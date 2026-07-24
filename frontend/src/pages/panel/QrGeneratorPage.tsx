@@ -51,7 +51,9 @@ export function QrGeneratorPage() {
   const colorInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
-  const menuUrl = `http://localhost:5173/menu/${restaurantId}`;
+  // Use the current browser origin so the QR + link work on localhost and on
+  // any deployed domain (e.g. the Vercel production URL) without a rebuild.
+  const menuUrl = `${window.location.origin}/menu/${restaurantId}`;
   // Path coordinates are in module units, so stroke-width is a module fraction.
   const strokeWidth = (radius / 100) * 0.35;
   const showLogo = logoEnabled && Boolean(logoSrc);
