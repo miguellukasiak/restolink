@@ -1,8 +1,13 @@
 import axios, { AxiosError } from 'axios';
 
-/** Shared Axios instance pointed at the FastAPI backend. */
+/**
+ * Shared Axios instance pointed at the FastAPI backend.
+ *
+ * The base URL comes from the `VITE_API_URL` build-time env var (set in Vercel
+ * for production); it falls back to the local Docker backend for development.
+ */
 export const api = axios.create({
-  baseURL: 'http://localhost:8000',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
   headers: {
     'Content-Type': 'application/json',
   },
