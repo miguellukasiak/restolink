@@ -26,11 +26,13 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(title="HoReCa SaaS API", version="1.0.0", lifespan=lifespan)
 
-# CORS: Vite dev origin + wildcard for the integration phase. Credentials are
-# disabled so the "*" origin is accepted by browsers.
+# CORS: explicit allow-list — local Vite dev origin + Vercel production domain.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "*"],
+    allow_origins=[
+        "http://localhost:5173",
+        "https://restolink-vert.vercel.app",
+    ],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
