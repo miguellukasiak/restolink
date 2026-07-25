@@ -24,7 +24,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     await engine.dispose()
 
 
-app = FastAPI(title="HoReCa SaaS API", version="1.0.0", lifespan=lifespan)
+app = FastAPI(title="RestoLink SaaS API", version="1.0.0", lifespan=lifespan)
 
 # CORS: explicit allow-list — local Vite dev origin + Vercel production domain.
 app.add_middleware(

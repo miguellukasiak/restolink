@@ -37,7 +37,7 @@ export function AdminLayout() {
             </Avatar>
             <Box>
               <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
-                HoReCa Admin
+                RestoLink Admin
               </Typography>
               <Typography variant="caption" color="text.secondary">
                 Panel administracyjny platformy
