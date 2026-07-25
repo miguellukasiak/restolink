@@ -558,7 +558,7 @@ export function SettingsPage() {
                     }}
                   >
                     <Typography variant="caption" color="text.secondary" noWrap>
-                      localhost:5173/menu/{restaurantId.slice(0, 8)}…
+                      {window.location.host}/menu/{restaurantId.slice(0, 8)}…
                     </Typography>
                   </Box>
                 </Stack>
