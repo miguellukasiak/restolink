@@ -44,6 +44,37 @@ export async function createMenuCategory(
   return data;
 }
 
+/** PATCH /api/v1/restaurants/{restaurantId}/menu/categories/{categoryId} — rename. */
+export async function updateMenuCategory(
+  restaurantId: string,
+  categoryId: string,
+  name: string,
+): Promise<MenuCategory> {
+  const { data } = await api.patch<MenuCategory>(
+    `/api/v1/restaurants/${restaurantId}/menu/categories/${categoryId}`,
+    { name },
+  );
+  return data;
+}
+
+/** DELETE /api/v1/restaurants/{restaurantId}/menu/categories/{categoryId} (204). */
+export async function deleteMenuCategory(
+  restaurantId: string,
+  categoryId: string,
+): Promise<void> {
+  await api.delete(
+    `/api/v1/restaurants/${restaurantId}/menu/categories/${categoryId}`,
+  );
+}
+
+/** DELETE /api/v1/restaurants/{restaurantId}/menu/items/{itemId} (204). */
+export async function deleteMenuItem(
+  restaurantId: string,
+  itemId: string,
+): Promise<void> {
+  await api.delete(`/api/v1/restaurants/${restaurantId}/menu/items/${itemId}`);
+}
+
 /**
  * POST /api/v1/restaurants/{restaurantId}/menu/items — saves a dish.
  * Passing `itemId` includes it in the body so the backend can upsert an

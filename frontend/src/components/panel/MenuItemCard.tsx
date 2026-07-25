@@ -6,9 +6,11 @@ import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 import Switch from '@mui/material/Switch';
 import Tooltip from '@mui/material/Tooltip';
+import IconButton from '@mui/material/IconButton';
 import { alpha } from '@mui/material/styles';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import RestaurantMenuRoundedIcon from '@mui/icons-material/RestaurantMenuRounded';
+import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import type { MenuItem } from '../../types';
 import { formatPln } from '../../constants/menu';
 
@@ -18,6 +20,7 @@ interface MenuItemCardProps {
   isDragging: boolean;
   onClick: () => void;
   onToggleAvailability: (item: MenuItem, isAvailable: boolean) => void;
+  onRequestDelete: (item: MenuItem) => void;
 }
 
 /**
@@ -30,6 +33,7 @@ export function MenuItemCard({
   isDragging,
   onClick,
   onToggleAvailability,
+  onRequestDelete,
 }: MenuItemCardProps) {
   const available = item.is_available;
 
@@ -138,18 +142,42 @@ export function MenuItemCard({
           >
             {formatPln(item.price)}
           </Typography>
-          <Tooltip title={available ? 'Dostępne — kliknij, aby ukryć' : 'Niedostępne'} arrow>
-            <Switch
-              size="small"
-              color="secondary"
-              checked={available}
-              onClick={(event) => event.stopPropagation()}
-              onChange={(event) => onToggleAvailability(item, event.target.checked)}
-              slotProps={{
-                input: { 'aria-label': `Dostępność dania ${item.name}` },
-              }}
-            />
-          </Tooltip>
+          <Stack direction="row" spacing={0.25} sx={{ alignItems: 'center' }}>
+            <Tooltip
+              title={available ? 'Dostępne — kliknij, aby ukryć' : 'Niedostępne'}
+              arrow
+            >
+              <Switch
+                size="small"
+                color="secondary"
+                checked={available}
+                onClick={(event) => event.stopPropagation()}
+                onChange={(event) => onToggleAvailability(item, event.target.checked)}
+                slotProps={{
+                  input: { 'aria-label': `Dostępność dania ${item.name}` },
+                }}
+              />
+            </Tooltip>
+            <Tooltip title="Usuń danie" arrow>
+              <IconButton
+                size="small"
+                aria-label={`Usuń danie ${item.name}`}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onRequestDelete(item);
+                }}
+                sx={{
+                  color: 'text.disabled',
+                  '&:hover': {
+                    color: 'error.main',
+                    bgcolor: (t) => alpha(t.palette.error.main, 0.08),
+                  },
+                }}
+              >
+                <DeleteOutlineRoundedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Stack>
         </Stack>
       </Stack>
     </Paper>

@@ -168,6 +168,10 @@ class MenuCategoryCreate(BaseModel):
     name: str = Field(min_length=1)
 
 
+class MenuCategoryUpdate(BaseModel):
+    name: str = Field(min_length=1)
+
+
 class MenuCategoryResponse(BaseModel):
     """Category with nested items. DB `sort_order` is exposed as `order`."""
 

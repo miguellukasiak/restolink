@@ -1,6 +1,7 @@
 """Restaurant-owner panel endpoints: info, theme, menu categories & items."""
 
 import uuid
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func, select
@@ -12,6 +13,7 @@ from ..models import MenuCategory, MenuItem, Restaurant
 from ..schemas import (
     MenuCategoryCreate,
     MenuCategoryResponse,
+    MenuCategoryUpdate,
     MenuItemRequest,
     MenuItemResponse,
     RestaurantPanelInfo,
@@ -114,6 +116,89 @@ async def create_category(
     loaded = await _load_category(db, category.id)
     assert loaded is not None
     return loaded
+
+
+async def _require_category(
+    db: AsyncSession, restaurant_id: uuid.UUID, category_id: uuid.UUID
+) -> MenuCategory:
+    category = await db.get(MenuCategory, category_id)
+    if (
+        category is None
+        or category.deleted_at is not None
+        or category.restaurant_id != restaurant_id
+    ):
+        raise HTTPException(status_code=404, detail="Nie znaleziono kategorii.")
+    return category
+
+
+@router.patch(
+    "/{restaurant_id}/menu/categories/{category_id}",
+    response_model=MenuCategoryResponse,
+)
+async def update_category(
+    restaurant_id: uuid.UUID,
+    category_id: uuid.UUID,
+    payload: MenuCategoryUpdate,
+    db: AsyncSession = Depends(get_db),
+) -> MenuCategory:
+    """Rename a category."""
+    await _require_restaurant(db, restaurant_id)
+    category = await _require_category(db, restaurant_id, category_id)
+    category.name = payload.name
+    await db.flush()
+
+    loaded = await _load_category(db, category.id)
+    assert loaded is not None
+    return loaded
+
+
+@router.delete(
+    "/{restaurant_id}/menu/categories/{category_id}",
+    status_code=204,
+)
+async def delete_category(
+    restaurant_id: uuid.UUID,
+    category_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+) -> None:
+    """Soft-delete a category and cascade the soft-delete to its dishes."""
+    await _require_restaurant(db, restaurant_id)
+    category = await _require_category(db, restaurant_id, category_id)
+
+    now = datetime.now(timezone.utc)
+    category.deleted_at = now
+    items = await db.scalars(
+        select(MenuItem).where(
+            MenuItem.category_id == category_id,
+            MenuItem.deleted_at.is_(None),
+        )
+    )
+    for item in items:
+        item.deleted_at = now
+    await db.flush()
+
+
+@router.delete(
+    "/{restaurant_id}/menu/items/{item_id}",
+    status_code=204,
+)
+async def delete_menu_item(
+    restaurant_id: uuid.UUID,
+    item_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+) -> None:
+    """Soft-delete a single dish (ownership verified via its category)."""
+    await _require_restaurant(db, restaurant_id)
+    item = await db.get(MenuItem, item_id)
+    if item is None or item.deleted_at is not None:
+        raise HTTPException(status_code=404, detail="Nie znaleziono dania.")
+
+    category = await db.get(MenuCategory, item.category_id)
+    if category is None or category.restaurant_id != restaurant_id:
+        raise HTTPException(status_code=404, detail="Nie znaleziono dania.")
+
+    item.deleted_at = datetime.now(timezone.utc)
+    await db.flush()
 
 
 @router.post("/{restaurant_id}/menu/items", response_model=MenuItemResponse)

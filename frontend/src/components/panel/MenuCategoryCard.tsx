@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Draggable,
   type DraggableProvided,
@@ -12,9 +13,16 @@ import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
+import TextField from '@mui/material/TextField';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
 import { alpha } from '@mui/material/styles';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import EditRoundedIcon from '@mui/icons-material/EditRounded';
+import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import type { MenuCategory, MenuItem } from '../../types';
 import { MenuItemCard } from './MenuItemCard';
 
@@ -27,12 +35,15 @@ interface MenuCategoryCardProps {
   onAddItem: (category: MenuCategory) => void;
   onEditItem: (category: MenuCategory, item: MenuItem) => void;
   onToggleAvailability: (item: MenuItem, isAvailable: boolean) => void;
+  onRenameCategory: (category: MenuCategory, name: string) => void;
+  onRequestDeleteCategory: (category: MenuCategory) => void;
+  onRequestDeleteItem: (item: MenuItem) => void;
 }
 
 /**
  * One draggable category column. A single cohesive Paper holds the header (with
- * category drag handle), the droppable list of dishes, and the dashed "add dish"
- * button — everything lives strictly inside this one container.
+ * a drag handle, inline-editable title, and delete action), the droppable list
+ * of dishes, and the dashed "add dish" button.
  */
 export function MenuCategoryCard({
   category,
@@ -40,7 +51,30 @@ export function MenuCategoryCard({
   onAddItem,
   onEditItem,
   onToggleAvailability,
+  onRenameCategory,
+  onRequestDeleteCategory,
+  onRequestDeleteItem,
 }: MenuCategoryCardProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState(category.name);
+
+  const startEdit = () => {
+    setDraft(category.name);
+    setIsEditing(true);
+  };
+
+  const cancelEdit = () => {
+    setDraft(category.name);
+    setIsEditing(false);
+  };
+
+  const saveEdit = () => {
+    const trimmed = draft.trim();
+    if (!trimmed) return;
+    if (trimmed !== category.name) onRenameCategory(category, trimmed);
+    setIsEditing(false);
+  };
+
   return (
     <Draggable draggableId={category.id} index={index}>
       {(dragProvided: DraggableProvided, dragSnapshot: DraggableStateSnapshot) => (
@@ -62,30 +96,109 @@ export function MenuCategoryCard({
             }),
           }}
         >
-          {/* Header — the drag handle for the whole category */}
-          <Stack
-            direction="row"
-            spacing={1}
-            {...dragProvided.dragHandleProps}
-            sx={{
-              alignItems: 'center',
-              cursor: 'grab',
-              '&:active': { cursor: 'grabbing' },
-            }}
-          >
-            <DragIndicatorIcon fontSize="small" sx={{ color: 'text.disabled' }} />
-            <Typography variant="h6" sx={{ flex: 1, minWidth: 0 }} noWrap>
-              {category.name}
-            </Typography>
-            <Chip
-              size="small"
-              label={category.items.length}
+          {/* Header: drag handle (icon only) + inline-editable title + actions */}
+          <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
+            <Box
+              {...dragProvided.dragHandleProps}
+              aria-label={`Przeciągnij kategorię ${category.name}`}
               sx={{
-                fontWeight: 700,
-                bgcolor: (t) => alpha(t.palette.secondary.main, 0.12),
-                color: 'secondary.dark',
+                display: 'flex',
+                color: 'text.disabled',
+                cursor: 'grab',
+                '&:active': { cursor: 'grabbing' },
               }}
-            />
+            >
+              <DragIndicatorIcon fontSize="small" />
+            </Box>
+
+            {isEditing ? (
+              <TextField
+                value={draft}
+                onChange={(event) => setDraft(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') saveEdit();
+                  if (event.key === 'Escape') cancelEdit();
+                }}
+                size="small"
+                autoFocus
+                fullWidth
+                slotProps={{ htmlInput: { 'aria-label': 'Nazwa kategorii' } }}
+                sx={{
+                  flex: 1,
+                  '& .MuiOutlinedInput-root': { borderRadius: 2.5 },
+                }}
+              />
+            ) : (
+              <Typography variant="h6" sx={{ flex: 1, minWidth: 0 }} noWrap>
+                {category.name}
+              </Typography>
+            )}
+
+            {isEditing ? (
+              <>
+                <Tooltip title="Zapisz" arrow>
+                  <span>
+                    <IconButton
+                      size="small"
+                      color="secondary"
+                      aria-label="Zapisz nazwę kategorii"
+                      onClick={saveEdit}
+                      disabled={!draft.trim()}
+                    >
+                      <CheckRoundedIcon fontSize="small" />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+                <Tooltip title="Anuluj" arrow>
+                  <IconButton
+                    size="small"
+                    aria-label="Anuluj edycję nazwy"
+                    onClick={cancelEdit}
+                    sx={{ color: 'text.secondary' }}
+                  >
+                    <CloseRoundedIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </>
+            ) : (
+              <>
+                <Chip
+                  size="small"
+                  label={category.items.length}
+                  sx={{
+                    fontWeight: 700,
+                    bgcolor: (t) => alpha(t.palette.secondary.main, 0.12),
+                    color: 'secondary.dark',
+                  }}
+                />
+                <Tooltip title="Zmień nazwę" arrow>
+                  <IconButton
+                    size="small"
+                    aria-label={`Zmień nazwę kategorii ${category.name}`}
+                    onClick={startEdit}
+                    sx={{ color: 'text.secondary' }}
+                  >
+                    <EditRoundedIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Usuń kategorię" arrow>
+                  <IconButton
+                    size="small"
+                    aria-label={`Usuń kategorię ${category.name}`}
+                    onClick={() => onRequestDeleteCategory(category)}
+                    sx={{
+                      color: 'text.disabled',
+                      '&:hover': {
+                        color: 'error.main',
+                        bgcolor: (t) => alpha(t.palette.error.main, 0.08),
+                      },
+                    }}
+                  >
+                    <DeleteOutlineRoundedIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </>
+            )}
           </Stack>
 
           <Droppable droppableId={category.id} type="MENU_ITEM">
@@ -128,6 +241,7 @@ export function MenuCategoryCard({
                         isDragging={itemSnapshot.isDragging}
                         onClick={() => onEditItem(category, item)}
                         onToggleAvailability={onToggleAvailability}
+                        onRequestDelete={onRequestDeleteItem}
                       />
                     )}
                   </Draggable>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   DragDropContext,
@@ -17,12 +17,16 @@ import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded';
 import type { MenuCategory, MenuItem } from '../../types';
 import { useMenu } from '../../hooks/useMenu';
 import { useSaveMenuItem } from '../../hooks/useSaveMenuItem';
+import { useUpdateCategory } from '../../hooks/useUpdateCategory';
+import { useDeleteCategory } from '../../hooks/useDeleteCategory';
+import { useDeleteMenuItem } from '../../hooks/useDeleteMenuItem';
 import { useSnackbar } from '../../components/feedback/SnackbarProvider';
 import { getApiErrorMessage } from '../../services/api';
 import { MenuCategoryCard } from '../../components/panel/MenuCategoryCard';
 import { MenuItemDrawer } from '../../components/panel/MenuItemDrawer';
 import { AddCategoryColumn } from '../../components/panel/AddCategoryColumn';
 import { AddCategoryDialog } from '../../components/panel/AddCategoryDialog';
+import { ConfirmDialog } from '../../components/panel/ConfirmDialog';
 
 interface DrawerState {
   open: boolean;
@@ -37,6 +41,11 @@ const CLOSED_DRAWER: DrawerState = {
   categoryName: '',
   item: null,
 };
+
+/** What the confirmation dialog is about to delete. */
+type DeleteTarget =
+  | { kind: 'category'; category: MenuCategory }
+  | { kind: 'item'; item: MenuItem };
 
 /** Reorders an array immutably, moving the item at `from` to `to`. */
 function reorder<T>(list: T[], from: number, to: number): T[] {
@@ -73,16 +82,37 @@ export function MenuBuilderPage() {
   const { restaurantId = '' } = useParams<{ restaurantId: string }>();
   const menu = useMenu(restaurantId);
   const saveMenuItem = useSaveMenuItem(restaurantId);
+  const updateCategory = useUpdateCategory(restaurantId);
+  const deleteCategory = useDeleteCategory(restaurantId);
+  const deleteItem = useDeleteMenuItem(restaurantId);
   const { showError } = useSnackbar();
 
   // Local board state so drag-and-drop feels instant (optimistic UI).
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [drawer, setDrawer] = useState<DrawerState>(CLOSED_DRAWER);
   const [addCategoryOpen, setAddCategoryOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
+  const boardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (menu.data) setCategories(menu.data);
   }, [menu.data]);
+
+  // Desktop UX: translate vertical mouse-wheel scrolling into horizontal panning
+  // (non-passive so we can preventDefault the page's vertical scroll).
+  useEffect(() => {
+    const el = boardRef.current;
+    if (!el) return;
+    const handleWheel = (event: WheelEvent) => {
+      if (event.deltaY === 0) return;
+      // Only hijack the wheel when there is horizontal overflow to pan.
+      if (el.scrollWidth <= el.clientWidth) return;
+      event.preventDefault();
+      el.scrollLeft += event.deltaY;
+    };
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleWheel);
+  }, [menu.isLoading]);
 
   const handleDragEnd = (result: DropResult) => {
     const { source, destination, type } = result;
@@ -156,6 +186,59 @@ export function MenuBuilderPage() {
     );
   };
 
+  /** Optimistically renames a category locally, then persists it. */
+  const handleRenameCategory = (category: MenuCategory, name: string) => {
+    const previousName = category.name;
+    setCategories((previous) =>
+      previous.map((c) => (c.id === category.id ? { ...c, name } : c)),
+    );
+    updateCategory.mutate(
+      { categoryId: category.id, name },
+      {
+        onError: (error) => {
+          setCategories((previous) =>
+            previous.map((c) =>
+              c.id === category.id ? { ...c, name: previousName } : c,
+            ),
+          );
+          showError(getApiErrorMessage(error));
+        },
+      },
+    );
+  };
+
+  /** Executes the pending deletion (category or item) optimistically. */
+  const handleConfirmDelete = () => {
+    if (!deleteTarget) return;
+    const snapshot = categories;
+
+    if (deleteTarget.kind === 'category') {
+      const { category } = deleteTarget;
+      setCategories((previous) => previous.filter((c) => c.id !== category.id));
+      deleteCategory.mutate(category.id, {
+        onError: (error) => {
+          setCategories(snapshot);
+          showError(getApiErrorMessage(error));
+        },
+      });
+    } else {
+      const { item } = deleteTarget;
+      setCategories((previous) =>
+        previous.map((c) => ({
+          ...c,
+          items: c.items.filter((i) => i.id !== item.id),
+        })),
+      );
+      deleteItem.mutate(item.id, {
+        onError: (error) => {
+          setCategories(snapshot);
+          showError(getApiErrorMessage(error));
+        },
+      });
+    }
+    setDeleteTarget(null);
+  };
+
   const openCreateDrawer = (category: MenuCategory) => {
     setDrawer({
       open: true,
@@ -203,6 +286,7 @@ export function MenuBuilderPage() {
       ) : (
         <DragDropContext onDragEnd={handleDragEnd}>
           <Box
+            ref={boardRef}
             sx={{
               display: 'flex',
               gap: 3,
@@ -226,6 +310,13 @@ export function MenuBuilderPage() {
                       onAddItem={openCreateDrawer}
                       onEditItem={openEditDrawer}
                       onToggleAvailability={handleToggleAvailability}
+                      onRenameCategory={handleRenameCategory}
+                      onRequestDeleteCategory={(c) =>
+                        setDeleteTarget({ kind: 'category', category: c })
+                      }
+                      onRequestDeleteItem={(item) =>
+                        setDeleteTarget({ kind: 'item', item })
+                      }
                     />
                   ))}
                   {provided.placeholder}
@@ -266,6 +357,21 @@ export function MenuBuilderPage() {
         open={addCategoryOpen}
         restaurantId={restaurantId}
         onClose={() => setAddCategoryOpen(false)}
+      />
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title={deleteTarget?.kind === 'item' ? 'Usunąć danie?' : 'Usunąć kategorię?'}
+        description={
+          deleteTarget?.kind === 'category'
+            ? `Kategoria „${deleteTarget.category.name}" i wszystkie jej dania zostaną trwale usunięte.`
+            : deleteTarget?.kind === 'item'
+              ? `Danie „${deleteTarget.item.name}" zostanie usunięte z menu.`
+              : ''
+        }
+        confirmLabel="Usuń"
+        onConfirm={handleConfirmDelete}
+        onClose={() => setDeleteTarget(null)}
       />
     </Box>
   );
