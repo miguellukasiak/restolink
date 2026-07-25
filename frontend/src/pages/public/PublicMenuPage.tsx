@@ -6,12 +6,64 @@ import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Alert from '@mui/material/Alert';
 import Skeleton from '@mui/material/Skeleton';
+import Typography from '@mui/material/Typography';
+import Avatar from '@mui/material/Avatar';
 import CssBaseline from '@mui/material/CssBaseline';
+import { alpha } from '@mui/material/styles';
+import LockRoundedIcon from '@mui/icons-material/LockRounded';
+import HourglassTopRoundedIcon from '@mui/icons-material/HourglassTopRounded';
 import type { PublicMenuItem } from '../../types';
 import { usePublicMenu } from '../../hooks/usePublicMenu';
 import { getApiErrorMessage } from '../../services/api';
+import { resolveAccessState } from '../../constants/subscription';
 import { PublicMenuView } from '../../components/public/PublicMenuView';
 import { ItemDetailModal } from '../../components/public/ItemDetailModal';
+
+/** Clean, centered status screen shown when the menu isn't publicly available. */
+function StatusScreen({
+  icon,
+  message,
+}: {
+  icon: 'blocked' | 'pending';
+  message: string;
+}) {
+  return (
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        px: 3,
+        textAlign: 'center',
+      }}
+    >
+      <Stack spacing={2.5} sx={{ alignItems: 'center', maxWidth: 420 }}>
+        <Avatar
+          sx={{
+            width: 72,
+            height: 72,
+            bgcolor: (t) =>
+              alpha(
+                icon === 'blocked' ? t.palette.text.primary : t.palette.warning.main,
+                0.1,
+              ),
+            color: icon === 'blocked' ? 'text.secondary' : 'warning.dark',
+          }}
+        >
+          {icon === 'blocked' ? (
+            <LockRoundedIcon sx={{ fontSize: 36 }} />
+          ) : (
+            <HourglassTopRoundedIcon sx={{ fontSize: 36 }} />
+          )}
+        </Avatar>
+        <Typography variant="h5" component="h1" sx={{ fontWeight: 600 }}>
+          {message}
+        </Typography>
+      </Stack>
+    </Box>
+  );
+}
 
 /** Loading skeleton mirroring the final layout. */
 function PublicMenuSkeleton() {
@@ -64,6 +116,14 @@ export function PublicMenuPage() {
     setDetailOpen(true);
   };
 
+  // Gate the menu on the restaurant's subscription status (blocked/pending/active).
+  const access = menu.data
+    ? resolveAccessState(
+        menu.data.restaurant.status,
+        menu.data.restaurant.subscription_valid_until,
+      )
+    : null;
+
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       <CssBaseline />
@@ -86,20 +146,32 @@ export function PublicMenuPage() {
         </Box>
       )}
 
-      {menu.data && (
-        <PublicMenuView
-          restaurantName={menu.data.restaurant.name}
-          logoUrl={menu.data.restaurant.theme.logo_url}
-          categories={menu.data.categories}
-          onOpenItem={openDetail}
+      {access === 'BLOCKED' && (
+        <StatusScreen icon="blocked" message="Menu chwilowo niedostępne." />
+      )}
+
+      {access === 'PENDING' && (
+        <StatusScreen
+          icon="pending"
+          message="Restauracja w przygotowaniu. Zapraszamy wkrótce!"
         />
       )}
 
-      <ItemDetailModal
-        item={selectedItem}
-        open={detailOpen}
-        onClose={() => setDetailOpen(false)}
-      />
+      {access === 'ACTIVE' && menu.data && (
+        <>
+          <PublicMenuView
+            restaurantName={menu.data.restaurant.name}
+            logoUrl={menu.data.restaurant.theme.logo_url}
+            categories={menu.data.categories}
+            onOpenItem={openDetail}
+          />
+          <ItemDetailModal
+            item={selectedItem}
+            open={detailOpen}
+            onClose={() => setDetailOpen(false)}
+          />
+        </>
+      )}
     </Box>
   );
 }

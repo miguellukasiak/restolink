@@ -18,6 +18,15 @@ import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import RestaurantRoundedIcon from '@mui/icons-material/RestaurantRounded';
 import { NavLink, Outlet, useLocation, useParams } from 'react-router-dom';
 import { useRestaurantInfo } from '../../hooks/useRestaurantInfo';
+import { useSnackbar } from '../feedback/SnackbarProvider';
+import {
+  PAYMENT_PENDING_TOAST,
+  resolveAccessState,
+} from '../../constants/subscription';
+import {
+  SubscriptionPaywall,
+  SubscriptionPendingBanner,
+} from '../panel/SubscriptionNotices';
 
 const DRAWER_WIDTH = 272;
 
@@ -30,6 +39,18 @@ export function RestaurantPanelLayout() {
   const { restaurantId = '' } = useParams<{ restaurantId: string }>();
   const location = useLocation();
   const restaurant = useRestaurantInfo(restaurantId);
+  const { showInfo } = useSnackbar();
+
+  // Access is only enforced once the restaurant details have loaded.
+  const access = restaurant.data
+    ? resolveAccessState(
+        restaurant.data.status,
+        restaurant.data.subscription_valid_until,
+      )
+    : null;
+
+  // Stripe isn't wired up yet — the CTAs just surface a placeholder toast.
+  const handlePaymentCta = () => showInfo(PAYMENT_PENDING_TOAST);
 
   const base = `/panel/${restaurantId}`;
   const navItems = [
@@ -121,7 +142,17 @@ export function RestaurantPanelLayout() {
 
       <Box component="main" sx={{ flexGrow: 1, minWidth: 0, px: { xs: 2, md: 4 }, pb: 6 }}>
         <Toolbar />
-        <Outlet />
+        {access === 'BLOCKED' ? (
+          // Expired/blocked: no access to builder, settings or QR tools.
+          <SubscriptionPaywall onPay={handlePaymentCta} />
+        ) : (
+          <>
+            {access === 'PENDING' && (
+              <SubscriptionPendingBanner onActivate={handlePaymentCta} />
+            )}
+            <Outlet />
+          </>
+        )}
       </Box>
     </Box>
   );

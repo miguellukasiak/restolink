@@ -54,10 +54,12 @@ export interface CreateRestaurantRequest {
   package_id: string;
 }
 
-/** Schema: RestaurantPanelInfo — lightweight restaurant details for the panel header. */
+/** Schema: RestaurantPanelInfo — restaurant details + subscription gating. */
 export interface RestaurantPanelInfo {
   id: string;
   name: string;
+  status: RestaurantStatus;
+  subscription_valid_until: string | null;
 }
 
 /** Schema: MenuItem */
@@ -131,6 +133,8 @@ export interface PublicMenuResponse {
   restaurant: {
     name: string;
     theme: RestaurantThemeSettings;
+    status: RestaurantStatus;
+    subscription_valid_until: string | null;
   };
   categories: PublicMenuCategory[];
 }

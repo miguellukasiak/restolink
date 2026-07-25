@@ -46,6 +46,8 @@ async def get_public_menu(
         restaurant=PublicRestaurant(
             name=restaurant.name,
             theme=ThemeSettings.model_validate(restaurant),
+            status=restaurant.status,
+            subscription_valid_until=restaurant.subscription_valid_until,
         ),
         categories=[MenuCategoryResponse.model_validate(c) for c in categories],
     )

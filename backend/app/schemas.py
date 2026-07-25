@@ -96,12 +96,14 @@ class ManualPaymentResponse(BaseModel):
 
 
 class RestaurantPanelInfo(BaseModel):
-    """Lightweight restaurant details for the panel header."""
+    """Restaurant details for the panel header + subscription gating."""
 
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
     name: str
+    status: RestaurantStatus
+    subscription_valid_until: datetime | None
 
 
 class RestaurantThemeUpdate(BaseModel):
@@ -185,6 +187,8 @@ class MenuCategoryResponse(BaseModel):
 class PublicRestaurant(BaseModel):
     name: str
     theme: ThemeSettings
+    status: RestaurantStatus
+    subscription_valid_until: datetime | None
 
 
 class PublicMenuResponse(BaseModel):
