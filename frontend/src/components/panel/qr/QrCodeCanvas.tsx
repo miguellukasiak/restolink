@@ -3,8 +3,11 @@ import QRCodeStyling, { type Options } from 'qr-code-styling';
 import Box from '@mui/material/Box';
 
 export interface QrCodeCanvasHandle {
-  /** Downloads the current code as a PNG with the given filename (no extension). */
-  download: (filename: string) => Promise<void>;
+  /**
+   * Downloads the current code in the given vector/raster format.
+   * `name` is the filename without extension.
+   */
+  download: (extension: 'png' | 'svg', name?: string) => Promise<void>;
 }
 
 interface QrCodeCanvasProps {
@@ -45,8 +48,8 @@ export const QrCodeCanvas = forwardRef<QrCodeCanvasHandle, QrCodeCanvasProps>(
     }, [options]);
 
     useImperativeHandle(ref, () => ({
-      download: async (filename: string) => {
-        await instanceRef.current?.download({ name: filename, extension: 'png' });
+      download: async (extension, name = 'qr-code') => {
+        await instanceRef.current?.download({ name, extension });
       },
     }));
 

@@ -20,10 +20,15 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import ToggleButton from '@mui/material/ToggleButton';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
 import { alpha } from '@mui/material/styles';
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
+import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import ContentCopyRoundedIcon from '@mui/icons-material/ContentCopyRounded';
 import AddPhotoAlternateRoundedIcon from '@mui/icons-material/AddPhotoAlternateRounded';
 import QrCode2RoundedIcon from '@mui/icons-material/QrCode2Rounded';
@@ -31,6 +36,7 @@ import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import CategoryRoundedIcon from '@mui/icons-material/CategoryRounded';
 import PaletteRoundedIcon from '@mui/icons-material/PaletteRounded';
 import ImageRoundedIcon from '@mui/icons-material/ImageRounded';
+import PolylineRoundedIcon from '@mui/icons-material/PolylineRounded';
 import { useSnackbar } from '../../components/feedback/SnackbarProvider';
 import {
   CORNER_DOT_OPTIONS,
@@ -127,6 +133,7 @@ export function QrGeneratorPage() {
   const [logoEnabled, setLogoEnabled] = useState(false);
   const [logoSrc, setLogoSrc] = useState<string | null>(null);
   const [logoMargin, setLogoMargin] = useState(8);
+  const [downloadAnchor, setDownloadAnchor] = useState<HTMLElement | null>(null);
 
   const qrRef = useRef<QrCodeCanvasHandle>(null);
   const colorInputRef = useRef<HTMLInputElement>(null);
@@ -207,12 +214,13 @@ export function QrGeneratorPage() {
     }
   };
 
-  const handleDownload = async () => {
+  const handleDownload = async (extension: 'png' | 'svg') => {
+    setDownloadAnchor(null);
     try {
-      await qrRef.current?.download(`menu-qr-${restaurantId.slice(0, 8)}`);
-      showSuccess('Kod QR został pobrany jako PNG.');
+      await qrRef.current?.download(extension, `menu-qr-${restaurantId.slice(0, 8)}`);
+      showSuccess(`Kod QR został pobrany jako ${extension.toUpperCase()}.`);
     } catch {
-      showError('Nie udało się wygenerować pliku PNG.');
+      showError('Nie udało się wygenerować pliku.');
     }
   };
 
@@ -743,10 +751,44 @@ export function QrGeneratorPage() {
             color="secondary"
             size="large"
             startIcon={<DownloadRoundedIcon />}
-            onClick={() => void handleDownload()}
+            endIcon={<KeyboardArrowDownRoundedIcon />}
+            onClick={(event) => setDownloadAnchor(event.currentTarget)}
+            aria-haspopup="menu"
+            aria-expanded={downloadAnchor ? true : undefined}
+            aria-controls={downloadAnchor ? 'qr-download-menu' : undefined}
           >
-            Pobierz kod QR (.png)
+            Pobierz kod QR
           </Button>
+          <Menu
+            id="qr-download-menu"
+            anchorEl={downloadAnchor}
+            open={Boolean(downloadAnchor)}
+            onClose={() => setDownloadAnchor(null)}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'center' }}
+            slotProps={{ paper: { sx: { borderRadius: 4, minWidth: 264, mt: 1 } } }}
+          >
+            <MenuItem onClick={() => void handleDownload('png')} sx={{ py: 1.25 }}>
+              <ListItemIcon>
+                <ImageRoundedIcon fontSize="small" color="secondary" />
+              </ListItemIcon>
+              <ListItemText
+                primary="Pobierz jako PNG"
+                secondary="do internetu"
+                slotProps={{ primary: { sx: { fontWeight: 600 } } }}
+              />
+            </MenuItem>
+            <MenuItem onClick={() => void handleDownload('svg')} sx={{ py: 1.25 }}>
+              <ListItemIcon>
+                <PolylineRoundedIcon fontSize="small" color="secondary" />
+              </ListItemIcon>
+              <ListItemText
+                primary="Pobierz jako SVG"
+                secondary="do druku / Figma"
+                slotProps={{ primary: { sx: { fontWeight: 600 } } }}
+              />
+            </MenuItem>
+          </Menu>
 
           <TextField
             fullWidth
