@@ -10,17 +10,14 @@ import ListItemText from '@mui/material/ListItemText';
 import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
 import Chip from '@mui/material/Chip';
-import Divider from '@mui/material/Divider';
 import Skeleton from '@mui/material/Skeleton';
 import { alpha } from '@mui/material/styles';
 import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded';
 import QrCode2RoundedIcon from '@mui/icons-material/QrCode2Rounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import RestaurantRoundedIcon from '@mui/icons-material/RestaurantRounded';
-import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import { NavLink, Outlet, useLocation, useParams } from 'react-router-dom';
 import { useRestaurantInfo } from '../../hooks/useRestaurantInfo';
-import { useAuth } from '../../hooks/useAuth';
 
 const DRAWER_WIDTH = 272;
 
@@ -32,7 +29,6 @@ const DRAWER_WIDTH = 272;
 export function RestaurantPanelLayout() {
   const { restaurantId = '' } = useParams<{ restaurantId: string }>();
   const location = useLocation();
-  const { role } = useAuth();
   const restaurant = useRestaurantInfo(restaurantId);
 
   const base = `/panel/${restaurantId}`;
@@ -121,28 +117,6 @@ export function RestaurantPanelLayout() {
             );
           })}
         </List>
-
-        {role === 'ADMIN' && (
-          <>
-            <Box sx={{ flexGrow: 1 }} />
-            <Divider sx={{ mx: 1 }} />
-            <List sx={{ pb: 2 }}>
-              <ListItemButton
-                component={NavLink}
-                to="/admin/restaurants"
-                sx={{ borderRadius: 999 }}
-              >
-                <ListItemIcon sx={{ minWidth: 40 }}>
-                  <ArrowBackRoundedIcon />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Panel admina"
-                  slotProps={{ primary: { sx: { fontWeight: 600 } } }}
-                />
-              </ListItemButton>
-            </List>
-          </>
-        )}
       </Drawer>
 
       <Box component="main" sx={{ flexGrow: 1, minWidth: 0, px: { xs: 2, md: 4 }, pb: 6 }}>

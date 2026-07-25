@@ -24,7 +24,6 @@ import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded';
 import WorkspacePremiumRoundedIcon from '@mui/icons-material/WorkspacePremiumRounded';
 import { format, isPast } from 'date-fns';
 import { pl } from 'date-fns/locale';
-import { useNavigate } from 'react-router-dom';
 import { useRestaurants } from '../hooks/useRestaurants';
 import { getApiErrorMessage } from '../services/api';
 import { StatusChip } from '../components/restaurants/StatusChip';
@@ -69,7 +68,6 @@ export function RestaurantsPage() {
   const [paymentTarget, setPaymentTarget] = useState<RestaurantListItem | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const navigate = useNavigate();
 
   const { data, isLoading, isFetching, isError, error, refetch } =
     useRestaurants(paginationModel);
@@ -192,7 +190,10 @@ export function RestaurantsPage() {
               <IconButton
                 color="secondary"
                 aria-label={`Otwórz panel — ${params.row.name}`}
-                onClick={() => navigate(`/panel/${params.row.id}/menu?role=ADMIN`)}
+                component="a"
+                href={`/panel/${params.row.id}/menu`}
+                target="_blank"
+                rel="noopener noreferrer"
                 sx={{
                   width: 36,
                   height: 36,
