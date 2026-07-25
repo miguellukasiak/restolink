@@ -63,7 +63,7 @@ export function MenuItemCard({
             }),
       }}
     >
-      <Stack direction="row" spacing={1.25} sx={{ alignItems: 'center' }}>
+      <Stack direction="row" spacing={1.25} sx={{ alignItems: 'flex-start' }}>
         <Box
           {...provided.dragHandleProps}
           onClick={(event) => event.stopPropagation()}
@@ -72,6 +72,7 @@ export function MenuItemCard({
             display: 'flex',
             color: 'text.disabled',
             cursor: 'grab',
+            alignSelf: 'center',
             '&:active': { cursor: 'grabbing' },
           }}
         >
@@ -88,6 +89,7 @@ export function MenuItemCard({
               height: 52,
               borderRadius: 2.5,
               flexShrink: 0,
+              alignSelf: 'center',
               objectFit: 'cover',
               filter: available ? 'none' : 'grayscale(100%)',
             }}
@@ -99,6 +101,7 @@ export function MenuItemCard({
               height: 52,
               borderRadius: 2.5,
               flexShrink: 0,
+              alignSelf: 'center',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -110,7 +113,9 @@ export function MenuItemCard({
           </Box>
         )}
 
-        <Box sx={{ flex: 1, minWidth: 0 }}>
+        {/* Middle content grows/shrinks to fill the gap and never pushes into
+            the fixed-width action column on the right. */}
+        <Box sx={{ flexGrow: 1, flexShrink: 1, minWidth: 0 }}>
           <Typography variant="subtitle2" noWrap>
             {item.name}
           </Typography>
@@ -120,7 +125,12 @@ export function MenuItemCard({
             </Typography>
           )}
           {item.tags.length > 0 && (
-            <Stack direction="row" spacing={0.5} sx={{ mt: 0.5 }}>
+            <Stack
+              direction="row"
+              spacing={0.5}
+              useFlexGap
+              sx={{ flexWrap: 'wrap', mt: 0.5 }}
+            >
               {item.tags.slice(0, 2).map((tag) => (
                 <Chip
                   key={tag}
@@ -135,14 +145,17 @@ export function MenuItemCard({
           )}
         </Box>
 
-        <Stack sx={{ alignItems: 'flex-end', flexShrink: 0 }} spacing={0.25}>
+        {/* Fixed-width action column: price on top, switch + delete in a row
+            beneath it — never shrinks, so it can't collide with the middle. */}
+        <Stack spacing={1} sx={{ alignItems: 'flex-end', flexShrink: 0 }}>
           <Typography
             variant="subtitle2"
+            noWrap
             sx={{ fontWeight: 700, color: 'secondary.dark' }}
           >
             {formatPln(item.price)}
           </Typography>
-          <Stack direction="row" spacing={0.25} sx={{ alignItems: 'center' }}>
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
             <Tooltip
               title={available ? 'Dostępne — kliknij, aby ukryć' : 'Niedostępne'}
               arrow
