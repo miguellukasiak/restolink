@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { ThemeProvider } from '@mui/material/styles';
@@ -156,6 +156,40 @@ export function AppearancePage() {
   const [device, setDevice] = useState<'mobile' | 'desktop'>('mobile');
   const logoInputRef = useRef<HTMLInputElement>(null);
   const hydratedRef = useRef(false);
+
+  // Measures the natural (unscaled) height of the preview content so the
+  // scaled wrapper below can be given an *explicit* CSS height instead of
+  // relying on `zoom`. `zoom` (unlike standard `transform: scale`) does not
+  // reliably respect an ancestor's `overflow: hidden` clip for `position:
+  // sticky` descendants in every engine — PublicMenuView's sticky header
+  // could bleed past the phone bezel even though the stacking context was
+  // otherwise correctly isolated. `transform: scale` is the well-supported,
+  // spec-compliant mechanism for this, so we're switching back to it and
+  // fixing the *original* dead-scroll-space bug the proper way: give the
+  // wrapper a real, measured height (content height × scale) instead of
+  // letting the (unscaled) content size leak into the scroll container.
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [contentHeight, setContentHeight] = useState<number | null>(null);
+
+  useLayoutEffect(() => {
+    const el = contentRef.current;
+    if (!el) return;
+    // `offsetHeight` ignores this element's own `transform: scale(...)` and
+    // reports its true pre-transform layout height — getBoundingClientRect()
+    // would return the already-scaled visual size and double-scale the wrapper.
+    const measure = () => setContentHeight(el.offsetHeight);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    // Images inside the preview decode async and grow the layout after this
+    // effect's first measurement — re-measure a few times on a plain JS timer
+    // (not rAF) so the wrapper's height always catches up to the true content.
+    const timeouts = [50, 150, 300, 600, 1200].map((delay) => setTimeout(measure, delay));
+    return () => {
+      observer.disconnect();
+      timeouts.forEach(clearTimeout);
+    };
+  }, [device, menu.isLoading]);
 
   const {
     control,
@@ -547,37 +581,37 @@ export function AppearancePage() {
                       zIndex: 3,
                     }}
                   />
-                  {/* Strict screen boundary: an isolating stacking context (position +
-                      explicit z-index) so nothing inside — e.g. PublicMenuView's sticky
-                      header at theme.zIndex.appBar (1100) — can ever escape above the
-                      island (z-index 3). Without this, the header's z-index leaks all
-                      the way up (no ancestor here was previously isolating it) and
-                      visually bleeds over the island / past the bezel's inner curve. */}
                   <Box
                     sx={{
-                      position: 'relative',
-                      zIndex: 1,
                       height: '100%',
-                      overflow: 'hidden',
-                      borderRadius: '34px',
+                      overflowY: 'auto',
+                      overflowX: 'hidden',
+                      // Clears the floating island so content never starts hidden under it.
+                      pt: '30px',
+                      scrollbarWidth: 'none',
+                      '&::-webkit-scrollbar': { display: 'none' },
                     }}
                   >
+                    {/* Strict screen boundary: an isolating stacking context (position +
+                        explicit z-index) PLUS an explicit, measured height (content ×
+                        scale) so the scaled+sticky content below can never escape this
+                        box's `overflow: hidden` clip — neither above the island nor
+                        past the bezel's inner curve, and no dead scroll space either. */}
                     <Box
                       sx={{
-                        height: '100%',
-                        overflowY: 'auto',
-                        overflowX: 'hidden',
-                        // Clears the floating island so content never starts hidden under it.
-                        pt: '30px',
-                        scrollbarWidth: 'none',
-                        '&::-webkit-scrollbar': { display: 'none' },
+                        position: 'relative',
+                        zIndex: 1,
+                        overflow: 'hidden',
+                        borderRadius: '34px',
+                        height: contentHeight !== null ? contentHeight * 0.769 : 'auto',
                       }}
                     >
-                      {/* `zoom` (not `transform: scale`) so the scroll container's
-                          height reflects the *zoomed* content — transform only
-                          repaints visually and leaves a tall dead scroll area
-                          behind, which was the empty-space-below-the-menu bug. */}
-                      <Box sx={{ width: 390, zoom: '0.769' }}>{preview}</Box>
+                      <Box
+                        ref={contentRef}
+                        sx={{ width: 390, transform: 'scale(0.769)', transformOrigin: 'top left' }}
+                      >
+                        {preview}
+                      </Box>
                     </Box>
                   </Box>
                 </Box>
@@ -635,13 +669,29 @@ export function AppearancePage() {
                   sx={{
                     height: 420,
                     overflowY: 'auto',
+                    overflowX: 'hidden',
                     scrollbarWidth: 'none',
                     '&::-webkit-scrollbar': { display: 'none' },
                   }}
                 >
-                  {/* `zoom`, not `transform: scale` — see the mobile frame comment
-                      above for why this avoids a dead scrollable area. */}
-                  <Box sx={{ width: 1024, zoom: '0.4375' }}>{preview}</Box>
+                  {/* See the mobile frame's comment above: measured height + standard
+                      `transform: scale` (not `zoom`) so sticky content is reliably
+                      clipped and there's no dead scroll space. */}
+                  <Box
+                    sx={{
+                      position: 'relative',
+                      zIndex: 1,
+                      overflow: 'hidden',
+                      height: contentHeight !== null ? contentHeight * 0.4375 : 'auto',
+                    }}
+                  >
+                    <Box
+                      ref={contentRef}
+                      sx={{ width: 1024, transform: 'scale(0.4375)', transformOrigin: 'top left' }}
+                    >
+                      {preview}
+                    </Box>
+                  </Box>
                 </Box>
               </Box>
             )}
