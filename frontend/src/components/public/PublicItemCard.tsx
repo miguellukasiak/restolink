@@ -52,7 +52,7 @@ export function PublicItemCard({ item, onOpen }: PublicItemCardProps) {
           aria-label={t('dishImage', { name: item.name })}
           sx={{
             position: 'relative',
-            height: 132,
+            aspectRatio: '1 / 1',
             borderRadius: 4,
             overflow: 'hidden',
             display: 'flex',

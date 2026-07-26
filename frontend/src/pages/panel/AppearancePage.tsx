@@ -547,21 +547,38 @@ export function AppearancePage() {
                       zIndex: 3,
                     }}
                   />
+                  {/* Strict screen boundary: an isolating stacking context (position +
+                      explicit z-index) so nothing inside — e.g. PublicMenuView's sticky
+                      header at theme.zIndex.appBar (1100) — can ever escape above the
+                      island (z-index 3). Without this, the header's z-index leaks all
+                      the way up (no ancestor here was previously isolating it) and
+                      visually bleeds over the island / past the bezel's inner curve. */}
                   <Box
                     sx={{
+                      position: 'relative',
+                      zIndex: 1,
                       height: '100%',
-                      overflowY: 'auto',
-                      // Clears the floating island so content never starts hidden under it.
-                      pt: '30px',
-                      scrollbarWidth: 'none',
-                      '&::-webkit-scrollbar': { display: 'none' },
+                      overflow: 'hidden',
+                      borderRadius: '34px',
                     }}
                   >
-                    {/* `zoom` (not `transform: scale`) so the scroll container's
-                        height reflects the *zoomed* content — transform only
-                        repaints visually and leaves a tall dead scroll area
-                        behind, which was the empty-space-below-the-menu bug. */}
-                    <Box sx={{ width: 390, zoom: '0.769' }}>{preview}</Box>
+                    <Box
+                      sx={{
+                        height: '100%',
+                        overflowY: 'auto',
+                        overflowX: 'hidden',
+                        // Clears the floating island so content never starts hidden under it.
+                        pt: '30px',
+                        scrollbarWidth: 'none',
+                        '&::-webkit-scrollbar': { display: 'none' },
+                      }}
+                    >
+                      {/* `zoom` (not `transform: scale`) so the scroll container's
+                          height reflects the *zoomed* content — transform only
+                          repaints visually and leaves a tall dead scroll area
+                          behind, which was the empty-space-below-the-menu bug. */}
+                      <Box sx={{ width: 390, zoom: '0.769' }}>{preview}</Box>
+                    </Box>
                   </Box>
                 </Box>
               </Box>

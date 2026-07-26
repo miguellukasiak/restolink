@@ -31,6 +31,7 @@ import { ALLERGEN_OPTIONS, TAG_OPTIONS } from '../../constants/menu';
 import { useSaveMenuItem } from '../../hooks/useSaveMenuItem';
 import { useSnackbar } from '../feedback/SnackbarProvider';
 import { getApiErrorMessage } from '../../services/api';
+import { ImageCropperDialog } from './ImageCropperDialog';
 
 const menuItemSchema = z.object({
   name: z.string().trim().min(2, 'Nazwa musi mieć co najmniej 2 znaki'),
@@ -85,6 +86,7 @@ export function MenuItemDrawer({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [cropperSrc, setCropperSrc] = useState<string | null>(null);
 
   const {
     register,
@@ -148,271 +150,287 @@ export function MenuItemDrawer({
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    // Reset so re-selecting the same file still fires a change event later.
+    event.target.value = '';
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => setImagePreview(String(reader.result));
+    reader.onload = () => setCropperSrc(String(reader.result));
     reader.readAsDataURL(file);
+  };
+
+  const handleCropApply = (croppedDataUrl: string) => {
+    setImagePreview(croppedDataUrl);
+    setCropperSrc(null);
   };
 
   const isSubmitting = saveMenuItem.isPending;
 
   return (
-    <Drawer
-      anchor="right"
-      open={open}
-      onClose={isSubmitting ? undefined : onClose}
-      // Slide over the fixed AppBar (drawer + 1) instead of being clipped under it.
-      sx={{ zIndex: (theme) => theme.zIndex.drawer + 2 }}
-      slotProps={{
-        paper: {
-          sx: {
-            width: { xs: '100%', sm: 400 },
-            borderTopLeftRadius: 24,
-            borderBottomLeftRadius: 24,
-            display: 'flex',
-            flexDirection: 'column',
+    <>
+      <Drawer
+        anchor="right"
+        open={open}
+        onClose={isSubmitting ? undefined : onClose}
+        // Slide over the fixed AppBar (drawer + 1) instead of being clipped under it.
+        sx={{ zIndex: (theme) => theme.zIndex.drawer + 2 }}
+        slotProps={{
+          paper: {
+            sx: {
+              width: { xs: '100%', sm: 400 },
+              borderTopLeftRadius: 24,
+              borderBottomLeftRadius: 24,
+              display: 'flex',
+              flexDirection: 'column',
+            },
           },
-        },
-      }}
-    >
-      <Box
-        component="form"
-        onSubmit={onSubmit}
-        sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}
+        }}
       >
-        {/* Header */}
-        <Stack
-          direction="row"
-          spacing={2}
-          sx={{ alignItems: 'center', px: 3, pt: 3, pb: 2 }}
+        <Box
+          component="form"
+          onSubmit={onSubmit}
+          sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}
         >
-          <Avatar sx={{ bgcolor: 'secondary.main', width: 44, height: 44 }}>
-            {isEdit ? <EditRoundedIcon /> : <RestaurantMenuRoundedIcon />}
-          </Avatar>
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography variant="h6" component="div" noWrap>
-              {isEdit ? 'Edytuj danie' : 'Nowe danie'}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" noWrap>
-              Kategoria: {categoryName}
-            </Typography>
-          </Box>
-          <IconButton
-            aria-label="Zamknij"
-            onClick={onClose}
-            disabled={isSubmitting}
-            edge="end"
+          {/* Header */}
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{ alignItems: 'center', px: 3, pt: 3, pb: 2 }}
           >
-            <CloseRoundedIcon />
-          </IconButton>
-        </Stack>
-        <Divider />
-
-        {/* Scrollable form body */}
-        <Box sx={{ flex: 1, overflowY: 'auto', px: 3, py: 2.5 }}>
-          <Stack spacing={2.5}>
-            {/* Image dropzone placeholder */}
-            <ButtonBase
-              onClick={() => fileInputRef.current?.click()}
+            <Avatar sx={{ bgcolor: 'secondary.main', width: 44, height: 44 }}>
+              {isEdit ? <EditRoundedIcon /> : <RestaurantMenuRoundedIcon />}
+            </Avatar>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography variant="h6" component="div" noWrap>
+                {isEdit ? 'Edytuj danie' : 'Nowe danie'}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" noWrap>
+                Kategoria: {categoryName}
+              </Typography>
+            </Box>
+            <IconButton
+              aria-label="Zamknij"
+              onClick={onClose}
               disabled={isSubmitting}
-              sx={{
-                borderRadius: 4,
-                border: '2px dashed',
-                borderColor: imagePreview ? 'secondary.main' : 'divider',
-                height: 140,
-                width: '100%',
-                overflow: 'hidden',
-                bgcolor: (t) => alpha(t.palette.secondary.main, 0.04),
-                transition: 'border-color 0.2s ease, background-color 0.2s ease',
-                '&:hover': {
-                  borderColor: 'secondary.main',
-                  bgcolor: (t) => alpha(t.palette.secondary.main, 0.08),
-                },
-              }}
+              edge="end"
             >
-              {imagePreview ? (
-                <Box
-                  component="img"
-                  src={imagePreview}
-                  alt="Podgląd zdjęcia dania"
-                  sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-              ) : (
-                <Stack spacing={0.75} sx={{ alignItems: 'center', color: 'text.secondary' }}>
-                  <AddPhotoAlternateRoundedIcon sx={{ fontSize: 32, opacity: 0.6 }} />
-                  <Typography variant="subtitle2">Dodaj zdjęcie</Typography>
-                  <Typography variant="caption">PNG lub JPG, maks. 5 MB</Typography>
-                </Stack>
-              )}
-            </ButtonBase>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/png,image/jpeg"
-              hidden
-              onChange={handleImageChange}
-            />
+              <CloseRoundedIcon />
+            </IconButton>
+          </Stack>
+          <Divider />
 
-            <TextField
-              label="Nazwa dania"
-              placeholder="np. Bruschetta Pomodoro"
-              fullWidth
-              autoFocus={!isEdit}
-              error={Boolean(errors.name)}
-              helperText={errors.name?.message ?? ' '}
+          {/* Scrollable form body */}
+          <Box sx={{ flex: 1, overflowY: 'auto', px: 3, py: 2.5 }}>
+            <Stack spacing={2.5}>
+              {/* Image dropzone placeholder */}
+              <ButtonBase
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isSubmitting}
+                sx={{
+                  borderRadius: 4,
+                  border: '2px dashed',
+                  borderColor: imagePreview ? 'secondary.main' : 'divider',
+                  height: 140,
+                  width: '100%',
+                  overflow: 'hidden',
+                  bgcolor: (t) => alpha(t.palette.secondary.main, 0.04),
+                  transition: 'border-color 0.2s ease, background-color 0.2s ease',
+                  '&:hover': {
+                    borderColor: 'secondary.main',
+                    bgcolor: (t) => alpha(t.palette.secondary.main, 0.08),
+                  },
+                }}
+              >
+                {imagePreview ? (
+                  <Box
+                    component="img"
+                    src={imagePreview}
+                    alt="Podgląd zdjęcia dania"
+                    sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                ) : (
+                  <Stack spacing={0.75} sx={{ alignItems: 'center', color: 'text.secondary' }}>
+                    <AddPhotoAlternateRoundedIcon sx={{ fontSize: 32, opacity: 0.6 }} />
+                    <Typography variant="subtitle2">Dodaj zdjęcie</Typography>
+                    <Typography variant="caption">PNG lub JPG, maks. 5 MB</Typography>
+                  </Stack>
+                )}
+              </ButtonBase>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg"
+                hidden
+                onChange={handleImageChange}
+              />
+
+              <TextField
+                label="Nazwa dania"
+                placeholder="np. Bruschetta Pomodoro"
+                fullWidth
+                autoFocus={!isEdit}
+                error={Boolean(errors.name)}
+                helperText={errors.name?.message ?? ' '}
+                disabled={isSubmitting}
+                {...register('name')}
+              />
+
+              <TextField
+                label="Cena"
+                placeholder="np. 24.90"
+                fullWidth
+                type="number"
+                inputMode="decimal"
+                error={Boolean(errors.price)}
+                helperText={errors.price?.message ?? ' '}
+                disabled={isSubmitting}
+                slotProps={{
+                  input: {
+                    endAdornment: <InputAdornment position="end">zł</InputAdornment>,
+                  },
+                  htmlInput: { step: '0.01', min: '0' },
+                }}
+                {...register('price', { valueAsNumber: true })}
+              />
+
+              <TextField
+                label="Opis"
+                placeholder="Krótki opis widoczny dla gości"
+                fullWidth
+                multiline
+                minRows={2}
+                error={Boolean(errors.description)}
+                helperText={errors.description?.message ?? ' '}
+                disabled={isSubmitting}
+                {...register('description')}
+              />
+
+              <TextField
+                label="Składniki"
+                placeholder="np. pomidory, bazylia, oliwa z oliwek"
+                fullWidth
+                multiline
+                minRows={2}
+                error={Boolean(errors.ingredients)}
+                helperText={errors.ingredients?.message ?? ' '}
+                disabled={isSubmitting}
+                {...register('ingredients')}
+              />
+
+              {/* Allergens */}
+              <Card variant="outlined" sx={{ borderRadius: 4 }}>
+                <CardContent sx={{ '&:last-child': { pb: 2 } }}>
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{ alignItems: 'center', mb: 1 }}
+                  >
+                    <WarningAmberRoundedIcon color="warning" fontSize="small" />
+                    <Typography variant="subtitle2">Alergeny</Typography>
+                  </Stack>
+                  <Controller
+                    name="allergens"
+                    control={control}
+                    render={({ field }) => (
+                      <FormGroup row>
+                        {ALLERGEN_OPTIONS.map((allergen) => (
+                          <FormControlLabel
+                            key={allergen}
+                            sx={{ width: '50%', mr: 0 }}
+                            control={
+                              <Checkbox
+                                size="small"
+                                color="warning"
+                                checked={field.value.includes(allergen)}
+                                onChange={() =>
+                                  field.onChange(toggleValue(field.value, allergen))
+                                }
+                                disabled={isSubmitting}
+                              />
+                            }
+                            label={
+                              <Typography variant="body2">{allergen}</Typography>
+                            }
+                          />
+                        ))}
+                      </FormGroup>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Tags */}
+              <Card variant="outlined" sx={{ borderRadius: 4 }}>
+                <CardContent sx={{ '&:last-child': { pb: 2 } }}>
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{ alignItems: 'center', mb: 1 }}
+                  >
+                    <SellRoundedIcon color="secondary" fontSize="small" />
+                    <Typography variant="subtitle2">Tagi</Typography>
+                  </Stack>
+                  <Controller
+                    name="tags"
+                    control={control}
+                    render={({ field }) => (
+                      <FormGroup row>
+                        {TAG_OPTIONS.map((tag) => (
+                          <FormControlLabel
+                            key={tag}
+                            sx={{ width: '50%', mr: 0 }}
+                            control={
+                              <Checkbox
+                                size="small"
+                                color="secondary"
+                                checked={field.value.includes(tag)}
+                                onChange={() =>
+                                  field.onChange(toggleValue(field.value, tag))
+                                }
+                                disabled={isSubmitting}
+                              />
+                            }
+                            label={<Typography variant="body2">{tag}</Typography>}
+                          />
+                        ))}
+                      </FormGroup>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+            </Stack>
+          </Box>
+
+          {/* Sticky footer */}
+          <Divider />
+          <Stack
+            direction="row"
+            spacing={1.5}
+            sx={{ px: 3, py: 2, justifyContent: 'flex-end' }}
+          >
+            <Button onClick={onClose} color="inherit" disabled={isSubmitting}>
+              Anuluj
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              color="secondary"
               disabled={isSubmitting}
-              {...register('name')}
-            />
-
-            <TextField
-              label="Cena"
-              placeholder="np. 24.90"
-              fullWidth
-              type="number"
-              inputMode="decimal"
-              error={Boolean(errors.price)}
-              helperText={errors.price?.message ?? ' '}
-              disabled={isSubmitting}
-              slotProps={{
-                input: {
-                  endAdornment: <InputAdornment position="end">zł</InputAdornment>,
-                },
-                htmlInput: { step: '0.01', min: '0' },
-              }}
-              {...register('price', { valueAsNumber: true })}
-            />
-
-            <TextField
-              label="Opis"
-              placeholder="Krótki opis widoczny dla gości"
-              fullWidth
-              multiline
-              minRows={2}
-              error={Boolean(errors.description)}
-              helperText={errors.description?.message ?? ' '}
-              disabled={isSubmitting}
-              {...register('description')}
-            />
-
-            <TextField
-              label="Składniki"
-              placeholder="np. pomidory, bazylia, oliwa z oliwek"
-              fullWidth
-              multiline
-              minRows={2}
-              error={Boolean(errors.ingredients)}
-              helperText={errors.ingredients?.message ?? ' '}
-              disabled={isSubmitting}
-              {...register('ingredients')}
-            />
-
-            {/* Allergens */}
-            <Card variant="outlined" sx={{ borderRadius: 4 }}>
-              <CardContent sx={{ '&:last-child': { pb: 2 } }}>
-                <Stack
-                  direction="row"
-                  spacing={1}
-                  sx={{ alignItems: 'center', mb: 1 }}
-                >
-                  <WarningAmberRoundedIcon color="warning" fontSize="small" />
-                  <Typography variant="subtitle2">Alergeny</Typography>
-                </Stack>
-                <Controller
-                  name="allergens"
-                  control={control}
-                  render={({ field }) => (
-                    <FormGroup row>
-                      {ALLERGEN_OPTIONS.map((allergen) => (
-                        <FormControlLabel
-                          key={allergen}
-                          sx={{ width: '50%', mr: 0 }}
-                          control={
-                            <Checkbox
-                              size="small"
-                              color="warning"
-                              checked={field.value.includes(allergen)}
-                              onChange={() =>
-                                field.onChange(toggleValue(field.value, allergen))
-                              }
-                              disabled={isSubmitting}
-                            />
-                          }
-                          label={
-                            <Typography variant="body2">{allergen}</Typography>
-                          }
-                        />
-                      ))}
-                    </FormGroup>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Tags */}
-            <Card variant="outlined" sx={{ borderRadius: 4 }}>
-              <CardContent sx={{ '&:last-child': { pb: 2 } }}>
-                <Stack
-                  direction="row"
-                  spacing={1}
-                  sx={{ alignItems: 'center', mb: 1 }}
-                >
-                  <SellRoundedIcon color="secondary" fontSize="small" />
-                  <Typography variant="subtitle2">Tagi</Typography>
-                </Stack>
-                <Controller
-                  name="tags"
-                  control={control}
-                  render={({ field }) => (
-                    <FormGroup row>
-                      {TAG_OPTIONS.map((tag) => (
-                        <FormControlLabel
-                          key={tag}
-                          sx={{ width: '50%', mr: 0 }}
-                          control={
-                            <Checkbox
-                              size="small"
-                              color="secondary"
-                              checked={field.value.includes(tag)}
-                              onChange={() =>
-                                field.onChange(toggleValue(field.value, tag))
-                              }
-                              disabled={isSubmitting}
-                            />
-                          }
-                          label={<Typography variant="body2">{tag}</Typography>}
-                        />
-                      ))}
-                    </FormGroup>
-                  )}
-                />
-              </CardContent>
-            </Card>
+              startIcon={
+                isSubmitting ? <CircularProgress size={18} color="inherit" /> : undefined
+              }
+            >
+              {isSubmitting ? 'Zapisywanie…' : 'Zapisz danie'}
+            </Button>
           </Stack>
         </Box>
+      </Drawer>
 
-        {/* Sticky footer */}
-        <Divider />
-        <Stack
-          direction="row"
-          spacing={1.5}
-          sx={{ px: 3, py: 2, justifyContent: 'flex-end' }}
-        >
-          <Button onClick={onClose} color="inherit" disabled={isSubmitting}>
-            Anuluj
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            color="secondary"
-            disabled={isSubmitting}
-            startIcon={
-              isSubmitting ? <CircularProgress size={18} color="inherit" /> : undefined
-            }
-          >
-            {isSubmitting ? 'Zapisywanie…' : 'Zapisz danie'}
-          </Button>
-        </Stack>
-      </Box>
-    </Drawer>
+      <ImageCropperDialog
+        open={cropperSrc !== null}
+        imageSrc={cropperSrc}
+        onApply={handleCropApply}
+        onCancel={() => setCropperSrc(null)}
+      />
+    </>
   );
 }

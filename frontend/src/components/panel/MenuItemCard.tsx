@@ -87,6 +87,7 @@ export function MenuItemCard({
             sx={{
               width: 52,
               height: 52,
+              aspectRatio: '1 / 1',
               borderRadius: 2.5,
               flexShrink: 0,
               alignSelf: 'center',
