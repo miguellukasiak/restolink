@@ -5,7 +5,6 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Alert from '@mui/material/Alert';
-import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -17,6 +16,7 @@ import { usePublicMenu } from '../../hooks/usePublicMenu';
 import { getApiErrorMessage } from '../../services/api';
 import { resolveAccessState } from '../../constants/subscription';
 import { PublicMenuView } from '../../components/public/PublicMenuView';
+import { PublicMenuSkeleton } from '../../components/public/PublicMenuSkeleton';
 import { ItemDetailModal } from '../../components/public/ItemDetailModal';
 
 /** Clean, centered status screen shown when the menu isn't publicly available. */
@@ -62,34 +62,6 @@ function StatusScreen({
         </Typography>
       </Stack>
     </Box>
-  );
-}
-
-/** Loading skeleton mirroring the final layout. */
-function PublicMenuSkeleton() {
-  return (
-    <Stack spacing={3} sx={{ px: 2, pt: 3, maxWidth: 960, mx: 'auto' }}>
-      <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
-        <Skeleton variant="circular" width={56} height={56} />
-        <Skeleton variant="rounded" height={48} sx={{ flex: 1, borderRadius: 999 }} />
-      </Stack>
-      <Stack direction="row" spacing={2}>
-        {[0, 1, 2, 3].map((key) => (
-          <Skeleton key={key} variant="circular" width={56} height={56} />
-        ))}
-      </Stack>
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-          gap: 2,
-        }}
-      >
-        {[0, 1, 2, 3, 4, 5].map((key) => (
-          <Skeleton key={key} variant="rounded" height={180} sx={{ borderRadius: 4 }} />
-        ))}
-      </Box>
-    </Stack>
   );
 }
 

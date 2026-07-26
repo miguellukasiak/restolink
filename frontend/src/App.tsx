@@ -5,7 +5,7 @@ import { RestaurantThemeProvider } from './components/public/RestaurantThemeProv
 import { RestaurantsPage } from './pages/RestaurantsPage';
 import { MenuBuilderPage } from './pages/panel/MenuBuilderPage';
 import { QrGeneratorPage } from './pages/panel/QrGeneratorPage';
-import { SettingsPage } from './pages/panel/SettingsPage';
+import { AppearancePage } from './pages/panel/AppearancePage';
 import { PublicMenuPage } from './pages/public/PublicMenuPage';
 
 export default function App() {
@@ -25,7 +25,7 @@ export default function App() {
           <Route index element={<Navigate to="menu" replace />} />
           <Route path="menu" element={<MenuBuilderPage />} />
           <Route path="qr" element={<QrGeneratorPage />} />
-          <Route path="settings" element={<SettingsPage />} />
+          <Route path="settings" element={<AppearancePage />} />
         </Route>
 
         {/* Public client ecosystem — isolated, dynamically themed */}

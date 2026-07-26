@@ -15,7 +15,6 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
-import Skeleton from '@mui/material/Skeleton';
 import { alpha } from '@mui/material/styles';
 import AddPhotoAlternateRoundedIcon from '@mui/icons-material/AddPhotoAlternateRounded';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
@@ -34,6 +33,7 @@ import { useSnackbar } from '../../components/feedback/SnackbarProvider';
 import { getApiErrorMessage } from '../../services/api';
 import { createRestaurantTheme } from '../../components/public/RestaurantThemeProvider';
 import { PublicMenuView } from '../../components/public/PublicMenuView';
+import { PublicMenuSkeleton } from '../../components/public/PublicMenuSkeleton';
 
 const HEX_PATTERN = /^#[0-9a-fA-F]{6}$/;
 
@@ -143,11 +143,11 @@ function ColorField({ label, value, onChange, presets, error }: ColorFieldProps)
 }
 
 /**
- * "Ustawienia" — Linktree-style visual configuration. Left: form (react-hook-form,
+ * "Wygląd menu" — Linktree-style visual configuration. Left: form (react-hook-form,
  * useWatch). Right: sticky device preview rendering the real PublicMenuView with
  * the *unsaved* watched values applied through the restaurant theme factory.
  */
-export function SettingsPage() {
+export function AppearancePage() {
   const { restaurantId = '' } = useParams<{ restaurantId: string }>();
   const { showSuccess, showError } = useSnackbar();
   const menu = usePublicMenu(restaurantId);
@@ -210,24 +210,28 @@ export function SettingsPage() {
 
   const isSaving = updateTheme.isPending;
 
-  const preview = menu.data ? (
-    <ThemeProvider theme={previewTheme}>
-      <Box sx={{ pointerEvents: 'none', bgcolor: 'background.default' }}>
-        <PublicMenuView
-          restaurantName={menu.data.restaurant.name}
-          logoUrl={watched.logo_url}
-          categories={menu.data.categories}
-        />
-      </Box>
-    </ThemeProvider>
-  ) : (
-    <Skeleton variant="rounded" height={400} />
-  );
+  // Same rich, page-shaped skeleton used on the live public menu — shown until
+  // the first fetch resolves (React Query keeps `data` truthy afterwards, so
+  // saves/refetches never flash back to this state).
+  const preview =
+    menu.isLoading || !menu.data ? (
+      <PublicMenuSkeleton />
+    ) : (
+      <ThemeProvider theme={previewTheme}>
+        <Box sx={{ pointerEvents: 'none', bgcolor: 'background.default' }}>
+          <PublicMenuView
+            restaurantName={menu.data.restaurant.name}
+            logoUrl={watched.logo_url}
+            categories={menu.data.categories}
+          />
+        </Box>
+      </ThemeProvider>
+    );
 
   return (
     <Box sx={{ maxWidth: 1300, mx: 'auto', pt: 4 }}>
       <Stack spacing={0.5} sx={{ mb: 3 }}>
-        <Typography variant="h4">Konfiguracja profilu</Typography>
+        <Typography variant="h4">Wygląd menu</Typography>
         <Typography variant="body1" color="text.secondary">
           Dostosuj wygląd swojego cyfrowego menu. Podgląd po prawej reaguje na
           zmiany natychmiast — zapisz, gdy będziesz zadowolony z efektu.
@@ -466,50 +470,98 @@ export function SettingsPage() {
             </ToggleButtonGroup>
 
             {device === 'mobile' ? (
-              /* Smartphone frame */
+              /* Smartphone frame: brushed-metal gradient bezel + floating
+                 dynamic-island notch + side buttons for a realistic device feel. */
               <Box
                 sx={{
                   width: 320,
-                  height: 620,
                   borderRadius: '44px',
-                  border: '10px solid #1C1B22',
-                  boxShadow: '0 24px 64px rgba(28, 27, 34, 0.28)',
-                  overflow: 'hidden',
+                  p: '10px',
+                  background:
+                    'linear-gradient(155deg, #3a3a42 0%, #1C1B22 45%, #000000 100%)',
+                  boxShadow:
+                    '0 24px 64px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255,255,255,0.08)',
                   position: 'relative',
-                  bgcolor: '#FFFFFF',
                 }}
               >
-                {/* Simulated notch */}
+                {/* Volume + power buttons */}
                 <Box
                   aria-hidden
                   sx={{
                     position: 'absolute',
-                    top: 0,
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    width: 120,
-                    height: 22,
-                    bgcolor: '#1C1B22',
-                    borderRadius: '0 0 14px 14px',
-                    zIndex: 3,
+                    left: -2,
+                    top: 108,
+                    width: 3,
+                    height: 28,
+                    bgcolor: '#000',
+                    borderRadius: '2px 0 0 2px',
                   }}
                 />
                 <Box
+                  aria-hidden
                   sx={{
-                    height: '100%',
-                    overflowY: 'auto',
-                    scrollbarWidth: 'none',
-                    '&::-webkit-scrollbar': { display: 'none' },
+                    position: 'absolute',
+                    left: -2,
+                    top: 144,
+                    width: 3,
+                    height: 46,
+                    bgcolor: '#000',
+                    borderRadius: '2px 0 0 2px',
+                  }}
+                />
+                <Box
+                  aria-hidden
+                  sx={{
+                    position: 'absolute',
+                    right: -2,
+                    top: 130,
+                    width: 3,
+                    height: 58,
+                    bgcolor: '#000',
+                    borderRadius: '0 2px 2px 0',
+                  }}
+                />
+
+                {/* Screen */}
+                <Box
+                  sx={{
+                    height: 600,
+                    borderRadius: '34px',
+                    overflow: 'hidden',
+                    position: 'relative',
+                    bgcolor: '#FFFFFF',
                   }}
                 >
+                  {/* Floating dynamic-island style notch */}
+                  <Box
+                    aria-hidden
+                    sx={{
+                      position: 'absolute',
+                      top: 8,
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      width: 90,
+                      height: 24,
+                      bgcolor: '#000',
+                      borderRadius: '999px',
+                      zIndex: 3,
+                    }}
+                  />
                   <Box
                     sx={{
-                      width: 390,
-                      transform: 'scale(0.769)',
-                      transformOrigin: 'top left',
+                      height: '100%',
+                      overflowY: 'auto',
+                      // Clears the floating island so content never starts hidden under it.
+                      pt: '30px',
+                      scrollbarWidth: 'none',
+                      '&::-webkit-scrollbar': { display: 'none' },
                     }}
                   >
-                    {preview}
+                    {/* `zoom` (not `transform: scale`) so the scroll container's
+                        height reflects the *zoomed* content — transform only
+                        repaints visually and leaves a tall dead scroll area
+                        behind, which was the empty-space-below-the-menu bug. */}
+                    <Box sx={{ width: 390, zoom: '0.769' }}>{preview}</Box>
                   </Box>
                 </Box>
               </Box>
@@ -570,15 +622,9 @@ export function SettingsPage() {
                     '&::-webkit-scrollbar': { display: 'none' },
                   }}
                 >
-                  <Box
-                    sx={{
-                      width: 1024,
-                      transform: 'scale(0.4375)',
-                      transformOrigin: 'top left',
-                    }}
-                  >
-                    {preview}
-                  </Box>
+                  {/* `zoom`, not `transform: scale` — see the mobile frame comment
+                      above for why this avoids a dead scrollable area. */}
+                  <Box sx={{ width: 1024, zoom: '0.4375' }}>{preview}</Box>
                 </Box>
               </Box>
             )}

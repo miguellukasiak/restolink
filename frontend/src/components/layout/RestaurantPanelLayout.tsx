@@ -56,7 +56,7 @@ export function RestaurantPanelLayout() {
   const navItems = [
     { label: 'Kreator menu', to: `${base}/menu`, icon: <MenuBookRoundedIcon /> },
     { label: 'Kody QR', to: `${base}/qr`, icon: <QrCode2RoundedIcon /> },
-    { label: 'Ustawienia', to: `${base}/settings`, icon: <SettingsRoundedIcon /> },
+    { label: 'Wygląd menu', to: `${base}/settings`, icon: <SettingsRoundedIcon /> },
   ];
 
   return (
