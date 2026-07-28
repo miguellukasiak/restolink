@@ -26,7 +26,9 @@ import {
   BACKGROUND_COLOR_PRESETS,
   FONT_OPTIONS,
   PRIMARY_COLOR_PRESETS,
+  THEME_PRESETS,
 } from '../../constants/menu';
+import type { ThemePreset } from '../../constants/menu';
 import { usePublicMenu } from '../../hooks/usePublicMenu';
 import { useUpdateTheme } from '../../hooks/useUpdateTheme';
 import { useSnackbar } from '../../components/feedback/SnackbarProvider';
@@ -232,6 +234,22 @@ export function AppearancePage() {
     reader.readAsDataURL(file);
   };
 
+  // One-tap preset: overwrite the three visual fields with a curated,
+  // contrast-safe combination and mark the form dirty so it can be saved.
+  const applyPreset = (preset: ThemePreset) => {
+    const options = { shouldDirty: true, shouldValidate: true };
+    setValue('primary_color', preset.primary_color, options);
+    setValue('background_color', preset.background_color, options);
+    setValue('font_family', preset.font_family, options);
+  };
+
+  const activePresetId = THEME_PRESETS.find(
+    (preset) =>
+      preset.primary_color.toLowerCase() === watched.primary_color?.toLowerCase() &&
+      preset.background_color.toLowerCase() === watched.background_color?.toLowerCase() &&
+      preset.font_family === watched.font_family,
+  )?.id;
+
   const onSubmit = handleSubmit((values) => {
     updateTheme.mutate(values, {
       onSuccess: () => {
@@ -285,6 +303,87 @@ export function AppearancePage() {
         {/* Left: scrollable configuration form */}
         <Box sx={{ flex: 1, minWidth: 0, width: '100%' }}>
           <Stack spacing={3}>
+            <Paper elevation={1} sx={{ borderRadius: '24px', p: 3 }}>
+              <Typography variant="h6" component="h2" sx={{ mb: 0.5 }}>
+                Gotowe motywy
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Zacznij od gotowej, czytelnej kombinacji — dopracujesz szczegóły niżej.
+              </Typography>
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: {
+                    xs: '1fr',
+                    sm: 'repeat(3, 1fr)',
+                  },
+                  gap: 1.5,
+                }}
+              >
+                {THEME_PRESETS.map((preset) => {
+                  const isActive = preset.id === activePresetId;
+                  return (
+                    <ButtonBase
+                      key={preset.id}
+                      onClick={() => applyPreset(preset)}
+                      aria-label={`Zastosuj motyw: ${preset.label}`}
+                      aria-pressed={isActive}
+                      sx={{
+                        display: 'block',
+                        textAlign: 'left',
+                        borderRadius: '18px',
+                        p: 1.5,
+                        border: '2px solid',
+                        borderColor: isActive ? 'secondary.main' : 'transparent',
+                        bgcolor: (t) =>
+                          alpha(t.palette.secondary.main, isActive ? 0.12 : 0.06),
+                        transition: 'background-color 0.2s ease, border-color 0.2s ease',
+                        '&:hover': {
+                          bgcolor: (t) => alpha(t.palette.secondary.main, 0.14),
+                        },
+                      }}
+                    >
+                      {/* Mini swatch: background surface with a primary accent bar. */}
+                      <Box
+                        aria-hidden
+                        sx={{
+                          height: 56,
+                          borderRadius: '12px',
+                          bgcolor: preset.background_color,
+                          border: '1px solid',
+                          borderColor: 'divider',
+                          display: 'flex',
+                          alignItems: 'flex-end',
+                          p: 1,
+                          mb: 1,
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            height: 8,
+                            width: '60%',
+                            borderRadius: 999,
+                            bgcolor: preset.primary_color,
+                          }}
+                        />
+                      </Box>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                        {preset.label}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        component="div"
+                        sx={{ lineHeight: 1.3 }}
+                      >
+                        {preset.description}
+                      </Typography>
+                    </ButtonBase>
+                  );
+                })}
+              </Box>
+            </Paper>
+
             <Paper elevation={1} sx={{ borderRadius: '24px', p: 3 }}>
               <Typography variant="h6" component="h2" sx={{ mb: 2 }}>
                 Logo Restauracji

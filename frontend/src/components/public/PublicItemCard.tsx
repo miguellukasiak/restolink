@@ -44,7 +44,26 @@ export function PublicItemCard({ item, onOpen }: PublicItemCardProps) {
         sx={{
           borderRadius: 5,
           p: 0.5,
+          overflow: 'hidden',
           '&.Mui-disabled': { opacity: 1 },
+          // MUI's default rectangular focus wash competes with the image
+          // treatment below — suppress it and drive the hover from the image.
+          '& .MuiCardActionArea-focusHighlight': { opacity: 0 },
+          // Gently zoom the photo and reveal a shape-matched darken overlay
+          // (see .dish-media / .dish-overlay) only while the card is hovered
+          // or keyboard-focused, and only when the dish is actually orderable.
+          '& .dish-media': { transition: 'transform 0.35s ease' },
+          '& .dish-overlay': { opacity: 0, transition: 'opacity 0.25s ease' },
+          ...(available && onOpen
+            ? {
+                '&:hover .dish-media, &.Mui-focusVisible .dish-media': {
+                  transform: 'scale(1.05)',
+                },
+                '&:hover .dish-overlay, &.Mui-focusVisible .dish-overlay': {
+                  opacity: 1,
+                },
+              }
+            : {}),
         }}
       >
         <Box
@@ -68,13 +87,28 @@ export function PublicItemCard({ item, onOpen }: PublicItemCardProps) {
           {item.image_url ? (
             <Box
               component="img"
+              className="dish-media"
               src={item.image_url}
               alt=""
               sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
           ) : (
-            <RestaurantMenuRoundedIcon sx={{ fontSize: 44 }} />
+            <RestaurantMenuRoundedIcon className="dish-media" sx={{ fontSize: 44 }} />
           )}
+          {/* Hover darken that perfectly follows the image's rounded-square
+              boundary: absolutely fills the clipped parent and inherits its
+              border-radius, so it can never bleed out as a stray rectangle/circle. */}
+          <Box
+            className="dish-overlay"
+            aria-hidden
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              borderRadius: 'inherit',
+              bgcolor: 'rgba(0, 0, 0, 0.16)',
+              pointerEvents: 'none',
+            }}
+          />
           {item.tags.includes('Nowość') && available && (
             <Chip
               label="NEW"

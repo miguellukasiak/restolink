@@ -72,7 +72,16 @@ export function PublicMenuView({
     .toUpperCase();
 
   return (
-    <Box sx={{ minHeight: '100%', bgcolor: 'background.default' }}>
+    <Box
+      sx={{
+        minHeight: '100%',
+        bgcolor: 'background.default',
+        // Anchor inherited text to the themed on-background color so headings
+        // (and any Typography without an explicit color) stay readable when the
+        // background is dark — otherwise they'd inherit the outer page's color.
+        color: 'text.primary',
+      }}
+    >
       {/* Sticky top bar: logo, search, language toggle */}
       <Box
         component="header"

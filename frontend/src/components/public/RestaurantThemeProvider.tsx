@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { ThemeProvider, createTheme, alpha } from '@mui/material/styles';
 import { usePublicMenu } from '../../hooks/usePublicMenu';
 import { getFontStack } from '../../constants/menu';
+import { getContrastingTextColor, isDarkColor } from '../../utils/colors';
 import type { RestaurantThemeUpdate } from '../../types';
 
 /**
@@ -18,17 +19,31 @@ export function createRestaurantTheme(settings: RestaurantThemeUpdate = {}) {
       ? fontStack
       : 'Georgia, "Times New Roman", serif';
 
+  // Readability guardrail: derive every on-background color from the chosen
+  // background's luminance, so a dark background automatically flips text (and
+  // dividers/surfaces) to light — a restaurant can't create a dark-on-dark,
+  // unreadable menu. See utils/colors.ts.
+  const backgroundColor = settings.background_color ?? '#FCF4F6';
+  const dark = isDarkColor(backgroundColor);
+  const onBackground = getContrastingTextColor(backgroundColor, {
+    light: '#FFFFFF',
+    dark: '#211A1B',
+  });
+
   return createTheme({
     palette: {
-      mode: 'light',
+      mode: dark ? 'dark' : 'light',
       primary: { main: settings.primary_color ?? '#8C1D18' },
-      secondary: { main: '#6D5E4F' },
+      secondary: { main: dark ? '#CBB9A6' : '#6D5E4F' },
       background: {
-        default: settings.background_color ?? '#FCF4F6',
-        paper: '#FFFFFF',
+        default: backgroundColor,
+        paper: dark ? '#242424' : '#FFFFFF',
       },
-      text: { primary: '#211A1B', secondary: '#655C5E' },
-      divider: alpha('#211A1B', 0.08),
+      text: {
+        primary: onBackground,
+        secondary: alpha(onBackground, dark ? 0.7 : 0.62),
+      },
+      divider: alpha(onBackground, dark ? 0.16 : 0.08),
     },
     shape: { borderRadius: 16 },
     typography: {

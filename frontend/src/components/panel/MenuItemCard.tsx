@@ -85,11 +85,17 @@ export function MenuItemCard({
             src={item.image_url}
             alt=""
             sx={{
+              // Hard-lock the thumbnail to a 52px square: min/max width AND
+              // flexShrink:0 together stop the flex row from ever squeezing it
+              // into an oval or shoving it into the price column.
               width: 52,
+              minWidth: 52,
+              maxWidth: 52,
               height: 52,
               aspectRatio: '1 / 1',
+              display: 'block',
               borderRadius: 2.5,
-              flexShrink: 0,
+              flex: '0 0 auto',
               alignSelf: 'center',
               objectFit: 'cover',
               filter: available ? 'none' : 'grayscale(100%)',
@@ -99,9 +105,12 @@ export function MenuItemCard({
           <Box
             sx={{
               width: 52,
+              minWidth: 52,
+              maxWidth: 52,
               height: 52,
+              aspectRatio: '1 / 1',
               borderRadius: 2.5,
-              flexShrink: 0,
+              flex: '0 0 auto',
               alignSelf: 'center',
               display: 'flex',
               alignItems: 'center',
