@@ -84,6 +84,8 @@ export function MenuItemCard({
             component="img"
             src={item.image_url}
             alt=""
+            loading="lazy"
+            decoding="async"
             sx={{
               // Hard-lock the thumbnail to a 52px square: min/max width AND
               // flexShrink:0 together stop the flex row from ever squeezing it

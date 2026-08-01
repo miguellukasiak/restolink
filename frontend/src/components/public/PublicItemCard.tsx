@@ -90,6 +90,8 @@ export function PublicItemCard({ item, onOpen }: PublicItemCardProps) {
               className="dish-media"
               src={item.image_url}
               alt=""
+              loading="lazy"
+              decoding="async"
               sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
           ) : (

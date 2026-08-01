@@ -60,6 +60,8 @@ function DishImage({ name, imageUrl }: { name: string; imageUrl: string | null }
           component="img"
           src={imageUrl}
           alt=""
+          loading="lazy"
+          decoding="async"
           sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
         />
       ) : (

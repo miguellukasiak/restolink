@@ -245,6 +245,8 @@ export function MenuItemDrawer({
                     component="img"
                     src={imagePreview}
                     alt="Podgląd zdjęcia dania"
+                    loading="lazy"
+                    decoding="async"
                     sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   />
                 ) : (
