@@ -19,6 +19,7 @@ import RestaurantMenuRoundedIcon from '@mui/icons-material/RestaurantMenuRounded
 import type { PublicMenuItem } from '../../types';
 import { formatPln } from '../../constants/menu';
 import { getAllergenIcon, getTagIcon } from '../../constants/menuIcons';
+import { useBackButtonClose } from '../../hooks/useBackButtonClose';
 
 const SlideUp = forwardRef(function SlideUp(
   props: TransitionProps & { children: ReactElement },
@@ -244,8 +245,12 @@ export function ItemDetailModal({ item, open, onClose }: ItemDetailModalProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
+  // Map the hardware/browser Back button to closing the modal (see hook).
+  useBackButtonClose(open, onClose);
+
   if (!item) return null;
 
+  // Desktop: solid pill over the split image/card layout.
   const closeButton = (
     <IconButton
       onClick={onClose}
@@ -264,6 +269,28 @@ export function ItemDetailModal({ item, open, onClose }: ItemDetailModalProps) {
     </IconButton>
   );
 
+  // Mobile: fixed, blurred, dark-translucent — always visible & tappable over
+  // the parallax image and the sheet, regardless of scroll position.
+  const mobileCloseButton = (
+    <IconButton
+      onClick={onClose}
+      aria-label={t('close')}
+      sx={{
+        position: 'fixed',
+        top: 'calc(16px + env(safe-area-inset-top, 0px))',
+        left: 16,
+        zIndex: 20,
+        color: '#fff',
+        bgcolor: 'rgba(0, 0, 0, 0.4)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+        '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.55)' },
+      }}
+    >
+      <CloseRoundedIcon />
+    </IconButton>
+  );
+
   if (isMobile) {
     return (
       <Dialog
@@ -274,31 +301,40 @@ export function ItemDetailModal({ item, open, onClose }: ItemDetailModalProps) {
         aria-labelledby="dish-detail-title"
         aria-describedby="dish-detail-summary"
       >
+        {mobileCloseButton}
+        {/* One scroll container. The image is `sticky` so it stays pinned while
+            the content sheet — pulled up over its lower edge with a higher
+            z-index — slides up and covers it: the "bottom sheet over image"
+            parallax you get in UberEats et al. */}
         <Box
           sx={{
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
+            height: '100dvh',
+            width: '100%',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            position: 'relative',
             bgcolor: 'background.default',
+            WebkitOverflowScrolling: 'touch',
           }}
         >
-          {closeButton}
-          <Box sx={{ height: '30vh', flexShrink: 0 }}>
+          <Box sx={{ position: 'sticky', top: 0, height: '40vh', zIndex: 0 }}>
             <DishImage name={item.name} imageUrl={item.image_url} />
           </Box>
-          <Paper
-            elevation={0}
+          <Box
             sx={{
-              flex: 1,
-              mt: -3.5,
-              borderRadius: '28px 28px 0 0',
+              position: 'relative',
+              zIndex: 10,
+              mt: '-32px',
+              minHeight: '66vh',
+              borderRadius: '32px 32px 0 0',
+              bgcolor: 'background.paper',
               p: 3,
-              overflowY: 'auto',
-              zIndex: 1,
+              pb: 'calc(32px + env(safe-area-inset-bottom, 0px))',
+              boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.12)',
             }}
           >
             <DetailBody item={item} />
-          </Paper>
+          </Box>
         </Box>
       </Dialog>
     );
