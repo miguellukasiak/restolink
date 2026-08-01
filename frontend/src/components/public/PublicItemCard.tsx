@@ -42,7 +42,11 @@ export function PublicItemCard({ item, onOpen }: PublicItemCardProps) {
         aria-label={ariaLabel}
         aria-disabled={!available}
         sx={{
-          borderRadius: 5,
+          // Fixed px, NOT the sx multiplier: `borderRadius: 5` resolved to
+          // 5 × theme.shape.borderRadius (16) = 80px, and with overflow:hidden
+          // those giant bottom corners sliced through the price text. Clamp to a
+          // sane Material 3 value so the card can never become a text-eating pill.
+          borderRadius: '24px',
           p: 0.5,
           overflow: 'hidden',
           '&.Mui-disabled': { opacity: 1 },
@@ -127,7 +131,9 @@ export function PublicItemCard({ item, onOpen }: PublicItemCardProps) {
             />
           )}
         </Box>
-        <Box sx={{ px: 1, pt: 1, pb: 0.75 }}>
+        {/* Extra bottom padding keeps the price clear of the card's rounded
+            bottom corners even at the maximum clamped radius (see above). */}
+        <Box sx={{ px: 1, pt: 1, pb: 2 }}>
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
             <Typography
               variant="subtitle2"
