@@ -1,35 +1,109 @@
+import { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
-import Skeleton from '@mui/material/Skeleton';
+import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
+import { keyframes } from '@mui/material/styles';
+import RamenDiningRoundedIcon from '@mui/icons-material/RamenDiningRounded';
+
+/** Playful "kitchen at work" status lines, cycled while the menu loads. */
+const LOADING_PHRASES = [
+  'Podgrzewamy piekarnik do 200°C...',
+  'Kroimy cebulę (bez płaczu)...',
+  'Układamy frytki w idealny wzór...',
+  'Twoje dania już do Ciebie lecą!',
+] as const;
+
+/** How long each phrase stays before fading to the next. */
+const PHRASE_INTERVAL_MS = 1500;
+
+/** Gentle continuous bounce + squash for the centered dish icon. */
+const bounce = keyframes`
+  0%, 100% { transform: translateY(0) scale(1); }
+  30% { transform: translateY(-12px) scale(1.06); }
+  60% { transform: translateY(0) scale(0.97); }
+`;
 
 /**
- * Loading placeholder mirroring the public menu's final layout (logo + search,
- * category pills, dish grid). Shared by the live public page and the
- * appearance-settings device preview so both show the same M3 loading state.
+ * "SimCity-style" loading splash for the public menu: a bouncing dish icon
+ * inside a large spinner, with kitchen-themed status lines that cross-fade every
+ * 1.5s — so a slow-network visitor feels entertained, not stalled. Rendered by
+ * the live public page and (scaled) inside the appearance-settings preview.
  */
 export function PublicMenuSkeleton() {
+  const [phraseIndex, setPhraseIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  // Every tick, fade the current line out; the swap-in happens once the
+  // fade-out transition actually finishes (see onTransitionEnd) so the text
+  // never snaps and we don't juggle nested, leak-prone timers.
+  useEffect(() => {
+    const id = setInterval(() => setVisible(false), PHRASE_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, []);
+
+  const handleFadeEnd = () => {
+    if (!visible) {
+      setPhraseIndex((index) => (index + 1) % LOADING_PHRASES.length);
+      setVisible(true);
+    }
+  };
+
   return (
-    <Stack spacing={3} sx={{ px: 2, pt: 3, maxWidth: 960, mx: 'auto' }}>
-      <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
-        <Skeleton variant="circular" width={56} height={56} />
-        <Skeleton variant="rounded" height={48} sx={{ flex: 1, borderRadius: 999 }} />
-      </Stack>
-      <Stack direction="row" spacing={2}>
-        {[0, 1, 2, 3].map((key) => (
-          <Skeleton key={key} variant="circular" width={56} height={56} />
-        ))}
-      </Stack>
-      <Box
+    <Box
+      role="status"
+      aria-live="polite"
+      aria-label={LOADING_PHRASES[phraseIndex]}
+      sx={{
+        minHeight: '100dvh',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 4,
+        px: 3,
+        textAlign: 'center',
+        bgcolor: 'background.default',
+      }}
+    >
+      {/* Spinner (active fetching) with the bouncing dish icon at its center. */}
+      <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+        <CircularProgress size={104} thickness={2.4} sx={{ color: 'primary.main' }} />
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <RamenDiningRoundedIcon
+            sx={{
+              fontSize: 48,
+              color: 'primary.main',
+              animation: `${bounce} 1.4s ease-in-out infinite`,
+            }}
+          />
+        </Box>
+      </Box>
+
+      {/* Cross-fading kitchen status line. */}
+      <Typography
+        variant="h6"
+        component="p"
+        onTransitionEnd={handleFadeEnd}
         sx={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-          gap: 2,
+          maxWidth: 340,
+          minHeight: '2.5em',
+          fontWeight: 600,
+          color: 'text.secondary',
+          opacity: visible ? 1 : 0,
+          transition: 'opacity 0.3s ease',
         }}
       >
-        {[0, 1, 2, 3, 4, 5].map((key) => (
-          <Skeleton key={key} variant="rounded" height={180} sx={{ borderRadius: 4 }} />
-        ))}
-      </Box>
-    </Stack>
+        {LOADING_PHRASES[phraseIndex]}
+      </Typography>
+    </Box>
   );
 }
