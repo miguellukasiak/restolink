@@ -76,7 +76,15 @@ export function PublicItemCard({ item, onOpen }: PublicItemCardProps) {
           sx={{
             position: 'relative',
             aspectRatio: '1 / 1',
-            borderRadius: 4,
+            // Round only the TOP corners, matching the card's clamped 24px radius;
+            // the bottom stays flat so the image meets the text block below it
+            // seamlessly. (Was `borderRadius: 4` → 4 × theme.shape (16) = 64px,
+            // which ballooned the image into a circle AND whose heavy corners
+            // clipped the absolutely-positioned "NEW" badge.)
+            borderTopLeftRadius: '24px',
+            borderTopRightRadius: '24px',
+            borderBottomLeftRadius: 0,
+            borderBottomRightRadius: 0,
             overflow: 'hidden',
             display: 'flex',
             alignItems: 'center',
@@ -96,14 +104,19 @@ export function PublicItemCard({ item, onOpen }: PublicItemCardProps) {
               alt=""
               loading="lazy"
               decoding="async"
-              sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              sx={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                borderRadius: 'inherit',
+              }}
             />
           ) : (
             <RestaurantMenuRoundedIcon className="dish-media" sx={{ fontSize: 44 }} />
           )}
-          {/* Hover darken that perfectly follows the image's rounded-square
-              boundary: absolutely fills the clipped parent and inherits its
-              border-radius, so it can never bleed out as a stray rectangle/circle. */}
+          {/* Hover darken that perfectly follows the image's top-rounded shape:
+              absolutely fills the clipped parent and inherits its border-radius
+              (top corners rounded, bottom flat), so it can never bleed out. */}
           <Box
             className="dish-overlay"
             aria-hidden
@@ -122,8 +135,10 @@ export function PublicItemCard({ item, onOpen }: PublicItemCardProps) {
               color="primary"
               sx={{
                 position: 'absolute',
-                top: 8,
-                right: 8,
+                // Safe inset from the corner so the badge sits inside the visible
+                // area and clears the top-right rounded corner (24px) cleanly.
+                top: 10,
+                right: 10,
                 height: 22,
                 fontSize: 11,
                 fontWeight: 700,
