@@ -22,6 +22,7 @@ import SmartphoneRoundedIcon from '@mui/icons-material/SmartphoneRounded';
 import DesktopWindowsRoundedIcon from '@mui/icons-material/DesktopWindowsRounded';
 import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
 import ColorizeRoundedIcon from '@mui/icons-material/ColorizeRounded';
+import LockRoundedIcon from '@mui/icons-material/LockRounded';
 import {
   BACKGROUND_COLOR_PRESETS,
   FONT_OPTIONS,
@@ -573,13 +574,17 @@ export function AppearancePage() {
           </Box>
         </Box>
 
-        {/* Right: sticky live preview */}
+        {/* Right: sticky live preview. The device-type toggle sits above the
+            mockup, so on desktop we nudge the whole column up a touch to keep the
+            phone visually aligned with the top of the form column on the left
+            (the form already top-aligns both via alignItems: flex-start). */}
         <Box
           sx={{
             width: { xs: '100%', lg: 470 },
             flexShrink: 0,
             position: { lg: 'sticky' },
             top: { lg: 88 },
+            mt: { lg: -3 },
           }}
         >
           <Stack spacing={2} sx={{ alignItems: 'center' }}>
@@ -655,7 +660,8 @@ export function AppearancePage() {
                   }}
                 />
 
-                {/* Screen */}
+                {/* Screen — a vertical column: (fixed) browser chrome on top,
+                    (scrolling) site content below. */}
                 <Box
                   sx={{
                     height: 600,
@@ -663,6 +669,8 @@ export function AppearancePage() {
                     overflow: 'hidden',
                     position: 'relative',
                     bgcolor: '#FFFFFF',
+                    display: 'flex',
+                    flexDirection: 'column',
                   }}
                 >
                   {/* Floating dynamic-island style notch */}
@@ -680,13 +688,53 @@ export function AppearancePage() {
                       zIndex: 3,
                     }}
                   />
+
+                  {/* Faux mobile browser chrome (iOS Safari-style): a fixed address
+                      bar sitting below the island and above the scrolling site
+                      content. Deliberately neutral/light — it represents the phone's
+                      browser UI, so it stays constant regardless of the (possibly
+                      dark) menu theme being previewed. Its top padding clears the
+                      dynamic island so the URL never overlaps the notch. */}
                   <Box
                     sx={{
-                      height: '100%',
+                      flexShrink: 0,
+                      pt: '40px',
+                      px: 1.5,
+                      pb: 1.25,
+                      bgcolor: '#F2F2F7',
+                      borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
+                    }}
+                  >
+                    <Stack
+                      direction="row"
+                      spacing={0.5}
+                      sx={{
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        px: 1.5,
+                        py: 0.5,
+                        borderRadius: 999,
+                        bgcolor: '#FFFFFF',
+                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.06)',
+                      }}
+                    >
+                      <LockRoundedIcon sx={{ fontSize: 11, color: 'rgba(0, 0, 0, 0.45)' }} />
+                      <Typography
+                        sx={{ fontSize: 11, fontWeight: 500, color: 'rgba(0, 0, 0, 0.6)' }}
+                        noWrap
+                      >
+                        restolink.app/menu/{restaurantId.slice(0, 8)}…
+                      </Typography>
+                    </Stack>
+                  </Box>
+
+                  {/* Scrollable site content */}
+                  <Box
+                    sx={{
+                      flex: 1,
+                      minHeight: 0,
                       overflowY: 'auto',
                       overflowX: 'hidden',
-                      // Clears the floating island so content never starts hidden under it.
-                      pt: '30px',
                       scrollbarWidth: 'none',
                       '&::-webkit-scrollbar': { display: 'none' },
                     }}
@@ -694,14 +742,14 @@ export function AppearancePage() {
                     {/* Strict screen boundary: an isolating stacking context (position +
                         explicit z-index) PLUS an explicit, measured height (content ×
                         scale) so the scaled+sticky content below can never escape this
-                        box's `overflow: hidden` clip — neither above the island nor
-                        past the bezel's inner curve, and no dead scroll space either. */}
+                        box's `overflow: hidden` clip — and no dead scroll space either.
+                        The screen's own overflow:hidden + radius rounds the outer
+                        corners, so this wrapper needs no border-radius of its own. */}
                     <Box
                       sx={{
                         position: 'relative',
                         zIndex: 1,
                         overflow: 'hidden',
-                        borderRadius: '34px',
                         height: contentHeight !== null ? contentHeight * 0.769 : 'auto',
                       }}
                     >
