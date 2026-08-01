@@ -7,9 +7,12 @@ import RamenDiningRoundedIcon from '@mui/icons-material/RamenDiningRounded';
 
 /** Playful "kitchen at work" status lines, cycled while the menu loads. */
 const LOADING_PHRASES = [
-  'Podgrzewamy piekarnik do 200°C...',
-  'Kroimy cebulę (bez płaczu)...',
+  'Polerujemy wirtualne sztućce...',
+  'Zatrudniamy cyfrowych kelnerów...',
+  'Podgrzewamy serwery do 200°C...',
+  'Kroimy wirtualną cebulę (bez płaczu)...',
   'Układamy frytki w idealny wzór...',
+  'Degustujemy kod źródłowy...',
   'Twoje dania już do Ciebie lecą!',
 ] as const;
 
