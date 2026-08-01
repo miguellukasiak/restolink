@@ -21,6 +21,17 @@ import './index.css';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      // Data stays "fresh" for 5 minutes, so moving between panel tabs
+      // (Kreator menu / Kody QR / Wygląd menu) serves the cached result
+      // instantly — no refetch, no loading skeleton on client-side navigation.
+      staleTime: 1000 * 60 * 5,
+      // Keep unused query data around for 30 minutes after the last screen
+      // using it unmounts, so returning to a tab still hits a warm cache
+      // (never falls back to the `isPending` skeleton) even after a detour.
+      gcTime: 1000 * 60 * 30,
+      // When data IS stale, React Query revalidates in the background while the
+      // existing data stays on screen — `isLoading` (isPending) never flips
+      // true once there's cached data, so refetches are silent, never a loader.
       retry: 1,
       refetchOnWindowFocus: false,
     },

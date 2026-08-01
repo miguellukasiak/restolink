@@ -14,6 +14,7 @@ export function usePublicMenu(restaurantId: string) {
     queryKey: publicMenuQueryKeys.menu(restaurantId),
     queryFn: () => fetchPublicMenu(restaurantId),
     enabled: Boolean(restaurantId),
-    staleTime: 60_000,
+    // staleTime inherited from the global QueryClient default (5 min); the theme
+    // save (useUpdateTheme) invalidates this key so the preview stays in sync.
   });
 }

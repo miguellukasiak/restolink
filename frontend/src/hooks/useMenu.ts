@@ -12,6 +12,7 @@ export function useMenu(restaurantId: string) {
     queryKey: menuQueryKeys.categories(restaurantId),
     queryFn: () => fetchMenuCategories(restaurantId),
     enabled: Boolean(restaurantId),
-    staleTime: 30_000,
+    // staleTime inherited from the global QueryClient default (5 min) so tab
+    // navigation is instant; mutations invalidate this key to stay accurate.
   });
 }
