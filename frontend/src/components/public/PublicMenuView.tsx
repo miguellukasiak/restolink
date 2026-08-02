@@ -8,14 +8,21 @@ import Avatar from '@mui/material/Avatar';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import Badge from '@mui/material/Badge';
+import Tooltip from '@mui/material/Tooltip';
 import { alpha } from '@mui/material/styles';
 import { visuallyHidden } from '@mui/utils';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import LanguageRoundedIcon from '@mui/icons-material/LanguageRounded';
 import SearchOffRoundedIcon from '@mui/icons-material/SearchOffRounded';
+import HealthAndSafetyRoundedIcon from '@mui/icons-material/HealthAndSafetyRounded';
 import type { PublicMenuCategory, PublicMenuItem } from '../../types';
 import { CategoryPills } from './CategoryPills';
 import { PublicItemCard } from './PublicItemCard';
+
+/** Stable empty default so the filter memo isn't invalidated every render. */
+const NO_ALLERGENS: string[] = [];
 
 interface PublicMenuViewProps {
   restaurantName: string;
@@ -23,6 +30,12 @@ interface PublicMenuViewProps {
   categories: PublicMenuCategory[];
   /** Omit to render a read-only variant (settings live preview). */
   onOpenItem?: (item: PublicMenuItem) => void;
+  /** Allergens the guest wants excluded — dishes containing any are hidden. */
+  selectedAllergens?: string[];
+  /** Show the header allergy-filter button (only when the menu has allergens). */
+  canFilterAllergens?: boolean;
+  /** Open the allergy filter sheet (omit to hide the header button). */
+  onOpenAllergyFilter?: () => void;
 }
 
 /**
@@ -35,25 +48,42 @@ export function PublicMenuView({
   logoUrl,
   categories,
   onOpenItem,
+  selectedAllergens = NO_ALLERGENS,
+  canFilterAllergens = false,
+  onOpenAllergyFilter,
 }: PublicMenuViewProps) {
   const { t, i18n } = useTranslation();
   const [query, setQuery] = useState('');
 
   const filteredCategories = useMemo(() => {
     const trimmed = query.trim().toLowerCase();
-    if (!trimmed) return categories;
+    const hasAllergyFilter = selectedAllergens.length > 0;
+    if (!trimmed && !hasAllergyFilter) return categories;
     return categories
       .map((category) => ({
         ...category,
-        items: category.items.filter((item) =>
-          [item.name, item.description, item.ingredients]
-            .join(' ')
-            .toLowerCase()
-            .includes(trimmed),
-        ),
+        items: category.items.filter((item) => {
+          // Exclusion: hide any dish containing a selected allergen.
+          if (
+            hasAllergyFilter &&
+            item.allergens.some((allergen) => selectedAllergens.includes(allergen))
+          ) {
+            return false;
+          }
+          if (
+            trimmed &&
+            ![item.name, item.description, item.ingredients]
+              .join(' ')
+              .toLowerCase()
+              .includes(trimmed)
+          ) {
+            return false;
+          }
+          return true;
+        }),
       }))
       .filter((category) => category.items.length > 0);
-  }, [categories, query]);
+  }, [categories, query, selectedAllergens]);
 
   const resultsCount = useMemo(
     () => filteredCategories.reduce((sum, category) => sum + category.items.length, 0),
@@ -134,6 +164,31 @@ export function PublicMenuView({
                 },
               }}
             />
+            {canFilterAllergens && onOpenAllergyFilter && (
+              <Tooltip title="Filtruj alergeny" arrow>
+                <IconButton
+                  onClick={onOpenAllergyFilter}
+                  aria-label={
+                    selectedAllergens.length > 0
+                      ? `Filtruj alergeny (aktywne wykluczenia: ${selectedAllergens.length})`
+                      : 'Filtruj alergeny'
+                  }
+                  sx={{
+                    flexShrink: 0,
+                    color:
+                      selectedAllergens.length > 0 ? 'primary.main' : 'text.secondary',
+                  }}
+                >
+                  <Badge
+                    badgeContent={selectedAllergens.length}
+                    color="primary"
+                    overlap="circular"
+                  >
+                    <HealthAndSafetyRoundedIcon />
+                  </Badge>
+                </IconButton>
+              </Tooltip>
+            )}
             <Button
               onClick={toggleLanguage}
               aria-label={t('languageToggle')}
@@ -166,6 +221,26 @@ export function PublicMenuView({
             <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
               {t('emptySearch', { query: query.trim() })}
             </Typography>
+          </Stack>
+        )}
+
+        {/* Everything hidden purely by the allergy filter — offer a way back. */}
+        {!query.trim() && resultsCount === 0 && selectedAllergens.length > 0 && (
+          <Stack spacing={2} sx={{ mt: 8, alignItems: 'center', color: 'text.secondary' }}>
+            <HealthAndSafetyRoundedIcon sx={{ fontSize: 52, opacity: 0.4 }} />
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, textAlign: 'center' }}>
+              Żadne danie nie spełnia Twoich filtrów alergenów.
+            </Typography>
+            {onOpenAllergyFilter && (
+              <Button
+                variant="outlined"
+                color="primary"
+                startIcon={<HealthAndSafetyRoundedIcon />}
+                onClick={onOpenAllergyFilter}
+              >
+                Dostosuj filtry
+              </Button>
+            )}
           </Stack>
         )}
 
