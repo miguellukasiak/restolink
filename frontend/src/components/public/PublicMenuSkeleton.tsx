@@ -5,11 +5,11 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { keyframes } from '@mui/material/styles';
 import type { SvgIconComponent } from '@mui/icons-material';
 import RestaurantRoundedIcon from '@mui/icons-material/RestaurantRounded';
-import RoomServiceRoundedIcon from '@mui/icons-material/RoomServiceRounded';
+import AgricultureRoundedIcon from '@mui/icons-material/AgricultureRounded';
 import LocalPizzaRoundedIcon from '@mui/icons-material/LocalPizzaRounded';
 import SoupKitchenRoundedIcon from '@mui/icons-material/SoupKitchenRounded';
 import FastfoodRoundedIcon from '@mui/icons-material/FastfoodRounded';
-import RamenDiningRoundedIcon from '@mui/icons-material/RamenDiningRounded';
+import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
 import DeliveryDiningRoundedIcon from '@mui/icons-material/DeliveryDiningRounded';
 
 interface LoadingStep {
@@ -23,12 +23,12 @@ interface LoadingStep {
  * (cutlery, oven, delivery scooter…). Cycled while the menu loads.
  */
 const LOADING_STEPS: LoadingStep[] = [
-  { text: 'Polerujemy wirtualne sztućce...', Icon: RestaurantRoundedIcon },
-  { text: 'Zatrudniamy cyfrowych kelnerów...', Icon: RoomServiceRoundedIcon },
-  { text: 'Podgrzewamy serwery do 200°C...', Icon: LocalPizzaRoundedIcon },
-  { text: 'Kroimy wirtualną cebulę (bez płaczu)...', Icon: SoupKitchenRoundedIcon },
+  { text: 'Polerujemy sztućce...', Icon: RestaurantRoundedIcon },
+  { text: 'Obieramy ziemniaki...', Icon: AgricultureRoundedIcon },
+  { text: 'Podgrzewamy piekarnik do 200°C...', Icon: LocalPizzaRoundedIcon },
+  { text: 'Kroimy cebulę (bez płaczu)...', Icon: SoupKitchenRoundedIcon },
   { text: 'Układamy frytki w idealny wzór...', Icon: FastfoodRoundedIcon },
-  { text: 'Degustujemy kod źródłowy...', Icon: RamenDiningRoundedIcon },
+  { text: 'Gotujemy z sercem...', Icon: FavoriteRoundedIcon },
   { text: 'Twoje dania już do Ciebie lecą!', Icon: DeliveryDiningRoundedIcon },
 ];
 
