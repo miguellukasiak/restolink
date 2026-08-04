@@ -127,7 +127,9 @@ export function MenuItemDrawer({
           allergens: values.allergens,
           tags: values.tags,
           is_available: item?.is_available ?? true,
-          // Base64 Data URI — the mock persists it (Task 1 fix).
+          // Either a freshly-cropped Base64 Data URI (the API uploads it to
+          // Cloudinary and stores the URL) or the existing hosted URL when the
+          // photo wasn't touched — the backend passes those through untouched.
           image_url: imagePreview,
         },
         itemId: item?.id,

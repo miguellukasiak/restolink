@@ -4,7 +4,9 @@ Conventions:
 - UUID primary keys generated in Python (uuid4).
 - Soft deletes everywhere: rows carry `deleted_at`; queries must filter on it.
   Read-oriented relationships below already exclude soft-deleted children.
-- Images (logo, dish photos) are Base64 Data URIs stored in TEXT columns (MVP).
+- Images (logo, dish photos) are stored as Cloudinary URLs in TEXT columns; the
+  browser still uploads a Base64 Data URI, which the API swaps for the hosted
+  URL before persisting (see app/cloudinary_service.py).
 - `allergens` / `tags` are JSONB arrays of strings.
 """
 

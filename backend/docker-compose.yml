@@ -19,8 +19,13 @@ services:
     build: .
     ports:
       - "8000:8000"
+    # Cloudinary creds are interpolated from `backend/.env` (gitignored, loaded
+    # automatically by Compose) or the host env — never baked into this file.
     environment:
       DATABASE_URL: postgresql+asyncpg://horeca:horeca@db:5432/horeca
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-}
     depends_on:
       db:
         condition: service_healthy

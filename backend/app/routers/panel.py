@@ -8,6 +8,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from ..cloudinary_service import ImageUploadError, upload_image_if_needed
 from ..database import get_db
 from ..models import MenuCategory, MenuItem, Restaurant
 from ..schemas import (
@@ -21,6 +22,22 @@ from ..schemas import (
 )
 
 router = APIRouter(prefix="/api/v1/restaurants", tags=["Panel"])
+
+
+async def _host_image(image: str | None, *, folder: str) -> str | None:
+    """Upload a freshly-cropped Data URI to Cloudinary, returning its URL.
+
+    Values that are already hosted URLs pass straight through, so re-saving an
+    unchanged photo costs nothing. Upload failures surface as a 502 rather than
+    an unhandled 500, so the client shows a real message.
+    """
+    try:
+        return await upload_image_if_needed(image, folder=folder)
+    except ImageUploadError as exc:
+        raise HTTPException(
+            status_code=502,
+            detail="Nie udało się przesłać zdjęcia. Spróbuj ponownie.",
+        ) from exc
 
 
 async def _require_restaurant(
@@ -60,7 +77,12 @@ async def update_theme(
 ) -> dict[str, bool]:
     """Persist the restaurant's visual settings (only provided fields)."""
     restaurant = await _require_restaurant(db, restaurant_id)
-    for field, value in payload.model_dump(exclude_unset=True).items():
+    fields = payload.model_dump(exclude_unset=True)
+    # The logo rides along on *every* public menu load, so it gets the same
+    # Cloudinary treatment as dish photos instead of being inlined as Base64.
+    if "logo_url" in fields:
+        fields["logo_url"] = await _host_image(fields["logo_url"], folder="logos")
+    for field, value in fields.items():
         setattr(restaurant, field, value)
     await db.flush()
     return {"success": True}
@@ -244,7 +266,9 @@ async def upsert_menu_item(
     item.allergens = payload.allergens
     item.tags = payload.tags
     item.is_available = payload.is_available
-    item.image_url = payload.image_url
+    # Store a short Cloudinary URL, never the multi-megabyte Data URI the
+    # browser sends — that bloat was the menu-loading bottleneck.
+    item.image_url = await _host_image(payload.image_url, folder="dishes")
 
     await db.flush()
     await db.refresh(item)
