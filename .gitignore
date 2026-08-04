@@ -25,6 +25,9 @@ env/
 .env.*
 !.env.example
 
+# ---- One-off image backfill: backups hold raw image data, never commit them ----
+backfill_backup_*.json
+
 # ---- Docker ----
 pgdata/
 *.pid
