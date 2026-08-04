@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import Card from '@mui/material/Card';
 import CardActionArea from '@mui/material/CardActionArea';
@@ -20,8 +21,13 @@ interface PublicItemCardProps {
  * Client-facing dish card. Unavailable dishes stay visible but are greyed out,
  * unclickable, and flagged with a "Niedostępne" badge (also announced to
  * screen readers via the action-area label).
+ *
+ * Wrapped in `React.memo` (see export): a menu can have dozens of these, and
+ * every allergy-filter toggle / search keystroke re-renders the parent list.
+ * With a stable `item` reference and a stable `onOpen` (memoized upstream),
+ * memo lets untouched cards skip re-rendering entirely.
  */
-export function PublicItemCard({ item, onOpen }: PublicItemCardProps) {
+function PublicItemCardComponent({ item, onOpen }: PublicItemCardProps) {
   const { t } = useTranslation();
   const available = item.is_available !== false;
 
@@ -183,3 +189,5 @@ export function PublicItemCard({ item, onOpen }: PublicItemCardProps) {
     </Card>
   );
 }
+
+export const PublicItemCard = memo(PublicItemCardComponent);

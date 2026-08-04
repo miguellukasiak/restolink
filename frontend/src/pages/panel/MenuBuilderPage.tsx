@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   DragDropContext,
@@ -147,7 +147,7 @@ export function MenuBuilderPage() {
   };
 
   /** Optimistically flips availability locally, then persists via upsert. */
-  const handleToggleAvailability = (item: MenuItem, isAvailable: boolean) => {
+  const handleToggleAvailability = useCallback((item: MenuItem, isAvailable: boolean) => {
     const applyFlag = (value: boolean) => {
       setCategories((previous) =>
         previous.map((category) => ({
@@ -184,10 +184,10 @@ export function MenuBuilderPage() {
         },
       },
     );
-  };
+  }, [saveMenuItem, showError]);
 
   /** Optimistically renames a category locally, then persists it. */
-  const handleRenameCategory = (category: MenuCategory, name: string) => {
+  const handleRenameCategory = useCallback((category: MenuCategory, name: string) => {
     const previousName = category.name;
     setCategories((previous) =>
       previous.map((c) => (c.id === category.id ? { ...c, name } : c)),
@@ -205,7 +205,7 @@ export function MenuBuilderPage() {
         },
       },
     );
-  };
+  }, [updateCategory, showError]);
 
   /** Executes the pending deletion (category or item) optimistically. */
   const handleConfirmDelete = () => {
@@ -239,23 +239,32 @@ export function MenuBuilderPage() {
     setDeleteTarget(null);
   };
 
-  const openCreateDrawer = (category: MenuCategory) => {
+  const openCreateDrawer = useCallback((category: MenuCategory) => {
     setDrawer({
       open: true,
       categoryId: category.id,
       categoryName: category.name,
       item: null,
     });
-  };
+  }, []);
 
-  const openEditDrawer = (category: MenuCategory, item: MenuItem) => {
+  const openEditDrawer = useCallback((category: MenuCategory, item: MenuItem) => {
     setDrawer({
       open: true,
       categoryId: category.id,
       categoryName: category.name,
       item,
     });
-  };
+  }, []);
+
+  // Stable delete-request callbacks (were inline arrows in the JSX below).
+  const handleRequestDeleteCategory = useCallback((category: MenuCategory) => {
+    setDeleteTarget({ kind: 'category', category });
+  }, []);
+
+  const handleRequestDeleteItem = useCallback((item: MenuItem) => {
+    setDeleteTarget({ kind: 'item', item });
+  }, []);
 
   return (
     <Box sx={{ maxWidth: 1400, mx: 'auto', pt: 4 }}>
@@ -311,12 +320,8 @@ export function MenuBuilderPage() {
                       onEditItem={openEditDrawer}
                       onToggleAvailability={handleToggleAvailability}
                       onRenameCategory={handleRenameCategory}
-                      onRequestDeleteCategory={(c) =>
-                        setDeleteTarget({ kind: 'category', category: c })
-                      }
-                      onRequestDeleteItem={(item) =>
-                        setDeleteTarget({ kind: 'item', item })
-                      }
+                      onRequestDeleteCategory={handleRequestDeleteCategory}
+                      onRequestDeleteItem={handleRequestDeleteItem}
                     />
                   ))}
                   {provided.placeholder}

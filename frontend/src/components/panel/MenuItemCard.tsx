@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { DraggableProvided } from '@hello-pangea/dnd';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
@@ -26,8 +27,12 @@ interface MenuItemCardProps {
 /**
  * A single dish inside a category column: thumbnail, name, snippet, price and
  * a quick availability switch (does not open the edit drawer).
+ *
+ * `React.memo`-wrapped (see export): the builder board re-renders on every
+ * optimistic edit/drag; with stable handler props (memoized in the page) an
+ * unchanged dish skips re-rendering.
  */
-export function MenuItemCard({
+function MenuItemCardComponent({
   item,
   provided,
   isDragging,
@@ -208,3 +213,5 @@ export function MenuItemCard({
     </Paper>
   );
 }
+
+export const MenuItemCard = memo(MenuItemCardComponent);

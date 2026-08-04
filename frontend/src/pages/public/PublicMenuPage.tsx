@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Box from '@mui/material/Box';
@@ -120,10 +120,12 @@ export function PublicMenuPage() {
     if (restaurantName) document.title = `${restaurantName} — Menu`;
   }, [restaurantName]);
 
-  const openDetail = (item: PublicMenuItem) => {
+  // Stable identity so React.memo on PublicItemCard isn't defeated by a fresh
+  // callback prop every time the allergy filter / search state changes.
+  const openDetail = useCallback((item: PublicMenuItem) => {
     setSelectedItem(item);
     setDetailOpen(true);
-  };
+  }, []);
 
   // Gate the menu on the restaurant's subscription status (blocked/pending/active).
   const access = menu.data
