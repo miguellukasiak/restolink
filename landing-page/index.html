@@ -1,12 +1,16 @@
 <!doctype html>
-<html lang="pl">
+<!-- The baked-in copy is English, matching `fallbackLng`. It is what crawlers
+     and JavaScript-less visitors get; the detector swaps it before first paint
+     for everyone else. `?lang=pl` pins a language from a link. -->
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RestoLink — Menu, wymyślone na nowo</title>
+    <title data-i18n="meta.title">RestoLink — Menus, reinvented</title>
     <meta
       name="description"
-      content="Tekst zastępczy. RestoLink zamienia kod QR w szybkie, zawsze aktualne menu, które gość otwiera wprost w przeglądarce."
+      data-i18n-content="meta.description"
+      content="RestoLink turns a QR code into a fast, always up-to-date digital menu that guests open straight in their browser."
     />
     <meta name="theme-color" content="#0f8256" />
     <link
@@ -33,20 +37,22 @@
   <body class="font-sans antialiased">
     <a
       href="#main"
+      data-i18n="a11y.skip"
       class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-ink-900 focus:px-5 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-white"
     >
-      Przejdź do treści
+      Skip to content
     </a>
 
     <!-- ===================== Header ===================== -->
     <header class="sticky top-0 z-40 bg-white/70 backdrop-blur-xl">
       <div
-        class="mx-auto flex h-18 max-w-7xl items-center justify-between gap-4 px-5 sm:px-8"
+        class="mx-auto flex h-18 max-w-7xl items-center justify-between gap-3 px-5 sm:gap-4 sm:px-8"
       >
         <a
           href="#main"
-          class="flex items-center gap-2.5 rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600"
-          aria-label="RestoLink — strona główna"
+          data-i18n-aria-label="a11y.home"
+          aria-label="RestoLink — home"
+          class="flex shrink-0 items-center gap-2.5 rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600"
         >
           <span
             class="grid size-8 place-items-center rounded-full bg-brand-600 text-sm font-bold text-white"
@@ -54,44 +60,106 @@
           >
             R
           </span>
-          <span class="text-xl font-semibold tracking-tight text-ink-900">
+          <!-- Brand name: never translated. Hidden on the narrowest screens so
+               the switcher and the login pill both fit. -->
+          <span
+            class="hidden text-xl font-semibold tracking-tight text-ink-900 sm:inline"
+          >
             RestoLink
           </span>
         </a>
 
-        <nav aria-label="Główna" class="hidden items-center gap-9 md:flex">
+        <nav
+          data-i18n-aria-label="a11y.nav"
+          aria-label="Main"
+          class="hidden items-center gap-9 lg:flex"
+        >
           <a
-            href="#doswiadczenie"
+            href="#experience"
+            data-i18n="nav.guest"
             class="rounded-full text-sm font-medium text-ink-500 transition-colors hover:text-ink-900 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600"
           >
-            Dla gościa
+            For guests
           </a>
           <a
-            href="#funkcje"
+            href="#features"
+            data-i18n="nav.features"
             class="rounded-full text-sm font-medium text-ink-500 transition-colors hover:text-ink-900 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600"
           >
-            Funkcje
+            Features
           </a>
           <a
-            href="#cennik"
+            href="#pricing"
+            data-i18n="nav.pricing"
             class="rounded-full text-sm font-medium text-ink-500 transition-colors hover:text-ink-900 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600"
           >
-            Cennik
+            Pricing
           </a>
           <a
-            href="#kontakt"
+            href="#contact"
+            data-i18n="nav.contact"
             class="rounded-full text-sm font-medium text-ink-500 transition-colors hover:text-ink-900 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600"
           >
-            Kontakt
+            Contact
           </a>
         </nav>
 
-        <a
-          href="https://restolink.vercel.app/panel/"
-          class="shrink-0 rounded-full bg-ink-900 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-ink-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-900"
-        >
-          <span lang="en">Log in</span>
-        </a>
+        <div class="flex shrink-0 items-center gap-2 sm:gap-3">
+          <!-- A native <select>: keyboard handling, the mobile picker and
+               screen-reader semantics all come for free. Option labels stay in
+               their own language — a switcher that renames itself is useless to
+               whoever cannot read the current one. -->
+          <div class="relative">
+            <svg
+              class="pointer-events-none absolute top-1/2 left-3 hidden size-4 -translate-y-1/2 text-ink-400 sm:block"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <circle cx="12" cy="12" r="9" />
+              <path d="M3.5 9h17M3.5 15h17" />
+              <path d="M12 3c2.4 2.6 2.4 15.4 0 18M12 3c-2.4 2.6-2.4 15.4 0 18" />
+            </svg>
+            <select
+              data-language-switcher
+              data-i18n-aria-label="a11y.language"
+              aria-label="Change language"
+              class="cursor-pointer appearance-none rounded-full border border-ink-900/15 bg-white/70 py-2.5 pr-8 pl-3.5 text-sm font-medium text-ink-900 transition-colors hover:border-ink-900/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 sm:pl-9"
+            >
+              <option value="en" lang="en">English</option>
+              <option value="pl" lang="pl">Polski</option>
+              <option value="de" lang="de">Deutsch</option>
+              <option value="fr" lang="fr">Français</option>
+              <option value="es" lang="es">Español</option>
+            </select>
+            <svg
+              class="pointer-events-none absolute top-1/2 right-3 size-3.5 -translate-y-1/2 text-ink-400"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.25"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </div>
+
+          <a
+            href="https://restolink.vercel.app/panel/"
+            data-i18n="nav.login"
+            class="rounded-full bg-ink-900 px-5 py-2.5 text-sm font-semibold whitespace-nowrap text-white transition-colors hover:bg-ink-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-900"
+          >
+            Log in
+          </a>
+        </div>
       </div>
     </header>
 
@@ -106,31 +174,33 @@
               class="size-1.5 rounded-full bg-pop-green"
               aria-hidden="true"
             ></span>
-            Lorem ipsum dolor sit amet
+            <span data-i18n="hero.badge">No app, no download</span>
           </p>
 
           <h1
             id="hero-heading"
+            data-i18n="hero.title"
             class="reveal reveal-delay-1 mt-7 text-5xl font-extrabold tracking-tighter text-balance text-ink-900 sm:text-7xl lg:text-8xl"
           >
-            Menu, wymyślone na nowo.
+            Menus, reinvented.
           </h1>
 
           <p
+            data-i18n="hero.subtitle"
             class="reveal reveal-delay-2 mx-auto mt-7 max-w-2xl text-lg text-pretty text-ink-500 sm:text-xl"
           >
-            Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            Ut enim ad minim veniam, quis nostrud exercitation ullamco.
+            Your guest scans a code and the menu is already open. You change a
+            price and it is live everywhere in seconds.
           </p>
 
           <div
             class="reveal reveal-delay-3 mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row"
           >
             <a
-              href="#cennik"
+              href="#pricing"
               class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-600 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-brand-600/20 transition-all hover:bg-brand-700 hover:shadow-xl hover:shadow-brand-600/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 sm:w-auto"
             >
-              Zacznij bezpłatnie
+              <span data-i18n="hero.ctaPrimary">Start for free</span>
               <svg
                 class="size-4"
                 viewBox="0 0 24 24"
@@ -146,10 +216,11 @@
               </svg>
             </a>
             <a
-              href="#doswiadczenie"
+              href="#experience"
+              data-i18n="hero.ctaSecondary"
               class="inline-flex w-full items-center justify-center rounded-full border border-ink-900/15 px-8 py-4 text-base font-semibold text-ink-900 transition-colors hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 sm:w-auto"
             >
-              Zobacz, jak to działa
+              See how it works
             </a>
           </div>
         </div>
@@ -185,7 +256,6 @@
               </g>
             </svg>
 
-            <!-- Phone mockup placeholder -->
             <div
               class="relative mx-auto w-full max-w-[19rem] rounded-t-[2.5rem] bg-ink-900 p-3 pb-0 shadow-2xl shadow-ink-900/25"
             >
@@ -212,10 +282,15 @@
                     <circle cx="8.5" cy="8.5" r="1.5" />
                     <path d="m21 15-5-5L5 21" />
                   </svg>
-                  <p class="mt-3 text-sm font-medium text-ink-500">
-                    Miejsce na zrzut ekranu
+                  <p
+                    data-i18n="common.imagePlaceholder"
+                    class="mt-3 text-sm font-medium text-ink-500"
+                  >
+                    Image placeholder
                   </p>
-                  <p class="mt-1 text-xs text-ink-400">Menu gościa · 9:16</p>
+                  <p data-i18n="hero.phoneCaption" class="mt-1 text-xs text-ink-400">
+                    Guest menu · 9:16
+                  </p>
                 </div>
               </div>
             </div>
@@ -223,28 +298,33 @@
         </div>
       </section>
 
-      <!-- ============ Scroll-telling: doświadczenie gościa ============ -->
+      <!-- ============ Scroll-telling: guest experience ============ -->
       <section
-        id="doswiadczenie"
-        aria-labelledby="doswiadczenie-heading"
+        id="experience"
+        aria-labelledby="experience-heading"
         class="px-5 py-24 sm:px-8 sm:py-36"
       >
         <div class="mx-auto max-w-7xl">
           <div class="reveal mx-auto max-w-3xl text-center">
             <p
+              data-i18n="experience.eyebrow"
               class="text-sm font-semibold tracking-widest text-pop-green uppercase"
             >
-              Dla gościa
+              For guests
             </p>
             <h2
-              id="doswiadczenie-heading"
+              id="experience-heading"
+              data-i18n="experience.title"
               class="mt-4 text-4xl font-extrabold tracking-tighter text-balance text-ink-900 sm:text-6xl"
             >
-              Trzy sekundy od stolika do menu.
+              Three seconds from table to menu.
             </h2>
-            <p class="mx-auto mt-6 max-w-xl text-lg text-pretty text-ink-500">
-              Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit
-              aut fugit, sed quia consequuntur.
+            <p
+              data-i18n="experience.subtitle"
+              class="mx-auto mt-6 max-w-xl text-lg text-pretty text-ink-500"
+            >
+              No app store, no waiting for a printed card — just a browser your
+              guest already has open.
             </p>
           </div>
 
@@ -288,11 +368,17 @@
                           <path d="M9 20H5.5A1.5 1.5 0 0 1 4 18.5V15" />
                           <path d="M8 12h8" />
                         </svg>
-                        <p class="mt-4 text-sm font-semibold text-ink-900">
-                          Skanowanie kodu QR
+                        <p
+                          data-i18n="experience.panel.scan"
+                          class="mt-4 text-sm font-semibold text-ink-900"
+                        >
+                          Scanning the QR code
                         </p>
-                        <p class="mt-1 text-xs text-ink-500">
-                          Miejsce na zrzut ekranu
+                        <p
+                          data-i18n="common.imagePlaceholder"
+                          class="mt-1 text-xs text-ink-500"
+                        >
+                          Image placeholder
                         </p>
                       </div>
                     </div>
@@ -317,11 +403,17 @@
                           <path d="M7 12h10" />
                           <path d="M10 18h4" />
                         </svg>
-                        <p class="mt-4 text-sm font-semibold text-ink-900">
-                          Filtrowanie i alergeny
+                        <p
+                          data-i18n="experience.panel.filter"
+                          class="mt-4 text-sm font-semibold text-ink-900"
+                        >
+                          Filters and allergens
                         </p>
-                        <p class="mt-1 text-xs text-ink-500">
-                          Miejsce na zrzut ekranu
+                        <p
+                          data-i18n="common.imagePlaceholder"
+                          class="mt-1 text-xs text-ink-500"
+                        >
+                          Image placeholder
                         </p>
                       </div>
                     </div>
@@ -346,11 +438,17 @@
                           <path d="M2.5 10h19" />
                           <path d="M6 14h4" />
                         </svg>
-                        <p class="mt-4 text-sm font-semibold text-ink-900">
-                          Zamówienie i płatność
+                        <p
+                          data-i18n="experience.panel.order"
+                          class="mt-4 text-sm font-semibold text-ink-900"
+                        >
+                          Order and payment
                         </p>
-                        <p class="mt-1 text-xs text-ink-500">
-                          Miejsce na zrzut ekranu
+                        <p
+                          data-i18n="common.imagePlaceholder"
+                          class="mt-1 text-xs text-ink-500"
+                        >
+                          Image placeholder
                         </p>
                       </div>
                     </div>
@@ -372,13 +470,17 @@
                   1
                 </span>
                 <h3
+                  data-i18n="experience.step1.title"
                   class="mt-6 text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl"
                 >
-                  Skanuje kod QR
+                  Scans the QR code
                 </h3>
-                <p class="mt-4 max-w-md text-lg text-pretty text-ink-500">
-                  At vero eos et accusamus et iusto odio dignissimos ducimus
-                  qui blanditiis praesentium voluptatum deleniti atque.
+                <p
+                  data-i18n="experience.step1.body"
+                  class="mt-4 max-w-md text-lg text-pretty text-ink-500"
+                >
+                  The camera is enough. The menu opens in the browser, with no
+                  app to install and nothing to sign up for.
                 </p>
               </li>
 
@@ -393,13 +495,18 @@
                   2
                 </span>
                 <h3
+                  data-i18n="experience.step2.title"
                   class="mt-6 text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl"
                 >
-                  Przegląda i filtruje
+                  Browses and filters
                 </h3>
-                <p class="mt-4 max-w-md text-lg text-pretty text-ink-500">
-                  Et harum quidem rerum facilis est et expedita distinctio, nam
-                  libero tempore cum soluta nobis eligendi.
+                <p
+                  data-i18n="experience.step2.body"
+                  class="mt-4 max-w-md text-lg text-pretty text-ink-500"
+                >
+                  Photos, descriptions and allergens in one place. Whoever
+                  avoids gluten hides everything containing it with a single
+                  tap.
                 </p>
               </li>
 
@@ -414,13 +521,17 @@
                   3
                 </span>
                 <h3
+                  data-i18n="experience.step3.title"
                   class="mt-6 text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl"
                 >
-                  Zamawia i płaci
+                  Orders and pays
                 </h3>
-                <p class="mt-4 max-w-md text-lg text-pretty text-ink-500">
-                  Temporibus autem quibusdam et aut officiis debitis aut rerum
-                  necessitatibus saepe eveniet ut et voluptates.
+                <p
+                  data-i18n="experience.step3.body"
+                  class="mt-4 max-w-md text-lg text-pretty text-ink-500"
+                >
+                  The order lands straight on the kitchen console, and the bill
+                  is settled without waiting for anyone to bring the terminal.
                 </p>
               </li>
             </ol>
@@ -428,24 +539,26 @@
         </div>
       </section>
 
-      <!-- ============ Zig-zag: panel i konsola ============ -->
+      <!-- ============ Zig-zag: panel and console ============ -->
       <section
-        id="funkcje"
-        aria-labelledby="funkcje-heading"
+        id="features"
+        aria-labelledby="features-heading"
         class="px-5 pb-24 sm:px-8 sm:pb-36"
       >
         <div class="mx-auto max-w-7xl">
           <div class="reveal mx-auto max-w-3xl text-center">
             <p
+              data-i18n="features.eyebrow"
               class="text-sm font-semibold tracking-widest text-pop-blue uppercase"
             >
-              Dla restauracji
+              For restaurants
             </p>
             <h2
-              id="funkcje-heading"
+              id="features-heading"
+              data-i18n="features.title"
               class="mt-4 text-4xl font-extrabold tracking-tighter text-balance text-ink-900 sm:text-6xl"
             >
-              Wszystko pod kontrolą.
+              Everything under control.
             </h2>
           </div>
 
@@ -474,14 +587,17 @@
                   </svg>
                 </span>
                 <h3
+                  data-i18n="features.b1.title"
                   class="mt-7 text-3xl font-bold tracking-tighter text-balance text-ink-900 sm:text-5xl"
                 >
-                  Pełna kontrola
+                  Full control
                 </h3>
-                <p class="mt-5 max-w-lg text-lg text-pretty text-ink-500">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                  Przeciągnij i upuść, żeby zmienić kolejność — dostępność
-                  dania przełączasz jednym kliknięciem.
+                <p
+                  data-i18n="features.b1.body"
+                  class="mt-5 max-w-lg text-lg text-pretty text-ink-500"
+                >
+                  Drag and drop to reorder, toggle a dish's availability with
+                  one click. No developer, no waiting.
                 </p>
                 <ul role="list" class="mt-7 space-y-3">
                   <li class="flex items-center gap-3 text-ink-700">
@@ -498,7 +614,9 @@
                     >
                       <path d="m5 13 4 4L19 7" />
                     </svg>
-                    Edytor w stylu Linktree
+                    <span data-i18n="features.b1.point1">
+                      Linktree-style editor
+                    </span>
                   </li>
                   <li class="flex items-center gap-3 text-ink-700">
                     <svg
@@ -514,7 +632,9 @@
                     >
                       <path d="m5 13 4 4L19 7" />
                     </svg>
-                    Sed do eiusmod tempor incididunt
+                    <span data-i18n="features.b1.point2">
+                      Sold out in one tap
+                    </span>
                   </li>
                 </ul>
               </div>
@@ -541,10 +661,18 @@
                       <circle cx="8.5" cy="8.5" r="1.5" />
                       <path d="m21 15-5-5L5 21" />
                     </svg>
-                    <p class="mt-3 text-sm font-medium text-ink-700">
-                      Miejsce na zrzut ekranu
+                    <p
+                      data-i18n="common.imagePlaceholder"
+                      class="mt-3 text-sm font-medium text-ink-700"
+                    >
+                      Image placeholder
                     </p>
-                    <p class="mt-1 text-xs text-ink-500">Kreator menu · 4:3</p>
+                    <p
+                      data-i18n="features.b1.caption"
+                      class="mt-1 text-xs text-ink-500"
+                    >
+                      Menu builder · 4:3
+                    </p>
                   </div>
                 </div>
               </div>
@@ -572,14 +700,17 @@
                   </svg>
                 </span>
                 <h3
+                  data-i18n="features.b2.title"
                   class="mt-7 text-3xl font-bold tracking-tighter text-balance text-ink-900 sm:text-5xl"
                 >
-                  Konsola Zamówień
+                  Orders Console
                 </h3>
-                <p class="mt-5 max-w-lg text-lg text-pretty text-ink-500">
-                  Ut enim ad minim veniam, quis nostrud exercitation ullamco.
-                  Głośne powiadomienie na kuchni, status zamówienia widoczny
-                  dla całej zmiany.
+                <p
+                  data-i18n="features.b2.body"
+                  class="mt-5 max-w-lg text-lg text-pretty text-ink-500"
+                >
+                  A loud alert in the kitchen and an order status the whole
+                  shift can see at a glance.
                 </p>
                 <ul role="list" class="mt-7 space-y-3">
                   <li class="flex items-center gap-3 text-ink-700">
@@ -596,7 +727,9 @@
                     >
                       <path d="m5 13 4 4L19 7" />
                     </svg>
-                    Donośne alerty dźwiękowe
+                    <span data-i18n="features.b2.point1">
+                      Loud audio alerts
+                    </span>
                   </li>
                   <li class="flex items-center gap-3 text-ink-700">
                     <svg
@@ -612,7 +745,9 @@
                     >
                       <path d="m5 13 4 4L19 7" />
                     </svg>
-                    Quis nostrud exercitation ullamco
+                    <span data-i18n="features.b2.point2">
+                      Kitchen shift view
+                    </span>
                   </li>
                 </ul>
               </div>
@@ -639,11 +774,17 @@
                       <circle cx="8.5" cy="8.5" r="1.5" />
                       <path d="m21 15-5-5L5 21" />
                     </svg>
-                    <p class="mt-3 text-sm font-medium text-ink-700">
-                      Miejsce na zrzut ekranu
+                    <p
+                      data-i18n="common.imagePlaceholder"
+                      class="mt-3 text-sm font-medium text-ink-700"
+                    >
+                      Image placeholder
                     </p>
-                    <p class="mt-1 text-xs text-ink-500">
-                      Konsola zamówień · 4:3
+                    <p
+                      data-i18n="features.b2.caption"
+                      class="mt-1 text-xs text-ink-500"
+                    >
+                      Orders console · 4:3
                     </p>
                   </div>
                 </div>
@@ -672,14 +813,17 @@
                   </svg>
                 </span>
                 <h3
+                  data-i18n="features.b3.title"
                   class="mt-7 text-3xl font-bold tracking-tighter text-balance text-ink-900 sm:text-5xl"
                 >
-                  Google Maps &amp; Opinie
+                  Google Maps &amp; reviews
                 </h3>
-                <p class="mt-5 max-w-lg text-lg text-pretty text-ink-500">
-                  Duis aute irure dolor in reprehenderit in voluptate velit.
-                  Zadowolony gość trafia prosto na Twoją wizytówkę, zanim
-                  wstanie od stolika.
+                <p
+                  data-i18n="features.b3.body"
+                  class="mt-5 max-w-lg text-lg text-pretty text-ink-500"
+                >
+                  A happy guest lands on your listing before they get up from
+                  the table.
                 </p>
                 <ul role="list" class="mt-7 space-y-3">
                   <li class="flex items-center gap-3 text-ink-700">
@@ -696,7 +840,9 @@
                     >
                       <path d="m5 13 4 4L19 7" />
                     </svg>
-                    Kierowanie ruchu na opinie
+                    <span data-i18n="features.b3.point1">
+                      Traffic routed to reviews
+                    </span>
                   </li>
                   <li class="flex items-center gap-3 text-ink-700">
                     <svg
@@ -712,7 +858,9 @@
                     >
                       <path d="m5 13 4 4L19 7" />
                     </svg>
-                    Excepteur sint occaecat cupidatat
+                    <span data-i18n="features.b3.point2">
+                      Listing always current
+                    </span>
                   </li>
                 </ul>
               </div>
@@ -739,11 +887,17 @@
                       <circle cx="8.5" cy="8.5" r="1.5" />
                       <path d="m21 15-5-5L5 21" />
                     </svg>
-                    <p class="mt-3 text-sm font-medium text-ink-700">
-                      Miejsce na zrzut ekranu
+                    <p
+                      data-i18n="common.imagePlaceholder"
+                      class="mt-3 text-sm font-medium text-ink-700"
+                    >
+                      Image placeholder
                     </p>
-                    <p class="mt-1 text-xs text-ink-500">
-                      Wizytówka i opinie · 4:3
+                    <p
+                      data-i18n="features.b3.caption"
+                      class="mt-1 text-xs text-ink-500"
+                    >
+                      Listing and reviews · 4:3
                     </p>
                   </div>
                 </div>
@@ -774,14 +928,17 @@
                   </svg>
                 </span>
                 <h3
+                  data-i18n="features.b4.title"
                   class="mt-7 text-3xl font-bold tracking-tighter text-balance text-ink-900 sm:text-5xl"
                 >
-                  Dostępność (WCAG)
+                  Accessibility (WCAG)
                 </h3>
-                <p class="mt-5 max-w-lg text-lg text-pretty text-ink-500">
-                  Excepteur sint occaecat cupidatat non proident. Czytniki
-                  ekranu, kontrast liczony z luminancji tła i menu w dwóch
-                  językach.
+                <p
+                  data-i18n="features.b4.body"
+                  class="mt-5 max-w-lg text-lg text-pretty text-ink-500"
+                >
+                  Screen readers, contrast computed from background luminance,
+                  and a menu in two languages.
                 </p>
                 <ul role="list" class="mt-7 space-y-3">
                   <li class="flex items-center gap-3 text-ink-700">
@@ -798,7 +955,9 @@
                     >
                       <path d="m5 13 4 4L19 7" />
                     </svg>
-                    Obsługa czytników ekranu
+                    <span data-i18n="features.b4.point1">
+                      Screen reader support
+                    </span>
                   </li>
                   <li class="flex items-center gap-3 text-ink-700">
                     <svg
@@ -814,7 +973,9 @@
                     >
                       <path d="m5 13 4 4L19 7" />
                     </svg>
-                    Menu dwujęzyczne (i18n)
+                    <span data-i18n="features.b4.point2">
+                      Bilingual menu (i18n)
+                    </span>
                   </li>
                 </ul>
               </div>
@@ -841,11 +1002,17 @@
                       <circle cx="8.5" cy="8.5" r="1.5" />
                       <path d="m21 15-5-5L5 21" />
                     </svg>
-                    <p class="mt-3 text-sm font-medium text-ink-700">
-                      Miejsce na zrzut ekranu
+                    <p
+                      data-i18n="common.imagePlaceholder"
+                      class="mt-3 text-sm font-medium text-ink-700"
+                    >
+                      Image placeholder
                     </p>
-                    <p class="mt-1 text-xs text-ink-500">
-                      Ustawienia dostępności · 4:3
+                    <p
+                      data-i18n="features.b4.caption"
+                      class="mt-1 text-xs text-ink-500"
+                    >
+                      Accessibility settings · 4:3
                     </p>
                   </div>
                 </div>
@@ -855,28 +1022,32 @@
         </div>
       </section>
 
-      <!-- ===================== Cennik ===================== -->
+      <!-- ===================== Pricing ===================== -->
       <section
-        id="cennik"
-        aria-labelledby="cennik-heading"
+        id="pricing"
+        aria-labelledby="pricing-heading"
         class="px-5 py-24 sm:px-8 sm:py-36"
       >
         <div class="mx-auto max-w-5xl">
           <div class="reveal mx-auto max-w-3xl text-center">
             <p
+              data-i18n="pricing.eyebrow"
               class="text-sm font-semibold tracking-widest text-pop-green uppercase"
             >
-              Cennik
+              Pricing
             </p>
             <h2
-              id="cennik-heading"
+              id="pricing-heading"
+              data-i18n="pricing.title"
               class="mt-4 text-4xl font-extrabold tracking-tighter text-balance text-ink-900 sm:text-6xl"
             >
-              Prosto i przewidywalnie.
+              Simple and predictable.
             </h2>
-            <p class="mx-auto mt-6 max-w-xl text-lg text-pretty text-ink-500">
-              Quis autem vel eum iure reprehenderit qui in ea voluptate velit
-              esse quam nihil molestiae.
+            <p
+              data-i18n="pricing.subtitle"
+              class="mx-auto mt-6 max-w-xl text-lg text-pretty text-ink-500"
+            >
+              One rate, no commission on orders and no setup fee.
             </p>
           </div>
 
@@ -885,9 +1056,14 @@
             <div
               class="reveal flex flex-col rounded-[2rem] border border-ink-900/10 bg-white p-8 sm:rounded-[2.5rem] sm:p-10"
             >
-              <h3 class="text-xl font-semibold text-ink-900">Start</h3>
-              <p class="mt-2 text-ink-500">
-                Lorem ipsum dolor sit amet consectetur.
+              <h3
+                data-i18n="pricing.start.name"
+                class="text-xl font-semibold text-ink-900"
+              >
+                Start
+              </h3>
+              <p data-i18n="pricing.start.desc" class="mt-2 text-ink-500">
+                Everything a single venue needs to get going.
               </p>
               <p class="mt-8 flex items-baseline gap-2">
                 <span
@@ -895,8 +1071,11 @@
                 >
                   00
                 </span>
-                <span class="text-base font-medium text-ink-400">
-                  zł / miesiąc
+                <span
+                  data-i18n="pricing.period"
+                  class="text-base font-medium text-ink-400"
+                >
+                  PLN / month
                 </span>
               </p>
 
@@ -915,7 +1094,9 @@
                   >
                     <path d="m5 13 4 4L19 7" />
                   </svg>
-                  Lorem ipsum dolor sit amet
+                  <span data-i18n="pricing.start.point1">
+                    Digital menu and QR codes
+                  </span>
                 </li>
                 <li class="flex gap-3">
                   <svg
@@ -931,7 +1112,9 @@
                   >
                     <path d="m5 13 4 4L19 7" />
                   </svg>
-                  Consectetur adipiscing elit
+                  <span data-i18n="pricing.start.point2">
+                    Unlimited dishes and photos
+                  </span>
                 </li>
                 <li class="flex gap-3">
                   <svg
@@ -947,15 +1130,18 @@
                   >
                     <path d="m5 13 4 4L19 7" />
                   </svg>
-                  Sed do eiusmod tempor
+                  <span data-i18n="pricing.start.point3">
+                    Your own menu styling
+                  </span>
                 </li>
               </ul>
 
               <a
                 href="https://restolink.vercel.app/panel/"
+                data-i18n="pricing.start.cta"
                 class="mt-10 inline-flex items-center justify-center rounded-full border border-ink-900/15 px-7 py-3.5 text-base font-semibold text-ink-900 transition-colors hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
               >
-                Wybieram Start
+                Choose Start
               </a>
             </div>
 
@@ -967,15 +1153,21 @@
                 class="relative flex h-full flex-col rounded-[calc(2rem-2px)] bg-white p-8 sm:rounded-[calc(2.5rem-2px)] sm:p-10"
               >
                 <div class="flex items-center justify-between gap-4">
-                  <h3 class="text-xl font-semibold text-ink-900">Pro</h3>
+                  <h3
+                    data-i18n="pricing.pro.name"
+                    class="text-xl font-semibold text-ink-900"
+                  >
+                    Pro
+                  </h3>
                   <p
+                    data-i18n="pricing.pro.badge"
                     class="rounded-full bg-pastel-green px-3 py-1 text-xs font-semibold tracking-wide text-pop-green uppercase"
                   >
-                    Najczęściej wybierany
+                    Most popular
                   </p>
                 </div>
-                <p class="mt-2 text-ink-500">
-                  Excepteur sint occaecat cupidatat non proident.
+                <p data-i18n="pricing.pro.desc" class="mt-2 text-ink-500">
+                  For venues that also take orders through the menu.
                 </p>
                 <p class="mt-8 flex items-baseline gap-2">
                   <span
@@ -983,8 +1175,11 @@
                   >
                     00
                   </span>
-                  <span class="text-base font-medium text-ink-400">
-                    zł / miesiąc
+                  <span
+                    data-i18n="pricing.period"
+                    class="text-base font-medium text-ink-400"
+                  >
+                    PLN / month
                   </span>
                 </p>
 
@@ -1003,7 +1198,9 @@
                     >
                       <path d="m5 13 4 4L19 7" />
                     </svg>
-                    Wszystko z pakietu Start
+                    <span data-i18n="pricing.pro.point1">
+                      Everything in Start
+                    </span>
                   </li>
                   <li class="flex gap-3">
                     <svg
@@ -1019,7 +1216,7 @@
                     >
                       <path d="m5 13 4 4L19 7" />
                     </svg>
-                    Konsola Zamówień
+                    <span data-i18n="pricing.pro.point2">Orders Console</span>
                   </li>
                   <li class="flex gap-3">
                     <svg
@@ -1035,7 +1232,9 @@
                     >
                       <path d="m5 13 4 4L19 7" />
                     </svg>
-                    Ut labore et dolore magna
+                    <span data-i18n="pricing.pro.point3">
+                      Google Maps and reviews
+                    </span>
                   </li>
                   <li class="flex gap-3">
                     <svg
@@ -1051,30 +1250,36 @@
                     >
                       <path d="m5 13 4 4L19 7" />
                     </svg>
-                    Quis nostrud exercitation
+                    <span data-i18n="pricing.pro.point4">
+                      Priority support
+                    </span>
                   </li>
                 </ul>
 
                 <a
                   href="https://restolink.vercel.app/panel/"
+                  data-i18n="pricing.pro.cta"
                   class="mt-10 inline-flex items-center justify-center rounded-full bg-brand-600 px-7 py-3.5 text-base font-semibold text-white shadow-lg shadow-brand-600/20 transition-all hover:bg-brand-700 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
                 >
-                  Wybieram Pro
+                  Choose Pro
                 </a>
               </div>
             </div>
           </div>
 
-          <p class="reveal mt-8 text-center text-sm text-ink-400">
-            Ceny zastępcze — nie są ostateczne.
+          <p
+            data-i18n="pricing.note"
+            class="reveal mt-8 text-center text-sm text-ink-400"
+          >
+            Placeholder pricing — not final.
           </p>
         </div>
       </section>
 
-      <!-- ===================== Kontakt ===================== -->
+      <!-- ===================== Contact ===================== -->
       <section
-        id="kontakt"
-        aria-labelledby="kontakt-heading"
+        id="contact"
+        aria-labelledby="contact-heading"
         class="px-5 pb-24 sm:px-8 sm:pb-36"
       >
         <div class="mx-auto max-w-5xl">
@@ -1084,20 +1289,24 @@
             <div class="mx-auto max-w-xl">
               <div class="text-center">
                 <h2
-                  id="kontakt-heading"
+                  id="contact-heading"
+                  data-i18n="contact.title"
                   class="text-4xl font-extrabold tracking-tighter text-balance text-ink-900 sm:text-5xl"
                 >
-                  Porozmawiajmy.
+                  Let's talk.
                 </h2>
-                <p class="mt-5 text-lg text-pretty text-ink-500">
-                  Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut
-                  odit aut fugit.
+                <p
+                  data-i18n="contact.subtitle"
+                  class="mt-5 text-lg text-pretty text-ink-500"
+                >
+                  Tell us about your venue and we will show you what the menu
+                  would look like.
                 </p>
               </div>
 
-              <!-- TODO: podłączyć `action` do endpointu (formularz jeszcze
-                   nigdzie nie wysyła danych). Walidacja jest natywna: `required`
-                   i `type="email"` działają bez JavaScriptu. -->
+              <!-- TODO: point `action` at a real endpoint — this form does not
+                   submit anywhere yet. Validation is native: `required` and
+                   `type="email"` work without JavaScript. -->
               <form action="#" method="post" class="mt-10 space-y-5">
                 <div class="relative">
                   <input
@@ -1111,9 +1320,10 @@
                   />
                   <label
                     for="cf-name"
+                    data-i18n="contact.name"
                     class="pointer-events-none absolute top-4.5 left-5 text-base text-ink-400 transition-all peer-focus:top-2 peer-focus:text-xs peer-focus:text-brand-700 peer-[:not(:placeholder-shown)]:top-2 peer-[:not(:placeholder-shown)]:text-xs"
                   >
-                    Imię i nazwisko
+                    Full name
                   </label>
                 </div>
 
@@ -1129,9 +1339,10 @@
                   />
                   <label
                     for="cf-email"
+                    data-i18n="contact.email"
                     class="pointer-events-none absolute top-4.5 left-5 text-base text-ink-400 transition-all peer-focus:top-2 peer-focus:text-xs peer-focus:text-brand-700 peer-[:not(:placeholder-shown)]:top-2 peer-[:not(:placeholder-shown)]:text-xs"
                   >
-                    Adres e-mail
+                    Email address
                   </label>
                 </div>
 
@@ -1146,9 +1357,10 @@
                   />
                   <label
                     for="cf-restaurant"
+                    data-i18n="contact.restaurant"
                     class="pointer-events-none absolute top-4.5 left-5 text-base text-ink-400 transition-all peer-focus:top-2 peer-focus:text-xs peer-focus:text-brand-700 peer-[:not(:placeholder-shown)]:top-2 peer-[:not(:placeholder-shown)]:text-xs"
                   >
-                    Nazwa lokalu (opcjonalnie)
+                    Venue name (optional)
                   </label>
                 </div>
 
@@ -1163,21 +1375,26 @@
                   ></textarea>
                   <label
                     for="cf-message"
+                    data-i18n="contact.message"
                     class="pointer-events-none absolute top-4.5 left-5 text-base text-ink-400 transition-all peer-focus:top-2 peer-focus:text-xs peer-focus:text-brand-700 peer-[:not(:placeholder-shown)]:top-2 peer-[:not(:placeholder-shown)]:text-xs"
                   >
-                    Wiadomość
+                    Message
                   </label>
                 </div>
 
                 <button
                   type="submit"
+                  data-i18n="contact.submit"
                   class="inline-flex w-full items-center justify-center rounded-full bg-ink-900 px-8 py-4 text-base font-semibold text-white transition-colors hover:bg-ink-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-900"
                 >
-                  Wyślij wiadomość
+                  Send message
                 </button>
 
-                <p class="text-center text-sm text-ink-500">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                <p
+                  data-i18n="contact.note"
+                  class="text-center text-sm text-ink-500"
+                >
+                  We usually reply the same business day.
                 </p>
               </form>
             </div>
@@ -1202,45 +1419,58 @@
                 RestoLink
               </span>
             </div>
-            <p class="mt-4 text-sm text-white/60">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt.
+            <p data-i18n="footer.tagline" class="mt-4 text-sm text-white/60">
+              Digital menus for restaurants, cafés and bars. A QR code instead
+              of a printed card.
             </p>
           </div>
 
           <div class="grid grid-cols-2 gap-10 sm:gap-16">
             <div>
-              <h2 class="text-sm font-semibold text-white">Informacje</h2>
+              <h2
+                data-i18n="footer.infoHeading"
+                class="text-sm font-semibold text-white"
+              >
+                Information
+              </h2>
               <ul role="list" class="mt-4 space-y-3 text-sm">
                 <li>
                   <a
                     href="#"
+                    data-i18n="footer.terms"
                     class="rounded text-white/60 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-200"
                   >
-                    Regulamin
+                    Terms of service
                   </a>
                 </li>
                 <li>
                   <a
                     href="#"
+                    data-i18n="footer.privacy"
                     class="rounded text-white/60 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-200"
                   >
-                    Polityka prywatności
+                    Privacy policy
                   </a>
                 </li>
                 <li>
                   <a
                     href="#"
+                    data-i18n="footer.cookies"
                     class="rounded text-white/60 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-200"
                   >
-                    Polityka cookies
+                    Cookie policy
                   </a>
                 </li>
               </ul>
             </div>
 
             <div>
-              <h2 class="text-sm font-semibold text-white">Kontakt</h2>
+              <h2
+                data-i18n="footer.contactHeading"
+                class="text-sm font-semibold text-white"
+              >
+                Contact
+              </h2>
               <ul role="list" class="mt-4 space-y-3 text-sm">
                 <li>
                   <a
@@ -1258,16 +1488,17 @@
                     +48 000 000 000
                   </a>
                 </li>
-                <li class="text-white/60">Lorem ipsum 1, 00-000 Warszawa</li>
+                <li data-i18n="footer.address" class="text-white/60">
+                  Lorem ipsum 1, 00-000 Warsaw
+                </li>
               </ul>
             </div>
           </div>
         </div>
 
         <div class="mt-12 border-t border-white/10 pt-8 text-sm text-white/50">
-          <p>
-            &copy; <span data-current-year>2026</span> RestoLink. Wszelkie
-            prawa zastrzeżone.
+          <p data-i18n="footer.copyright">
+            © 2026 RestoLink. All rights reserved.
           </p>
         </div>
       </div>

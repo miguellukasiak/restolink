@@ -1,0 +1,129 @@
+{
+  "meta": {
+    "title": "RestoLink — Menu, wymyślone na nowo",
+    "description": "RestoLink zamienia kod QR w szybkie, zawsze aktualne menu, które gość otwiera wprost w przeglądarce."
+  },
+  "a11y": {
+    "skip": "Przejdź do treści",
+    "home": "RestoLink — strona główna",
+    "nav": "Główna",
+    "language": "Zmień język"
+  },
+  "nav": {
+    "guest": "Dla gościa",
+    "features": "Funkcje",
+    "pricing": "Cennik",
+    "contact": "Kontakt",
+    "login": "Zaloguj się"
+  },
+  "common": {
+    "imagePlaceholder": "Miejsce na zrzut ekranu"
+  },
+  "hero": {
+    "badge": "Bez aplikacji, bez pobierania",
+    "title": "Menu, wymyślone na nowo.",
+    "subtitle": "Gość skanuje kod i menu już jest otwarte. Ty zmieniasz cenę, a ona jest aktualna wszędzie w kilka sekund.",
+    "ctaPrimary": "Zacznij bezpłatnie",
+    "ctaSecondary": "Zobacz, jak to działa",
+    "phoneCaption": "Menu gościa · 9:16"
+  },
+  "experience": {
+    "eyebrow": "Dla gościa",
+    "title": "Trzy sekundy od stolika do menu.",
+    "subtitle": "Żadnego sklepu z aplikacjami, żadnego czekania na kartę — tylko przeglądarka, którą gość i tak ma otwartą.",
+    "panel": {
+      "scan": "Skanowanie kodu QR",
+      "filter": "Filtrowanie i alergeny",
+      "order": "Zamówienie i płatność"
+    },
+    "step1": {
+      "title": "Skanuje kod QR",
+      "body": "Wystarczy aparat. Menu otwiera się w przeglądarce — nic nie trzeba instalować ani zakładać konta."
+    },
+    "step2": {
+      "title": "Przegląda i filtruje",
+      "body": "Zdjęcia, opisy i alergeny w jednym miejscu. Kto unika glutenu, jednym dotknięciem ukrywa wszystko, co go zawiera."
+    },
+    "step3": {
+      "title": "Zamawia i płaci",
+      "body": "Zamówienie trafia prosto na konsolę w kuchni, a rachunek reguluje się bez czekania na terminal."
+    }
+  },
+  "features": {
+    "eyebrow": "Dla restauracji",
+    "title": "Wszystko pod kontrolą.",
+    "b1": {
+      "title": "Pełna kontrola",
+      "body": "Przeciągnij i upuść, żeby zmienić kolejność, a dostępność dania przełącz jednym kliknięciem. Bez programisty i bez czekania.",
+      "point1": "Edytor w stylu Linktree",
+      "point2": "Wyprzedane jednym dotknięciem",
+      "caption": "Kreator menu · 4:3"
+    },
+    "b2": {
+      "title": "Konsola Zamówień",
+      "body": "Donośny alert na kuchni i status zamówienia, który cała zmiana widzi jednym spojrzeniem.",
+      "point1": "Donośne alerty dźwiękowe",
+      "point2": "Widok dla zmiany w kuchni",
+      "caption": "Konsola zamówień · 4:3"
+    },
+    "b3": {
+      "title": "Google Maps i opinie",
+      "body": "Zadowolony gość trafia na Twoją wizytówkę, zanim wstanie od stolika.",
+      "point1": "Kierowanie ruchu na opinie",
+      "point2": "Wizytówka zawsze aktualna",
+      "caption": "Wizytówka i opinie · 4:3"
+    },
+    "b4": {
+      "title": "Dostępność (WCAG)",
+      "body": "Czytniki ekranu, kontrast liczony z luminancji tła i menu w dwóch językach.",
+      "point1": "Obsługa czytników ekranu",
+      "point2": "Menu dwujęzyczne (i18n)",
+      "caption": "Ustawienia dostępności · 4:3"
+    }
+  },
+  "pricing": {
+    "eyebrow": "Cennik",
+    "title": "Prosto i przewidywalnie.",
+    "subtitle": "Jedna stawka, bez prowizji od zamówień i bez opłaty wdrożeniowej.",
+    "period": "zł / miesiąc",
+    "note": "Ceny zastępcze — nie są ostateczne.",
+    "start": {
+      "name": "Start",
+      "desc": "Wszystko, czego potrzebuje jeden lokal na początek.",
+      "cta": "Wybieram Start",
+      "point1": "Cyfrowe menu i kody QR",
+      "point2": "Bez limitu dań i zdjęć",
+      "point3": "Własna stylistyka menu"
+    },
+    "pro": {
+      "name": "Pro",
+      "badge": "Najczęściej wybierany",
+      "desc": "Dla lokali, które przyjmują też zamówienia przez menu.",
+      "cta": "Wybieram Pro",
+      "point1": "Wszystko z pakietu Start",
+      "point2": "Konsola Zamówień",
+      "point3": "Google Maps i opinie",
+      "point4": "Wsparcie priorytetowe"
+    }
+  },
+  "contact": {
+    "title": "Porozmawiajmy.",
+    "subtitle": "Napisz kilka słów o swoim lokalu, a pokażemy, jak wyglądałoby jego menu.",
+    "name": "Imię i nazwisko",
+    "email": "Adres e-mail",
+    "restaurant": "Nazwa lokalu (opcjonalnie)",
+    "message": "Wiadomość",
+    "submit": "Wyślij wiadomość",
+    "note": "Zwykle odpowiadamy tego samego dnia roboczego."
+  },
+  "footer": {
+    "tagline": "Cyfrowe menu dla restauracji, kawiarni i barów. Kod QR zamiast drukowanej karty.",
+    "infoHeading": "Informacje",
+    "terms": "Regulamin",
+    "privacy": "Polityka prywatności",
+    "cookies": "Polityka cookies",
+    "contactHeading": "Kontakt",
+    "address": "Lorem ipsum 1, 00-000 Warszawa",
+    "copyright": "© {{year}} RestoLink. Wszelkie prawa zastrzeżone."
+  }
+}

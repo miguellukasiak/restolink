@@ -1,0 +1,129 @@
+{
+  "meta": {
+    "title": "RestoLink — La carte, réinventée",
+    "description": "RestoLink transforme un QR code en une carte numérique rapide et toujours à jour, que vos clients ouvrent directement dans leur navigateur."
+  },
+  "a11y": {
+    "skip": "Aller au contenu",
+    "home": "RestoLink — accueil",
+    "nav": "Principale",
+    "language": "Changer de langue"
+  },
+  "nav": {
+    "guest": "Pour les clients",
+    "features": "Fonctionnalités",
+    "pricing": "Tarifs",
+    "contact": "Contact",
+    "login": "Connexion"
+  },
+  "common": {
+    "imagePlaceholder": "Emplacement pour capture d'écran"
+  },
+  "hero": {
+    "badge": "Sans application, sans téléchargement",
+    "title": "La carte, réinventée.",
+    "subtitle": "Votre client scanne le code et la carte est déjà ouverte. Vous changez un prix et il est à jour partout en quelques secondes.",
+    "ctaPrimary": "Commencer gratuitement",
+    "ctaSecondary": "Voir comment ça marche",
+    "phoneCaption": "Carte client · 9:16"
+  },
+  "experience": {
+    "eyebrow": "Pour les clients",
+    "title": "Trois secondes entre la table et la carte.",
+    "subtitle": "Aucun magasin d'applications, aucune attente d'une carte imprimée — juste le navigateur que votre client a déjà ouvert.",
+    "panel": {
+      "scan": "Scan du QR code",
+      "filter": "Filtres et allergènes",
+      "order": "Commande et paiement"
+    },
+    "step1": {
+      "title": "Scanne le QR code",
+      "body": "L'appareil photo suffit. La carte s'ouvre dans le navigateur, sans rien installer ni créer de compte."
+    },
+    "step2": {
+      "title": "Parcourt et filtre",
+      "body": "Photos, descriptions et allergènes au même endroit. Qui évite le gluten masque tout ce qui en contient d'une seule pression."
+    },
+    "step3": {
+      "title": "Commande et paie",
+      "body": "La commande arrive directement sur la console de cuisine, et l'addition se règle sans attendre le terminal."
+    }
+  },
+  "features": {
+    "eyebrow": "Pour les restaurants",
+    "title": "Tout sous contrôle.",
+    "b1": {
+      "title": "Contrôle total",
+      "body": "Glissez-déposez pour réordonner, basculez la disponibilité d'un plat en un clic. Sans développeur et sans attendre.",
+      "point1": "Éditeur façon Linktree",
+      "point2": "Épuisé en une pression",
+      "caption": "Éditeur de carte · 4:3"
+    },
+    "b2": {
+      "title": "Console de commandes",
+      "body": "Une alerte sonore en cuisine et un statut de commande que toute l'équipe voit d'un coup d'œil.",
+      "point1": "Alertes sonores puissantes",
+      "point2": "Vue pour l'équipe en cuisine",
+      "caption": "Console de commandes · 4:3"
+    },
+    "b3": {
+      "title": "Google Maps et avis",
+      "body": "Un client satisfait arrive sur votre fiche avant même de quitter la table.",
+      "point1": "Trafic orienté vers les avis",
+      "point2": "Fiche toujours à jour",
+      "caption": "Fiche et avis · 4:3"
+    },
+    "b4": {
+      "title": "Accessibilité (WCAG)",
+      "body": "Lecteurs d'écran, contraste calculé à partir de la luminance du fond et carte en deux langues.",
+      "point1": "Prise en charge des lecteurs d'écran",
+      "point2": "Carte bilingue (i18n)",
+      "caption": "Réglages d'accessibilité · 4:3"
+    }
+  },
+  "pricing": {
+    "eyebrow": "Tarifs",
+    "title": "Simple et prévisible.",
+    "subtitle": "Un seul tarif, aucune commission sur les commandes et aucuns frais de mise en service.",
+    "period": "PLN / mois",
+    "note": "Tarifs indicatifs — non définitifs.",
+    "start": {
+      "name": "Start",
+      "desc": "Tout ce qu'il faut à un établissement pour démarrer.",
+      "cta": "Choisir Start",
+      "point1": "Carte numérique et QR codes",
+      "point2": "Plats et photos illimités",
+      "point3": "Votre propre style de carte"
+    },
+    "pro": {
+      "name": "Pro",
+      "badge": "Le plus choisi",
+      "desc": "Pour les établissements qui prennent aussi les commandes via la carte.",
+      "cta": "Choisir Pro",
+      "point1": "Tout ce qu'inclut Start",
+      "point2": "Console de commandes",
+      "point3": "Google Maps et avis",
+      "point4": "Support prioritaire"
+    }
+  },
+  "contact": {
+    "title": "Discutons-en.",
+    "subtitle": "Parlez-nous de votre établissement et nous vous montrerons à quoi ressemblerait sa carte.",
+    "name": "Nom et prénom",
+    "email": "Adresse e-mail",
+    "restaurant": "Nom de l'établissement (facultatif)",
+    "message": "Message",
+    "submit": "Envoyer le message",
+    "note": "Nous répondons généralement le même jour ouvré."
+  },
+  "footer": {
+    "tagline": "Cartes numériques pour restaurants, cafés et bars. Un QR code plutôt qu'une carte imprimée.",
+    "infoHeading": "Informations",
+    "terms": "Conditions générales",
+    "privacy": "Politique de confidentialité",
+    "cookies": "Politique relative aux cookies",
+    "contactHeading": "Contact",
+    "address": "Lorem ipsum 1, 00-000 Varsovie",
+    "copyright": "© {{year}} RestoLink. Tous droits réservés."
+  }
+}

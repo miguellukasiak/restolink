@@ -1,0 +1,129 @@
+{
+  "meta": {
+    "title": "RestoLink — La carta, reinventada",
+    "description": "RestoLink convierte un código QR en una carta digital rápida y siempre actualizada que tus clientes abren directamente en el navegador."
+  },
+  "a11y": {
+    "skip": "Ir al contenido",
+    "home": "RestoLink — inicio",
+    "nav": "Principal",
+    "language": "Cambiar idioma"
+  },
+  "nav": {
+    "guest": "Para clientes",
+    "features": "Funciones",
+    "pricing": "Precios",
+    "contact": "Contacto",
+    "login": "Iniciar sesión"
+  },
+  "common": {
+    "imagePlaceholder": "Espacio para captura de pantalla"
+  },
+  "hero": {
+    "badge": "Sin aplicación, sin descargas",
+    "title": "La carta, reinventada.",
+    "subtitle": "Tu cliente escanea el código y la carta ya está abierta. Cambias un precio y se actualiza en todas partes en segundos.",
+    "ctaPrimary": "Empieza gratis",
+    "ctaSecondary": "Ver cómo funciona",
+    "phoneCaption": "Carta del cliente · 9:16"
+  },
+  "experience": {
+    "eyebrow": "Para clientes",
+    "title": "Tres segundos de la mesa a la carta.",
+    "subtitle": "Sin tienda de aplicaciones y sin esperar la carta impresa: solo el navegador que tu cliente ya tiene abierto.",
+    "panel": {
+      "scan": "Escaneo del código QR",
+      "filter": "Filtros y alérgenos",
+      "order": "Pedido y pago"
+    },
+    "step1": {
+      "title": "Escanea el código QR",
+      "body": "Basta con la cámara. La carta se abre en el navegador, sin instalar nada y sin registrarse."
+    },
+    "step2": {
+      "title": "Explora y filtra",
+      "body": "Fotos, descripciones y alérgenos en un mismo lugar. Quien evita el gluten oculta todo lo que lo contiene con un solo toque."
+    },
+    "step3": {
+      "title": "Pide y paga",
+      "body": "El pedido llega directo a la consola de cocina y la cuenta se abona sin esperar el datáfono."
+    }
+  },
+  "features": {
+    "eyebrow": "Para restaurantes",
+    "title": "Todo bajo control.",
+    "b1": {
+      "title": "Control total",
+      "body": "Arrastra y suelta para reordenar y cambia la disponibilidad de un plato con un clic. Sin programador y sin esperas.",
+      "point1": "Editor estilo Linktree",
+      "point2": "Agotado con un toque",
+      "caption": "Editor de la carta · 4:3"
+    },
+    "b2": {
+      "title": "Consola de pedidos",
+      "body": "Un aviso sonoro en cocina y un estado del pedido que todo el turno ve de un vistazo.",
+      "point1": "Avisos sonoros potentes",
+      "point2": "Vista para el turno de cocina",
+      "caption": "Consola de pedidos · 4:3"
+    },
+    "b3": {
+      "title": "Google Maps y reseñas",
+      "body": "Un cliente satisfecho llega a tu ficha antes de levantarse de la mesa.",
+      "point1": "Tráfico dirigido a las reseñas",
+      "point2": "Ficha siempre actualizada",
+      "caption": "Ficha y reseñas · 4:3"
+    },
+    "b4": {
+      "title": "Accesibilidad (WCAG)",
+      "body": "Lectores de pantalla, contraste calculado a partir de la luminancia del fondo y carta en dos idiomas.",
+      "point1": "Compatible con lectores de pantalla",
+      "point2": "Carta bilingüe (i18n)",
+      "caption": "Ajustes de accesibilidad · 4:3"
+    }
+  },
+  "pricing": {
+    "eyebrow": "Precios",
+    "title": "Sencillo y previsible.",
+    "subtitle": "Una sola tarifa, sin comisión por pedido y sin cuota de alta.",
+    "period": "PLN / mes",
+    "note": "Precios provisionales: no son definitivos.",
+    "start": {
+      "name": "Start",
+      "desc": "Todo lo que un local necesita para empezar.",
+      "cta": "Elegir Start",
+      "point1": "Carta digital y códigos QR",
+      "point2": "Platos y fotos sin límite",
+      "point3": "Tu propio estilo de carta"
+    },
+    "pro": {
+      "name": "Pro",
+      "badge": "El más elegido",
+      "desc": "Para locales que además reciben pedidos a través de la carta.",
+      "cta": "Elegir Pro",
+      "point1": "Todo lo incluido en Start",
+      "point2": "Consola de pedidos",
+      "point3": "Google Maps y reseñas",
+      "point4": "Soporte prioritario"
+    }
+  },
+  "contact": {
+    "title": "Hablemos.",
+    "subtitle": "Cuéntanos cómo es tu local y te mostraremos qué aspecto tendría su carta.",
+    "name": "Nombre y apellidos",
+    "email": "Correo electrónico",
+    "restaurant": "Nombre del local (opcional)",
+    "message": "Mensaje",
+    "submit": "Enviar mensaje",
+    "note": "Normalmente respondemos el mismo día laborable."
+  },
+  "footer": {
+    "tagline": "Cartas digitales para restaurantes, cafeterías y bares. Un código QR en lugar de una carta impresa.",
+    "infoHeading": "Información",
+    "terms": "Términos del servicio",
+    "privacy": "Política de privacidad",
+    "cookies": "Política de cookies",
+    "contactHeading": "Contacto",
+    "address": "Lorem ipsum 1, 00-000 Varsovia",
+    "copyright": "© {{year}} RestoLink. Todos los derechos reservados."
+  }
+}

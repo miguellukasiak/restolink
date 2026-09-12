@@ -1,0 +1,129 @@
+{
+  "meta": {
+    "title": "RestoLink — Speisekarten, neu gedacht",
+    "description": "RestoLink verwandelt einen QR-Code in eine schnelle, stets aktuelle digitale Speisekarte, die Gäste direkt im Browser öffnen."
+  },
+  "a11y": {
+    "skip": "Zum Inhalt springen",
+    "home": "RestoLink — Startseite",
+    "nav": "Hauptnavigation",
+    "language": "Sprache wechseln"
+  },
+  "nav": {
+    "guest": "Für Gäste",
+    "features": "Funktionen",
+    "pricing": "Preise",
+    "contact": "Kontakt",
+    "login": "Anmelden"
+  },
+  "common": {
+    "imagePlaceholder": "Platz für Screenshot"
+  },
+  "hero": {
+    "badge": "Keine App, kein Download",
+    "title": "Speisekarten, neu gedacht.",
+    "subtitle": "Ihr Gast scannt den Code und die Karte ist schon offen. Sie ändern einen Preis und er ist in Sekunden überall aktuell.",
+    "ctaPrimary": "Kostenlos starten",
+    "ctaSecondary": "So funktioniert es",
+    "phoneCaption": "Gästekarte · 9:16"
+  },
+  "experience": {
+    "eyebrow": "Für Gäste",
+    "title": "Drei Sekunden vom Tisch zur Karte.",
+    "subtitle": "Kein App-Store, kein Warten auf die gedruckte Karte — nur der Browser, den Ihr Gast längst offen hat.",
+    "panel": {
+      "scan": "QR-Code scannen",
+      "filter": "Filter und Allergene",
+      "order": "Bestellung und Zahlung"
+    },
+    "step1": {
+      "title": "Scannt den QR-Code",
+      "body": "Die Kamera genügt. Die Karte öffnet sich im Browser — ohne Installation und ohne Registrierung."
+    },
+    "step2": {
+      "title": "Stöbert und filtert",
+      "body": "Fotos, Beschreibungen und Allergene an einem Ort. Wer Gluten meidet, blendet mit einem Tipp alles Entsprechende aus."
+    },
+    "step3": {
+      "title": "Bestellt und bezahlt",
+      "body": "Die Bestellung landet direkt auf der Küchenkonsole, und die Rechnung wird ohne Warten auf das Terminal beglichen."
+    }
+  },
+  "features": {
+    "eyebrow": "Für Restaurants",
+    "title": "Alles unter Kontrolle.",
+    "b1": {
+      "title": "Volle Kontrolle",
+      "body": "Per Drag-and-drop umsortieren, die Verfügbarkeit eines Gerichts mit einem Klick umschalten. Ohne Entwickler, ohne Warten.",
+      "point1": "Editor im Linktree-Stil",
+      "point2": "Ausverkauft mit einem Tipp",
+      "caption": "Karten-Editor · 4:3"
+    },
+    "b2": {
+      "title": "Bestellkonsole",
+      "body": "Ein lauter Hinweis in der Küche und ein Bestellstatus, den die ganze Schicht auf einen Blick sieht.",
+      "point1": "Laute Signaltöne",
+      "point2": "Ansicht für die Küchenschicht",
+      "caption": "Bestellkonsole · 4:3"
+    },
+    "b3": {
+      "title": "Google Maps und Bewertungen",
+      "body": "Ein zufriedener Gast landet auf Ihrem Eintrag, noch bevor er vom Tisch aufsteht.",
+      "point1": "Besucher zu Bewertungen lenken",
+      "point2": "Eintrag immer aktuell",
+      "caption": "Eintrag und Bewertungen · 4:3"
+    },
+    "b4": {
+      "title": "Barrierefreiheit (WCAG)",
+      "body": "Screenreader, aus der Hintergrundhelligkeit berechneter Kontrast und eine Karte in zwei Sprachen.",
+      "point1": "Screenreader-Unterstützung",
+      "point2": "Zweisprachige Karte (i18n)",
+      "caption": "Einstellungen zur Barrierefreiheit · 4:3"
+    }
+  },
+  "pricing": {
+    "eyebrow": "Preise",
+    "title": "Einfach und planbar.",
+    "subtitle": "Ein Tarif, keine Provision auf Bestellungen und keine Einrichtungsgebühr.",
+    "period": "PLN / Monat",
+    "note": "Platzhalterpreise — nicht endgültig.",
+    "start": {
+      "name": "Start",
+      "desc": "Alles, was ein einzelner Betrieb für den Anfang braucht.",
+      "cta": "Start wählen",
+      "point1": "Digitale Karte und QR-Codes",
+      "point2": "Unbegrenzt Gerichte und Fotos",
+      "point3": "Eigene Gestaltung der Karte"
+    },
+    "pro": {
+      "name": "Pro",
+      "badge": "Am beliebtesten",
+      "desc": "Für Betriebe, die auch über die Karte Bestellungen annehmen.",
+      "cta": "Pro wählen",
+      "point1": "Alles aus Start",
+      "point2": "Bestellkonsole",
+      "point3": "Google Maps und Bewertungen",
+      "point4": "Bevorzugter Support"
+    }
+  },
+  "contact": {
+    "title": "Sprechen wir.",
+    "subtitle": "Erzählen Sie uns von Ihrem Betrieb und wir zeigen Ihnen, wie seine Karte aussehen würde.",
+    "name": "Vor- und Nachname",
+    "email": "E-Mail-Adresse",
+    "restaurant": "Name des Betriebs (optional)",
+    "message": "Nachricht",
+    "submit": "Nachricht senden",
+    "note": "Wir antworten meist am selben Werktag."
+  },
+  "footer": {
+    "tagline": "Digitale Speisekarten für Restaurants, Cafés und Bars. Ein QR-Code statt gedruckter Karte.",
+    "infoHeading": "Informationen",
+    "terms": "AGB",
+    "privacy": "Datenschutzerklärung",
+    "cookies": "Cookie-Richtlinie",
+    "contactHeading": "Kontakt",
+    "address": "Lorem ipsum 1, 00-000 Warschau",
+    "copyright": "© {{year}} RestoLink. Alle Rechte vorbehalten."
+  }
+}
