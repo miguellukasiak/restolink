@@ -1,9 +1,15 @@
 @import 'tailwindcss';
 
-/* Brand tokens. Tailwind v4 turns each of these into utilities
-   (`bg-brand-600`, `text-ink-500`, …), so rebranding the page means editing
-   this block and nothing else. */
+/* The Outfit webfont itself is pulled in with <link rel="preconnect"> +
+   <link rel="stylesheet"> in index.html rather than an @import here. A remote
+   @import inside the bundle would chain a second blocking request behind our
+   own CSS and delay first paint; the <link> starts both in parallel. This block
+   is where the family is *declared* for Tailwind. */
 @theme {
+  --font-sans: 'Outfit', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  /* Brand */
   --color-brand-50: #eefbf5;
   --color-brand-100: #d5f5e6;
   --color-brand-200: #aeead0;
@@ -12,9 +18,22 @@
   --color-brand-700: #0c6544;
   --color-brand-900: #064a32;
 
-  --color-accent-100: #fef3c7;
-  --color-accent-500: #f0a020;
+  /* Material-ish pastel surfaces. Each zig-zag showcase sits on one of these,
+     the way Android's feature pages rotate through tinted panels. */
+  --color-pastel-green: #e6f4ea;
+  --color-pastel-blue: #e8f0fe;
+  --color-pastel-yellow: #fef7e0;
+  --color-pastel-purple: #f3e8fd;
+  --color-pastel-rose: #fce8e6;
 
+  /* Saturated counterparts, for icons and small accents on those panels. */
+  --color-pop-green: #188038;
+  --color-pop-blue: #1a73e8;
+  --color-pop-yellow: #b06000;
+  --color-pop-purple: #8430ce;
+
+  /* Neutrals */
+  --color-ink-300: #9aa4b2;
   --color-ink-400: #6b7787;
   --color-ink-500: #4b5563;
   --color-ink-700: #2c3542;
@@ -22,9 +41,6 @@
 
   --color-surface: #ffffff;
   --color-surface-muted: #f7f9fa;
-
-  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
-    Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 @layer base {
@@ -32,9 +48,9 @@
     scroll-behavior: smooth;
   }
 
-  /* Anchor targets must clear the sticky header. */
+  /* Anchor targets have to clear the sticky header. */
   :where(section[id]) {
-    scroll-margin-top: 5rem;
+    scroll-margin-top: 6rem;
   }
 
   body {
@@ -44,11 +60,124 @@
   }
 }
 
-/* Respect the OS "reduce motion" setting: kill the smooth scroll and every
-   transition rather than merely shortening them. */
+/* ------------------------------------------------------------------------- *
+ * Scroll reveal
+ *
+ * Deliberately outside a cascade layer so these win over Tailwind's opacity
+ * and transform utilities without needing `!`.
+ *
+ * The hidden state is gated behind `.js` — added by an inline script in <head>,
+ * before first paint. Without JavaScript nothing ever adds `.active`, so
+ * ungated rules would leave the whole page permanently invisible.
+ * ------------------------------------------------------------------------- */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(1.75rem);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+.js .reveal.active {
+  opacity: 1;
+  transform: none;
+}
+
+/* Stagger siblings so a grid of cards cascades in instead of snapping. */
+.js .reveal-delay-1 {
+  transition-delay: 90ms;
+}
+.js .reveal-delay-2 {
+  transition-delay: 180ms;
+}
+.js .reveal-delay-3 {
+  transition-delay: 270ms;
+}
+
+/* ------------------------------------------------------------------------- *
+ * Sticky scroll-telling
+ *
+ * The three mockup panels are stacked on top of each other inside the sticky
+ * phone; exactly one is `.is-visible` at a time, driven by which text block is
+ * crossing the middle of the viewport.
+ * ------------------------------------------------------------------------- */
+.scene-panel {
+  opacity: 0;
+  transform: scale(0.97) translateY(0.75rem);
+  transition:
+    opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.scene-panel.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* The current step is marked with a rail and a filled badge.
+   Note: the inactive prose is NOT dimmed. Fading body copy is the usual
+   scroll-telling trick, but it drops text contrast below WCAG AA — which would
+   be a poor look on a page that advertises accessibility. State is carried by
+   the rail and the badge instead, both non-text. */
+.scene-step {
+  border-inline-start: 2px solid transparent;
+  transition:
+    border-color 0.4s ease,
+    background-color 0.4s ease;
+}
+
+.scene-step .scene-step-badge {
+  background-color: var(--color-surface-muted);
+  color: var(--color-ink-400);
+  transition:
+    background-color 0.4s ease,
+    color 0.4s ease,
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.scene-step.is-current {
+  border-inline-start-color: var(--color-brand-600);
+}
+
+.scene-step.is-current .scene-step-badge {
+  background-color: var(--color-brand-600);
+  color: #fff;
+  transform: scale(1.08);
+}
+
+/* Printing never scrolls, so the reveal state would blank the page.
+   `.scene-panel` needs no override: exactly one is always `.is-visible`,
+   because the scene activates its first step synchronously on load. */
+@media print {
+  .js .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ------------------------------------------------------------------------- *
+ * Reduced motion: show everything in its final state, animate nothing.
+ * ------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  .js .reveal,
+  .js .reveal.active {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .scene-panel {
+    transition: none;
+  }
+
+  .scene-step,
+  .scene-step .scene-step-badge {
+    transition: none;
   }
 
   *,

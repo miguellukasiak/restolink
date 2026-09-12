@@ -1,429 +1,909 @@
 <!doctype html>
-<html lang="en" class="scroll-smooth">
+<html lang="pl">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RestoLink — Digital menus for restaurants</title>
+    <title>RestoLink — Menu, wymyślone na nowo</title>
     <meta
       name="description"
-      content="Placeholder description. RestoLink turns a QR code into a fast, always up-to-date digital menu that guests open straight in their browser."
+      content="Tekst zastępczy. RestoLink zamienia kod QR w szybkie, zawsze aktualne menu, które gość otwiera wprost w przeglądarce."
     />
     <meta name="theme-color" content="#0f8256" />
     <link
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f8256'/%3E%3Ctext x='16' y='22' font-family='sans-serif' font-size='18' font-weight='700' fill='white' text-anchor='middle'%3ER%3C/text%3E%3C/svg%3E"
     />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Marks that scripting is available *before* first paint, so the reveal
+         animations can start from opacity 0 without risking a permanently
+         blank page when JavaScript is off. -->
+    <script>
+      document.documentElement.classList.add('js');
+    </script>
     <script type="module" src="/src/main.ts"></script>
   </head>
 
   <body class="font-sans antialiased">
     <a
       href="#main"
-      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-brand-700 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
+      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-ink-900 focus:px-5 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-white"
     >
-      Skip to main content
+      Przejdź do treści
     </a>
 
-    <!-- ================= Header ================= -->
-    <header
-      class="sticky top-0 z-40 border-b border-ink-900/10 bg-surface/90 backdrop-blur"
-    >
+    <!-- ===================== Header ===================== -->
+    <header class="sticky top-0 z-40 bg-white/70 backdrop-blur-xl">
       <div
-        class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8"
+        class="mx-auto flex h-18 max-w-7xl items-center justify-between gap-4 px-5 sm:px-8"
       >
-        <!-- Logo placeholder: swap this anchor's contents for an <img>. -->
         <a
           href="#main"
-          class="flex items-center gap-2.5 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600"
-          aria-label="RestoLink — home"
+          class="flex items-center gap-2.5 rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600"
+          aria-label="RestoLink — strona główna"
         >
           <span
-            class="grid size-9 place-items-center rounded-lg bg-brand-600 text-base font-bold text-white"
+            class="grid size-8 place-items-center rounded-full bg-brand-600 text-sm font-bold text-white"
             aria-hidden="true"
           >
             R
           </span>
-          <span class="text-lg font-bold tracking-tight text-ink-900">
+          <span class="text-xl font-semibold tracking-tight text-ink-900">
             RestoLink
           </span>
         </a>
 
-        <nav aria-label="Main" class="hidden items-center gap-8 md:flex">
+        <nav aria-label="Główna" class="hidden items-center gap-9 md:flex">
           <a
-            href="#features"
-            class="rounded text-sm font-medium text-ink-500 transition-colors hover:text-ink-900 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600"
+            href="#doswiadczenie"
+            class="rounded-full text-sm font-medium text-ink-500 transition-colors hover:text-ink-900 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600"
           >
-            Features
+            Dla gościa
           </a>
           <a
-            href="#how-it-works"
-            class="rounded text-sm font-medium text-ink-500 transition-colors hover:text-ink-900 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600"
+            href="#funkcje"
+            class="rounded-full text-sm font-medium text-ink-500 transition-colors hover:text-ink-900 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600"
           >
-            How it works
+            Funkcje
           </a>
           <a
-            href="#pricing"
-            class="rounded text-sm font-medium text-ink-500 transition-colors hover:text-ink-900 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600"
+            href="#cennik"
+            class="rounded-full text-sm font-medium text-ink-500 transition-colors hover:text-ink-900 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600"
           >
-            Pricing
+            Cennik
+          </a>
+          <a
+            href="#kontakt"
+            class="rounded-full text-sm font-medium text-ink-500 transition-colors hover:text-ink-900 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600"
+          >
+            Kontakt
           </a>
         </nav>
 
         <a
           href="https://restolink.vercel.app/panel/"
-          class="shrink-0 rounded-lg border border-ink-900/15 px-4 py-2 text-sm font-semibold text-ink-900 transition-colors hover:border-brand-600 hover:text-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+          class="shrink-0 rounded-full bg-ink-900 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-ink-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-900"
         >
-          Log in
+          <span lang="en">Log in</span>
         </a>
       </div>
     </header>
 
     <main id="main">
-      <!-- ================= Hero ================= -->
-      <section aria-labelledby="hero-heading" class="overflow-hidden">
-        <div
-          class="mx-auto grid max-w-6xl gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-2 lg:items-center lg:gap-16 lg:px-8"
-        >
-          <div>
-            <p
-              class="mb-4 inline-flex items-center rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold tracking-wide text-brand-700 uppercase"
-            >
-              Lorem ipsum dolor
-            </p>
-
-            <h1
-              id="hero-heading"
-              class="text-4xl font-extrabold tracking-tight text-balance text-ink-900 sm:text-5xl lg:text-6xl"
-            >
-              Lorem ipsum dolor sit amet consectetur elit
-            </h1>
-
-            <p
-              class="mt-6 max-w-xl text-lg text-pretty text-ink-500 sm:text-xl"
-            >
-              Sed do eiusmod tempor incididunt ut labore et dolore magna
-              aliqua. Ut enim ad minim veniam, quis nostrud exercitation
-              ullamco laboris nisi ut aliquip.
-            </p>
-
-            <div class="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <a
-                href="#pricing"
-                class="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-6 py-3.5 text-base font-semibold text-white shadow-sm transition-colors hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
-              >
-                Get started
-                <svg
-                  class="size-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                  focusable="false"
-                >
-                  <path d="M5 12h14M13 6l6 6-6 6" />
-                </svg>
-              </a>
-              <a
-                href="#how-it-works"
-                class="inline-flex items-center justify-center rounded-xl border border-ink-900/15 px-6 py-3.5 text-base font-semibold text-ink-900 transition-colors hover:border-ink-900/30 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
-              >
-                See how it works
-              </a>
-            </div>
-
-            <p class="mt-6 text-sm text-ink-400">
-              Lorem ipsum dolor sit amet · Consectetur adipiscing elit
-            </p>
-          </div>
-
-          <!-- Image placeholder: product screenshot / phone mockup goes here. -->
-          <div
-            class="mx-auto grid aspect-4/5 w-full max-w-sm place-items-center rounded-2xl border-2 border-dashed border-ink-900/15 bg-surface-muted lg:max-w-none"
+      <!-- ===================== Hero ===================== -->
+      <section aria-labelledby="hero-heading" class="px-5 pt-14 sm:px-8 sm:pt-20">
+        <div class="mx-auto max-w-5xl text-center">
+          <p
+            class="reveal inline-flex items-center gap-2 rounded-full bg-pastel-green px-4 py-1.5 text-sm font-medium text-pop-green"
           >
-            <div class="p-6 text-center">
+            <span
+              class="size-1.5 rounded-full bg-pop-green"
+              aria-hidden="true"
+            ></span>
+            Lorem ipsum dolor sit amet
+          </p>
+
+          <h1
+            id="hero-heading"
+            class="reveal reveal-delay-1 mt-7 text-5xl font-extrabold tracking-tighter text-balance text-ink-900 sm:text-7xl lg:text-8xl"
+          >
+            Menu, wymyślone na nowo.
+          </h1>
+
+          <p
+            class="reveal reveal-delay-2 mx-auto mt-7 max-w-2xl text-lg text-pretty text-ink-500 sm:text-xl"
+          >
+            Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            Ut enim ad minim veniam, quis nostrud exercitation ullamco.
+          </p>
+
+          <div
+            class="reveal reveal-delay-3 mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row"
+          >
+            <a
+              href="#cennik"
+              class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-600 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-brand-600/20 transition-all hover:bg-brand-700 hover:shadow-xl hover:shadow-brand-600/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 sm:w-auto"
+            >
+              Zacznij bezpłatnie
               <svg
-                class="mx-auto size-10 text-ink-400"
+                class="size-4"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="1.5"
+                stroke-width="2.5"
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 aria-hidden="true"
                 focusable="false"
               >
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <circle cx="8.5" cy="8.5" r="1.5" />
-                <path d="m21 15-5-5L5 21" />
+                <path d="M5 12h14M13 6l6 6-6 6" />
               </svg>
-              <p class="mt-3 text-sm font-medium text-ink-500">
-                Image placeholder
-              </p>
-              <p class="mt-1 text-xs text-ink-400">Hero visual · 4:5</p>
+            </a>
+            <a
+              href="#doswiadczenie"
+              class="inline-flex w-full items-center justify-center rounded-full border border-ink-900/15 px-8 py-4 text-base font-semibold text-ink-900 transition-colors hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 sm:w-auto"
+            >
+              Zobacz, jak to działa
+            </a>
+          </div>
+        </div>
+
+        <!-- Phone floating over a stylised map. The "map" is a decorative
+             inline SVG — no image request, scales to any width. -->
+        <div class="reveal mx-auto mt-16 max-w-7xl sm:mt-20">
+          <div
+            class="relative overflow-hidden rounded-[2.5rem] bg-pastel-green px-6 pt-14 sm:rounded-[3rem] sm:px-10 sm:pt-20"
+          >
+            <svg
+              class="pointer-events-none absolute inset-0 size-full text-pop-green/15"
+              viewBox="0 0 800 500"
+              preserveAspectRatio="xMidYMid slice"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <g stroke="currentColor" fill="none" stroke-linecap="round">
+                <path d="M-20 120h840" stroke-width="14" />
+                <path d="M-20 380h840" stroke-width="10" />
+                <path d="M160 -20v540" stroke-width="12" />
+                <path d="M620 -20v540" stroke-width="9" />
+                <path d="M160 250h460" stroke-width="7" />
+                <path d="M380 -20v540" stroke-width="5" />
+              </g>
+              <g fill="currentColor" opacity="0.7">
+                <rect x="200" y="150" width="120" height="70" rx="14" />
+                <rect x="430" y="160" width="150" height="60" rx="14" />
+                <rect x="210" y="290" width="140" height="60" rx="14" />
+                <rect x="450" y="280" width="110" height="80" rx="14" />
+                <rect x="660" y="170" width="110" height="170" rx="16" />
+                <rect x="20" y="160" width="100" height="180" rx="16" />
+              </g>
+            </svg>
+
+            <!-- Phone mockup placeholder -->
+            <div
+              class="relative mx-auto w-full max-w-[19rem] rounded-t-[2.5rem] bg-ink-900 p-3 pb-0 shadow-2xl shadow-ink-900/25"
+            >
+              <div
+                class="mx-auto mb-2.5 h-1.5 w-20 rounded-full bg-white/25"
+                aria-hidden="true"
+              ></div>
+              <div
+                class="grid aspect-9/16 place-items-center rounded-t-[2rem] bg-white"
+              >
+                <div class="px-6 text-center">
+                  <svg
+                    class="mx-auto size-9 text-ink-300"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <rect x="3" y="3" width="18" height="18" rx="3" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <path d="m21 15-5-5L5 21" />
+                  </svg>
+                  <p class="mt-3 text-sm font-medium text-ink-500">
+                    Miejsce na zrzut ekranu
+                  </p>
+                  <p class="mt-1 text-xs text-ink-400">Menu gościa · 9:16</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- ================= Features ================= -->
+      <!-- ============ Scroll-telling: doświadczenie gościa ============ -->
       <section
-        id="features"
-        aria-labelledby="features-heading"
-        class="border-y border-ink-900/10 bg-surface-muted"
+        id="doswiadczenie"
+        aria-labelledby="doswiadczenie-heading"
+        class="px-5 py-24 sm:px-8 sm:py-36"
       >
-        <div class="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
-          <div class="max-w-2xl">
-            <h2
-              id="features-heading"
-              class="text-3xl font-bold tracking-tight text-balance text-ink-900 sm:text-4xl"
+        <div class="mx-auto max-w-7xl">
+          <div class="reveal mx-auto max-w-3xl text-center">
+            <p
+              class="text-sm font-semibold tracking-widest text-pop-green uppercase"
             >
-              Lorem ipsum dolor sit amet
-            </h2>
-            <p class="mt-4 text-lg text-pretty text-ink-500">
-              Duis aute irure dolor in reprehenderit in voluptate velit esse
-              cillum dolore eu fugiat nulla pariatur.
+              Dla gościa
             </p>
-          </div>
-
-          <ul
-            role="list"
-            class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-          >
-            <li
-              class="rounded-2xl border border-ink-900/10 bg-surface p-6 sm:p-8"
-            >
-              <span
-                class="grid size-12 place-items-center rounded-xl bg-brand-100 text-brand-700"
-                aria-hidden="true"
-              >
-                <svg
-                  class="size-6"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  focusable="false"
-                >
-                  <path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12l1-8.5Z" />
-                </svg>
-              </span>
-              <h3 class="mt-5 text-lg font-semibold text-ink-900">
-                Blazing fast
-              </h3>
-              <p class="mt-2 text-ink-500">
-                Excepteur sint occaecat cupidatat non proident, sunt in culpa
-                qui officia deserunt mollit anim.
-              </p>
-            </li>
-
-            <li
-              class="rounded-2xl border border-ink-900/10 bg-surface p-6 sm:p-8"
-            >
-              <span
-                class="grid size-12 place-items-center rounded-xl bg-brand-100 text-brand-700"
-                aria-hidden="true"
-              >
-                <svg
-                  class="size-6"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  focusable="false"
-                >
-                  <rect x="6" y="2.5" width="12" height="19" rx="2.5" />
-                  <path d="M10.5 5.5h3" />
-                  <path d="M9.5 10.5h5v5h-5z" />
-                </svg>
-              </span>
-              <h3 class="mt-5 text-lg font-semibold text-ink-900">
-                No app to install
-              </h3>
-              <p class="mt-2 text-ink-500">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore.
-              </p>
-            </li>
-
-            <li
-              class="rounded-2xl border border-ink-900/10 bg-surface p-6 sm:p-8"
-            >
-              <span
-                class="grid size-12 place-items-center rounded-xl bg-brand-100 text-brand-700"
-                aria-hidden="true"
-              >
-                <svg
-                  class="size-6"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  focusable="false"
-                >
-                  <path d="M4 20h4L18.5 9.5a2.83 2.83 0 0 0-4-4L4 16v4Z" />
-                  <path d="M13.5 6.5 17 10" />
-                </svg>
-              </span>
-              <h3 class="mt-5 text-lg font-semibold text-ink-900">
-                Updates in seconds
-              </h3>
-              <p class="mt-2 text-ink-500">
-                Ut enim ad minim veniam, quis nostrud exercitation ullamco
-                laboris nisi ut aliquip ex ea commodo.
-              </p>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <!-- ================= How it works ================= -->
-      <section id="how-it-works" aria-labelledby="how-it-works-heading">
-        <div class="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
-          <div class="max-w-2xl">
             <h2
-              id="how-it-works-heading"
-              class="text-3xl font-bold tracking-tight text-balance text-ink-900 sm:text-4xl"
+              id="doswiadczenie-heading"
+              class="mt-4 text-4xl font-extrabold tracking-tighter text-balance text-ink-900 sm:text-6xl"
             >
-              Lorem ipsum tribus gradibus
+              Trzy sekundy od stolika do menu.
             </h2>
-            <p class="mt-4 text-lg text-pretty text-ink-500">
+            <p class="mx-auto mt-6 max-w-xl text-lg text-pretty text-ink-500">
               Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit
-              aut fugit.
+              aut fugit, sed quia consequuntur.
             </p>
           </div>
 
-          <!-- An ordered list carries the sequence semantically, so the big
-               numerals are decorative. -->
-          <ol role="list" class="mt-12 grid gap-10 md:grid-cols-3 md:gap-8">
-            <li class="relative md:pr-6">
-              <span
-                class="grid size-11 place-items-center rounded-full bg-brand-600 text-lg font-bold text-white"
-                aria-hidden="true"
-              >
-                1
-              </span>
-              <h3 class="mt-5 text-lg font-semibold text-ink-900">
-                Consectetur adipiscing
-              </h3>
-              <p class="mt-2 text-ink-500">
-                At vero eos et accusamus et iusto odio dignissimos ducimus qui
-                blanditiis praesentium voluptatum.
-              </p>
-            </li>
-
-            <li class="relative md:pr-6">
-              <span
-                class="grid size-11 place-items-center rounded-full bg-brand-600 text-lg font-bold text-white"
-                aria-hidden="true"
-              >
-                2
-              </span>
-              <h3 class="mt-5 text-lg font-semibold text-ink-900">
-                Tempor incididunt labore
-              </h3>
-              <p class="mt-2 text-ink-500">
-                Et harum quidem rerum facilis est et expedita distinctio nam
-                libero tempore cum soluta nobis.
-              </p>
-            </li>
-
-            <li class="relative">
-              <span
-                class="grid size-11 place-items-center rounded-full bg-brand-600 text-lg font-bold text-white"
-                aria-hidden="true"
-              >
-                3
-              </span>
-              <h3 class="mt-5 text-lg font-semibold text-ink-900">
-                Magna aliqua veniam
-              </h3>
-              <p class="mt-2 text-ink-500">
-                Temporibus autem quibusdam et aut officiis debitis aut rerum
-                necessitatibus saepe eveniet.
-              </p>
-            </li>
-          </ol>
-
-          <!-- Image placeholder: screenshot strip / illustration. -->
           <div
-            class="mt-14 grid aspect-video w-full place-items-center rounded-2xl border-2 border-dashed border-ink-900/15 bg-surface-muted"
+            data-scroll-scene
+            class="mt-16 grid gap-12 sm:mt-24 lg:grid-cols-2 lg:gap-20"
           >
-            <div class="p-6 text-center">
-              <svg
-                class="mx-auto size-10 text-ink-400"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-                focusable="false"
+            <!-- Sticky phone. Decorative: every panel duplicates text that is
+                 already in the steps on the right. -->
+            <div class="hidden lg:block">
+              <div class="sticky top-28">
+                <div
+                  class="relative mx-auto w-full max-w-[19rem] rounded-[2.5rem] bg-ink-900 p-3 shadow-2xl shadow-ink-900/25"
+                >
+                  <div
+                    class="mx-auto mb-2.5 h-1.5 w-20 rounded-full bg-white/25"
+                    aria-hidden="true"
+                  ></div>
+                  <div
+                    class="relative grid aspect-9/16 place-items-center overflow-hidden rounded-[2rem] bg-white"
+                  >
+                    <div
+                      data-panel
+                      class="scene-panel absolute inset-0 grid place-items-center bg-pastel-green p-8 text-center"
+                      aria-hidden="true"
+                    >
+                      <div>
+                        <svg
+                          class="mx-auto size-10 text-pop-green"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.75"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          focusable="false"
+                        >
+                          <path d="M4 9V5.5A1.5 1.5 0 0 1 5.5 4H9" />
+                          <path d="M15 4h3.5A1.5 1.5 0 0 1 20 5.5V9" />
+                          <path d="M20 15v3.5a1.5 1.5 0 0 1-1.5 1.5H15" />
+                          <path d="M9 20H5.5A1.5 1.5 0 0 1 4 18.5V15" />
+                          <path d="M8 12h8" />
+                        </svg>
+                        <p class="mt-4 text-sm font-semibold text-ink-900">
+                          Skanowanie kodu QR
+                        </p>
+                        <p class="mt-1 text-xs text-ink-500">
+                          Miejsce na zrzut ekranu
+                        </p>
+                      </div>
+                    </div>
+
+                    <div
+                      data-panel
+                      class="scene-panel absolute inset-0 grid place-items-center bg-pastel-blue p-8 text-center"
+                      aria-hidden="true"
+                    >
+                      <div>
+                        <svg
+                          class="mx-auto size-10 text-pop-blue"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.75"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          focusable="false"
+                        >
+                          <path d="M4 6h16" />
+                          <path d="M7 12h10" />
+                          <path d="M10 18h4" />
+                        </svg>
+                        <p class="mt-4 text-sm font-semibold text-ink-900">
+                          Filtrowanie i alergeny
+                        </p>
+                        <p class="mt-1 text-xs text-ink-500">
+                          Miejsce na zrzut ekranu
+                        </p>
+                      </div>
+                    </div>
+
+                    <div
+                      data-panel
+                      class="scene-panel absolute inset-0 grid place-items-center bg-pastel-yellow p-8 text-center"
+                      aria-hidden="true"
+                    >
+                      <div>
+                        <svg
+                          class="mx-auto size-10 text-pop-yellow"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.75"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          focusable="false"
+                        >
+                          <rect x="2.5" y="6" width="19" height="12" rx="2.5" />
+                          <path d="M2.5 10h19" />
+                          <path d="M6 14h4" />
+                        </svg>
+                        <p class="mt-4 text-sm font-semibold text-ink-900">
+                          Zamówienie i płatność
+                        </p>
+                        <p class="mt-1 text-xs text-ink-500">
+                          Miejsce na zrzut ekranu
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Steps. An ordered list, so the sequence survives without CSS. -->
+            <ol role="list" class="lg:py-[18vh]">
+              <li
+                data-step
+                class="scene-step reveal py-10 pl-6 sm:py-14 lg:py-[16vh]"
               >
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <circle cx="8.5" cy="8.5" r="1.5" />
-                <path d="m21 15-5-5L5 21" />
-              </svg>
-              <p class="mt-3 text-sm font-medium text-ink-500">
-                Image placeholder
-              </p>
-              <p class="mt-1 text-xs text-ink-400">Walkthrough visual · 16:9</p>
+                <span
+                  class="scene-step-badge grid size-11 place-items-center rounded-full text-base font-bold"
+                  aria-hidden="true"
+                >
+                  1
+                </span>
+                <h3
+                  class="mt-6 text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl"
+                >
+                  Skanuje kod QR
+                </h3>
+                <p class="mt-4 max-w-md text-lg text-pretty text-ink-500">
+                  At vero eos et accusamus et iusto odio dignissimos ducimus
+                  qui blanditiis praesentium voluptatum deleniti atque.
+                </p>
+              </li>
+
+              <li
+                data-step
+                class="scene-step reveal py-10 pl-6 sm:py-14 lg:py-[16vh]"
+              >
+                <span
+                  class="scene-step-badge grid size-11 place-items-center rounded-full text-base font-bold"
+                  aria-hidden="true"
+                >
+                  2
+                </span>
+                <h3
+                  class="mt-6 text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl"
+                >
+                  Przegląda i filtruje
+                </h3>
+                <p class="mt-4 max-w-md text-lg text-pretty text-ink-500">
+                  Et harum quidem rerum facilis est et expedita distinctio, nam
+                  libero tempore cum soluta nobis eligendi.
+                </p>
+              </li>
+
+              <li
+                data-step
+                class="scene-step reveal py-10 pl-6 sm:py-14 lg:py-[16vh]"
+              >
+                <span
+                  class="scene-step-badge grid size-11 place-items-center rounded-full text-base font-bold"
+                  aria-hidden="true"
+                >
+                  3
+                </span>
+                <h3
+                  class="mt-6 text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl"
+                >
+                  Zamawia i płaci
+                </h3>
+                <p class="mt-4 max-w-md text-lg text-pretty text-ink-500">
+                  Temporibus autem quibusdam et aut officiis debitis aut rerum
+                  necessitatibus saepe eveniet ut et voluptates.
+                </p>
+              </li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Zig-zag: panel i konsola ============ -->
+      <section
+        id="funkcje"
+        aria-labelledby="funkcje-heading"
+        class="px-5 pb-24 sm:px-8 sm:pb-36"
+      >
+        <div class="mx-auto max-w-7xl">
+          <div class="reveal mx-auto max-w-3xl text-center">
+            <p
+              class="text-sm font-semibold tracking-widest text-pop-blue uppercase"
+            >
+              Dla restauracji
+            </p>
+            <h2
+              id="funkcje-heading"
+              class="mt-4 text-4xl font-extrabold tracking-tighter text-balance text-ink-900 sm:text-6xl"
+            >
+              Wszystko pod kontrolą.
+            </h2>
+          </div>
+
+          <div class="mt-20 space-y-24 sm:mt-28 sm:space-y-36">
+            <!-- Block 1 — text left, visual right -->
+            <div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-20">
+              <div class="reveal">
+                <span
+                  class="grid size-14 place-items-center rounded-2xl bg-pastel-green text-pop-green"
+                  aria-hidden="true"
+                >
+                  <svg
+                    class="size-7"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.75"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    focusable="false"
+                  >
+                    <path d="M4 7h5M15 7h5M4 12h11M20 12h0M4 17h3M13 17h7" />
+                    <circle cx="12" cy="7" r="2.25" />
+                    <circle cx="17.5" cy="12" r="2.25" />
+                    <circle cx="10" cy="17" r="2.25" />
+                  </svg>
+                </span>
+                <h3
+                  class="mt-7 text-3xl font-bold tracking-tighter text-balance text-ink-900 sm:text-5xl"
+                >
+                  Pełna kontrola
+                </h3>
+                <p class="mt-5 max-w-lg text-lg text-pretty text-ink-500">
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                  Przeciągnij i upuść, żeby zmienić kolejność — dostępność
+                  dania przełączasz jednym kliknięciem.
+                </p>
+                <ul role="list" class="mt-7 space-y-3">
+                  <li class="flex items-center gap-3 text-ink-700">
+                    <svg
+                      class="size-5 shrink-0 text-pop-green"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      <path d="m5 13 4 4L19 7" />
+                    </svg>
+                    Edytor w stylu Linktree
+                  </li>
+                  <li class="flex items-center gap-3 text-ink-700">
+                    <svg
+                      class="size-5 shrink-0 text-pop-green"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      <path d="m5 13 4 4L19 7" />
+                    </svg>
+                    Sed do eiusmod tempor incididunt
+                  </li>
+                </ul>
+              </div>
+
+              <div class="reveal reveal-delay-1">
+                <div
+                  class="grid aspect-4/3 place-items-center rounded-[2.5rem] bg-pastel-green p-8 sm:rounded-[3rem]"
+                >
+                  <div
+                    class="grid w-full max-w-md place-items-center rounded-[1.75rem] border-2 border-dashed border-pop-green/30 bg-white/60 px-6 py-14 text-center"
+                  >
+                    <svg
+                      class="size-9 text-pop-green/70"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      <rect x="3" y="3" width="18" height="18" rx="3" />
+                      <circle cx="8.5" cy="8.5" r="1.5" />
+                      <path d="m21 15-5-5L5 21" />
+                    </svg>
+                    <p class="mt-3 text-sm font-medium text-ink-700">
+                      Miejsce na zrzut ekranu
+                    </p>
+                    <p class="mt-1 text-xs text-ink-500">Kreator menu · 4:3</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Block 2 — visual left, text right -->
+            <div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-20">
+              <div class="reveal lg:order-2">
+                <span
+                  class="grid size-14 place-items-center rounded-2xl bg-pastel-rose text-pop-purple"
+                  aria-hidden="true"
+                >
+                  <svg
+                    class="size-7"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.75"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    focusable="false"
+                  >
+                    <path d="M6 9.5a6 6 0 1 1 12 0c0 3.8 1.5 4.9 1.5 4.9h-15S6 13.3 6 9.5Z" />
+                    <path d="M10 18.5a2 2 0 0 0 4 0" />
+                  </svg>
+                </span>
+                <h3
+                  class="mt-7 text-3xl font-bold tracking-tighter text-balance text-ink-900 sm:text-5xl"
+                >
+                  Konsola Zamówień
+                </h3>
+                <p class="mt-5 max-w-lg text-lg text-pretty text-ink-500">
+                  Ut enim ad minim veniam, quis nostrud exercitation ullamco.
+                  Głośne powiadomienie na kuchni, status zamówienia widoczny
+                  dla całej zmiany.
+                </p>
+                <ul role="list" class="mt-7 space-y-3">
+                  <li class="flex items-center gap-3 text-ink-700">
+                    <svg
+                      class="size-5 shrink-0 text-pop-purple"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      <path d="m5 13 4 4L19 7" />
+                    </svg>
+                    Donośne alerty dźwiękowe
+                  </li>
+                  <li class="flex items-center gap-3 text-ink-700">
+                    <svg
+                      class="size-5 shrink-0 text-pop-purple"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      <path d="m5 13 4 4L19 7" />
+                    </svg>
+                    Quis nostrud exercitation ullamco
+                  </li>
+                </ul>
+              </div>
+
+              <div class="reveal reveal-delay-1 lg:order-1">
+                <div
+                  class="grid aspect-4/3 place-items-center rounded-[2.5rem] bg-pastel-rose p-8 sm:rounded-[3rem]"
+                >
+                  <div
+                    class="grid w-full max-w-md place-items-center rounded-[1.75rem] border-2 border-dashed border-pop-purple/30 bg-white/60 px-6 py-14 text-center"
+                  >
+                    <svg
+                      class="size-9 text-pop-purple/70"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      <rect x="3" y="3" width="18" height="18" rx="3" />
+                      <circle cx="8.5" cy="8.5" r="1.5" />
+                      <path d="m21 15-5-5L5 21" />
+                    </svg>
+                    <p class="mt-3 text-sm font-medium text-ink-700">
+                      Miejsce na zrzut ekranu
+                    </p>
+                    <p class="mt-1 text-xs text-ink-500">
+                      Konsola zamówień · 4:3
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Block 3 — text left, visual right -->
+            <div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-20">
+              <div class="reveal">
+                <span
+                  class="grid size-14 place-items-center rounded-2xl bg-pastel-blue text-pop-blue"
+                  aria-hidden="true"
+                >
+                  <svg
+                    class="size-7"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.75"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    focusable="false"
+                  >
+                    <path d="M12 21s6.5-5.9 6.5-10.5a6.5 6.5 0 1 0-13 0C5.5 15.1 12 21 12 21Z" />
+                    <circle cx="12" cy="10.5" r="2.5" />
+                  </svg>
+                </span>
+                <h3
+                  class="mt-7 text-3xl font-bold tracking-tighter text-balance text-ink-900 sm:text-5xl"
+                >
+                  Google Maps &amp; Opinie
+                </h3>
+                <p class="mt-5 max-w-lg text-lg text-pretty text-ink-500">
+                  Duis aute irure dolor in reprehenderit in voluptate velit.
+                  Zadowolony gość trafia prosto na Twoją wizytówkę, zanim
+                  wstanie od stolika.
+                </p>
+                <ul role="list" class="mt-7 space-y-3">
+                  <li class="flex items-center gap-3 text-ink-700">
+                    <svg
+                      class="size-5 shrink-0 text-pop-blue"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      <path d="m5 13 4 4L19 7" />
+                    </svg>
+                    Kierowanie ruchu na opinie
+                  </li>
+                  <li class="flex items-center gap-3 text-ink-700">
+                    <svg
+                      class="size-5 shrink-0 text-pop-blue"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      <path d="m5 13 4 4L19 7" />
+                    </svg>
+                    Excepteur sint occaecat cupidatat
+                  </li>
+                </ul>
+              </div>
+
+              <div class="reveal reveal-delay-1">
+                <div
+                  class="grid aspect-4/3 place-items-center rounded-[2.5rem] bg-pastel-blue p-8 sm:rounded-[3rem]"
+                >
+                  <div
+                    class="grid w-full max-w-md place-items-center rounded-[1.75rem] border-2 border-dashed border-pop-blue/30 bg-white/60 px-6 py-14 text-center"
+                  >
+                    <svg
+                      class="size-9 text-pop-blue/70"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      <rect x="3" y="3" width="18" height="18" rx="3" />
+                      <circle cx="8.5" cy="8.5" r="1.5" />
+                      <path d="m21 15-5-5L5 21" />
+                    </svg>
+                    <p class="mt-3 text-sm font-medium text-ink-700">
+                      Miejsce na zrzut ekranu
+                    </p>
+                    <p class="mt-1 text-xs text-ink-500">
+                      Wizytówka i opinie · 4:3
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Block 4 — visual left, text right -->
+            <div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-20">
+              <div class="reveal lg:order-2">
+                <span
+                  class="grid size-14 place-items-center rounded-2xl bg-pastel-purple text-pop-purple"
+                  aria-hidden="true"
+                >
+                  <svg
+                    class="size-7"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.75"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    focusable="false"
+                  >
+                    <circle cx="12" cy="4.5" r="2" />
+                    <path d="M12 8v5.5" />
+                    <path d="m12 13.5-2.5 6.5M12 13.5l2.5 6.5" />
+                    <path d="m6 9.5 6 1.5 6-1.5" />
+                  </svg>
+                </span>
+                <h3
+                  class="mt-7 text-3xl font-bold tracking-tighter text-balance text-ink-900 sm:text-5xl"
+                >
+                  Dostępność (WCAG)
+                </h3>
+                <p class="mt-5 max-w-lg text-lg text-pretty text-ink-500">
+                  Excepteur sint occaecat cupidatat non proident. Czytniki
+                  ekranu, kontrast liczony z luminancji tła i menu w dwóch
+                  językach.
+                </p>
+                <ul role="list" class="mt-7 space-y-3">
+                  <li class="flex items-center gap-3 text-ink-700">
+                    <svg
+                      class="size-5 shrink-0 text-pop-purple"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      <path d="m5 13 4 4L19 7" />
+                    </svg>
+                    Obsługa czytników ekranu
+                  </li>
+                  <li class="flex items-center gap-3 text-ink-700">
+                    <svg
+                      class="size-5 shrink-0 text-pop-purple"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      <path d="m5 13 4 4L19 7" />
+                    </svg>
+                    Menu dwujęzyczne (i18n)
+                  </li>
+                </ul>
+              </div>
+
+              <div class="reveal reveal-delay-1 lg:order-1">
+                <div
+                  class="grid aspect-4/3 place-items-center rounded-[2.5rem] bg-pastel-purple p-8 sm:rounded-[3rem]"
+                >
+                  <div
+                    class="grid w-full max-w-md place-items-center rounded-[1.75rem] border-2 border-dashed border-pop-purple/30 bg-white/60 px-6 py-14 text-center"
+                  >
+                    <svg
+                      class="size-9 text-pop-purple/70"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      <rect x="3" y="3" width="18" height="18" rx="3" />
+                      <circle cx="8.5" cy="8.5" r="1.5" />
+                      <path d="m21 15-5-5L5 21" />
+                    </svg>
+                    <p class="mt-3 text-sm font-medium text-ink-700">
+                      Miejsce na zrzut ekranu
+                    </p>
+                    <p class="mt-1 text-xs text-ink-500">
+                      Ustawienia dostępności · 4:3
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- ================= Pricing ================= -->
+      <!-- ===================== Cennik ===================== -->
       <section
-        id="pricing"
-        aria-labelledby="pricing-heading"
-        class="border-y border-ink-900/10 bg-surface-muted"
+        id="cennik"
+        aria-labelledby="cennik-heading"
+        class="px-5 py-24 sm:px-8 sm:py-36"
       >
-        <div class="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
-          <div class="max-w-2xl">
-            <h2
-              id="pricing-heading"
-              class="text-3xl font-bold tracking-tight text-balance text-ink-900 sm:text-4xl"
+        <div class="mx-auto max-w-5xl">
+          <div class="reveal mx-auto max-w-3xl text-center">
+            <p
+              class="text-sm font-semibold tracking-widest text-pop-green uppercase"
             >
-              Lorem ipsum pretium
+              Cennik
+            </p>
+            <h2
+              id="cennik-heading"
+              class="mt-4 text-4xl font-extrabold tracking-tighter text-balance text-ink-900 sm:text-6xl"
+            >
+              Prosto i przewidywalnie.
             </h2>
-            <p class="mt-4 text-lg text-pretty text-ink-500">
+            <p class="mx-auto mt-6 max-w-xl text-lg text-pretty text-ink-500">
               Quis autem vel eum iure reprehenderit qui in ea voluptate velit
               esse quam nihil molestiae.
             </p>
           </div>
 
-          <div class="mt-12 grid gap-6 lg:grid-cols-2 lg:gap-8">
-            <!-- Plan: Basic -->
+          <div class="mt-16 grid gap-6 sm:mt-20 lg:grid-cols-2 lg:gap-8">
+            <!-- Start -->
             <div
-              class="flex flex-col rounded-2xl border border-ink-900/10 bg-surface p-6 sm:p-8"
+              class="reveal flex flex-col rounded-[2rem] border border-ink-900/10 bg-white p-8 sm:rounded-[2.5rem] sm:p-10"
             >
-              <h3 class="text-lg font-semibold text-ink-900">Basic</h3>
-              <p class="mt-2 text-sm text-ink-500">
+              <h3 class="text-xl font-semibold text-ink-900">Start</h3>
+              <p class="mt-2 text-ink-500">
                 Lorem ipsum dolor sit amet consectetur.
               </p>
-              <p class="mt-6 flex items-baseline gap-1.5">
-                <span class="text-4xl font-extrabold tracking-tight text-ink-900">
+              <p class="mt-8 flex items-baseline gap-2">
+                <span
+                  class="text-5xl font-extrabold tracking-tighter text-ink-900"
+                >
                   00
                 </span>
                 <span class="text-base font-medium text-ink-400">
-                  PLN / month
+                  zł / miesiąc
                 </span>
               </p>
 
-              <ul role="list" class="mt-8 flex-1 space-y-3 text-ink-500">
+              <ul role="list" class="mt-10 flex-1 space-y-4 text-ink-700">
                 <li class="flex gap-3">
                   <svg
-                    class="mt-0.5 size-5 shrink-0 text-brand-600"
+                    class="mt-1 size-5 shrink-0 text-brand-600"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -439,7 +919,7 @@
                 </li>
                 <li class="flex gap-3">
                   <svg
-                    class="mt-0.5 size-5 shrink-0 text-brand-600"
+                    class="mt-1 size-5 shrink-0 text-brand-600"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -455,7 +935,7 @@
                 </li>
                 <li class="flex gap-3">
                   <svg
-                    class="mt-0.5 size-5 shrink-0 text-brand-600"
+                    class="mt-1 size-5 shrink-0 text-brand-600"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -473,131 +953,252 @@
 
               <a
                 href="https://restolink.vercel.app/panel/"
-                class="mt-8 inline-flex items-center justify-center rounded-xl border border-ink-900/15 px-6 py-3 text-base font-semibold text-ink-900 transition-colors hover:border-ink-900/30 hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+                class="mt-10 inline-flex items-center justify-center rounded-full border border-ink-900/15 px-7 py-3.5 text-base font-semibold text-ink-900 transition-colors hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
               >
-                Choose Basic
+                Wybieram Start
               </a>
             </div>
 
-            <!-- Plan: Pro (highlighted) -->
+            <!-- Pro — gradient border via a 2px padded wrapper -->
             <div
-              class="relative flex flex-col rounded-2xl border-2 border-brand-600 bg-surface p-6 shadow-sm sm:p-8"
+              class="reveal reveal-delay-1 rounded-[2rem] bg-linear-to-b from-brand-500 via-brand-600 to-pop-blue p-0.5 shadow-2xl shadow-brand-600/15 sm:rounded-[2.5rem]"
             >
-              <p
-                class="absolute -top-3 left-6 rounded-full bg-brand-600 px-3 py-1 text-xs font-semibold tracking-wide text-white uppercase sm:left-8"
+              <div
+                class="relative flex h-full flex-col rounded-[calc(2rem-2px)] bg-white p-8 sm:rounded-[calc(2.5rem-2px)] sm:p-10"
               >
-                Most popular
-              </p>
+                <div class="flex items-center justify-between gap-4">
+                  <h3 class="text-xl font-semibold text-ink-900">Pro</h3>
+                  <p
+                    class="rounded-full bg-pastel-green px-3 py-1 text-xs font-semibold tracking-wide text-pop-green uppercase"
+                  >
+                    Najczęściej wybierany
+                  </p>
+                </div>
+                <p class="mt-2 text-ink-500">
+                  Excepteur sint occaecat cupidatat non proident.
+                </p>
+                <p class="mt-8 flex items-baseline gap-2">
+                  <span
+                    class="text-5xl font-extrabold tracking-tighter text-ink-900"
+                  >
+                    00
+                  </span>
+                  <span class="text-base font-medium text-ink-400">
+                    zł / miesiąc
+                  </span>
+                </p>
 
-              <h3 class="text-lg font-semibold text-ink-900">Pro</h3>
-              <p class="mt-2 text-sm text-ink-500">
-                Excepteur sint occaecat cupidatat non proident.
-              </p>
-              <p class="mt-6 flex items-baseline gap-1.5">
-                <span class="text-4xl font-extrabold tracking-tight text-ink-900">
-                  00
-                </span>
-                <span class="text-base font-medium text-ink-400">
-                  PLN / month
-                </span>
-              </p>
+                <ul role="list" class="mt-10 flex-1 space-y-4 text-ink-700">
+                  <li class="flex gap-3">
+                    <svg
+                      class="mt-1 size-5 shrink-0 text-brand-600"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      <path d="m5 13 4 4L19 7" />
+                    </svg>
+                    Wszystko z pakietu Start
+                  </li>
+                  <li class="flex gap-3">
+                    <svg
+                      class="mt-1 size-5 shrink-0 text-brand-600"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      <path d="m5 13 4 4L19 7" />
+                    </svg>
+                    Konsola Zamówień
+                  </li>
+                  <li class="flex gap-3">
+                    <svg
+                      class="mt-1 size-5 shrink-0 text-brand-600"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      <path d="m5 13 4 4L19 7" />
+                    </svg>
+                    Ut labore et dolore magna
+                  </li>
+                  <li class="flex gap-3">
+                    <svg
+                      class="mt-1 size-5 shrink-0 text-brand-600"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                      focusable="false"
+                    >
+                      <path d="m5 13 4 4L19 7" />
+                    </svg>
+                    Quis nostrud exercitation
+                  </li>
+                </ul>
 
-              <ul role="list" class="mt-8 flex-1 space-y-3 text-ink-500">
-                <li class="flex gap-3">
-                  <svg
-                    class="mt-0.5 size-5 shrink-0 text-brand-600"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                    focusable="false"
-                  >
-                    <path d="m5 13 4 4L19 7" />
-                  </svg>
-                  Omnia in Basic inclusa
-                </li>
-                <li class="flex gap-3">
-                  <svg
-                    class="mt-0.5 size-5 shrink-0 text-brand-600"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                    focusable="false"
-                  >
-                    <path d="m5 13 4 4L19 7" />
-                  </svg>
-                  Ut labore et dolore magna
-                </li>
-                <li class="flex gap-3">
-                  <svg
-                    class="mt-0.5 size-5 shrink-0 text-brand-600"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                    focusable="false"
-                  >
-                    <path d="m5 13 4 4L19 7" />
-                  </svg>
-                  Quis nostrud exercitation
-                </li>
-                <li class="flex gap-3">
-                  <svg
-                    class="mt-0.5 size-5 shrink-0 text-brand-600"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                    focusable="false"
-                  >
-                    <path d="m5 13 4 4L19 7" />
-                  </svg>
-                  Ullamco laboris nisi aliquip
-                </li>
-              </ul>
-
-              <a
-                href="https://restolink.vercel.app/panel/"
-                class="mt-8 inline-flex items-center justify-center rounded-xl bg-brand-600 px-6 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
-              >
-                Choose Pro
-              </a>
+                <a
+                  href="https://restolink.vercel.app/panel/"
+                  class="mt-10 inline-flex items-center justify-center rounded-full bg-brand-600 px-7 py-3.5 text-base font-semibold text-white shadow-lg shadow-brand-600/20 transition-all hover:bg-brand-700 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+                >
+                  Wybieram Pro
+                </a>
+              </div>
             </div>
           </div>
 
-          <p class="mt-8 text-sm text-ink-400">
-            Lorem ipsum dolor sit amet. Placeholder pricing — not final.
+          <p class="reveal mt-8 text-center text-sm text-ink-400">
+            Ceny zastępcze — nie są ostateczne.
           </p>
+        </div>
+      </section>
+
+      <!-- ===================== Kontakt ===================== -->
+      <section
+        id="kontakt"
+        aria-labelledby="kontakt-heading"
+        class="px-5 pb-24 sm:px-8 sm:pb-36"
+      >
+        <div class="mx-auto max-w-5xl">
+          <div
+            class="reveal overflow-hidden rounded-[2.5rem] bg-pastel-yellow px-6 py-14 sm:rounded-[3rem] sm:px-16 sm:py-20"
+          >
+            <div class="mx-auto max-w-xl">
+              <div class="text-center">
+                <h2
+                  id="kontakt-heading"
+                  class="text-4xl font-extrabold tracking-tighter text-balance text-ink-900 sm:text-5xl"
+                >
+                  Porozmawiajmy.
+                </h2>
+                <p class="mt-5 text-lg text-pretty text-ink-500">
+                  Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut
+                  odit aut fugit.
+                </p>
+              </div>
+
+              <!-- TODO: podłączyć `action` do endpointu (formularz jeszcze
+                   nigdzie nie wysyła danych). Walidacja jest natywna: `required`
+                   i `type="email"` działają bez JavaScriptu. -->
+              <form action="#" method="post" class="mt-10 space-y-5">
+                <div class="relative">
+                  <input
+                    id="cf-name"
+                    name="name"
+                    type="text"
+                    autocomplete="name"
+                    placeholder=" "
+                    required
+                    class="peer w-full rounded-2xl border border-ink-900/15 bg-white px-5 pt-7 pb-2.5 text-base text-ink-900 outline-none transition-colors placeholder:text-transparent focus:border-brand-600 focus:ring-1 focus:ring-brand-600"
+                  />
+                  <label
+                    for="cf-name"
+                    class="pointer-events-none absolute top-4.5 left-5 text-base text-ink-400 transition-all peer-focus:top-2 peer-focus:text-xs peer-focus:text-brand-700 peer-[:not(:placeholder-shown)]:top-2 peer-[:not(:placeholder-shown)]:text-xs"
+                  >
+                    Imię i nazwisko
+                  </label>
+                </div>
+
+                <div class="relative">
+                  <input
+                    id="cf-email"
+                    name="email"
+                    type="email"
+                    autocomplete="email"
+                    placeholder=" "
+                    required
+                    class="peer w-full rounded-2xl border border-ink-900/15 bg-white px-5 pt-7 pb-2.5 text-base text-ink-900 outline-none transition-colors placeholder:text-transparent focus:border-brand-600 focus:ring-1 focus:ring-brand-600"
+                  />
+                  <label
+                    for="cf-email"
+                    class="pointer-events-none absolute top-4.5 left-5 text-base text-ink-400 transition-all peer-focus:top-2 peer-focus:text-xs peer-focus:text-brand-700 peer-[:not(:placeholder-shown)]:top-2 peer-[:not(:placeholder-shown)]:text-xs"
+                  >
+                    Adres e-mail
+                  </label>
+                </div>
+
+                <div class="relative">
+                  <input
+                    id="cf-restaurant"
+                    name="restaurant"
+                    type="text"
+                    autocomplete="organization"
+                    placeholder=" "
+                    class="peer w-full rounded-2xl border border-ink-900/15 bg-white px-5 pt-7 pb-2.5 text-base text-ink-900 outline-none transition-colors placeholder:text-transparent focus:border-brand-600 focus:ring-1 focus:ring-brand-600"
+                  />
+                  <label
+                    for="cf-restaurant"
+                    class="pointer-events-none absolute top-4.5 left-5 text-base text-ink-400 transition-all peer-focus:top-2 peer-focus:text-xs peer-focus:text-brand-700 peer-[:not(:placeholder-shown)]:top-2 peer-[:not(:placeholder-shown)]:text-xs"
+                  >
+                    Nazwa lokalu (opcjonalnie)
+                  </label>
+                </div>
+
+                <div class="relative">
+                  <textarea
+                    id="cf-message"
+                    name="message"
+                    rows="4"
+                    placeholder=" "
+                    required
+                    class="peer w-full resize-y rounded-2xl border border-ink-900/15 bg-white px-5 pt-7 pb-3 text-base text-ink-900 outline-none transition-colors placeholder:text-transparent focus:border-brand-600 focus:ring-1 focus:ring-brand-600"
+                  ></textarea>
+                  <label
+                    for="cf-message"
+                    class="pointer-events-none absolute top-4.5 left-5 text-base text-ink-400 transition-all peer-focus:top-2 peer-focus:text-xs peer-focus:text-brand-700 peer-[:not(:placeholder-shown)]:top-2 peer-[:not(:placeholder-shown)]:text-xs"
+                  >
+                    Wiadomość
+                  </label>
+                </div>
+
+                <button
+                  type="submit"
+                  class="inline-flex w-full items-center justify-center rounded-full bg-ink-900 px-8 py-4 text-base font-semibold text-white transition-colors hover:bg-ink-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-900"
+                >
+                  Wyślij wiadomość
+                </button>
+
+                <p class="text-center text-sm text-ink-500">
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                </p>
+              </form>
+            </div>
+          </div>
         </div>
       </section>
     </main>
 
-    <!-- ================= Footer ================= -->
+    <!-- ===================== Footer ===================== -->
     <footer class="bg-ink-900 text-white/70">
-      <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+      <div class="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-16">
         <div class="flex flex-col gap-10 md:flex-row md:justify-between">
           <div class="max-w-sm">
             <div class="flex items-center gap-2.5">
               <span
-                class="grid size-9 place-items-center rounded-lg bg-brand-500 text-base font-bold text-white"
+                class="grid size-8 place-items-center rounded-full bg-brand-500 text-sm font-bold text-white"
                 aria-hidden="true"
               >
                 R
               </span>
-              <span class="text-lg font-bold tracking-tight text-white">
+              <span class="text-xl font-semibold tracking-tight text-white">
                 RestoLink
               </span>
             </div>
@@ -609,14 +1210,14 @@
 
           <div class="grid grid-cols-2 gap-10 sm:gap-16">
             <div>
-              <h2 class="text-sm font-semibold text-white">Legal</h2>
+              <h2 class="text-sm font-semibold text-white">Informacje</h2>
               <ul role="list" class="mt-4 space-y-3 text-sm">
                 <li>
                   <a
                     href="#"
                     class="rounded text-white/60 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-200"
                   >
-                    Terms of service
+                    Regulamin
                   </a>
                 </li>
                 <li>
@@ -624,7 +1225,7 @@
                     href="#"
                     class="rounded text-white/60 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-200"
                   >
-                    Privacy policy
+                    Polityka prywatności
                   </a>
                 </li>
                 <li>
@@ -632,21 +1233,21 @@
                     href="#"
                     class="rounded text-white/60 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-200"
                   >
-                    Cookie policy
+                    Polityka cookies
                   </a>
                 </li>
               </ul>
             </div>
 
             <div>
-              <h2 class="text-sm font-semibold text-white">Contact</h2>
+              <h2 class="text-sm font-semibold text-white">Kontakt</h2>
               <ul role="list" class="mt-4 space-y-3 text-sm">
                 <li>
                   <a
-                    href="mailto:hello@example.com"
+                    href="mailto:kontakt@example.com"
                     class="rounded text-white/60 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-200"
                   >
-                    hello@example.com
+                    kontakt@example.com
                   </a>
                 </li>
                 <li>
@@ -663,12 +1264,10 @@
           </div>
         </div>
 
-        <div
-          class="mt-12 border-t border-white/10 pt-8 text-sm text-white/50"
-        >
+        <div class="mt-12 border-t border-white/10 pt-8 text-sm text-white/50">
           <p>
-            &copy; <span data-current-year>2026</span> RestoLink. All rights
-            reserved.
+            &copy; <span data-current-year>2026</span> RestoLink. Wszelkie
+            prawa zastrzeżone.
           </p>
         </div>
       </div>
