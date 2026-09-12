@@ -15,6 +15,7 @@ Configuration comes exclusively from the environment — never hardcode keys:
 
 import logging
 import os
+import re
 
 import cloudinary
 import cloudinary.uploader
@@ -28,6 +29,16 @@ API_SECRET = os.getenv("CLOUDINARY_API_SECRET", "")
 
 #: Everything the app uploads lands under this Cloudinary folder.
 UPLOAD_FOLDER = "restolink"
+
+#: Params injected into every Cloudinary URL we hand out. `w_600` matches the
+#: frontend cropper's output size, while `q_auto`/`f_auto` let Cloudinary choose
+#: the quality and the codec (WebP/AVIF) per requesting browser.
+DELIVERY_TRANSFORMATION = "w_600,q_auto,f_auto"
+
+_CLOUDINARY_HOST = "res.cloudinary.com"
+_UPLOAD_MARKER = "/image/upload/"
+#: The `v1785868265` segment Cloudinary puts in front of the public id.
+_VERSION_RE = re.compile(r"^v\d+$")
 
 cloudinary.config(
     cloud_name=CLOUD_NAME,
@@ -51,13 +62,96 @@ def _is_data_uri(value: str) -> bool:
     return value.startswith("data:")
 
 
+def _split_upload_url(url: str) -> tuple[str, str] | None:
+    """Split a Cloudinary delivery URL around its `/image/upload/` marker.
+
+    Returns ``(everything up to and including the marker, the rest)``, or
+    ``None`` for anything that isn't a Cloudinary delivery URL — Data URIs,
+    externally hosted images, or a URL shape we don't recognise. Callers treat
+    ``None`` as "leave this value completely alone".
+    """
+    if _CLOUDINARY_HOST not in url:
+        return None
+    head, marker, tail = url.partition(_UPLOAD_MARKER)
+    if not marker or not tail:
+        return None
+    return head + marker, tail
+
+
+def _has_transformation(remainder: str) -> bool:
+    """True when the path after `/image/upload/` already carries params.
+
+    Cloudinary URLs are ``/upload/[<transformations>/]v<version>/<public_id>``,
+    so the first segment is a transformation unless it's the version. Uploads
+    from this app always include a version, which makes that check reliable
+    here; anything ambiguous is reported as "already transformed" so we err
+    towards leaving a URL untouched rather than mangling it.
+    """
+    first = remainder.split("/", 1)[0]
+    if not first or _VERSION_RE.match(first):
+        return False
+    return "_" in first
+
+
+def with_delivery_transformation(url: str | None) -> str | None:
+    """Add on-the-fly resize/compression params to a Cloudinary URL.
+
+    The backfill pushed the *originals* to Cloudinary — several are 2+ MB PNGs —
+    and the stored URL serves them byte for byte. Injecting the transformation
+    on the way out makes Cloudinary resize and re-encode on delivery (then cache
+    the result), which took the Pepik Pub menu from 13.1 MB of images to 0.5 MB
+    without re-uploading anything or touching the database.
+
+    Applying this is always safe: non-Cloudinary values pass through untouched,
+    and a URL that already carries params is returned as-is, so the function is
+    idempotent even if a value goes through it more than once.
+    """
+    if not url:
+        return url
+
+    split = _split_upload_url(url)
+    if split is None:
+        return url
+
+    prefix, remainder = split
+    if _has_transformation(remainder):
+        return url
+    return f"{prefix}{DELIVERY_TRANSFORMATION}/{remainder}"
+
+
+def without_delivery_transformation(url: str | None) -> str | None:
+    """Strip our own delivery params, recovering the canonical stored URL.
+
+    Saving a dish in the panel echoes its existing ``image_url`` straight back,
+    and by then the value has already been through
+    `with_delivery_transformation`. Normalising on write keeps the pristine
+    original in the database, so the transformation stays a presentation detail
+    that can be changed at any time. Only our exact param string is removed —
+    a transformation someone added by hand is left alone.
+    """
+    if not url:
+        return url
+
+    split = _split_upload_url(url)
+    if split is None:
+        return url
+
+    prefix, remainder = split
+    first, separator, rest = remainder.partition("/")
+    if first == DELIVERY_TRANSFORMATION and separator and rest:
+        return prefix + rest
+    return url
+
+
 async def upload_image_if_needed(image: str | None, *, folder: str) -> str | None:
     """Return a hosted image URL for `image`, uploading it only when necessary.
 
     - ``None`` / empty  -> ``None`` (dish simply has no photo).
-    - already an URL    -> returned untouched. This matters: editing a dish
-      without touching its photo sends the *existing* ``https://`` URL back, and
-      re-uploading that every save would be pure waste.
+    - already an URL    -> returned as-is, minus any delivery params we added on
+      the way out. This matters: editing a dish without touching its photo sends
+      the *existing* URL back, and re-uploading that every save would be pure
+      waste — while persisting it verbatim would bake presentation params into
+      the database.
     - a Data URI        -> uploaded to Cloudinary; its ``secure_url`` is returned.
 
     The Cloudinary SDK is synchronous, so the call is pushed to a worker thread
@@ -67,7 +161,7 @@ async def upload_image_if_needed(image: str | None, *, folder: str) -> str | Non
         return None
 
     if not _is_data_uri(image):
-        return image
+        return without_delivery_transformation(image)
 
     if not is_configured():
         # Don't hard-fail local/dev environments that have no credentials —

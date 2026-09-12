@@ -10,10 +10,24 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, PlainSerializer
 
+from .cloudinary_service import with_delivery_transformation
 from .models import RestaurantStatus
+
+#: An image column on its way out to a client.
+#:
+#: The database holds the canonical Cloudinary URL, which serves the original
+#: full-size file. Resizing and re-encoding are a *delivery* concern, so the
+#: params are injected here, at serialization time, instead of being baked into
+#: stored data — every response model that exposes an image gets the cheap
+#: variant for free, and the transformation can be retuned in one place without
+#: a migration or a re-upload. See `cloudinary_service` for the mechanics.
+HostedImageUrl = Annotated[
+    str | None, PlainSerializer(with_delivery_transformation)
+]
 
 # --------------------------------------------------------------------------- #
 # Packages
@@ -120,7 +134,7 @@ class ThemeSettings(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    logo_url: str | None
+    logo_url: HostedImageUrl
     primary_color: str
     background_color: str
     font_family: str
@@ -161,7 +175,7 @@ class MenuItemResponse(BaseModel):
     allergens: list[str]
     tags: list[str]
     is_available: bool
-    image_url: str | None
+    image_url: HostedImageUrl
 
 
 class MenuCategoryCreate(BaseModel):
