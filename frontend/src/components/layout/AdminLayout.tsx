@@ -12,6 +12,7 @@ import Stack from '@mui/material/Stack';
 import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded';
 import RestaurantRoundedIcon from '@mui/icons-material/RestaurantRounded';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { LogoutButton } from '../auth/LogoutButton';
 
 const DRAWER_WIDTH = 264;
 
@@ -44,6 +45,8 @@ export function AdminLayout() {
               </Typography>
             </Box>
           </Stack>
+          <Box sx={{ flexGrow: 1 }} />
+          <LogoutButton scope="admin" />
         </Toolbar>
       </AppBar>
 

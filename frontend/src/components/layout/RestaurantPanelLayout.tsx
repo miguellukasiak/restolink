@@ -18,6 +18,7 @@ import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import RestaurantRoundedIcon from '@mui/icons-material/RestaurantRounded';
 import { NavLink, Outlet, useLocation, useParams } from 'react-router-dom';
 import { useRestaurantInfo } from '../../hooks/useRestaurantInfo';
+import { LogoutButton } from '../auth/LogoutButton';
 import { useSnackbar } from '../feedback/SnackbarProvider';
 import {
   PAYMENT_PENDING_TOAST,
@@ -88,6 +89,7 @@ export function RestaurantPanelLayout() {
             label={`ID: ${restaurantId.slice(0, 8)}…`}
             sx={{ fontFamily: 'monospace', display: { xs: 'none', sm: 'inline-flex' } }}
           />
+          <LogoutButton scope="restaurant" />
         </Toolbar>
       </AppBar>
 

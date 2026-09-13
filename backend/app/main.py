@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .database import AsyncSessionLocal, engine
 from .models import Base
-from .routers import admin, panel, public
+from .routers import admin, auth, panel, public
 from .seed import seed_if_empty
 
 
@@ -45,6 +45,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router)
 app.include_router(admin.router)
 app.include_router(panel.router)
 app.include_router(public.router)

@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from ..database import get_db
+from ..dependencies import require_admin
 from ..models import (
     PaymentHistory,
     PaymentMethod,
@@ -28,7 +29,13 @@ from ..schemas import (
     UpdatedRestaurant,
 )
 
-router = APIRouter(prefix="/api/v1/admin", tags=["Admin"])
+# These routes list every customer, create restaurants and record payments, so
+# the whole router sits behind the super-admin token.
+router = APIRouter(
+    prefix="/api/v1/admin",
+    tags=["Admin"],
+    dependencies=[Depends(require_admin)],
+)
 
 
 async def _get_restaurant_with_package(

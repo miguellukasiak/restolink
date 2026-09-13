@@ -85,6 +85,20 @@ class Restaurant(TimestampSoftDeleteMixin, Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     contact_email: Mapped[str] = mapped_column(String(255), nullable=False)
     contact_phone: Mapped[str] = mapped_column(String(50), nullable=False)
+
+    # --- Sign-in credentials -------------------------------------------------
+    # `email` is the *login identity* and is deliberately separate from
+    # `contact_email`, which is public-facing contact data an owner may want to
+    # change or publish without touching how they sign in. Both are nullable so
+    # restaurants created before authentication existed stay valid; a row with
+    # no credentials simply cannot log in.
+    #
+    # Postgres allows many NULLs under a UNIQUE constraint, so unset rows do
+    # not collide with each other.
+    email: Mapped[str | None] = mapped_column(
+        String(255), unique=True, index=True, nullable=True
+    )
+    hashed_password: Mapped[str | None] = mapped_column(String(255), nullable=True)
     package_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("subscription_package.id"), nullable=False
     )
@@ -117,6 +131,39 @@ class Restaurant(TimestampSoftDeleteMixin, Base):
         ),
         order_by="MenuCategory.sort_order",
         viewonly=True,
+    )
+
+
+class PasswordReset(Base):
+    """A single-use, short-lived password reset grant.
+
+    Only the SHA-256 *hash* of the token is stored: the raw value exists in the
+    email and nowhere else, so a leaked database dump cannot be replayed to take
+    over an account.
+
+    Rows are hard-deleted rather than soft-deleted — unlike the rest of the
+    schema. A soft-deleted credential is still a credential, and keeping spent
+    tokens around only widens the window for mistakes. `used_at` therefore does
+    not exist either; consumption means deletion.
+    """
+
+    __tablename__ = "password_reset"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    restaurant_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("restaurant.id"), nullable=False, index=True
+    )
+    #: SHA-256 of the raw token, hex-encoded — always 64 characters.
+    token_hash: Mapped[str] = mapped_column(
+        String(64), unique=True, index=True, nullable=False
+    )
+    expires_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
     )
 
 

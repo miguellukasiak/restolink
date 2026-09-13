@@ -1,5 +1,11 @@
 import axios, { AxiosError } from 'axios';
 import type { InternalAxiosRequestConfig } from 'axios';
+import {
+  clearAdminSession,
+  clearRestaurantSession,
+  getAdminSession,
+  getRestaurantSession,
+} from './authStorage';
 
 /**
  * Shared Axios instance pointed at the FastAPI backend.
@@ -23,6 +29,36 @@ export const api = axios.create({
 interface RetriableConfig extends InternalAxiosRequestConfig {
   _retried?: boolean;
 }
+
+/**
+ * Which session, if any, a given API path is authenticated by.
+ *
+ * The two tokens are kept apart rather than sending "whatever we have": the
+ * backend rejects a restaurant token on an admin route and vice versa, and
+ * sending the admin token to an owner endpoint would leak the far more
+ * powerful credential to a request that has no business seeing it.
+ */
+function sessionScopeFor(url: string | undefined): 'admin' | 'restaurant' | null {
+  if (!url) return null;
+  if (url.startsWith('/api/v1/admin')) return 'admin';
+  if (url.startsWith('/api/v1/restaurants')) return 'restaurant';
+  // `/api/v1/auth/*` and `/api/v1/public/*` are deliberately unauthenticated.
+  return null;
+}
+
+/** Attaches the bearer token that matches the endpoint being called. */
+api.interceptors.request.use((config) => {
+  const scope = sessionScopeFor(config.url);
+  if (!scope) return config;
+
+  const token =
+    scope === 'admin' ? getAdminSession()?.token : getRestaurantSession()?.token;
+
+  if (token) {
+    config.headers.set('Authorization', `Bearer ${token}`);
+  }
+  return config;
+});
 
 /** Was this failure a timeout or a total no-response (i.e. a cold start)? */
 function isColdStartFailure(error: AxiosError): boolean {
@@ -48,9 +84,47 @@ api.interceptors.response.use(
       return api(config);
     }
 
+    handleExpiredSession(error);
+
     return Promise.reject(error);
   },
 );
+
+/**
+ * A 401 from a protected endpoint means the token is gone, expired or was
+ * revoked server-side — the account was blocked or deleted while the session
+ * was still live. Drop the stale credential and send the user to the right
+ * login screen.
+ *
+ * A 401 from `/api/v1/auth/*` is *not* this: it is the normal "wrong password"
+ * answer, and bouncing the page would throw away the error the form is about
+ * to display.
+ */
+function handleExpiredSession(error: AxiosError): void {
+  if (error.response?.status !== 401) return;
+
+  const scope = sessionScopeFor(error.config?.url);
+  if (!scope) return;
+
+  if (scope === 'admin') {
+    clearAdminSession();
+    redirectToLogin('/hq-access');
+  } else {
+    clearRestaurantSession();
+    redirectToLogin('/login');
+  }
+}
+
+function redirectToLogin(path: string): void {
+  if (window.location.pathname === path) return;
+
+  // The interceptor lives outside the Router, so navigation goes through the
+  // browser. `next` lets the login screen return the user where they were.
+  const next = encodeURIComponent(
+    window.location.pathname + window.location.search,
+  );
+  window.location.replace(`${path}?next=${next}`);
+}
 
 interface FastApiErrorBody {
   detail?: string | Array<{ msg?: string }>;

@@ -10,12 +10,13 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, Any
 
-from pydantic import BaseModel, ConfigDict, Field, PlainSerializer
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, PlainSerializer
 
 from .cloudinary_service import with_delivery_transformation
 from .models import RestaurantStatus
+from .security import MAX_PASSWORD_BYTES
 
 #: An image column on its way out to a client.
 #:
@@ -212,3 +213,52 @@ class PublicRestaurant(BaseModel):
 class PublicMenuResponse(BaseModel):
     restaurant: PublicRestaurant
     categories: list[MenuCategoryResponse]
+
+
+# --------------------------------------------------------------------------- #
+# Auth
+# --------------------------------------------------------------------------- #
+
+
+def _password_field(description: str) -> Any:
+    """A password input, bounded at both ends.
+
+    The lower bound is a real (if modest) policy. The upper bound is not
+    cosmetic: bcrypt hashes only the first 72 bytes and silently drops the
+    rest, so without it two different long passwords would unlock the same
+    account. Rejecting them is the only honest option — quietly truncating
+    would let an owner believe in a strength they do not have.
+    """
+    return Field(min_length=8, max_length=MAX_PASSWORD_BYTES, description=description)
+
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=1, max_length=MAX_PASSWORD_BYTES)
+
+
+class TokenResponse(BaseModel):
+    """OAuth2-shaped so the frontend needs no special casing."""
+
+    access_token: str
+    token_type: str = "bearer"
+    expires_in: int
+    restaurant_id: uuid.UUID | None = None
+    restaurant_name: str | None = None
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str = Field(min_length=1, max_length=512)
+    password: str = _password_field("Nowe hasło (min. 8 znaków).")
+
+
+class AdminLoginRequest(BaseModel):
+    password: str = Field(min_length=1, max_length=512)
+
+
+class MessageResponse(BaseModel):
+    message: str

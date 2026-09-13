@@ -10,6 +10,7 @@ from sqlalchemy.orm import selectinload
 
 from ..cloudinary_service import ImageUploadError, upload_image_if_needed
 from ..database import get_db
+from ..dependencies import verify_restaurant_access
 from ..models import MenuCategory, MenuItem, Restaurant
 from ..schemas import (
     MenuCategoryCreate,
@@ -21,7 +22,16 @@ from ..schemas import (
     RestaurantThemeUpdate,
 )
 
-router = APIRouter(prefix="/api/v1/restaurants", tags=["Panel"])
+# Every route below is addressed as `/{restaurant_id}/…`, so the guard is
+# applied once here rather than repeated eight times. It both authenticates the
+# bearer token and checks that the token's restaurant matches the one in the
+# path — a router-level dependency means a future endpoint cannot be added
+# unprotected by forgetting to decorate it.
+router = APIRouter(
+    prefix="/api/v1/restaurants",
+    tags=["Panel"],
+    dependencies=[Depends(verify_restaurant_access)],
+)
 
 
 async def _host_image(image: str | None, *, folder: str) -> str | None:
