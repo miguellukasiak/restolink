@@ -12,6 +12,7 @@ import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import HealthAndSafetyRoundedIcon from '@mui/icons-material/HealthAndSafetyRounded';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { revealHeaderSx } from './reveal';
 
 interface MenuHeaderProps {
   restaurantName: string;
@@ -113,7 +114,11 @@ export function MenuHeader({
   }
 
   return (
-    <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center', py: 1 }}>
+    <Stack
+      direction="row"
+      spacing={0.5}
+      sx={{ alignItems: 'center', py: 1, ...revealHeaderSx }}
+    >
       <Avatar
         src={logoUrl ?? undefined}
         aria-label={t('restaurantLogo', { name: restaurantName })}

@@ -16,7 +16,8 @@ import { usePublicMenu } from '../../hooks/usePublicMenu';
 import { getApiErrorMessage } from '../../services/api';
 import { resolveAccessState } from '../../constants/subscription';
 import { PublicMenuView } from '../../components/public/PublicMenuView';
-import { PublicMenuSkeleton } from '../../components/public/PublicMenuSkeleton';
+import { MenuSkeleton } from '../../components/public/MenuSkeleton';
+import { revealSx } from '../../components/public/reveal';
 import { ItemDetailModal } from '../../components/public/ItemDetailModal';
 import { AllergyGateModal } from '../../components/public/AllergyGateModal';
 
@@ -202,7 +203,7 @@ export function PublicMenuPage() {
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       <CssBaseline />
 
-      {menu.isLoading && <PublicMenuSkeleton />}
+      {menu.isLoading && <MenuSkeleton />}
 
       {menu.isError && (
         <Box sx={{ maxWidth: 960, mx: 'auto', px: 2 }}>
@@ -232,7 +233,9 @@ export function PublicMenuPage() {
       )}
 
       {access === 'ACTIVE' && menu.data && (
-        <>
+        // Fades in over the skeleton it replaces, so the menu resolves instead
+        // of snapping. See `reveal.ts` for why this can never hide the content.
+        <Box sx={revealSx}>
           <PublicMenuView
             restaurantName={menu.data.restaurant.name}
             logoUrl={menu.data.restaurant.theme.logo_url}
@@ -256,7 +259,7 @@ export function PublicMenuPage() {
             onSkip={handleSkipAllergens}
             onClose={handleCloseGate}
           />
-        </>
+        </Box>
       )}
     </Box>
   );

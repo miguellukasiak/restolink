@@ -36,7 +36,7 @@ import { useSnackbar } from '../../components/feedback/SnackbarProvider';
 import { getApiErrorMessage } from '../../services/api';
 import { createRestaurantTheme } from '../../components/public/RestaurantThemeProvider';
 import { PublicMenuView } from '../../components/public/PublicMenuView';
-import { PublicMenuSkeleton } from '../../components/public/PublicMenuSkeleton';
+import { MenuSkeleton } from '../../components/public/MenuSkeleton';
 
 const HEX_PATTERN = /^#[0-9a-fA-F]{6}$/;
 
@@ -268,7 +268,7 @@ export function AppearancePage() {
   // saves/refetches never flash back to this state).
   const preview =
     menu.isLoading || !menu.data ? (
-      <PublicMenuSkeleton />
+      <MenuSkeleton />
     ) : (
       <ThemeProvider theme={previewTheme}>
         <Box sx={{ pointerEvents: 'none', bgcolor: 'background.default' }}>

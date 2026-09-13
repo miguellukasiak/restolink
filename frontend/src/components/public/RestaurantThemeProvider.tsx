@@ -6,6 +6,7 @@ import { ThemeProvider, createTheme, alpha } from '@mui/material/styles';
 import { usePublicMenu } from '../../hooks/usePublicMenu';
 import { getFontStack } from '../../constants/menu';
 import { getContrastingTextColor, isDarkColor } from '../../utils/colors';
+import { recallMenuTheme, rememberMenuTheme } from '../../utils/menuThemeMemory';
 import type { RestaurantThemeUpdate } from '../../types';
 
 /**
@@ -115,9 +116,20 @@ export function RestaurantThemeProvider({ children }: { children: ReactNode }) {
     };
   }, [language]);
 
+  const loaded = menu.data?.restaurant.theme;
+
+  // Remember what this restaurant looks like, so the next visit can paint its
+  // colours before the payload arrives.
+  useEffect(() => {
+    if (loaded) rememberMenuTheme(restaurantId, loaded);
+  }, [restaurantId, loaded]);
+
   const theme = useMemo(
-    () => createRestaurantTheme(menu.data?.restaurant.theme),
-    [menu.data?.restaurant.theme],
+    // While loading, fall back to the last theme we saw rather than the global
+    // default. That is what stops a dark restaurant's menu from flashing light
+    // — the skeleton and the page behind it start in the right colours.
+    () => createRestaurantTheme(loaded ?? recallMenuTheme(restaurantId)),
+    [loaded, restaurantId],
   );
 
   return <ThemeProvider theme={theme}>{children}</ThemeProvider>;
