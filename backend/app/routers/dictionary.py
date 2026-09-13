@@ -5,10 +5,8 @@ router sits behind `verify_restaurant_access` — which checks both that the
 bearer token is valid and that it belongs to the restaurant named in the path.
 """
 
-import asyncio
-import html
 import logging
-import re
+import os
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -45,16 +43,20 @@ router = APIRouter(
     dependencies=[Depends(verify_restaurant_access)],
 )
 
-#: Seconds between two draft translations. The free endpoint refuses Render's
-#: IPs outright, so this will not rescue it there — but on a connection it does
-#: answer, spacing the calls out is what keeps it answering. The owner is
-#: watching a spinner, not a guest, so the wait is affordable.
-AUTO_TRANSLATE_DELAY_SECONDS = 1.5
+#: DeepL wants uppercase targets, and refuses a bare "EN" — it insists on a
+#: regional variant so the caller, not the engine, decides which English. British
+#: English, because the guests this exists for are travellers in Europe.
+_DEEPL_TARGET = {
+    "en": "EN-GB",
+    "de": "DE",
+    "fr": "FR",
+    "es": "ES",
+}
 
-#: Ceiling on one drafting run, so a hung endpoint cannot hold the request open.
-AUTO_TRANSLATE_BUDGET_SECONDS = 180.0
-
-_WHITESPACE = re.compile(r"\s+")
+#: Source codes have no regional variants, so this is just an uppercase pass —
+#: guarded against a `base_language` DeepL does not know, where passing nothing
+#: and letting it auto-detect is better than erroring.
+_DEEPL_SOURCE = {"pl": "PL", "en": "EN", "de": "DE", "fr": "FR", "es": "ES"}
 
 
 def _require_language(raw: str) -> str:
@@ -216,20 +218,57 @@ async def save_dictionary(
     return await get_dictionary(restaurant_id, db, language)
 
 
-def _clean(text: str) -> str:
-    """Undo the HTML escaping the free translators apply, and tidy whitespace.
+# --------------------------------------------------------------------------- #
+# Draft translations (DeepL)
+# --------------------------------------------------------------------------- #
 
-    MyMemory hands back `Plats principaux&#xA0;:`; React escapes on output, so
-    that would reach the owner's input box as the literal characters `&#xA0;`.
+
+def _deepl_key() -> str:
+    """The API key, or a 500 that says exactly what is missing.
+
+    A configuration gap, not a user error — hence 500 rather than 4xx, and a
+    message the owner can forward to whoever administers the deployment instead
+    of a bare "translation failed".
     """
-    return _WHITESPACE.sub(" ", html.unescape(text)).strip()
+    key = os.getenv("DEEPL_API_KEY", "").strip()
+    if not key:
+        logger.error("DEEPL_API_KEY is not set — auto-translate is unavailable.")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=(
+                "Automatyczne tłumaczenie nie jest skonfigurowane "
+                "(brak klucza DEEPL_API_KEY). Tłumaczenia można wpisać ręcznie."
+            ),
+        )
+    return key
 
 
-def _translate_one(text: str, target_lang: str) -> str | None:
-    """One draft translation. Blocking, so it runs in a worker thread."""
-    from deep_translator import GoogleTranslator
+def _translate_batch(
+    texts: list[str], target_lang: str, source_lang: str | None, auth_key: str
+) -> list[str]:
+    """One DeepL call for the whole list. Blocking, so it runs in a thread.
 
-    return GoogleTranslator(source="auto", target=target_lang).translate(text)
+    `translate_text` accepts a sequence and returns one result per input in the
+    same order, batched by the API itself — which is why the delays, retries and
+    manual chunking the previous free-endpoint scraper needed are all gone.
+
+    `source_lang` is passed when we know it. DeepL detects well on prose but
+    poorly on the two-word fragments a menu is full of: "Sok" is Polish for
+    juice and also a plausible fragment in several other languages, and telling
+    it the answer is cheaper than letting it guess.
+    """
+    import deepl
+
+    translator = deepl.Translator(auth_key)
+    results = translator.translate_text(
+        texts, target_lang=target_lang, source_lang=source_lang
+    )
+    # A single string in gives a single result out; a list always gives a list.
+    # We always pass a list, but normalising costs one line and removes a whole
+    # class of "sometimes it is not iterable" bug.
+    if not isinstance(results, list):
+        results = [results]
+    return [result.text for result in results]
 
 
 @router.post("/auto-translate", response_model=AutoTranslateResponse)
@@ -240,17 +279,15 @@ async def auto_translate(
 ) -> AutoTranslateResponse:
     """Draft translations for review. **Nothing here is saved.**
 
-    That is the whole point of the redesign. Machine output goes to the owner,
-    who corrects it and presses save; it never reaches a guest unread. During
-    testing this translator rendered "Smażony ser" as "Gekochter Käse" —
-    *boiled* cheese — which is exactly the kind of error a human catches in a
-    second and a guest never does.
-
-    Requests are made strictly one at a time with a delay between them. A phrase
-    that fails is reported in `failed` and the run continues: one refused draft
-    should not cost the owner the other forty.
+    That is the point of this screen. Machine output goes to the owner, who
+    corrects it and presses save; it never reaches a guest unread. The engine
+    that preceded DeepL rendered "Smażony ser" as "Gekochter Käse" — *boiled*
+    cheese — which is exactly the kind of error a human catches in a second and
+    a guest never does. DeepL is much better, but "much better" is still not
+    "unsupervised".
     """
     language = _require_language(payload.target_lang)
+    auth_key = _deepl_key()
 
     restaurant = await db.get(
         Restaurant, restaurant_id, options=[noload(Restaurant.package)]
@@ -262,54 +299,81 @@ async def auto_translate(
     if not wanted:
         return AutoTranslateResponse(target_lang=language, entries=[], failed=[])
 
-    loop = asyncio.get_running_loop()
-    deadline = loop.time() + AUTO_TRANSLATE_BUDGET_SECONDS
+    target = _DEEPL_TARGET[language]
+    source = _DEEPL_SOURCE.get(restaurant.base_language)
+
+    try:
+        translations = await run_in_threadpool(
+            _translate_batch, wanted, target, source, auth_key
+        )
+    except Exception as exc:  # noqa: BLE001 — mapped by type below
+        raise _translation_failure(exc) from exc
 
     entries: list[DictionaryEntry] = []
     failed: list[str] = []
 
-    for index, text in enumerate(wanted):
-        if loop.time() > deadline:
-            # Out of budget: everything still untried is reported as failed so
-            # the owner sees exactly which rows they still need to fill.
-            failed.extend(wanted[index:])
-            logger.info(
-                "Auto-translate budget spent after %d/%d phrase(s) → %s",
-                index,
-                len(wanted),
-                language,
+    for original, translated in zip(wanted, translations, strict=False):
+        draft = translated.strip() if isinstance(translated, str) else ""
+        if draft:
+            entries.append(
+                DictionaryEntry(original_text=original, translated_text=draft)
             )
-            break
+        else:
+            failed.append(original)
 
-        # Space the calls out, but not before the first — there is nothing yet
-        # to space it from.
-        if index:
-            await asyncio.sleep(AUTO_TRANSLATE_DELAY_SECONDS)
-
-        try:
-            raw = await run_in_threadpool(_translate_one, text, language)
-        except Exception as exc:  # noqa: BLE001 — the wrapper raises many types
-            logger.warning(
-                "Auto-translate failed for one phrase (%s) → %s",
-                type(exc).__name__,
-                language,
-            )
-            failed.append(text)
-            continue
-
-        draft = _clean(raw) if isinstance(raw, str) else ""
-        if not draft:
-            failed.append(text)
-            continue
-
-        entries.append(DictionaryEntry(original_text=text, translated_text=draft))
+    # Defensive: DeepL returns one result per input, but a short list would
+    # otherwise drop phrases silently and leave the owner wondering why some
+    # rows stayed empty.
+    if len(translations) < len(wanted):
+        failed.extend(wanted[len(translations) :])
 
     logger.info(
-        "Auto-translate drafted %d/%d phrase(s) → %s",
+        "DeepL drafted %d/%d phrase(s) %s → %s",
         len(entries),
         len(wanted),
-        language,
+        source or "auto",
+        target,
     )
-    return AutoTranslateResponse(
-        target_lang=language, entries=entries, failed=failed
+    return AutoTranslateResponse(target_lang=language, entries=entries, failed=failed)
+
+
+def _translation_failure(exc: Exception) -> HTTPException:
+    """Turn a DeepL error into a message that says what to do about it.
+
+    The distinction that matters is whose problem it is: a bad key or an empty
+    quota is ours to fix and reads as 500, while the API being unreachable or
+    busy is upstream's and reads as 502. Either way the owner keeps their typed
+    translations — this endpoint never saves, so a failure costs them nothing
+    but the drafts.
+    """
+    import deepl
+
+    if isinstance(exc, deepl.AuthorizationException):
+        logger.error("DeepL rejected the API key.")
+        return HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Klucz DeepL został odrzucony. Sprawdź konfigurację serwera.",
+        )
+
+    if isinstance(exc, deepl.QuotaExceededException):
+        logger.error("DeepL translation quota exhausted.")
+        return HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=(
+                "Wyczerpano miesięczny limit tłumaczeń DeepL. "
+                "Tłumaczenia można wpisać ręcznie."
+            ),
+        )
+
+    if isinstance(exc, deepl.TooManyRequestsException):
+        logger.warning("DeepL rate-limited the request.")
+        return HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="DeepL chwilowo odrzuca żądania. Spróbuj ponownie za chwilę.",
+        )
+
+    logger.exception("DeepL translation failed")
+    return HTTPException(
+        status_code=status.HTTP_502_BAD_GATEWAY,
+        detail="Nie udało się pobrać tłumaczeń. Spróbuj ponownie za chwilę.",
     )

@@ -38,8 +38,9 @@ const LANGUAGES = [
  *
  * This screen exists because machine translation was not good enough for a
  * menu: the free translator rendered "Smażony ser" as "Gekochter Käse" —
- * *boiled* cheese. Auto-translate still lives here, but only as a first draft
- * the owner corrects; nothing reaches a guest until they press save.
+ * *boiled* cheese. Auto-translate now goes through DeepL, which is markedly
+ * better, but it is still only a first draft the owner corrects; nothing
+ * reaches a guest until they press save.
  */
 export function DictionaryPage() {
   const { restaurantId = '' } = useParams<{ restaurantId: string }>();
@@ -243,9 +244,8 @@ export function DictionaryPage() {
 
               {auto.isPending && (
                 <Alert severity="info" sx={{ mt: 2 }}>
-                  Tłumaczenie idzie po jednej frazie z przerwami, żeby nie
-                  przekroczyć limitów darmowej usługi — przy długim menu potrwa
-                  to nawet kilkadziesiąt sekund. Nie zamykaj tej karty.
+                  Pobieram propozycje z DeepL — to potrwa chwilę. Nic nie
+                  zostanie zapisane, dopóki sam(a) tego nie zatwierdzisz.
                 </Alert>
               )}
 

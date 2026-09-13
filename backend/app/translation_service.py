@@ -14,8 +14,9 @@ forgives; it is a different dish, and often enough an allergy-relevant one. A
 menu is the one text a restaurant cannot afford to have approximately right.
 
 So the owner writes the translations, in the panel, and this module only reads
-them. `deep-translator` survives in `dictionary.py` as a *draft* generator the
-owner reviews before saving — never as something that reaches a guest unread.
+them. Machine translation survives in `dictionary.py` — now through DeepL's
+official API rather than a scraper — as a *draft* generator the owner reviews
+before saving, never as something that reaches a guest unread.
 """
 
 import hashlib

@@ -55,9 +55,10 @@ export async function saveDictionary(
 /**
  * POST — machine drafts for the owner to review. **Nothing is saved.**
  *
- * The backend makes these one at a time with a delay, so a long list takes a
- * while; the caller is expected to show a spinner. The 30s default timeout on
- * the shared axios instance is far too short for that, hence the override.
+ * One DeepL call for the whole list, so this returns in about a second. The
+ * shared instance's 30s default is plenty; the previous 210s override existed
+ * for a free endpoint that had to be fed one phrase at a time with delays
+ * between them, and is gone with it.
  */
 export async function autoTranslate(
   restaurantId: string,
@@ -67,7 +68,6 @@ export async function autoTranslate(
   const { data } = await api.post<AutoTranslateResponse>(
     `${base(restaurantId)}/auto-translate`,
     { target_lang: targetLang, texts },
-    { timeout: 210_000 },
   );
   return data;
 }

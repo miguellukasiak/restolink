@@ -13,7 +13,9 @@ passlib[bcrypt]>=1.7.4
 bcrypt<4.1
 pyjwt>=2.8
 resend>=2.0
-# Menu translation. Wraps Google Translate's *free web* endpoint — no API key,
-# but also no SLA: it is undocumented, rate-limited and can block an IP. The
-# TranslationCache table exists so each string is fetched at most once.
-deep-translator>=1.11
+# Draft translations for the owner's dictionary. The official DeepL client,
+# replacing a scraper of Google's free web endpoint — which answered
+# TooManyRequests on the first call from Render's datacenter IPs, and whose
+# output was not good enough for a menu regardless. Needs DEEPL_API_KEY; the
+# free tier is 500k characters a month, which a menu does not come close to.
+deepl>=1.22
