@@ -125,8 +125,8 @@ export function PublicMenuView({
           borderColor: 'divider',
         }}
       >
-        <Box sx={{ maxWidth: 960, mx: 'auto', px: 2 }}>
-          <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', py: 1.5 }}>
+        <Box sx={{ maxWidth: 1200, mx: 'auto', px: 1.5 }}>
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center', py: 1 }}>
             <Avatar
               src={logoUrl ?? undefined}
               aria-label={t('restaurantLogo', { name: restaurantName })}
@@ -134,8 +134,9 @@ export function PublicMenuView({
                 bgcolor: (theme) => alpha(theme.palette.primary.main, 0.12),
                 color: 'primary.main',
                 fontWeight: 700,
-                width: 48,
-                height: 48,
+                width: 36,
+                height: 36,
+                fontSize: 14,
                 border: '2px solid',
                 borderColor: (theme) => alpha(theme.palette.primary.main, 0.3),
               }}
@@ -211,13 +212,13 @@ export function PublicMenuView({
         {query.trim() ? t('resultsFound', { count: resultsCount }) : ''}
       </Box>
 
-      <Box component="main" sx={{ maxWidth: 960, mx: 'auto', px: 2, pb: 8 }}>
+      <Box component="main" sx={{ maxWidth: 1200, mx: 'auto', px: 1.5, pb: 6 }}>
         {query.trim() && resultsCount === 0 && (
           <Stack
             spacing={1.5}
-            sx={{ mt: 8, alignItems: 'center', color: 'text.secondary' }}
+            sx={{ mt: 5, alignItems: 'center', color: 'text.secondary' }}
           >
-            <SearchOffRoundedIcon sx={{ fontSize: 52, opacity: 0.4 }} />
+            <SearchOffRoundedIcon sx={{ fontSize: 44, opacity: 0.4 }} />
             <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
               {t('emptySearch', { query: query.trim() })}
             </Typography>
@@ -226,8 +227,8 @@ export function PublicMenuView({
 
         {/* Everything hidden purely by the allergy filter — offer a way back. */}
         {!query.trim() && resultsCount === 0 && selectedAllergens.length > 0 && (
-          <Stack spacing={2} sx={{ mt: 8, alignItems: 'center', color: 'text.secondary' }}>
-            <HealthAndSafetyRoundedIcon sx={{ fontSize: 52, opacity: 0.4 }} />
+          <Stack spacing={2} sx={{ mt: 5, alignItems: 'center', color: 'text.secondary' }}>
+            <HealthAndSafetyRoundedIcon sx={{ fontSize: 44, opacity: 0.4 }} />
             <Typography variant="subtitle1" sx={{ fontWeight: 600, textAlign: 'center' }}>
               Żadne danie nie spełnia Twoich filtrów alergenów.
             </Typography>
@@ -249,21 +250,37 @@ export function PublicMenuView({
             <Box
               component="section"
               aria-labelledby={`category-heading-${category.id}`}
-              sx={{ pt: 4 }}
+              sx={{ pt: 2.5 }}
             >
               <Typography
-                variant="h5"
                 component="h2"
                 id={`category-heading-${category.id}`}
-                gutterBottom
+                sx={{
+                  // Was `variant="h5"` in the heading serif — handsome, but it
+                  // ate close to 40px per category on a phone. Kept clearly
+                  // dominant over the 14px dish names without the bulk.
+                  fontSize: { xs: 17, sm: 20 },
+                  fontWeight: 700,
+                  letterSpacing: '-0.01em',
+                  mb: 1,
+                }}
               >
                 {category.name}
               </Typography>
               <Box
                 sx={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-                  gap: 2,
+                  // Fixed column counts rather than `auto-fill minmax()`: the
+                  // old rule could drop to a single column on a narrow phone,
+                  // which is exactly the low-density layout being replaced.
+                  // Two-up is guaranteed at every width.
+                  gridTemplateColumns: {
+                    xs: 'repeat(2, minmax(0, 1fr))',
+                    sm: 'repeat(3, minmax(0, 1fr))',
+                    lg: 'repeat(4, minmax(0, 1fr))',
+                  },
+                  gap: 1.5,
+                  alignItems: 'stretch',
                 }}
               >
                 {category.items.map((item) => (
