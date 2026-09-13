@@ -12,7 +12,8 @@ import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import HealthAndSafetyRoundedIcon from '@mui/icons-material/HealthAndSafetyRounded';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import { LanguageSwitcher } from './LanguageSwitcher';
-import { revealHeaderSx } from './reveal';
+import { REVEAL_HEADER_MS, revealHeaderSx } from './reveal';
+import { useAnimationWindow } from '../../hooks/useAnimationWindow';
 
 interface MenuHeaderProps {
   restaurantName: string;
@@ -44,6 +45,9 @@ export function MenuHeader({
 }: MenuHeaderProps) {
   const { t } = useTranslation();
   const [searchOpen, setSearchOpen] = useState(false);
+  // Same guard as the page reveal: a paused entrance must not be able to
+  // leave the header invisible.
+  const entering = useAnimationWindow(REVEAL_HEADER_MS);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Focus on expand, so the keyboard is already up by the time the field
@@ -117,7 +121,7 @@ export function MenuHeader({
     <Stack
       direction="row"
       spacing={0.5}
-      sx={{ alignItems: 'center', py: 1, ...revealHeaderSx }}
+      sx={{ alignItems: 'center', py: 1, ...(entering ? revealHeaderSx : {}) }}
     >
       <Avatar
         src={logoUrl ?? undefined}

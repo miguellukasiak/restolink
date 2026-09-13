@@ -16,8 +16,13 @@ import { usePublicMenu } from '../../hooks/usePublicMenu';
 import { getApiErrorMessage } from '../../services/api';
 import { resolveAccessState } from '../../constants/subscription';
 import { PublicMenuView } from '../../components/public/PublicMenuView';
-import { MenuSkeleton } from '../../components/public/MenuSkeleton';
-import { revealSx } from '../../components/public/reveal';
+import { CinematicLoader } from '../../components/public/CinematicLoader';
+import {
+  REVEAL_FOCUS_PULL_MS,
+  revealFocusPullSx,
+} from '../../components/public/reveal';
+import { useAnimationWindow } from '../../hooks/useAnimationWindow';
+import { useSplashPhase } from '../../hooks/useSplashPhase';
 import { ItemDetailModal } from '../../components/public/ItemDetailModal';
 import { AllergyGateModal } from '../../components/public/AllergyGateModal';
 
@@ -101,6 +106,20 @@ export function PublicMenuPage() {
   const { restaurantId = '' } = useParams<{ restaurantId: string }>();
   const { t } = useTranslation();
   const menu = usePublicMenu(restaurantId);
+
+  // The splash outlives the fetch by design: it holds briefly, then plays its
+  // exit over the menu rather than cutting away the instant data lands.
+  // `isError` counts as ready too — a curtain that never lifts would hide the
+  // retry button behind it.
+  const splash = useSplashPhase(Boolean(menu.data) || menu.isError);
+
+  // The focus pull is applied for its own duration and then removed. A
+  // paused animation holds its first frame, which for this one is an
+  // invisible, blurred page — see `useAnimationWindow`.
+  const focusPulling = useAnimationWindow(
+    REVEAL_FOCUS_PULL_MS,
+    Boolean(menu.data),
+  );
 
   const [selectedItem, setSelectedItem] = useState<PublicMenuItem | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -203,7 +222,9 @@ export function PublicMenuPage() {
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       <CssBaseline />
 
-      {menu.isLoading && <MenuSkeleton />}
+      {splash.visible && (
+        <CinematicLoader restaurantId={restaurantId} exiting={splash.exiting} />
+      )}
 
       {menu.isError && (
         <Box sx={{ maxWidth: 960, mx: 'auto', px: 2 }}>
@@ -233,9 +254,10 @@ export function PublicMenuPage() {
       )}
 
       {access === 'ACTIVE' && menu.data && (
-        // Fades in over the skeleton it replaces, so the menu resolves instead
-        // of snapping. See `reveal.ts` for why this can never hide the content.
-        <Box sx={revealSx}>
+        // Resolves out of a blur as the splash rushes past it — the two
+        // overlap, so it reads as one camera move rather than a handoff.
+        // See `reveal.ts` for why this can never hide the content.
+        <Box sx={focusPulling ? revealFocusPullSx : undefined}>
           <PublicMenuView
             restaurantName={menu.data.restaurant.name}
             logoUrl={menu.data.restaurant.theme.logo_url}

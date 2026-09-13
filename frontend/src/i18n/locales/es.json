@@ -3,6 +3,7 @@
   "searchAria": "Buscar un plato en la carta",
   "openSearch": "Buscar en la carta",
   "closeSearch": "Cerrar la búsqueda",
+  "loaderTagline": "Preparando la carta",
   "categoriesNav": "Categorías de la carta",
   "goToCategory": "Ir a la categoría {{name}}",
   "languageSwitcher": "Cambiar el idioma de la carta",

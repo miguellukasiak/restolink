@@ -3,6 +3,7 @@
   "searchAria": "Search for a dish in the menu",
   "openSearch": "Search the menu",
   "closeSearch": "Close search",
+  "loaderTagline": "Curating experience",
   "categoriesNav": "Menu categories",
   "goToCategory": "Go to category {{name}}",
   "languageSwitcher": "Change menu language",
