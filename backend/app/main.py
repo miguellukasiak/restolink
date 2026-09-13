@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .database import AsyncSessionLocal, engine
 from .models import Base
-from .routers import admin, auth, dictionary, panel, public
+from .routers import admin, auth, dictionary, google_maps, panel, public
 from .seed import seed_if_empty
 
 
@@ -49,6 +49,7 @@ app.include_router(auth.router)
 app.include_router(admin.router)
 app.include_router(panel.router)
 app.include_router(dictionary.router)
+app.include_router(google_maps.router)
 app.include_router(public.router)
 
 

@@ -12,6 +12,7 @@ import { MenuBuilderPage } from './pages/panel/MenuBuilderPage';
 import { QrGeneratorPage } from './pages/panel/QrGeneratorPage';
 import { AppearancePage } from './pages/panel/AppearancePage';
 import { DictionaryPage } from './pages/panel/DictionaryPage';
+import { GoogleReviewsPage } from './pages/panel/GoogleReviewsPage';
 import { PublicMenuPage } from './pages/public/PublicMenuPage';
 
 export default function App() {
@@ -46,6 +47,7 @@ export default function App() {
             <Route path="menu" element={<MenuBuilderPage />} />
             <Route path="qr" element={<QrGeneratorPage />} />
             <Route path="dictionary" element={<DictionaryPage />} />
+            <Route path="google" element={<GoogleReviewsPage />} />
             <Route path="settings" element={<AppearancePage />} />
           </Route>
         </Route>

@@ -323,3 +323,58 @@ class AdminLoginRequest(BaseModel):
 
 class MessageResponse(BaseModel):
     message: str
+
+
+# --------------------------------------------------------------------------- #
+# Google Maps reviews (owner panel)
+# --------------------------------------------------------------------------- #
+
+
+class GooglePlaceUpdate(BaseModel):
+    """Body for PUT /panel/{id}/google-place.
+
+    An empty string is a valid value and means "disconnect" — the owner gets
+    the setup screen back rather than being stuck with a listing they can only
+    replace, never remove.
+    """
+
+    google_place_id: str = Field(max_length=255)
+
+
+class GoogleReviewItem(BaseModel):
+    """One review, normalised out of Google's payload.
+
+    Only the fields the dashboard renders are kept. Google's envelope carries
+    more (language codes, translation flags, author URLs we do not link to),
+    and storing the lot would mean a cached row full of data no screen reads.
+    """
+
+    author_name: str
+    profile_photo_url: str | None = None
+    rating: float
+    text: str = ""
+    #: Already localised by the API — the request asks for Polish, so this
+    #: arrives as e.g. "2 tygodnie temu" and needs no formatting here.
+    relative_time_description: str = ""
+    #: Epoch seconds. Used to order "most recent", and nothing else.
+    time: int = 0
+
+
+class GoogleReviewsResponse(BaseModel):
+    """The reviews dashboard's entire state, in one answer.
+
+    `configured` is what the panel switches on: false renders the setup screen,
+    true renders the dashboard. Returning it as data rather than as a 404 keeps
+    "not set up yet" out of the error path, where it would otherwise show a
+    guest-facing owner a red alert for something they have simply not done yet.
+    """
+
+    configured: bool
+    place_id: str | None = None
+    #: NULL for a listing with no ratings yet — distinct from 0.0, which would
+    #: read as "rated, and terribly".
+    rating: float | None = None
+    total_ratings: int = 0
+    reviews: list[GoogleReviewItem] = Field(default_factory=list)
+    #: When the data was last pulled from Google. NULL before the first sync.
+    synced_at: datetime | None = None

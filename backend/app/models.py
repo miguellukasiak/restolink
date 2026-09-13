@@ -18,6 +18,7 @@ from decimal import Decimal
 from sqlalchemy import (
     DateTime,
     Enum as SAEnum,
+    Float,
     ForeignKey,
     Index,
     Integer,
@@ -116,6 +117,11 @@ class Restaurant(TimestampSoftDeleteMixin, Base):
     base_language: Mapped[str] = mapped_column(
         String(8), default="pl", server_default="pl", nullable=False
     )
+
+    #: The restaurant's listing on Google Maps, pasted by the owner from
+    #: Google's Place ID finder. NULL means the reviews dashboard has not been
+    #: connected yet — which is a first-class state in the panel, not an error.
+    google_place_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     package_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("subscription_package.id"), nullable=False
     )
@@ -308,3 +314,53 @@ class MenuItem(TimestampSoftDeleteMixin, Base):
     is_available: Mapped[bool] = mapped_column(default=True, nullable=False)
     image_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
+
+class GoogleReviewCache(Base):
+    """A restaurant's Google Maps rating and reviews, as of the last fetch.
+
+    This table exists to keep the Places API inside its free allowance. Place
+    Details billed per panel visit would be charged every time an owner opened
+    the tab — reviews change a few times a month at most, so paying for that is
+    pure waste. One row per restaurant, refreshed at most once a day.
+
+    `place_id` is stored alongside the data rather than only on the restaurant.
+    An owner who pastes the wrong listing and corrects it would otherwise keep
+    seeing the *other* restaurant's reviews until the day-old cache expired,
+    with no way to force a refresh. Holding the id here lets the read decide for
+    itself whether what it found actually answers the question being asked,
+    instead of trusting every future writer to remember to purge.
+    """
+
+    __tablename__ = "google_review_cache"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    #: Unique: the cache is a single snapshot per restaurant, not a history.
+    restaurant_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("restaurant.id"), nullable=False, unique=True, index=True
+    )
+    #: The listing this snapshot describes. See the class docstring.
+    place_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    #: Google's average, 1.0–5.0. NULL for a listing with no ratings yet.
+    rating: Mapped[float | None] = mapped_column(Float, nullable=True)
+    total_ratings: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    #: Normalised reviews (author, rating, text, …) rather than Google's raw
+    #: envelope, so a change on their side is absorbed in one place.
+    reviews_data: Mapped[list[dict]] = mapped_column(
+        JSONB, default=list, nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    #: When the data was fetched — the value the 24-hour check reads, and the
+    #: "last synced" line in the panel.
+    #:
+    #: Deliberately *not* `onupdate=func.now()`. That fires only when some other
+    #: column actually changes, so a refresh that returned an identical rating
+    #: would leave this untouched, the row would stay stale forever, and every
+    #: page view would hit the paid API. The write path sets it explicitly.
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )

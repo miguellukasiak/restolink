@@ -42,9 +42,10 @@ function sessionScopeFor(url: string | undefined): 'admin' | 'restaurant' | null
   if (!url) return null;
   if (url.startsWith('/api/v1/admin')) return 'admin';
   // Two prefixes, both the owner's own data: `/restaurants` for the menu and
-  // theme, `/panel` for the translation dictionary. Matching on prefixes means
-  // a route added under a *third* one silently loses its token — which is how
-  // the dictionary first shipped a 401 — so add any new owner prefix here.
+  // theme, `/panel` for the translation dictionary and the Google reviews
+  // dashboard. Matching on prefixes means a route added under a *third* one
+  // silently loses its token — which is how the dictionary first shipped a
+  // 401 — so add any new owner prefix here.
   if (
     url.startsWith('/api/v1/restaurants') ||
     url.startsWith('/api/v1/panel')
