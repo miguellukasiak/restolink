@@ -19,10 +19,12 @@ from sqlalchemy import (
     DateTime,
     Enum as SAEnum,
     ForeignKey,
+    Index,
     Integer,
     Numeric,
     String,
     Text,
+    UniqueConstraint,
     func,
 )
 from sqlalchemy.dialects.postgresql import JSONB, UUID
@@ -169,6 +171,42 @@ class PasswordReset(Base):
     expires_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False
     )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+
+class TranslationCache(Base):
+    """One cached machine translation of one string into one language.
+
+    The table is what makes the free translation backend viable: the upstream
+    endpoint is unofficial and rate-limited, so every string is fetched at most
+    once and served from Postgres forever after. A menu that has been viewed in
+    German once costs nothing to show in German again.
+
+    Rows are immutable and never soft-deleted — a translation has no lifecycle,
+    and keeping `deleted_at` here would only complicate the lookup.
+    """
+
+    __tablename__ = "translation_cache"
+    __table_args__ = (
+        # The real key. Hash rather than the text itself: a btree index entry is
+        # capped near 2.7 kB on Postgres, and a long dish description in UTF-8
+        # could reach it — which would turn a cache write into a hard error.
+        UniqueConstraint("source_hash", "target_lang", name="uq_translation_source_lang"),
+        Index("ix_translation_lookup", "source_hash", "target_lang"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    #: SHA-256 of the source string, hex-encoded — always 64 characters.
+    source_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    #: Kept verbatim so the cache stays auditable and can be re-translated later.
+    original_text: Mapped[str] = mapped_column(Text, nullable=False)
+    #: Two-letter target, e.g. "de". Never the menu's own base language.
+    target_lang: Mapped[str] = mapped_column(String(8), nullable=False)
+    translated_text: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

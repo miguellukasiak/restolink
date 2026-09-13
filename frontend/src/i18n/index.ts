@@ -1,82 +1,71 @@
 import i18n from 'i18next';
+import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
+import de from './locales/de.json';
+import en from './locales/en.json';
+import es from './locales/es.json';
+import fr from './locales/fr.json';
+import pl from './locales/pl.json';
 
 /**
- * Public-menu translations. Language is auto-detected from the browser
- * (navigator.language) with Polish as the fallback, per product requirements.
+ * Public-menu translations.
+ *
+ * This covers the *static* interface only — labels, aria text, empty states.
+ * The menu's own content (category names, dish names, descriptions) is
+ * translated server-side and cached in Postgres, because it lives in the
+ * restaurant's database and cannot be shipped in a dictionary. The two halves
+ * meet in `usePublicMenu`, which sends the language resolved here to the API.
  */
-const resources = {
-  pl: {
-    translation: {
-      searchPlaceholder: 'Szukaj w menu...',
-      searchAria: 'Szukaj dania w menu',
-      languageToggle: 'Switch language to English',
-      categoriesNav: 'Kategorie menu',
-      goToCategory: 'Przejdź do kategorii {{name}}',
-      description: 'Opis',
-      ingredients: 'Składniki',
-      allergens: 'Alergeny',
-      noAllergens: 'brak alergenów',
-      tags: 'Tagi',
-      nutrition: 'Wartości odżywcze (300g)',
-      kcal: 'KCAL',
-      protein: 'BIAŁKO',
-      fat: 'TŁUSZCZE',
-      carbs: 'WĘGLE.',
-      close: 'Zamknij',
-      price: 'Cena',
-      openDish: 'Zobacz szczegóły dania {{name}}, cena {{price}}',
-      unavailable: 'Niedostępne',
-      resultsFound: 'Znaleziono dań: {{count}}',
-      emptySearch: 'Brak dań pasujących do „{{query}}"',
-      dishImage: 'Zdjęcie dania {{name}}',
-      restaurantLogo: 'Logo restauracji {{name}}',
-      menuLoadError: 'Nie udało się załadować menu. Spróbuj ponownie.',
-      retry: 'Spróbuj ponownie',
-    },
-  },
-  en: {
-    translation: {
-      searchPlaceholder: 'Search the menu...',
-      searchAria: 'Search for a dish in the menu',
-      languageToggle: 'Zmień język na polski',
-      categoriesNav: 'Menu categories',
-      goToCategory: 'Go to category {{name}}',
-      description: 'Description',
-      ingredients: 'Ingredients',
-      allergens: 'Allergens',
-      noAllergens: 'no allergens',
-      tags: 'Tags',
-      nutrition: 'Nutrition facts (300g)',
-      kcal: 'KCAL',
-      protein: 'PROTEIN',
-      fat: 'FAT',
-      carbs: 'CARBS',
-      close: 'Close',
-      price: 'Price',
-      openDish: 'View details of dish {{name}}, price {{price}}',
-      unavailable: 'Unavailable',
-      resultsFound: 'Dishes found: {{count}}',
-      emptySearch: 'No dishes match "{{query}}"',
-      dishImage: 'Photo of dish {{name}}',
-      restaurantLogo: 'Logo of restaurant {{name}}',
-      menuLoadError: 'Could not load the menu. Please try again.',
-      retry: 'Try again',
-    },
-  },
+
+/** Order here is the order shown in the menu's language switcher. */
+export const SUPPORTED_LANGUAGES = ['pl', 'en', 'de', 'fr', 'es'] as const;
+
+export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
+
+/** Endonyms: a switcher that renames itself is useless to whoever cannot read
+ *  the language currently active. */
+export const LANGUAGE_LABELS: Record<SupportedLanguage, string> = {
+  pl: 'Polski',
+  en: 'English',
+  de: 'Deutsch',
+  fr: 'Français',
+  es: 'Español',
 };
 
-const detectedLanguage =
-  typeof navigator !== 'undefined' &&
-  navigator.language?.toLowerCase().startsWith('en')
-    ? 'en'
-    : 'pl';
+void i18n
+  .use(LanguageDetector)
+  .use(initReactI18next)
+  .init({
+    resources: {
+      pl: { translation: pl },
+      en: { translation: en },
+      de: { translation: de },
+      fr: { translation: fr },
+      es: { translation: es },
+    },
+    supportedLngs: SUPPORTED_LANGUAGES,
+    // Polish, because that is the language the menus are written in: a guest
+    // whose browser we cannot place still sees exactly what the restaurant
+    // typed, untranslated but never wrong.
+    fallbackLng: 'pl',
+    // `de-AT` and `fr-CA` resolve to their base language instead of falling
+    // through to the fallback.
+    load: 'languageOnly',
+    nonExplicitSupportedLngs: true,
+    interpolation: { escapeValue: false },
+    detection: {
+      // `?lang=de` first, so a QR code or a shared link can pin a language;
+      // then the guest's own explicit choice; then the browser.
+      order: ['querystring', 'localStorage', 'navigator'],
+      lookupQuerystring: 'lang',
+      lookupLocalStorage: 'restolink.menu.lang',
+      caches: ['localStorage'],
+    },
+  });
 
-void i18n.use(initReactI18next).init({
-  resources,
-  lng: detectedLanguage,
-  fallbackLng: 'pl',
-  interpolation: { escapeValue: false },
-});
+/** The two-letter code to send to the API — never a regional variant. */
+export function currentMenuLanguage(): string {
+  return (i18n.resolvedLanguage ?? i18n.language ?? 'pl').split('-')[0] ?? 'pl';
+}
 
 export default i18n;

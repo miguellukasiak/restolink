@@ -1,5 +1,6 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { ThemeProvider, createTheme, alpha } from '@mui/material/styles';
 import { usePublicMenu } from '../../hooks/usePublicMenu';
@@ -96,6 +97,23 @@ export function createRestaurantTheme(settings: RestaurantThemeUpdate = {}) {
 export function RestaurantThemeProvider({ children }: { children: ReactNode }) {
   const { restaurantId = '' } = useParams<{ restaurantId: string }>();
   const menu = usePublicMenu(restaurantId);
+  const { i18n } = useTranslation();
+
+  // Keep `<html lang>` in step with the menu's language. Without this a German
+  // menu stays labelled Polish, and a screen reader pronounces every dish name
+  // with Polish phonetics — which is precisely the guest this feature exists
+  // for. Scoped here because this provider wraps only the public menu route:
+  // the owner's panel is Polish regardless of what a guest last picked.
+  const language = i18n.resolvedLanguage ?? i18n.language;
+  useEffect(() => {
+    if (!language) return;
+    const root = document.documentElement;
+    const previous = root.lang;
+    root.lang = language.split('-')[0] ?? previous;
+    return () => {
+      root.lang = previous;
+    };
+  }, [language]);
 
   const theme = useMemo(
     () => createRestaurantTheme(menu.data?.restaurant.theme),

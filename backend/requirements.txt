@@ -13,3 +13,7 @@ passlib[bcrypt]>=1.7.4
 bcrypt<4.1
 pyjwt>=2.8
 resend>=2.0
+# Menu translation. Wraps Google Translate's *free web* endpoint — no API key,
+# but also no SLA: it is undocumented, rate-limited and can block an IP. The
+# TranslationCache table exists so each string is fetched at most once.
+deep-translator>=1.11

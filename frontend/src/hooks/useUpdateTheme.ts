@@ -14,8 +14,10 @@ export function useUpdateTheme(restaurantId: string) {
     mutationFn: (payload: RestaurantThemeUpdate) =>
       updateRestaurantTheme(restaurantId, payload),
     onSuccess: () => {
+      // The prefix, not one language: the menu is now cached per language, and
+      // a theme change applies to every one of them.
       void queryClient.invalidateQueries({
-        queryKey: publicMenuQueryKeys.menu(restaurantId),
+        queryKey: publicMenuQueryKeys.all(restaurantId),
       });
     },
   });

@@ -14,11 +14,11 @@ import Tooltip from '@mui/material/Tooltip';
 import { alpha } from '@mui/material/styles';
 import { visuallyHidden } from '@mui/utils';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
-import LanguageRoundedIcon from '@mui/icons-material/LanguageRounded';
 import SearchOffRoundedIcon from '@mui/icons-material/SearchOffRounded';
 import HealthAndSafetyRoundedIcon from '@mui/icons-material/HealthAndSafetyRounded';
 import type { PublicMenuCategory, PublicMenuItem } from '../../types';
 import { CategoryPills } from './CategoryPills';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import { PublicItemCard } from './PublicItemCard';
 
 /** Stable empty default so the filter memo isn't invalidated every render. */
@@ -52,7 +52,7 @@ export function PublicMenuView({
   canFilterAllergens = false,
   onOpenAllergyFilter,
 }: PublicMenuViewProps) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
 
   const filteredCategories = useMemo(() => {
@@ -89,10 +89,6 @@ export function PublicMenuView({
     () => filteredCategories.reduce((sum, category) => sum + category.items.length, 0),
     [filteredCategories],
   );
-
-  const toggleLanguage = () => {
-    void i18n.changeLanguage(i18n.language.startsWith('pl') ? 'en' : 'pl');
-  };
 
   const initials = restaurantName
     .split(/\s+/)
@@ -166,13 +162,13 @@ export function PublicMenuView({
               }}
             />
             {canFilterAllergens && onOpenAllergyFilter && (
-              <Tooltip title="Filtruj alergeny" arrow>
+              <Tooltip title={t('allergyFilter')} arrow>
                 <IconButton
                   onClick={onOpenAllergyFilter}
                   aria-label={
                     selectedAllergens.length > 0
-                      ? `Filtruj alergeny (aktywne wykluczenia: ${selectedAllergens.length})`
-                      : 'Filtruj alergeny'
+                      ? t('allergyFilterActive', { count: selectedAllergens.length })
+                      : t('allergyFilter')
                   }
                   sx={{
                     flexShrink: 0,
@@ -190,15 +186,7 @@ export function PublicMenuView({
                 </IconButton>
               </Tooltip>
             )}
-            <Button
-              onClick={toggleLanguage}
-              aria-label={t('languageToggle')}
-              startIcon={<LanguageRoundedIcon />}
-              color="inherit"
-              sx={{ flexShrink: 0, fontWeight: 700, minWidth: 0 }}
-            >
-              {i18n.language.startsWith('pl') ? 'PL' : 'EN'}
-            </Button>
+            <LanguageSwitcher />
           </Stack>
 
           {filteredCategories.length > 0 && (
@@ -230,7 +218,7 @@ export function PublicMenuView({
           <Stack spacing={2} sx={{ mt: 5, alignItems: 'center', color: 'text.secondary' }}>
             <HealthAndSafetyRoundedIcon sx={{ fontSize: 44, opacity: 0.4 }} />
             <Typography variant="subtitle1" sx={{ fontWeight: 600, textAlign: 'center' }}>
-              Żadne danie nie spełnia Twoich filtrów alergenów.
+              {t('noDishesForAllergens')}
             </Typography>
             {onOpenAllergyFilter && (
               <Button
@@ -239,7 +227,7 @@ export function PublicMenuView({
                 startIcon={<HealthAndSafetyRoundedIcon />}
                 onClick={onOpenAllergyFilter}
               >
-                Dostosuj filtry
+                {t('adjustFilters')}
               </Button>
             )}
           </Stack>

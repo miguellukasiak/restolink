@@ -137,6 +137,16 @@ export interface PublicMenuResponse {
     subscription_valid_until: string | null;
   };
   categories: PublicMenuCategory[];
+  /**
+   * Present only when the menu was requested in a language other than its own.
+   * `pending` means the backend is still filling its translation cache in the
+   * background, so this copy is (partly) in the original language and the
+   * client should ask again shortly.
+   */
+  translation?: {
+    language: string;
+    pending: boolean;
+  } | null;
 }
 
 /** Schema: ManualPaymentRequest */

@@ -210,9 +210,26 @@ class PublicRestaurant(BaseModel):
     subscription_valid_until: datetime | None
 
 
+class TranslationStatus(BaseModel):
+    """How far along this menu's translation is.
+
+    `pending` exists so the client knows to come back. Translations are filled
+    in a background task — no free backend is fast enough to do it inside the
+    request — so the very first visitor in a new language gets the original
+    wording plus `pending: true`, refetches a few seconds later, and gets the
+    translated menu. Everyone after them is served from cache immediately.
+    """
+
+    language: str
+    #: True when some strings are still being translated in the background.
+    pending: bool = False
+
+
 class PublicMenuResponse(BaseModel):
     restaurant: PublicRestaurant
     categories: list[MenuCategoryResponse]
+    #: Absent when the menu was requested in its own language.
+    translation: TranslationStatus | None = None
 
 
 # --------------------------------------------------------------------------- #
