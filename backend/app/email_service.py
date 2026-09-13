@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 API_KEY = os.getenv("RESEND_API_KEY", "")
 FROM_ADDRESS = os.getenv("RESEND_FROM", "RestoLink <onboarding@resend.dev>")
-APP_BASE_URL = os.getenv("APP_BASE_URL", "https://restolink.vercel.app").rstrip("/")
+APP_BASE_URL = os.getenv("APP_BASE_URL", "https://restolink-vert.vercel.app").rstrip("/")
 
 resend.api_key = API_KEY
 
