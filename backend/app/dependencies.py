@@ -13,7 +13,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from .database import get_db
 from .models import Restaurant, RestaurantStatus
-from .security import TokenError, decode_access_token
+from .security import (
+    TokenError,
+    decode_access_token,
+    token_predates_password_change,
+)
 
 #: `auto_error=False` so a missing header produces our own 401 with a readable
 #: Polish message, rather than FastAPI's bare "Not authenticated".
@@ -47,7 +51,7 @@ async def get_current_restaurant(
     token = _credential_or_401(credentials)
 
     try:
-        subject = decode_access_token(token, expected_role="restaurant")
+        claims = decode_access_token(token, expected_role="restaurant")
     except TokenError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -56,13 +60,25 @@ async def get_current_restaurant(
         ) from exc
 
     try:
-        restaurant_id = uuid.UUID(subject)
+        restaurant_id = uuid.UUID(claims.subject)
     except ValueError as exc:
         raise _UNAUTHENTICATED from exc
 
     restaurant = await db.get(Restaurant, restaurant_id)
     if restaurant is None or restaurant.deleted_at is not None:
         raise _UNAUTHENTICATED
+
+    # A password reset ends every other session. JWTs are stateless, so the
+    # only way to retire one early is to compare when it was minted against
+    # when the credential it proves last changed — this is that check, and it
+    # is why resetting a password you believe is compromised actually evicts
+    # whoever else was signed in.
+    if token_predates_password_change(claims.issued_at, restaurant.password_changed_at):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Hasło zostało zmienione. Zaloguj się ponownie.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
     if restaurant.status is RestaurantStatus.BLOCKED:
         raise HTTPException(
@@ -100,7 +116,7 @@ async def require_admin(
     token = _credential_or_401(credentials)
 
     try:
-        return decode_access_token(token, expected_role="admin")
+        return decode_access_token(token, expected_role="admin").subject
     except TokenError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

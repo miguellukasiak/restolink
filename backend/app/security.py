@@ -16,7 +16,7 @@ import logging
 import os
 import secrets
 from datetime import datetime, timedelta, timezone
-from typing import Any, Literal
+from typing import Any, Literal, NamedTuple
 
 import jwt
 from passlib.context import CryptContext
@@ -45,6 +45,26 @@ MAX_PASSWORD_BYTES = 72
 MIN_SECRET_KEY_BYTES = 32
 
 TokenRole = Literal["restaurant", "admin"]
+
+
+class AccessTokenClaims(NamedTuple):
+    """The parts of a validated token that callers actually act on."""
+
+    subject: str
+    #: `iat`, in whole seconds since the epoch. Used to retire tokens that were
+    #: issued before a credential change.
+    issued_at: int
+
+
+def as_utc(value: datetime) -> datetime:
+    """Force a timestamp to be timezone-aware UTC.
+
+    Postgres returns aware datetimes for `TIMESTAMPTZ`, but that is a property
+    of the driver rather than something a comparison should rest on. A naive
+    value reaching one raises `TypeError` mid-request, turning a security check
+    into a 500 — the one outcome such a check must never produce.
+    """
+    return value if value.tzinfo is not None else value.replace(tzinfo=timezone.utc)
 
 
 def _load_secret_key() -> str:
@@ -172,8 +192,8 @@ class TokenError(Exception):
     """Raised when a token is missing, malformed, expired or the wrong role."""
 
 
-def decode_access_token(token: str, *, expected_role: TokenRole) -> str:
-    """Validate a token and return its subject.
+def decode_access_token(token: str, *, expected_role: TokenRole) -> AccessTokenClaims:
+    """Validate a token and return the claims callers act on.
 
     `algorithms` is pinned to a single entry on purpose: accepting a list the
     caller does not control is how "alg: none" and HMAC-vs-RSA confusion attacks
@@ -194,4 +214,26 @@ def decode_access_token(token: str, *, expected_role: TokenRole) -> str:
     if not isinstance(subject, str) or not subject:
         raise TokenError("Nieprawidłowy token sesji.")
 
-    return subject
+    issued_at = payload.get("iat")
+    if not isinstance(issued_at, int):
+        raise TokenError("Nieprawidłowy token sesji.")
+
+    return AccessTokenClaims(subject=subject, issued_at=issued_at)
+
+
+def token_predates_password_change(
+    issued_at: int, password_changed_at: datetime | None
+) -> bool:
+    """True when a token was minted before the password it authenticates.
+
+    Comparison is against the *floor* of the change timestamp, because `iat`
+    only has whole-second resolution. Rounding the other way would reject a
+    token issued in the same second as the change — that is, the token of
+    someone who just signed in with their brand-new password, which would lock
+    them out of their own account. The cost is that a token issued in the same
+    second as the reset survives; a sub-second window is theoretical, while
+    logging out the legitimate owner would be a real, reproducible bug.
+    """
+    if password_changed_at is None:
+        return False
+    return issued_at < int(as_utc(password_changed_at).timestamp())

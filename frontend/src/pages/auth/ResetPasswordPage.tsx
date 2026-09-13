@@ -92,6 +92,10 @@ export function ResetPasswordPage() {
           <Alert severity="success" sx={{ borderRadius: '16px' }}>
             Link został zużyty i nie zadziała ponownie.
           </Alert>
+          <Alert severity="info" sx={{ borderRadius: '16px' }}>
+            Ze względów bezpieczeństwa wszystkie pozostałe sesje zostały
+            wylogowane — na innych urządzeniach trzeba zalogować się ponownie.
+          </Alert>
           <Button
             variant="contained"
             size="large"

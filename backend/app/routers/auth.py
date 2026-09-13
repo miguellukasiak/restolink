@@ -34,6 +34,7 @@ from ..security import (
     ADMIN_TOKEN_TTL,
     PASSWORD_RESET_TTL,
     RESTAURANT_TOKEN_TTL,
+    as_utc,
     create_access_token,
     generate_reset_token,
     hash_password,
@@ -56,18 +57,6 @@ _INVALID_CREDENTIALS = HTTPException(
 _RESET_SENT_MESSAGE = (
     "Jeśli konto o tym adresie istnieje, wysłaliśmy na nie link do zmiany hasła."
 )
-
-
-def _as_utc(value: datetime) -> datetime:
-    """Force a timestamp to be timezone-aware UTC before comparing it.
-
-    Postgres hands back aware datetimes for `TIMESTAMPTZ`, but that is a
-    property of the driver, not something an expiry check should rest on. A
-    naive value reaching the comparison raises `TypeError` mid-request, which
-    would turn "this reset link expired" into a 500 — the one outcome a
-    security check must never produce.
-    """
-    return value if value.tzinfo is not None else value.replace(tzinfo=timezone.utc)
 
 
 def _normalize_email(email: str) -> str:
@@ -190,7 +179,7 @@ async def reset_password(
     ).first()
 
     now = datetime.now(timezone.utc)
-    if grant is None or _as_utc(grant.expires_at) <= now:
+    if grant is None or as_utc(grant.expires_at) <= now:
         if grant is not None:
             # Expired: clear it out rather than leaving it to accumulate.
             await db.delete(grant)
@@ -212,12 +201,19 @@ async def reset_password(
         )
 
     restaurant.hashed_password = hash_password(payload.password)
+    # Stamping this retires every access token issued earlier — see
+    # `token_predates_password_change`. A reset is usually requested precisely
+    # because someone else may be signed in, so leaving their week-long token
+    # alive would defeat the exercise.
+    restaurant.password_changed_at = now
     # Single use: the grant is deleted in the same transaction that sets the
     # password, so the link cannot be replayed even on a retry.
     await db.delete(grant)
     await db.commit()
 
-    return MessageResponse(message="Hasło zostało zmienione. Możesz się zalogować.")
+    return MessageResponse(
+        message="Hasło zostało zmienione. Wszystkie inne sesje zostały wylogowane."
+    )
 
 
 @router.post("/admin/login", response_model=TokenResponse)

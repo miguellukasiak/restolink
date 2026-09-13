@@ -99,6 +99,13 @@ class Restaurant(TimestampSoftDeleteMixin, Base):
         String(255), unique=True, index=True, nullable=True
     )
     hashed_password: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    #: When the password was last changed. Access tokens issued before this
+    #: moment are refused, which is what makes a reset actually end every other
+    #: session — the whole point of resetting a password you think is
+    #: compromised. NULL means "never changed", and every token passes.
+    password_changed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     package_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("subscription_package.id"), nullable=False
     )
