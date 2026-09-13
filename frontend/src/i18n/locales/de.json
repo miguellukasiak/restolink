@@ -1,6 +1,8 @@
 {
   "searchPlaceholder": "Karte durchsuchen...",
   "searchAria": "Nach einem Gericht in der Karte suchen",
+  "openSearch": "Karte durchsuchen",
+  "closeSearch": "Suche schließen",
   "categoriesNav": "Kategorien der Karte",
   "goToCategory": "Zur Kategorie {{name}}",
   "languageSwitcher": "Sprache der Karte ändern",

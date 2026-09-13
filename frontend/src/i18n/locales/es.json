@@ -1,6 +1,8 @@
 {
   "searchPlaceholder": "Buscar en la carta...",
   "searchAria": "Buscar un plato en la carta",
+  "openSearch": "Buscar en la carta",
+  "closeSearch": "Cerrar la búsqueda",
   "categoriesNav": "Categorías de la carta",
   "goToCategory": "Ir a la categoría {{name}}",
   "languageSwitcher": "Cambiar el idioma de la carta",

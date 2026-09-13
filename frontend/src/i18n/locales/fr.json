@@ -1,6 +1,8 @@
 {
   "searchPlaceholder": "Rechercher dans la carte...",
   "searchAria": "Rechercher un plat dans la carte",
+  "openSearch": "Rechercher dans la carte",
+  "closeSearch": "Fermer la recherche",
   "categoriesNav": "Catégories de la carte",
   "goToCategory": "Aller à la catégorie {{name}}",
   "languageSwitcher": "Changer la langue de la carte",

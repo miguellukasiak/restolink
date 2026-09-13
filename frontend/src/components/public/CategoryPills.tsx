@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { scroller } from 'react-scroll';
 import Box from '@mui/material/Box';
@@ -8,14 +8,17 @@ import type { PublicMenuCategory } from '../../types';
 
 /**
  * Scroll offset compensating for the sticky header, which the compact layout
- * measures at 97px (search row + chip bar). Landing the heading ~8px under it
- * keeps the category title visible instead of hidden behind the bar — the old
- * -180 was tuned for the taller icon-based navigation and now overshot.
+ * measures at roughly 92px (search row + chip bar). Landing the heading just
+ * under it keeps the category title visible instead of hidden behind the bar.
  */
-const SCROLL_OFFSET = -105;
+const SCROLL_OFFSET = -100;
 
 interface CategoryPillsProps {
   categories: PublicMenuCategory[];
+  /** The category the guest is currently reading, from the scroll spy. */
+  activeId: string | null;
+  /** Called before scrolling, so the spy can stand down during the animation. */
+  onSelect: (categoryId: string) => void;
 }
 
 /**
@@ -23,21 +26,31 @@ interface CategoryPillsProps {
  * scrolling line — the pattern every delivery app uses, because it keeps the
  * whole category list one thumb-swipe away without eating vertical space.
  *
- * The chips replaced a row of 56px circular icons stacked over labels, which
- * cost roughly 90px of height before a guest saw a single dish.
+ * The active chip is driven by scroll position rather than by taps alone, and
+ * follows the guest: scrolling into "Desserts" both highlights that chip and
+ * slides it into view, so the bar always shows where they are even when that
+ * category sits far enough along to have been scrolled off the strip.
  *
- * The bar lives inside the page's sticky header, so it stays reachable while
- * scrolling. The scrollbar is hidden on every engine (Firefox, WebKit/Blink,
- * old Edge) but the row stays scrollable by touch, wheel and keyboard.
+ * The scrollbar is hidden on every engine while the row stays scrollable by
+ * touch, wheel and keyboard.
  */
-export function CategoryPills({ categories }: CategoryPillsProps) {
+export function CategoryPills({ categories, activeId, onSelect }: CategoryPillsProps) {
   const { t } = useTranslation();
-  // Purely presentational: marks the chip the guest last jumped to, which is
-  // what makes these read as *filter* chips rather than anonymous buttons.
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const chipRefs = useRef(new Map<string, HTMLElement>());
+
+  useEffect(() => {
+    if (!activeId) return;
+    const chip = chipRefs.current.get(activeId);
+    if (!chip) return;
+
+    // `inline: 'center'` slides the strip horizontally; `block: 'nearest'` is
+    // what stops it from also scrolling the *page* vertically to reach the
+    // chip — which would fight the very scroll that selected it.
+    chip.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }, [activeId]);
 
   const scrollTo = (categoryId: string) => {
-    setActiveId(categoryId);
+    onSelect(categoryId);
     scroller.scrollTo(categoryId, {
       smooth: true,
       duration: 400,
@@ -54,8 +67,8 @@ export function CategoryPills({ categories }: CategoryPillsProps) {
         gap: 0.75,
         overflowX: 'auto',
         pb: 1,
-        // Keeps the first and last chip from sitting flush against the edge
-        // while still allowing them to scroll fully into view.
+        // Keeps the first and last chip off the edge while still allowing them
+        // to scroll fully into view.
         px: 0.25,
         scrollbarWidth: 'none',
         msOverflowStyle: 'none',
@@ -67,9 +80,14 @@ export function CategoryPills({ categories }: CategoryPillsProps) {
         return (
           <Chip
             key={category.id}
+            ref={(node: HTMLDivElement | null) => {
+              if (node) chipRefs.current.set(category.id, node);
+              else chipRefs.current.delete(category.id);
+            }}
             label={category.name}
             onClick={() => scrollTo(category.id)}
             aria-label={t('goToCategory', { name: category.name })}
+            aria-current={selected ? 'true' : undefined}
             size="small"
             sx={{
               flexShrink: 0,
@@ -80,6 +98,7 @@ export function CategoryPills({ categories }: CategoryPillsProps) {
               fontSize: 13,
               fontWeight: 600,
               px: 0.5,
+              transition: 'background-color 0.2s ease, color 0.2s ease',
               // Both states derive from the themed palette, so they keep
               // working on a dark restaurant background.
               bgcolor: (theme) =>

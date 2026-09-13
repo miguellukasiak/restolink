@@ -4,21 +4,15 @@ import { Element as ScrollElement } from 'react-scroll';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import Avatar from '@mui/material/Avatar';
-import TextField from '@mui/material/TextField';
-import InputAdornment from '@mui/material/InputAdornment';
 import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import Badge from '@mui/material/Badge';
-import Tooltip from '@mui/material/Tooltip';
 import { alpha } from '@mui/material/styles';
 import { visuallyHidden } from '@mui/utils';
-import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import SearchOffRoundedIcon from '@mui/icons-material/SearchOffRounded';
 import HealthAndSafetyRoundedIcon from '@mui/icons-material/HealthAndSafetyRounded';
 import type { PublicMenuCategory, PublicMenuItem } from '../../types';
+import { useCategoryScrollSpy } from '../../hooks/useCategoryScrollSpy';
 import { CategoryPills } from './CategoryPills';
-import { LanguageSwitcher } from './LanguageSwitcher';
+import { MenuHeader } from './MenuHeader';
 import { PublicItemCard } from './PublicItemCard';
 
 /** Stable empty default so the filter memo isn't invalidated every render. */
@@ -85,17 +79,19 @@ export function PublicMenuView({
       .filter((category) => category.items.length > 0);
   }, [categories, query, selectedAllergens]);
 
+  // Ids in menu order — the spy needs to know which section is 'above'
+  // which when two share the observation band.
+  const categoryIds = useMemo(
+    () => filteredCategories.map((category) => category.id),
+    [filteredCategories],
+  );
+  const { activeId: activeCategoryId, selectCategory } =
+    useCategoryScrollSpy(categoryIds);
+
   const resultsCount = useMemo(
     () => filteredCategories.reduce((sum, category) => sum + category.items.length, 0),
     [filteredCategories],
   );
-
-  const initials = restaurantName
-    .split(/\s+/)
-    .map((word) => word[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
 
   return (
     <Box
@@ -122,75 +118,22 @@ export function PublicMenuView({
         }}
       >
         <Box sx={{ maxWidth: 1200, mx: 'auto', px: 1.5 }}>
-          <Stack direction="row" spacing={1} sx={{ alignItems: 'center', py: 1 }}>
-            <Avatar
-              src={logoUrl ?? undefined}
-              aria-label={t('restaurantLogo', { name: restaurantName })}
-              sx={{
-                bgcolor: (theme) => alpha(theme.palette.primary.main, 0.12),
-                color: 'primary.main',
-                fontWeight: 700,
-                width: 36,
-                height: 36,
-                fontSize: 14,
-                border: '2px solid',
-                borderColor: (theme) => alpha(theme.palette.primary.main, 0.3),
-              }}
-            >
-              {initials || '·'}
-            </Avatar>
-            <TextField
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder={t('searchPlaceholder')}
-              size="small"
-              fullWidth
-              slotProps={{
-                htmlInput: { 'aria-label': t('searchAria'), type: 'search' },
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchRoundedIcon fontSize="small" />
-                    </InputAdornment>
-                  ),
-                },
-              }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  bgcolor: (theme) => alpha(theme.palette.text.primary, 0.045),
-                },
-              }}
-            />
-            {canFilterAllergens && onOpenAllergyFilter && (
-              <Tooltip title={t('allergyFilter')} arrow>
-                <IconButton
-                  onClick={onOpenAllergyFilter}
-                  aria-label={
-                    selectedAllergens.length > 0
-                      ? t('allergyFilterActive', { count: selectedAllergens.length })
-                      : t('allergyFilter')
-                  }
-                  sx={{
-                    flexShrink: 0,
-                    color:
-                      selectedAllergens.length > 0 ? 'primary.main' : 'text.secondary',
-                  }}
-                >
-                  <Badge
-                    badgeContent={selectedAllergens.length}
-                    color="primary"
-                    overlap="circular"
-                  >
-                    <HealthAndSafetyRoundedIcon />
-                  </Badge>
-                </IconButton>
-              </Tooltip>
-            )}
-            <LanguageSwitcher />
-          </Stack>
+          <MenuHeader
+            restaurantName={restaurantName}
+            logoUrl={logoUrl}
+            query={query}
+            onQueryChange={setQuery}
+            selectedAllergens={selectedAllergens}
+            canFilterAllergens={canFilterAllergens}
+            onOpenAllergyFilter={onOpenAllergyFilter}
+          />
 
           {filteredCategories.length > 0 && (
-            <CategoryPills categories={filteredCategories} />
+            <CategoryPills
+              categories={filteredCategories}
+              activeId={activeCategoryId}
+              onSelect={selectCategory}
+            />
           )}
         </Box>
       </Box>
@@ -234,7 +177,7 @@ export function PublicMenuView({
         )}
 
         {filteredCategories.map((category) => (
-          <ScrollElement name={category.id} key={category.id}>
+          <ScrollElement name={category.id} id={category.id} key={category.id}>
             <Box
               component="section"
               aria-labelledby={`category-heading-${category.id}`}

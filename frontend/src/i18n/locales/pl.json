@@ -1,6 +1,8 @@
 {
   "searchPlaceholder": "Szukaj w menu...",
   "searchAria": "Szukaj dania w menu",
+  "openSearch": "Szukaj w menu",
+  "closeSearch": "Zamknij wyszukiwanie",
   "categoriesNav": "Kategorie menu",
   "goToCategory": "Przejdź do kategorii {{name}}",
   "languageSwitcher": "Zmień język menu",
