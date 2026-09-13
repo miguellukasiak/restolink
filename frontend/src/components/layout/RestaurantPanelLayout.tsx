@@ -15,6 +15,7 @@ import { alpha } from '@mui/material/styles';
 import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded';
 import QrCode2RoundedIcon from '@mui/icons-material/QrCode2Rounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
+import TranslateRoundedIcon from '@mui/icons-material/TranslateRounded';
 import RestaurantRoundedIcon from '@mui/icons-material/RestaurantRounded';
 import { NavLink, Outlet, useLocation, useParams } from 'react-router-dom';
 import { useRestaurantInfo } from '../../hooks/useRestaurantInfo';
@@ -57,6 +58,7 @@ export function RestaurantPanelLayout() {
   const navItems = [
     { label: 'Kreator menu', to: `${base}/menu`, icon: <MenuBookRoundedIcon /> },
     { label: 'Kody QR', to: `${base}/qr`, icon: <QrCode2RoundedIcon /> },
+    { label: 'Słownik', to: `${base}/dictionary`, icon: <TranslateRoundedIcon /> },
     { label: 'Wygląd menu', to: `${base}/settings`, icon: <SettingsRoundedIcon /> },
   ];
 

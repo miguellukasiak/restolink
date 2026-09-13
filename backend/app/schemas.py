@@ -211,18 +211,22 @@ class PublicRestaurant(BaseModel):
 
 
 class TranslationStatus(BaseModel):
-    """How far along this menu's translation is.
+    """Which language this menu is actually being served in.
 
-    `pending` exists so the client knows to come back. Translations are filled
-    in a background task — no free backend is fast enough to do it inside the
-    request — so the very first visitor in a new language gets the original
-    wording plus `pending: true`, refetches a few seconds later, and gets the
-    translated menu. Everyone after them is served from cache immediately.
+    Translations come from the owner's dictionary, so coverage can be partial:
+    `phrases_translated` out of `phrases_total` says how much of the menu the
+    guest is reading in their own language rather than in a fallback.
     """
 
+    #: The language requested, and the one the page should be labelled with.
     language: str
-    #: True when some strings are still being translated in the background.
-    pending: bool = False
+    #: The restaurant's own language — what untranslated phrases are written in.
+    base_language: str
+    #: True when at least one phrase came from English because the requested
+    #: language had no entry for it.
+    used_fallback: bool = False
+    phrases_total: int = 0
+    phrases_translated: int = 0
 
 
 class PublicMenuResponse(BaseModel):
@@ -230,6 +234,46 @@ class PublicMenuResponse(BaseModel):
     categories: list[MenuCategoryResponse]
     #: Absent when the menu was requested in its own language.
     translation: TranslationStatus | None = None
+
+
+# --------------------------------------------------------------------------- #
+# Translation dictionary (owner panel)
+# --------------------------------------------------------------------------- #
+
+
+class DictionaryEntry(BaseModel):
+    """One menu phrase and its translation, as shown in the panel."""
+
+    original_text: str
+    translated_text: str = ""
+
+
+class DictionaryResponse(BaseModel):
+    target_lang: str
+    base_language: str
+    #: Every distinct phrase in the menu, in menu order, each with whatever the
+    #: owner has already written for it.
+    entries: list[DictionaryEntry]
+
+
+class DictionarySaveRequest(BaseModel):
+    target_lang: str = Field(min_length=2, max_length=8)
+    entries: list[DictionaryEntry] = Field(default_factory=list)
+
+
+class AutoTranslateRequest(BaseModel):
+    target_lang: str = Field(min_length=2, max_length=8)
+    #: Only the phrases the owner wants drafted — normally the empty ones.
+    texts: list[str] = Field(default_factory=list, max_length=100)
+
+
+class AutoTranslateResponse(BaseModel):
+    target_lang: str
+    #: Drafts for review. Nothing here has been saved.
+    entries: list[DictionaryEntry]
+    #: Phrases the translator could not produce a draft for; the owner writes
+    #: those by hand.
+    failed: list[str] = Field(default_factory=list)
 
 
 # --------------------------------------------------------------------------- #

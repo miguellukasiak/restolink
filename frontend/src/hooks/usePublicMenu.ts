@@ -10,13 +10,6 @@ export const publicMenuQueryKeys = {
 };
 
 /**
- * How long to wait before asking again for a menu the backend is still
- * translating. Long enough for a background warming pass to finish a typical
- * menu, short enough that a guest reading the first dish sees it switch.
- */
-const TRANSLATION_RETRY_MS = 6_000;
-
-/**
  * Full public menu with theme settings, in the guest's language.
  *
  * Shared by RestaurantThemeProvider and PublicMenuPage — React Query
@@ -34,12 +27,9 @@ export function usePublicMenu(restaurantId: string) {
     queryKey: publicMenuQueryKeys.menu(restaurantId, lang),
     queryFn: () => fetchPublicMenu(restaurantId, lang),
     enabled: Boolean(restaurantId),
-    // The first guest to open a menu in a new language gets it untranslated,
-    // because the backend fills its cache in a background task rather than
-    // making them wait on a slow free translation service. Poll until that
-    // finishes, then stop — `false` ends the interval.
-    refetchInterval: (query) =>
-      query.state.data?.translation?.pending ? TRANSLATION_RETRY_MS : false,
+    // No polling: translations come from the owner's dictionary and are
+    // complete the moment the menu is served. The old interval existed only to
+    // wait out a background machine-translation pass, which no longer exists.
     // staleTime inherited from the global QueryClient default (5 min); the theme
     // save (useUpdateTheme) invalidates this key so the preview stays in sync.
   });

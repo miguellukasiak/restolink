@@ -11,6 +11,7 @@ import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
 import { MenuBuilderPage } from './pages/panel/MenuBuilderPage';
 import { QrGeneratorPage } from './pages/panel/QrGeneratorPage';
 import { AppearancePage } from './pages/panel/AppearancePage';
+import { DictionaryPage } from './pages/panel/DictionaryPage';
 import { PublicMenuPage } from './pages/public/PublicMenuPage';
 
 export default function App() {
@@ -44,6 +45,7 @@ export default function App() {
             <Route index element={<Navigate to="menu" replace />} />
             <Route path="menu" element={<MenuBuilderPage />} />
             <Route path="qr" element={<QrGeneratorPage />} />
+            <Route path="dictionary" element={<DictionaryPage />} />
             <Route path="settings" element={<AppearancePage />} />
           </Route>
         </Route>

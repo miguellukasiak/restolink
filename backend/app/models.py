@@ -108,6 +108,14 @@ class Restaurant(TimestampSoftDeleteMixin, Base):
     password_changed_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+
+    #: The language the menu is written in. Everything the owner types — dish
+    #: names, descriptions, category names — is assumed to be in this language,
+    #: and `TranslationDictionary` holds its renderings in the others. Asking
+    #: the public menu for this language translates nothing.
+    base_language: Mapped[str] = mapped_column(
+        String(8), default="pl", server_default="pl", nullable=False
+    )
     package_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("subscription_package.id"), nullable=False
     )
@@ -176,39 +184,57 @@ class PasswordReset(Base):
     )
 
 
-class TranslationCache(Base):
-    """One cached machine translation of one string into one language.
+class TranslationDictionary(Base):
+    """One phrase from one restaurant's menu, translated into one language.
 
-    The table is what makes the free translation backend viable: the upstream
-    endpoint is unofficial and rate-limited, so every string is fetched at most
-    once and served from Postgres forever after. A menu that has been viewed in
-    German once costs nothing to show in German again.
+    This replaced a machine-translation cache. Free translation endpoints refuse
+    Render's shared IPs outright, and more fundamentally a menu is the one text
+    a restaurant cannot afford to get wrong: "Smażony ser" came back from a
+    machine as "Gekochter Käse" — *boiled* cheese — which is not a typo but a
+    different dish.
 
-    Rows are immutable and never soft-deleted — a translation has no lifecycle,
-    and keeping `deleted_at` here would only complicate the lookup.
+    So the owner writes these. Rows are scoped to a restaurant rather than
+    global: two restaurants may word the same dish differently on purpose, and
+    one owner's phrasing is not another's to inherit.
     """
 
-    __tablename__ = "translation_cache"
+    __tablename__ = "translation_dictionary"
     __table_args__ = (
-        # The real key. Hash rather than the text itself: a btree index entry is
-        # capped near 2.7 kB on Postgres, and a long dish description in UTF-8
-        # could reach it — which would turn a cache write into a hard error.
-        UniqueConstraint("source_hash", "target_lang", name="uq_translation_source_lang"),
-        Index("ix_translation_lookup", "source_hash", "target_lang"),
+        # One translation per phrase per language per restaurant. The unique
+        # constraint is what lets a save be an upsert rather than a diff.
+        UniqueConstraint(
+            "restaurant_id",
+            "source_hash",
+            "target_lang",
+            name="uq_dictionary_restaurant_source_lang",
+        ),
+        Index("ix_dictionary_lookup", "restaurant_id", "target_lang"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    #: SHA-256 of the source string, hex-encoded — always 64 characters.
+    restaurant_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("restaurant.id"), nullable=False, index=True
+    )
+    #: SHA-256 of `original_text`, hex-encoded — always 64 characters. Hashed
+    #: rather than indexed directly: a btree entry is capped near 2.7 kB on
+    #: Postgres and a long description in UTF-8 could reach it.
     source_hash: Mapped[str] = mapped_column(String(64), nullable=False)
-    #: Kept verbatim so the cache stays auditable and can be re-translated later.
+    #: The phrase exactly as it appears in the menu, so the panel can show the
+    #: owner what they are translating.
     original_text: Mapped[str] = mapped_column(Text, nullable=False)
-    #: Two-letter target, e.g. "de". Never the menu's own base language.
+    #: Two-letter target, e.g. "de". Never the restaurant's base language.
     target_lang: Mapped[str] = mapped_column(String(8), nullable=False)
     translated_text: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
     )
 
 

@@ -139,13 +139,16 @@ export interface PublicMenuResponse {
   categories: PublicMenuCategory[];
   /**
    * Present only when the menu was requested in a language other than its own.
-   * `pending` means the backend is still filling its translation cache in the
-   * background, so this copy is (partly) in the original language and the
-   * client should ask again shortly.
+   * Coverage can be partial: the owner writes these translations by hand, and
+   * `used_fallback` says whether English had to cover for phrases the requested
+   * language does not have yet.
    */
   translation?: {
     language: string;
-    pending: boolean;
+    base_language: string;
+    used_fallback: boolean;
+    phrases_total: number;
+    phrases_translated: number;
   } | null;
 }
 

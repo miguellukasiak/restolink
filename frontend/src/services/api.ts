@@ -41,7 +41,16 @@ interface RetriableConfig extends InternalAxiosRequestConfig {
 function sessionScopeFor(url: string | undefined): 'admin' | 'restaurant' | null {
   if (!url) return null;
   if (url.startsWith('/api/v1/admin')) return 'admin';
-  if (url.startsWith('/api/v1/restaurants')) return 'restaurant';
+  // Two prefixes, both the owner's own data: `/restaurants` for the menu and
+  // theme, `/panel` for the translation dictionary. Matching on prefixes means
+  // a route added under a *third* one silently loses its token — which is how
+  // the dictionary first shipped a 401 — so add any new owner prefix here.
+  if (
+    url.startsWith('/api/v1/restaurants') ||
+    url.startsWith('/api/v1/panel')
+  ) {
+    return 'restaurant';
+  }
   // `/api/v1/auth/*` and `/api/v1/public/*` are deliberately unauthenticated.
   return null;
 }
