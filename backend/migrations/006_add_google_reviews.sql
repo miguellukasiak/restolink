@@ -52,9 +52,11 @@ COMMIT;
 -- must never reach the browser, where it could be lifted and spent against
 -- your quota):
 --
---   GOOGLE_MAPS_API_KEY   a Google Cloud key with the Places API enabled
+--   GOOGLE_MAPS_API_KEY   a Google Cloud key with **Places API (New)** enabled.
+--                         The legacy "Places API" is a separate product and
+--                         is not what the endpoints call.
 --
 -- Without it GET /google-reviews answers 503 with a message naming the
 -- variable, and the panel shows that instead of a blank screen. Restrict the
--- key to the Places API in the Cloud console; an unrestricted key is a blank
+-- key to Places API (New) in the Cloud console; an unrestricted key is a blank
 -- cheque if it ever leaks.
