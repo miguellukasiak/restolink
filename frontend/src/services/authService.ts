@@ -71,16 +71,67 @@ export async function resetPassword(
   return data.message;
 }
 
-/** POST /api/v1/auth/admin/login — the hidden super-admin door. */
-export async function adminLogin(password: string): Promise<AdminSession> {
-  const { data } = await api.post<TokenResponse>('/api/v1/auth/admin/login', {
-    password,
-  });
+/** The HQ account behind a token. Mirrors the backend `AdminProfile`. */
+export interface AdminProfile {
+  id: string;
+  email: string;
+  is_superadmin: boolean;
+}
+
+interface AdminTokenResponse {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  admin: AdminProfile;
+}
+
+/**
+ * Thrown when credentials are valid but the account has no HQ rights.
+ *
+ * A separate type because it is not a failed sign-in: the person exists and
+ * proved it, so the screen offers them the owner panel rather than another
+ * attempt at a door that will never open for them.
+ */
+export class NotASuperadminError extends Error {
+  constructor(message = 'Brak uprawnień administracyjnych.') {
+    super(message);
+    this.name = 'NotASuperadminError';
+  }
+}
+
+/**
+ * POST /api/v1/auth/admin/login — HQ sign-in with individual credentials.
+ *
+ * This used to take a single shared master password. It now takes the same
+ * email and password shape as the owner login, against a separate accounts
+ * table, and the server answers 403 for an account without the superadmin
+ * flag. The flag is re-checked here before a session is stored — the server is
+ * the boundary, but a token that cannot open anything should never be saved.
+ */
+export async function adminLogin(
+  email: string,
+  password: string,
+): Promise<AdminSession> {
+  const { data } = await api.post<AdminTokenResponse>(
+    '/api/v1/auth/admin/login',
+    { email, password },
+  );
+
+  if (!data.admin?.is_superadmin) {
+    throw new NotASuperadminError();
+  }
 
   const session: AdminSession = {
     token: data.access_token,
     expiresAt: expiresAtFrom(data.expires_in),
+    email: data.admin.email,
   };
   saveAdminSession(session);
   return session;
+}
+
+/** GET /api/v1/admin/me — who the stored HQ token belongs to. */
+export async function fetchAdminProfile(): Promise<AdminProfile> {
+  const { data } = await api.get<AdminProfile>('/api/v1/admin/me');
+  return data;
 }

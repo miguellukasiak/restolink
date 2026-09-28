@@ -364,3 +364,52 @@ class GoogleReviewCache(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+
+
+class AdminUser(Base):
+    """A named person with access to the HQ panel.
+
+    This replaced a single shared `SUPERADMIN_PASSWORD`. A shared secret cannot
+    say who did anything, cannot be revoked for one person without changing it
+    for everyone, and survives every departure until somebody remembers to
+    rotate it. Rows here are individuals.
+
+    Deliberately *not* a flag on `Restaurant`. That table is the owner-side
+    identity and requires a name, a phone number and a subscription package FK,
+    so making an HQ employee one would mean inventing a fake restaurant and a
+    fake subscription for every member of staff. Staff are not customers.
+
+    There is no soft-delete column and no `is_active`: revoking access is
+    `is_superadmin = False`, which the dependency answers with 403 while the
+    row — and therefore the audit trail of who it was — stays put.
+    """
+
+    __tablename__ = "admin_user"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    #: Login identity, stored lower-cased and matched case-insensitively.
+    email: Mapped[str] = mapped_column(
+        String(255), unique=True, index=True, nullable=False
+    )
+    hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
+    #: The whole of the access model. False is a real state, not a disabled
+    #: account: the credentials still work, they simply open nothing.
+    is_superadmin: Mapped[bool] = mapped_column(
+        default=False, server_default="false", nullable=False
+    )
+    #: Same contract as `Restaurant.password_changed_at` — tokens minted before
+    #: this moment are refused, so changing the password ends other sessions.
+    password_changed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )

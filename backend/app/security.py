@@ -7,11 +7,13 @@ on its own; the request-scoped dependencies that use it live in
 Configuration comes exclusively from the environment — never hardcode secrets:
 
     JWT_SECRET_KEY        signing key for access tokens
-    SUPERADMIN_PASSWORD   the only credential for the hidden admin login
+
+HQ access used to be a second variable, `SUPERADMIN_PASSWORD`, checked here.
+It is gone: staff now sign in as individuals against the `admin_user` table,
+using the same hashing and token primitives as everyone else.
 """
 
 import hashlib
-import hmac
 import logging
 import os
 import secrets
@@ -100,24 +102,6 @@ def _load_secret_key() -> str:
 
 
 SECRET_KEY = _load_secret_key()
-
-
-def is_superadmin_configured() -> bool:
-    return bool(os.getenv("SUPERADMIN_PASSWORD", ""))
-
-
-def verify_superadmin_password(candidate: str) -> bool:
-    """Constant-time check of the hidden admin password.
-
-    `compare_digest` keeps the comparison from leaking the password's length or
-    its matching prefix through response timing. An unset variable always fails
-    — the admin door does not open just because nobody configured a lock.
-    """
-    expected = os.getenv("SUPERADMIN_PASSWORD", "")
-    if not expected:
-        logger.warning("SUPERADMIN_PASSWORD is not set — admin login refused.")
-        return False
-    return hmac.compare_digest(candidate.encode(), expected.encode())
 
 
 # --------------------------------------------------------------------------- #

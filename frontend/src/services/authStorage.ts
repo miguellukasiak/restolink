@@ -27,6 +27,9 @@ export interface RestaurantSession {
 export interface AdminSession {
   token: string;
   expiresAt: number;
+  /** Which HQ account this is. The panel used to have one anonymous
+   *  operator; with named accounts the header can say who is signed in. */
+  email: string;
 }
 
 function read<T>(key: string): T | null {

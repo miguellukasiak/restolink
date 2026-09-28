@@ -5,6 +5,7 @@ that turns an `Authorization: Bearer …` header into either a `Restaurant` row
 or an authenticated admin.
 """
 
+import logging
 import uuid
 
 from fastapi import Depends, HTTPException, Path, status
@@ -12,12 +13,14 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .database import get_db
-from .models import Restaurant, RestaurantStatus
+from .models import AdminUser, Restaurant, RestaurantStatus
 from .security import (
     TokenError,
     decode_access_token,
     token_predates_password_change,
 )
+
+logger = logging.getLogger(__name__)
 
 #: `auto_error=False` so a missing header produces our own 401 with a readable
 #: Polish message, rather than FastAPI's bare "Not authenticated".
@@ -109,17 +112,62 @@ async def verify_restaurant_access(
     return current
 
 
-async def require_admin(
+#: The 403 an authenticated-but-unprivileged account gets. Distinct from the
+#: 401s above on purpose: 401 means "we do not know who you are", 403 means
+#: "we do, and you may not". Collapsing them would send someone with a valid
+#: session back to a login screen that cannot fix anything.
+_NOT_A_SUPERADMIN = HTTPException(
+    status_code=status.HTTP_403_FORBIDDEN,
+    detail="Brak uprawnień administracyjnych.",
+)
+
+
+async def get_current_superadmin(
     credentials: HTTPAuthorizationCredentials | None = Depends(_bearer),
-) -> str:
-    """Gate for the super-admin routes. Needs no database at all."""
+    db: AsyncSession = Depends(get_db),
+) -> AdminUser:
+    """Gate for the HQ routes: a valid admin token *and* the superadmin flag.
+
+    The flag is read from the database on every request rather than trusted
+    from the token, for the same reason `get_current_restaurant` re-reads its
+    row: a claim baked into a half-day token would keep opening doors for half
+    a day after someone's access was revoked. Revocation has to bite now, which
+    is the whole argument for replacing a shared password with accounts.
+    """
     token = _credential_or_401(credentials)
 
     try:
-        return decode_access_token(token, expected_role="admin").subject
+        claims = decode_access_token(token, expected_role="admin")
     except TokenError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=str(exc),
             headers={"WWW-Authenticate": "Bearer"},
         ) from exc
+
+    try:
+        admin_id = uuid.UUID(claims.subject)
+    except ValueError as exc:
+        # Includes tokens minted by the retired master-password door, whose
+        # subject was the literal string "superadmin".
+        raise _UNAUTHENTICATED from exc
+
+    admin = await db.get(AdminUser, admin_id)
+    if admin is None:
+        raise _UNAUTHENTICATED
+
+    if token_predates_password_change(claims.issued_at, admin.password_changed_at):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Hasło zostało zmienione. Zaloguj się ponownie.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    if not admin.is_superadmin:
+        logger.warning(
+            "Admin %s tried to use an HQ route without the superadmin flag.",
+            admin.id,
+        )
+        raise _NOT_A_SUPERADMIN
+
+    return admin

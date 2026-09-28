@@ -318,7 +318,35 @@ class ResetPasswordRequest(BaseModel):
 
 
 class AdminLoginRequest(BaseModel):
-    password: str = Field(min_length=1, max_length=512)
+    """HQ sign-in. Individual credentials, not a shared master password."""
+
+    email: EmailStr
+    password: str = Field(min_length=1, max_length=MAX_PASSWORD_BYTES)
+
+
+class AdminProfile(BaseModel):
+    """Who the bearer token belongs to, for the HQ panel to display."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    email: str
+    is_superadmin: bool
+
+
+class AdminTokenResponse(BaseModel):
+    """The HQ token plus the identity behind it.
+
+    `is_superadmin` rides along so the sign-in screen can route on it without
+    a second round trip. It is **not** a claim inside the token: the flag is
+    re-read from the database on every request, so revoking someone takes
+    effect immediately instead of whenever their half-day token expires.
+    """
+
+    access_token: str
+    token_type: str = "bearer"
+    expires_in: int
+    admin: AdminProfile
 
 
 class MessageResponse(BaseModel):

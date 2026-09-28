@@ -21,9 +21,11 @@ from sqlalchemy.orm import noload
 
 from ..database import get_db
 from ..email_service import EmailSendError, send_password_reset
-from ..models import PasswordReset, Restaurant, RestaurantStatus
+from ..models import AdminUser, PasswordReset, Restaurant, RestaurantStatus
 from ..schemas import (
     AdminLoginRequest,
+    AdminProfile,
+    AdminTokenResponse,
     ForgotPasswordRequest,
     LoginRequest,
     MessageResponse,
@@ -40,7 +42,6 @@ from ..security import (
     hash_password,
     hash_reset_token,
     verify_password,
-    verify_superadmin_password,
 )
 
 logger = logging.getLogger(__name__)
@@ -216,21 +217,79 @@ async def reset_password(
     )
 
 
-@router.post("/admin/login", response_model=TokenResponse)
-async def admin_login(payload: AdminLoginRequest) -> TokenResponse:
-    """The hidden super-admin door.
+#: Correct credentials, wrong person. Deliberately distinct from
+#: `_INVALID_CREDENTIALS`: the caller has already proved they own the account,
+#: so naming the reason tells them nothing they did not supply themselves — and
+#: "wrong email or password" for someone whose password is right is the kind of
+#: error message people spend an afternoon on.
+_NO_ADMIN_RIGHTS = HTTPException(
+    status_code=status.HTTP_403_FORBIDDEN,
+    detail="Brak uprawnień administracyjnych.",
+)
 
-    Checks one environment variable and touches the database not at all, so
-    there is no admin account to enumerate, phish or leak in a dump. An unset
-    `SUPERADMIN_PASSWORD` refuses every attempt.
+
+async def _find_admin_by_email(db: AsyncSession, email: str) -> AdminUser | None:
+    result = await db.scalars(
+        select(AdminUser).where(func.lower(AdminUser.email) == email)
+    )
+    return result.first()
+
+
+async def _owner_credentials_match(
+    db: AsyncSession, email: str, password: str
+) -> bool:
+    """Whether these credentials belong to a restaurant owner.
+
+    Asked only after the HQ lookup has already failed, and only to choose the
+    error message. It confirms nothing the caller has not just proved by typing
+    the right password, so it is not the account oracle the rest of this module
+    works to avoid — and it is what turns "wrong email or password" into "you
+    are in the wrong place", for the person most likely to end up here by
+    mistake: an owner who bookmarked the wrong door.
     """
-    if not verify_superadmin_password(payload.password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Nieprawidłowe hasło.",
-        )
+    restaurant = await _find_by_email(db, email)
+    return verify_password(password, restaurant.hashed_password if restaurant else None)
+
+
+@router.post("/admin/login", response_model=AdminTokenResponse)
+async def admin_login(
+    payload: AdminLoginRequest, db: AsyncSession = Depends(get_db)
+) -> AdminTokenResponse:
+    """HQ sign-in, with individual accounts.
+
+    This replaced a single shared `SUPERADMIN_PASSWORD`. That door could not
+    say who had walked through it, could not be closed for one person without
+    changing the secret for everyone, and stayed open to every ex-employee
+    until somebody remembered to rotate it.
+
+    Two ways to fail, and they are different on purpose. Credentials that match
+    nothing get the same answer as everywhere else in this module. Credentials
+    that are *right* but lack the flag get 403 — at that point there is no
+    account to protect from the person who just authenticated as it.
+    """
+    email = _normalize_email(payload.email)
+    admin = await _find_admin_by_email(db, email)
+
+    # Real bcrypt work even when there is no row, so a missing HQ account takes
+    # as long as a wrong password.
+    if not verify_password(payload.password, admin.hashed_password if admin else None):
+        if await _owner_credentials_match(db, email, payload.password):
+            logger.info("Restaurant owner attempted to sign in at the HQ door.")
+            raise _NO_ADMIN_RIGHTS
+        raise _INVALID_CREDENTIALS
+
+    assert admin is not None  # narrowed by the check above
+
+    if not admin.is_superadmin:
+        logger.warning("HQ sign-in refused for %s: not a superadmin.", admin.id)
+        raise _NO_ADMIN_RIGHTS
 
     token, expires_in = create_access_token(
-        subject="superadmin", role="admin", expires_in=ADMIN_TOKEN_TTL
+        subject=str(admin.id), role="admin", expires_in=ADMIN_TOKEN_TTL
     )
-    return TokenResponse(access_token=token, expires_in=expires_in)
+    logger.info("HQ sign-in for admin %s.", admin.id)
+    return AdminTokenResponse(
+        access_token=token,
+        expires_in=expires_in,
+        admin=AdminProfile.model_validate(admin),
+    )

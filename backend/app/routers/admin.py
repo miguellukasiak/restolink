@@ -9,8 +9,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from ..database import get_db
-from ..dependencies import require_admin
+from ..dependencies import get_current_superadmin
 from ..models import (
+    AdminUser,
     PaymentHistory,
     PaymentMethod,
     PaymentStatus,
@@ -19,6 +20,7 @@ from ..models import (
     SubscriptionPackage,
 )
 from ..schemas import (
+    AdminProfile,
     ManualPaymentRequest,
     ManualPaymentResponse,
     PackageResponse,
@@ -30,12 +32,27 @@ from ..schemas import (
 )
 
 # These routes list every customer, create restaurants and record payments, so
-# the whole router sits behind the super-admin token.
+# the whole router sits behind the superadmin check — applied here rather than
+# on each endpoint, so an HQ route added later cannot arrive unprotected by
+# someone forgetting to decorate it.
 router = APIRouter(
     prefix="/api/v1/admin",
     tags=["Admin"],
-    dependencies=[Depends(require_admin)],
+    dependencies=[Depends(get_current_superadmin)],
 )
+
+
+@router.get("/me", response_model=AdminProfile)
+async def get_me(
+    admin: AdminUser = Depends(get_current_superadmin),
+) -> AdminUser:
+    """The signed-in HQ account.
+
+    Exists because the panel no longer has one anonymous operator: with named
+    accounts, "who am I signed in as" is a real question, and the header shows
+    the answer.
+    """
+    return admin
 
 
 async def _get_restaurant_with_package(

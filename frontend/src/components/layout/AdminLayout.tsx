@@ -13,6 +13,8 @@ import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded';
 import RestaurantRoundedIcon from '@mui/icons-material/RestaurantRounded';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { LogoutButton } from '../auth/LogoutButton';
+import { useAdminProfile } from '../../hooks/useAdminProfile';
+import { getAdminSession } from '../../services/authStorage';
 
 const DRAWER_WIDTH = 264;
 
@@ -27,6 +29,11 @@ const NAV_ITEMS = [
 /** Application shell: translucent top bar + permanent navigation drawer. */
 export function AdminLayout() {
   const location = useLocation();
+  const profile = useAdminProfile();
+
+  // Falls back to what sign-in stored, so the header never flashes empty while
+  // the live check is in flight.
+  const adminEmail = profile.data?.email ?? getAdminSession()?.email ?? '';
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
@@ -41,7 +48,7 @@ export function AdminLayout() {
                 RestoLink Admin
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                Panel administracyjny platformy
+                {adminEmail || 'Panel administracyjny platformy'}
               </Typography>
             </Box>
           </Stack>
