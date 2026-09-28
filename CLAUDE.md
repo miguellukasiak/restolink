@@ -5,7 +5,7 @@ gets the menu in their browser. Three deployables live in this repository.
 
 | Path            | What it is                                   | Deployed to |
 | --------------- | -------------------------------------------- | ----------- |
-| `backend/`      | FastAPI API, Docker image                    | Render      |
+| `backend/`      | FastAPI API, Docker image                    | Render service `restolink` — `https://restolink.onrender.com` |
 | `frontend/`     | React SPA — owner panel, HQ panel, public menu | Vercel project `restolink` |
 | `landing-page/` | Standalone static marketing site             | Vercel project `restolink-landing` |
 
@@ -530,7 +530,7 @@ Each of these cost real debugging time in this repo. They are not hypothetical.
 | `GOOGLE_MAPS_API_KEY` | reviews | 503 naming the variable |
 | `DEEPL_API_KEY` | dictionary drafts | 500 naming the variable; manual entry still works |
 | `VITE_API_URL` | frontend build | defaults to `http://localhost:8000` |
-| `VITE_API_URL` | landing-page build | **build fails** — a form posting to localhost would lose every lead. Set it in the `restolink-landing` Vercel project (Production and Preview). `landing-page/.env.example` |
+| `VITE_API_URL` | landing-page build | **build fails** — a form posting to localhost would lose every lead. Set it in the `restolink-landing` Vercel project (Production and Preview) to `https://restolink.onrender.com` — there is no `restolink-backend.onrender.com`, and Render's 404 for an unknown host carries no CORS headers, so a wrong URL surfaces in the browser as a CORS error. `landing-page/.env.example` |
 
 `SUPERADMIN_PASSWORD` is **retired**. Nothing reads it.
 
