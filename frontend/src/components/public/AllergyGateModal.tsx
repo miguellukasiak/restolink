@@ -16,6 +16,7 @@ import HealthAndSafetyRoundedIcon from '@mui/icons-material/HealthAndSafetyRound
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import { getAllergenIcon } from '../../constants/menuIcons';
+import { useMenuLabels } from '../../hooks/useMenuLabels';
 
 const SlideUp = forwardRef(function SlideUp(
   props: TransitionProps & { children: ReactElement },
@@ -54,6 +55,7 @@ export function AllergyGateModal({
   onSkip,
   onClose,
 }: AllergyGateModalProps) {
+  const { allergenLabel } = useMenuLabels();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [selected, setSelected] = useState<string[]>(initialSelected);
@@ -147,7 +149,7 @@ export function AllergyGateModal({
                 onClick={() => toggle(allergen)}
                 aria-pressed={active}
                 icon={active ? <CheckRoundedIcon /> : getAllergenIcon(allergen)}
-                label={allergen}
+                label={allergenLabel(allergen)}
                 color={active ? 'primary' : 'default'}
                 variant={active ? 'filled' : 'outlined'}
                 sx={{

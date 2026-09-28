@@ -9,6 +9,7 @@ import { alpha } from '@mui/material/styles';
 import RestaurantMenuRoundedIcon from '@mui/icons-material/RestaurantMenuRounded';
 import type { PublicMenuItem } from '../../types';
 import { formatPln } from '../../constants/menu';
+import { useMenuLabels } from '../../hooks/useMenuLabels';
 
 /** Card corner radius, in px. A string — `borderRadius: 16` in `sx` is a
  *  multiplier against theme.shape.borderRadius, not pixels. */
@@ -40,11 +41,14 @@ interface PublicItemCardProps {
  */
 function PublicItemCardComponent({ item, onOpen }: PublicItemCardProps) {
   const { t } = useTranslation();
+  const { allergenLabel } = useMenuLabels();
   const available = item.is_available !== false;
   const interactive = available && Boolean(onOpen);
 
   const allergensText =
-    item.allergens.length > 0 ? item.allergens.join(', ') : t('noAllergens');
+    item.allergens.length > 0
+      ? item.allergens.map(allergenLabel).join(', ')
+      : t('noAllergens');
   const ariaLabel = `${t('openDish', {
     name: item.name,
     price: formatPln(item.price),

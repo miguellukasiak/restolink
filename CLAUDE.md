@@ -396,6 +396,15 @@ product and answers `REQUEST_DENIED` if only the new one is enabled. The cache
 row stores the `place_id` it describes, so correcting a mistyped id does not keep
 serving another restaurant's reviews.
 
+**Allergens and tags on the public menu.** Stored as their Polish label from a
+fixed vocabulary (`ALLERGEN_OPTIONS`, `TAG_OPTIONS`) and passed through by the
+API untranslated. The guest menu translates them with `useMenuLabels()`, which
+maps each stored value to a stable i18n key (`allergenFish`, `tagSpicy`, …) via
+`getAllergenI18nKey` / `getTagI18nKey`; a value outside the vocabulary is shown
+as stored. **Filtering, matching and icons always use the stored value** — only
+what the guest reads is translated. A new option needs a key in the map and in
+all five locale files.
+
 **Contact form (landing page).** `POST /api/v1/public/contact`
 (`routers/contact.py`) emails an inquiry via Resend to `CONTACT_INBOX_EMAIL`,
 with **Reply-To set to the visitor** so answering reaches the lead directly.
@@ -572,12 +581,13 @@ Known product gaps, not bugs:
   restaurant-only and the CLI does not rotate passwords.
 - `PUT /admin/restaurants/{id}` does not repoint an activated owner's login
   email (§7).
-- The landing page footer still shows the placeholder `kontakt@example.com`.
-- Public-menu **allergens** are still shown in Polish in every language
-  ("Ryby" to a German guest). Tags go through `getTagI18nKey` in
-  `constants/menu.ts` → i18next; allergens need the same mapping — and, being
-  a safety matter, translations checked before they ship.
-- `ItemDetailModal` builds its "Ingredients and allergens" heading with a
-  hardcoded Polish `i`, so German reads "Zutaten i allergene".
+- The landing page footer's phone (`+48 000 000 000`) and address
+  (`Lorem ipsum 1, 00-000 …`, in every locale) are still placeholders.
+- The allergen vocabulary (`ALLERGEN_OPTIONS`) covers 8 of the EU's 14; there
+  is no peanut, crustacean, mollusc, sesame, sulphite or lupin option. Because an
+  owner may tick "Orzechy" for peanuts, it is translated to the broad everyday
+  word (Nuts / Nüsse / Frutos secos) rather than the narrower "tree nuts".
+- The public menu's blocked-status screen ("Menu chwilowo niedostępne.") is
+  hardcoded Polish.
 - Scroll-spy tuning (`SPY_ROOT_MARGIN` in `useCategoryScrollSpy.ts`) has never
   been verified against real scrolling — the preview pane cannot scroll.

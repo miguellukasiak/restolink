@@ -19,15 +19,30 @@ export const TAG_OPTIONS = [
   'Nowość',
 ] as const;
 
+export type MenuAllergen = (typeof ALLERGEN_OPTIONS)[number];
 export type MenuTag = (typeof TAG_OPTIONS)[number];
 
-/**
- * The public-menu i18n key for each tag.
+/*
+ * Public-menu i18n keys for the fixed vocabularies.
  *
- * A tag is stored as its Polish label — the owner panel shows it verbatim, and
- * the API passes it through untranslated — so the guest-facing menu maps that
- * stored value to a stable key instead of using Polish text as the key itself.
+ * Allergens and tags are stored as their Polish label — the owner panel shows
+ * them verbatim, and the API passes them through untranslated — so the
+ * guest-facing menu maps each stored value to a stable key instead of using
+ * Polish text as the key itself. Filtering and icons keep using the stored
+ * value; only what the guest reads is translated.
  */
+
+const ALLERGEN_I18N_KEYS: Record<MenuAllergen, string> = {
+  Gluten: 'allergenGluten',
+  Laktoza: 'allergenLactose',
+  Orzechy: 'allergenNuts',
+  Jaja: 'allergenEggs',
+  Soja: 'allergenSoy',
+  Ryby: 'allergenFish',
+  Seler: 'allergenCelery',
+  Gorczyca: 'allergenMustard',
+};
+
 const TAG_I18N_KEYS: Record<MenuTag, string> = {
   Wegańskie: 'tagVegan',
   Wegetariańskie: 'tagVegetarian',
@@ -36,10 +51,20 @@ const TAG_I18N_KEYS: Record<MenuTag, string> = {
   Nowość: 'tagNew',
 };
 
+function lookupKey(keys: Readonly<Record<string, string>>, value: string): string | null {
+  return Object.hasOwn(keys, value) ? (keys[value] ?? null) : null;
+}
+
+/** The i18n key for a stored allergen, or `null` for one outside the fixed
+ *  vocabulary — which callers show as stored rather than blank. */
+export function getAllergenI18nKey(allergen: string): string | null {
+  return lookupKey(ALLERGEN_I18N_KEYS, allergen);
+}
+
 /** The i18n key for a stored tag, or `null` for one outside the fixed
  *  vocabulary — which callers show as stored rather than blank. */
 export function getTagI18nKey(tag: string): string | null {
-  return Object.hasOwn(TAG_I18N_KEYS, tag) ? TAG_I18N_KEYS[tag as MenuTag] : null;
+  return lookupKey(TAG_I18N_KEYS, tag);
 }
 
 /** Font families offered in the visual settings page. */
