@@ -170,19 +170,23 @@ async def set_google_place(
 
 
 def _google_key() -> str:
-    """The API key, or a 503 that names the variable that is missing.
+    """The API key, or a failure that names the variable that is missing.
 
-    503 rather than 500: the feature is unavailable because the deployment has
-    not been configured, not because a request went wrong. The panel shows this
-    message verbatim, so it has to be something an owner can forward to whoever
-    administers the server.
+    Raised as an `_UpstreamError` rather than an `HTTPException` so it travels
+    the same road as a call that Google refused: with a snapshot in the
+    database the panel still shows reviews, and only a restaurant that has
+    never successfully synced sees the message. 503 rather than 500 because the
+    feature is unavailable through misconfiguration, not because a request went
+    wrong — and the panel prints this text verbatim, so it has to be something
+    an owner can forward to whoever administers the server.
     """
     key = os.getenv("GOOGLE_MAPS_API_KEY", "").strip()
     if not key:
         logger.error("GOOGLE_MAPS_API_KEY is not set — reviews are unavailable.")
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Klucz API Google Maps nie został skonfigurowany na serwerze",
+        raise _UpstreamError(
+            status.HTTP_503_SERVICE_UNAVAILABLE,
+            "Klucz API Google Maps nie został skonfigurowany na serwerze",
+            transient=False,
         )
     return key
 
@@ -532,20 +536,34 @@ async def _read_or_refresh(
     try:
         return await _refresh(db, restaurant.id, place_id, entry)
     except _UpstreamError as exc:
-        # Any failure of the Google call falls back to the last snapshot of
-        # *this* listing when there is one: a rating a day old beats an error
-        # page. The place_id match is what keeps that honest — a snapshot of a
-        # different listing is never served, whatever went wrong.
-        if entry is not None and entry.place_id == place_id:
+        # Any failure of the Google call falls back to whatever snapshot this
+        # restaurant has, however old, rather than answering with an error: a
+        # rating from last week beats a dashboard that will not load.
+        #
+        # Note what this does *not* check — that the snapshot describes the
+        # listing currently connected. It deliberately no longer does. The
+        # awkward case is an owner who connected one listing, synced it, then
+        # switched to another that Google will not serve; they are shown the
+        # first listing's reviews. The response reports the snapshot's own
+        # `place_id`, which the panel prints, so what is on screen still says
+        # which listing it came from — and the alternative, an error page for
+        # someone who has working data on file, is worse far more often.
+        if entry is not None:
             log = logger.info if exc.transient else logger.warning
             log(
-                "Serving stale Google reviews for restaurant %s (HTTP %d: %s)",
+                "Serving stale Google reviews for restaurant %s "
+                "(place %s, cached %s, HTTP %d: %s)",
                 restaurant.id,
+                entry.place_id,
+                as_utc(entry.updated_at).isoformat(),
                 exc.status_code,
                 exc.detail,
             )
             return _cached_response(entry)
 
+        # Nothing cached and Google will not answer. The mapped status and
+        # message reach the panel, which renders them above the setup screen —
+        # an explanation plus a way to act on it, not a broken page.
         raise HTTPException(status_code=exc.status_code, detail=exc.detail) from exc
 
 
