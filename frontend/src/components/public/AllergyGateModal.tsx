@@ -1,5 +1,6 @@
 import { forwardRef, useEffect, useState } from 'react';
 import type { ReactElement, Ref } from 'react';
+import { useTranslation } from 'react-i18next';
 import Dialog from '@mui/material/Dialog';
 import Slide from '@mui/material/Slide';
 import type { TransitionProps } from '@mui/material/transitions';
@@ -35,7 +36,7 @@ interface AllergyGateModalProps {
   initialSelected: string[];
   /** Commit the chosen exclusions (also marks the prompt answered). */
   onApply: (selected: string[]) => void;
-  /** Welcome-mode "Nie, pokaż menu" — answered, no filters. */
+  /** Welcome-mode skip button (`skipAllergyFilter`) — answered, no filters. */
   onSkip: () => void;
   /** Dismiss (X / backdrop / Esc). */
   onClose: () => void;
@@ -55,6 +56,7 @@ export function AllergyGateModal({
   onSkip,
   onClose,
 }: AllergyGateModalProps) {
+  const { t } = useTranslation();
   const { allergenLabel } = useMenuLabels();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -121,15 +123,13 @@ export function AllergyGateModal({
               id="allergy-gate-title"
               sx={{ fontWeight: 700, lineHeight: 1.25 }}
             >
-              {isWelcome ? 'Czy masz jakieś alergie pokarmowe?' : 'Filtruj alergeny'}
+              {isWelcome ? t('allergyWelcomeTitle') : t('allergyFilter')}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-              {isWelcome
-                ? 'Zaznacz składniki, których chcesz unikać — ukryjemy dania, które je zawierają.'
-                : 'Zaznacz alergeny, których dania mają być ukryte w menu.'}
+              {isWelcome ? t('allergyWelcomeHint') : t('allergyFilterHint')}
             </Typography>
           </Box>
-          <IconButton onClick={onClose} aria-label="Zamknij" edge="end" sx={{ mt: -0.5 }}>
+          <IconButton onClick={onClose} aria-label={t('close')} edge="end" sx={{ mt: -0.5 }}>
             <CloseRoundedIcon />
           </IconButton>
         </Stack>
@@ -137,7 +137,7 @@ export function AllergyGateModal({
         {/* Selectable allergen chips (icon + label; filled when excluded). */}
         <Box
           role="group"
-          aria-label="Alergeny do wykluczenia"
+          aria-label={t('allergensToExclude')}
           sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, my: 2.5 }}
         >
           {allergens.map((allergen) => {
@@ -178,7 +178,7 @@ export function AllergyGateModal({
                 startIcon={<HealthAndSafetyRoundedIcon />}
                 onClick={() => onApply(selected)}
               >
-                {`Zastosuj filtry (${selected.length})`}
+                {t('applyFiltersCount', { count: selected.length })}
               </Button>
             )}
             <Button
@@ -188,7 +188,7 @@ export function AllergyGateModal({
               color="secondary"
               onClick={onSkip}
             >
-              Nie, pokaż menu
+              {t('skipAllergyFilter')}
             </Button>
           </Stack>
         ) : (
@@ -201,7 +201,7 @@ export function AllergyGateModal({
               disabled={selected.length === 0}
               onClick={() => setSelected([])}
             >
-              Wyczyść
+              {t('clearFilters')}
             </Button>
             <Button
               fullWidth
@@ -211,7 +211,7 @@ export function AllergyGateModal({
               startIcon={<HealthAndSafetyRoundedIcon />}
               onClick={() => onApply(selected)}
             >
-              Zastosuj filtry
+              {t('applyFilters')}
             </Button>
           </Stack>
         )}

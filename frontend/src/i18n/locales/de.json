@@ -43,6 +43,14 @@
   "retry": "Erneut versuchen",
   "allergyFilter": "Allergene filtern",
   "allergyFilterActive": "Allergene filtern ({{count}} ausgeschlossen)",
+  "allergyWelcomeTitle": "Haben Sie Lebensmittelallergien?",
+  "allergyWelcomeHint": "Wählen Sie die Zutaten, die Sie meiden möchten — wir blenden Gerichte aus, die sie enthalten.",
+  "allergyFilterHint": "Wählen Sie die Allergene, deren Gerichte in der Karte ausgeblendet werden sollen.",
+  "allergensToExclude": "Auszuschließende Allergene",
+  "applyFilters": "Filter anwenden",
+  "applyFiltersCount": "Filter anwenden ({{count}})",
+  "skipAllergyFilter": "Nein, Karte anzeigen",
+  "clearFilters": "Zurücksetzen",
   "noDishesForAllergens": "Kein Gericht entspricht Ihren Allergenfiltern.",
   "adjustFilters": "Filter anpassen"
 }

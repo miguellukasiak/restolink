@@ -43,6 +43,14 @@
   "retry": "Spróbuj ponownie",
   "allergyFilter": "Filtruj alergeny",
   "allergyFilterActive": "Filtruj alergeny (aktywne wykluczenia: {{count}})",
+  "allergyWelcomeTitle": "Czy masz jakieś alergie pokarmowe?",
+  "allergyWelcomeHint": "Zaznacz składniki, których chcesz unikać — ukryjemy dania, które je zawierają.",
+  "allergyFilterHint": "Zaznacz alergeny, których dania mają być ukryte w menu.",
+  "allergensToExclude": "Alergeny do wykluczenia",
+  "applyFilters": "Zastosuj filtry",
+  "applyFiltersCount": "Zastosuj filtry ({{count}})",
+  "skipAllergyFilter": "Nie, pokaż menu",
+  "clearFilters": "Wyczyść",
   "noDishesForAllergens": "Żadne danie nie spełnia Twoich filtrów alergenów.",
   "adjustFilters": "Dostosuj filtry"
 }
