@@ -1,0 +1,557 @@
+# RestoLink — agent handbook
+
+RestoLink is a SaaS for digital restaurant menus: a guest scans a QR code and
+gets the menu in their browser. Three deployables live in this repository.
+
+| Path            | What it is                                   | Deployed to |
+| --------------- | -------------------------------------------- | ----------- |
+| `backend/`      | FastAPI API, Docker image                    | Render      |
+| `frontend/`     | React SPA — owner panel, HQ panel, public menu | Vercel    |
+| `landing-page/` | Standalone static marketing site             | static host |
+
+No infrastructure-as-code lives in the repo; Render and Vercel are configured in
+their own dashboards. `.claude/launch.json` defines the dev-server entry the
+Browser pane uses.
+
+> This file is written in English to match every docstring and comment in the
+> codebase. UI strings and user-facing API messages are **Polish** — keep that
+> split.
+
+---
+
+## 1. Stack
+
+**Backend** — Python 3.12 in production (`backend/Dockerfile`), FastAPI,
+SQLAlchemy 2.0 async with `asyncpg`, Pydantic v2. Postgres is hosted on **Neon**.
+`passlib[bcrypt]` + `pyjwt` for auth, `httpx` for outbound calls, `stripe`,
+`resend`, `deepl`, `cloudinary`.
+
+**Frontend** — React 19 + TypeScript (strict) + Vite 8, **MUI v9** (Material
+Design 3) with emotion, `@mui/x-data-grid` for tables, TanStack Query v5 for all
+server state, `react-router-dom` v7, `react-hook-form` + `zod`, `react-i18next`,
+`@hello-pangea/dnd`, `react-scroll`, `date-fns`.
+
+**Landing page** — Vite vanilla TS + **Tailwind v4** (`@tailwindcss/vite`, tokens
+declared in `@theme` inside `src/style.css`; there is deliberately **no**
+`tailwind.config.js`). i18next for en/pl/de/fr/es.
+
+Tailwind exists **only** in `landing-page/`. The React app is MUI-only — do not
+introduce Tailwind there.
+
+---
+
+## 2. Rules that are not negotiable
+
+### 2.1 There is no Alembic. Migrations are hand-written SQL.
+
+The schema is created by `Base.metadata.create_all()` in the FastAPI lifespan
+(`backend/app/main.py`). Every schema change also ships as a numbered file in
+`backend/migrations/`, applied by hand:
+
+```bash
+psql "$DATABASE_URL" -f backend/migrations/00N_name.sql
+```
+
+**`create_all` creates missing _tables_. It never alters an existing one.**
+So a new **table** is optional-but-provided in a migration, while a new
+**column** or **index** is REQUIRED before the deploy lands — otherwise every
+query touching that table fails with `UndefinedColumn` and takes the public menu
+down with it. This has happened; see §11.
+
+Every migration must be idempotent (`IF NOT EXISTS`, `ADD COLUMN IF NOT
+EXISTS`) and must state at the top whether it is required or optional.
+
+Do not introduce Alembic without being asked. Adopting it now means stamping a
+baseline revision against a production database whose schema it never authored.
+
+| File                              | Adds                                                | Status |
+| --------------------------------- | --------------------------------------------------- | ------ |
+| `001_add_auth_columns.sql`        | `restaurant.email`, `hashed_password`               | required |
+| `002_backfill_login_emails.sql`   | backfill helper                                     | optional |
+| `003_add_password_changed_at.sql` | `restaurant.password_changed_at`                    | required |
+| `004_add_translation_cache.sql`   | obsolete table from a retired MT worker             | dead |
+| `005_owner_translation_dictionary.sql` | `restaurant.base_language` + `translation_dictionary` | **column required** |
+| `006_add_google_reviews.sql`      | `restaurant.google_place_id` + `google_review_cache` | **column required** |
+| `007_admin_users_rbac.sql`        | `admin_user`                                        | optional (table only) |
+| `008_audit_log.sql`               | `audit_log`                                         | optional (table only) |
+| `009_stripe_billing.sql`          | `restaurant.stripe_customer_id` + unique index on `payment_history.external_transaction_id` | **required** |
+
+### 2.2 Configuration comes only from the environment
+
+Never hardcode a key, secret, URL or price id. Services read `os.getenv`
+**lazily inside a function**, not at import time, so a late-configured
+deployment and a test behave alike (`stripe_service._env`,
+`google_maps._google_key`). A missing key produces a clean HTTP error naming the
+variable — never a silent fallback, and never a hardcoded default for anything
+that grants access.
+
+`JWT_SECRET_KEY` is the one exception worth understanding: when unset the app
+generates an **ephemeral** key for that process rather than using a constant,
+because a hardcoded signing key would be a publicly known way to mint admin
+tokens.
+
+### 2.3 Never confirm whether an account exists
+
+Login answers identically for an unknown email and a wrong password.
+`forgot-password` answers identically whether or not the address is registered,
+including when Resend fails. `verify_password` runs a real bcrypt comparison
+against a dummy hash when there is no account, so timing matches too.
+
+The one sanctioned exception: at the HQ door, credentials that are **correct**
+but lack admin rights get an explicit 403. The caller already proved they own
+the account, so nothing is disclosed.
+
+### 2.4 Soft deletes — but not for credentials
+
+Most tables carry `deleted_at` and every query must filter on it. Credentials
+are different: `password_reset` rows are **hard-deleted** when spent, and
+`audit_log` is append-only. A soft-deleted credential is still a credential.
+
+### 2.5 Money and access changes get audited
+
+Anything that grants access, moves money, or changes who can do either writes an
+`audit_log` entry in the **same transaction** as the action.
+
+---
+
+## 3. Data model (`backend/app/models.py`)
+
+```
+subscription_package
+restaurant ─┬─ menu_category ── menu_item
+            ├─ payment_history
+            ├─ password_reset          (activation + reset grants)
+            ├─ translation_dictionary
+            └─ google_review_cache
+admin_user                            (HQ staff — NOT restaurants)
+audit_log                             (append-only, no FKs)
+```
+
+`Restaurant` is both the tenant and the owner's identity. Note the deliberate
+split between **`contact_email`** (public-facing contact data) and **`email`**
+(the login identity). `email` is `NULL` until the owner activates.
+
+`admin_user` is a separate table on purpose. `Restaurant` requires a name, a
+phone and a `package_id` FK, so making an HQ employee one would mean inventing a
+fake restaurant and a fake subscription per member of staff. Staff are not
+customers.
+
+---
+
+## 4. Auth — two independent session scopes
+
+Two logins, two token roles, two storage keys. They never mix.
+
+| | Owner | HQ admin |
+| --- | --- | --- |
+| Table | `restaurant` | `admin_user` |
+| Endpoint | `POST /api/v1/auth/login` | `POST /api/v1/auth/admin/login` |
+| JWT `role` | `restaurant` | `admin` |
+| TTL | 7 days | 12 hours |
+| Dependency | `get_current_restaurant` | `get_current_superadmin` |
+| localStorage | `restolink.auth.restaurant` | `restolink.auth.admin` |
+
+JWT is HS256 with `algorithms=[ALGORITHM]` pinned on decode — accepting a
+caller-influenced list is how `alg: none` and HMAC/RSA confusion get in. The
+role is checked inside `decode_access_token`, so an owner token can never be
+replayed on an admin route.
+
+### Row is re-read on every request
+
+Neither dependency trusts the token's claims beyond the subject. Both load the
+row, so blocking, deleting or demoting takes effect on the target's **next
+request** rather than whenever their token happens to expire. `is_superadmin` is
+deliberately **not** a JWT claim for exactly this reason.
+
+### Password changes end other sessions
+
+`token_predates_password_change(iat, password_changed_at)` refuses tokens minted
+before the credential they prove. Compared against the *floor* of the change
+timestamp, because `iat` has whole-second resolution and rounding the other way
+would sign out the person who just set the new password.
+
+### bcrypt bounds
+
+bcrypt hashes the first **72 bytes** and silently drops the rest, which would
+make two different long passwords interchangeable. `MAX_PASSWORD_BYTES = 72` is
+enforced in schemas, the CLI and the frontend (counting **bytes**, not
+characters — Polish letters are two bytes). `bcrypt` is pinned `<4.1` because
+passlib 1.7.4 reads `bcrypt.__about__`, removed in 4.1.
+
+### RBAC
+
+`get_current_superadmin` → valid `admin` token **and** `admin_user.is_superadmin`.
+401 means "we do not know who you are"; **403** means "we do, and you may not" —
+never collapse them, or a signed-in person gets bounced to a login screen that
+cannot fix anything. The 403 detail is `Brak uprawnień administracyjnych.` and
+the panel shows it verbatim.
+
+Revoking is `is_superadmin = False`, never a delete: the row stays so the audit
+trail keeps pointing at a real account. **Self-revocation is refused** — it is
+the only move that can empty HQ, since every other revocation leaves the person
+performing it.
+
+There is no sign-up for HQ. Bootstrap the first account with the CLI:
+
+```bash
+cd backend && python scripts/promote_admin.py you@example.com          # create or promote
+python scripts/promote_admin.py them@example.com --demote              # revoke
+```
+
+The password is prompted for, never an argument — arguments land in shell
+history and in `ps`. `SUPERADMIN_PASSWORD` is **gone**; if it is still set in any
+environment, remove it.
+
+### `verify_restaurant_access`
+
+Owner routes are addressed `/{restaurant_id}/…`, so a valid token is only half
+the check. This dependency compares the token's restaurant to the path and
+answers **404** (not 403) on a mismatch, so a wrong id does not confirm the
+restaurant exists. Applied at **router level**, so a route added later cannot
+arrive unprotected by someone forgetting to decorate it.
+
+---
+
+## 5. Impersonation (Ghost Login)
+
+`POST /api/v1/admin/impersonate/{restaurant_id}` mints a **real owner token** for
+a support session. The server cannot tell it from a genuine sign-in — that is
+the point, and also the risk. Three things keep it proportionate:
+
+1. Behind `get_current_superadmin` like every HQ route.
+2. **One hour**, not the owner's week. A support session is a phone call; a
+   forgotten tab should not still be a key tomorrow (`IMPERSONATION_TOKEN_TTL`).
+3. The audit entry is written **before** the token is built, so no path produces
+   a token without a row naming who took it.
+
+Frontend: the borrowed token is stored under the restaurant key with
+`impersonated: true`, and the **admin session is left untouched** so the way back
+to HQ stays open. `ImpersonationBanner` renders a warning strip across the panel
+— since the server cannot distinguish the session, the interface must.
+
+---
+
+## 6. Audit log
+
+`backend/app/audit.py` — one `record()` function and a list of action constants.
+
+- Actions are **stable tokens** (`restaurant.impersonated`), never prose. The
+  panel translates them, so rewording the UI never orphans old history. Unknown
+  tokens render raw in `AuditLogPage` rather than blank.
+- `admin_email` is a **copy, not a FK**. The trail must survive the account.
+- Written in the caller's transaction: a row exists exactly when the action it
+  describes did. A trail claiming a restaurant was created when the request
+  rolled back is worse than no entry.
+- The Stripe webhook has no human actor; it records `system:stripe-webhook`,
+  shaped so it cannot be mistaken for an email.
+- `created_at` is stamped **in Python**, not by `func.now()`. See §11.
+- Append-only by construction: nothing updates or deletes rows, and
+  `AuditLogPage` is read-only with no endpoint behind an edit.
+
+---
+
+## 7. Onboarding (Resend) and the HQ rescue tools
+
+Creating a restaurant in HQ issues an activation grant and emails a branded
+welcome link to `contact_email`. **The email never decides whether the account
+exists** — a bounce or a Resend outage leaves a real restaurant HQ can rescue
+from the same screen.
+
+`POST /api/v1/auth/activate` sets the password **and fills in the login
+identity** from `contact_email`, then returns a session so the owner lands
+straight in their panel.
+
+> Deriving the login email at *activation* rather than at creation is what makes
+> the rescue work. Correcting a mistyped address and re-sending the link also
+> corrects the address the owner will sign in with, because it is read at that
+> moment and not weeks earlier. Do not move this to creation.
+
+Activation grants reuse the **`password_reset`** table rather than a
+near-identical second one: same mechanics (only the SHA-256 hash is stored, spent
+by deletion), with `ACTIVATION_TTL = 7 days` instead of the reset's 30 minutes,
+because a welcome email may sit in spam over a weekend.
+
+A **blocked** account's link is deliberately *not* burned when activation is
+refused — the link is not the problem there, the account is, and spending it
+would strip the owner of the one thing that works once HQ unblocks them.
+
+Rescue actions in the HQ restaurants table (per-row overflow menu):
+
+| Action | Endpoint | Note |
+| --- | --- | --- |
+| Edytuj dane | `PUT /admin/restaurants/{id}` | records a before→after diff; sends nothing |
+| Wyślij link aktywacyjny | `POST …/send-activation-link` | fresh token, emails it |
+| Kopiuj link aktywacyjny | `POST …/generate-activation-link` | returns the raw URL, sends nothing |
+
+Both link endpoints **void the previous grant**, so pressing "copy" twice
+invalidates a URL an operator may already have pasted. The clipboard write falls
+back to a dialog showing the link when the browser refuses.
+
+`PUT /admin/restaurants/{id}` does **not** repoint the login `email` of an
+already-activated account. Silently moving a live credential from an HQ form is
+not something that endpoint should do alone. Known gap: an activated owner who
+loses their inbox still signs in with the old address.
+
+---
+
+## 8. Stripe (Checkout + raw webhooks)
+
+`backend/app/stripe_service.py` + `backend/app/routers/billing.py`. Two routers
+with opposite trust models:
+
+- `POST /api/v1/subscriptions/create-checkout-session` — authenticated owner.
+  The restaurant comes from the **token**, never the body.
+- `POST /api/v1/webhooks/stripe` — **unauthenticated by necessity**; Stripe holds
+  no token of ours. Its signature check is the whole of its security.
+
+### The raw-body rule
+
+```python
+payload = await request.body()          # never a Pydantic model
+signature = request.headers.get("stripe-signature")
+```
+
+The signature covers the **exact bytes** Stripe sent. Any parse-and-reserialise
+round trip changes whitespace and key order, so a Pydantic-bound body would fail
+verification for every genuine event. `tests/test_stripe.py` posts indented JSON
+with a trailing newline specifically to prove this path.
+
+The SDK verifies the signature; the event is then read from `json.loads(payload)`
+— the same bytes that were just verified. In `stripe` v15 the returned `Event` is
+a typed object that is no longer a mapping, so reading it directly couples the
+module to a library detail for no benefit.
+
+### Attribution
+
+`client_reference_id` carries the restaurant id, and it is written **three ways**:
+on the session, in session metadata, and into the subscription's metadata. The
+first two reach `checkout.session.completed`; the third survives into the monthly
+`invoice.payment_succeeded` events, which carry **no** `client_reference_id` —
+that field exists only on a Checkout Session. `restaurant.stripe_customer_id`,
+remembered at first checkout, is the final fallback and the only way renewals are
+attributable.
+
+### Idempotency
+
+Stripe retries until it gets a 2xx, and one payment arrives twice over
+(`checkout.session.completed` and `invoice.payment_succeeded` both describe the
+first month). The event id is stored in
+`payment_history.external_transaction_id` under a **unique partial index**; the
+handler refuses an id it has seen, and the index settles two retries racing in
+the same second. Without this, a retry adds another 30 days.
+
+### Status codes the webhook returns
+
+| Situation | Code | Why |
+| --- | --- | --- |
+| processed / duplicate / ignored / unmatched | **200** | Stripe retries non-2xx for days; a queue of retries for events we will never act on hides the ones that matter |
+| bad or missing signature | **400** | final — it will never verify |
+| `STRIPE_WEBHOOK_SECRET` unset | **500** | our misconfiguration; the event is real and *should* be retried once fixed |
+
+### Never shorten a subscription
+
+`_next_valid_until` stretches from the later of *now* or the current expiry, so
+paying early adds to remaining time. Stripe's own period end wins when it is in
+the future, because that is what the card is billed against.
+
+"Clearing the payment lock" in this schema means `status = ACTIVE`; there is no
+separate lock column.
+
+### Frontend return trip
+
+Success URL is `…/panel/{id}/menu?checkout=success`. The owner can arrive back
+**before** the webhook lands, so `useCheckoutReturn` re-checks a few times over
+several seconds and the banner says so while it does. The `checkout` flag is
+stripped once read so a refresh does not re-announce an old payment.
+
+---
+
+## 9. Other subsystems
+
+**Images (Cloudinary).** The browser uploads a Base64 data URI; the API swaps it
+for a hosted URL before persisting (this removed a 13 MB → 0.45 MB payload
+bottleneck). Delivery transformations (`w_600,q_auto,f_auto`) are injected at
+**Pydantic serialization** via `HostedImageUrl`, so they can be retuned in one
+place with no migration and no re-upload.
+
+**Public menu theming.** `utils/colors.ts` derives text and divider colours from
+the restaurant's own background luminance. This is a guardrail: an unreadable
+menu must be impossible whatever colours an owner picks. Any new surface on the
+public menu must go through it.
+
+**Translation dictionary.** Machine translation was removed twice — free
+endpoints refuse Render's shared IPs, and a menu is the one text you cannot get
+wrong ("Smażony ser" came back as *boiled* cheese). Owners now maintain
+`translation_dictionary` per restaurant; DeepL only drafts proposals the owner
+reviews and saves. Fallback chain per phrase: requested language → English →
+original.
+
+**Google reviews.** `GET /api/v1/panel/{id}/google-reviews`, backed by a
+24-hour `google_review_cache`. Uses **Places API (New)**
+(`places.googleapis.com/v1`) with the key in `X-Goog-Api-Key` and a
+`X-Goog-FieldMask` header — the legacy endpoint is a separate Google Cloud
+product and answers `REQUEST_DENIED` if only the new one is enabled. The cache
+row stores the `place_id` it describes, so correcting a mistyped id does not keep
+serving another restaurant's reviews.
+
+---
+
+## 10. Frontend conventions
+
+- **All server state goes through TanStack Query.** No `useEffect` fetching.
+- `services/*.ts` own the HTTP calls and their types; `hooks/*.ts` wrap them in
+  queries and mutations; pages compose hooks.
+- **Add every new owner API prefix to `sessionScopeFor` in
+  `services/api.ts`.** It matches on prefixes, so a route under a new one
+  silently loses its token. This already shipped a 401 once (the dictionary under
+  `/panel`). Current owner prefixes: `/api/v1/restaurants`, `/api/v1/panel`,
+  `/api/v1/subscriptions`. Admin: `/api/v1/admin`. Unauthenticated: `/auth`,
+  `/public`, `/webhooks`.
+- The Axios layer retries a **GET** once on a timeout or no-response (Render free
+  tier cold starts, 30 s timeout) and never retries writes. A 401 on a protected
+  path clears that scope's session and redirects; a 401 from `/auth/*` is the
+  normal "wrong password" and must not bounce the page.
+- Brand: primary `#0F8256` (the landing page's CTA green, `--color-brand-600`),
+  dark `#0C6544`, light `#16A06A`. The wordmark is the `Wordmark` component in
+  **Dela Gothic One** — one weight, display only, deliberately not in the body
+  font stack. There is no letter-tile logo any more.
+- Route guards (`RequireAuth.tsx`) are a **convenience, not the boundary** —
+  every protected endpoint is enforced server-side.
+
+### Routes
+
+```
+/                       → /login
+/login  /forgot-password  /reset-password  /activate  /hq-access
+/admin/{restaurants,team,logs}          (RequireAdminAuth)
+/panel/:restaurantId/{menu,qr,dictionary,google,settings}   (RequireRestaurantAuth)
+/menu/:restaurantId     public, themed, no account
+```
+
+---
+
+## 11. Traps that have actually bitten
+
+Each of these cost real debugging time in this repo. They are not hypothetical.
+
+1. **`create_all` never adds a column.** A model change without a migration
+   turns every query on that table into a 500 — including the public menu. Seen
+   live twice.
+2. **Naive vs aware datetimes.** Postgres returns aware values for `TIMESTAMPTZ`;
+   that is a property of the driver, not a contract. Comparing a naive value to
+   an aware one raises mid-request and turns a security check or a payment into a
+   500. Always route stored timestamps through **`security.as_utc()`**.
+3. **A rollback expires every instance in the session**, regardless of
+   `expire_on_commit=False`. Touching `obj.id` in an `except` branch triggers a
+   lazy reload — synchronous IO in async context — and SQLAlchemy raises
+   `MissingGreenlet`, replacing a clean 409 with a 500. **Read ids into locals
+   before the commit.**
+4. **`noload()` poisons the identity map.** It marks a relationship as
+   loaded-and-empty, so a later `selectinload` query returns the same object and
+   skips the loader — leaving the relationship `None` and failing
+   `response_model` validation. Load what the response needs.
+5. **Unit tests bypass `response_model`.** Calling an endpoint function directly
+   skips FastAPI's serialization, so a response-shape bug passes the suite and
+   500s in the browser. Validate the model explicitly, or go through the ASGI app.
+6. **`func.now()` is transaction-scoped on Postgres**, so several rows written in
+   one request share a timestamp to the microsecond and any "newest first"
+   ordering falls through to a random UUID. SQLite makes it worse — one-second
+   resolution. Stamp audit-style timestamps in Python.
+7. **Browsers pause CSS animations in a hidden tab, and a paused animation holds
+   its first frame indefinitely.** An entrance written `from { opacity: 0 }` with
+   no `forwards` fill is *not* safe: measured 40 dish cards behind an invisible,
+   blurred page. `useAnimationWindow` removes the animation on a timer so the
+   plain, visible rules apply whether it played or not. Unmount overlays on
+   **timers, never `animationend`**.
+8. **The Browser pane runs hidden** (`visibilityState: "hidden"`). rAF,
+   IntersectionObserver, CSS animations and transitions do not run; screenshots
+   time out; MUI Select/Menu popovers may not render; and `getComputedStyle` can
+   return a **stale** value for an element whose state changed. Verify via
+   DOM/`getComputedStyle`, and when a reading looks impossible, measure a fresh
+   clone of the element before believing it.
+9. **`react-scroll`'s `Element` sets `name`, not `id`.** An IntersectionObserver
+   looking for ids finds nothing. Set both.
+10. **MUI v9 `Stack` rejects `alignItems` as a prop** — put it in `sx`.
+11. **Stripe v15 `Event` is not a mapping.** `dict(event)` raises. Read the event
+    from the verified raw bytes.
+12. **Loanwords defeat "identical means broken" heuristics.** "Tiramisu" is the
+    same in German; a guard that rejected identical translations once caused an
+    infinite client poll.
+
+---
+
+## 12. Environment variables
+
+| Variable | Used by | Missing behaviour |
+| --- | --- | --- |
+| `DATABASE_URL` | everything | falls back to a local Postgres DSN |
+| `JWT_SECRET_KEY` | auth | **ephemeral per-process key**; all sessions die on restart. ≥32 bytes |
+| `APP_BASE_URL` | email links, Stripe URLs | defaults to the Vercel domain |
+| `CLOUDINARY_CLOUD_NAME` / `_API_KEY` / `_API_SECRET` | image upload | loud warning, uploads disabled |
+| `RESEND_API_KEY`, `RESEND_FROM` | reset + welcome email | **not sent**; the link is written to the log instead |
+| `STRIPE_API_KEY`, `STRIPE_PRICE_ID` | checkout | 503 from the checkout endpoint |
+| `STRIPE_WEBHOOK_SECRET` | webhook | **500, refuses to act** — never skips verification |
+| `GOOGLE_MAPS_API_KEY` | reviews | 503 naming the variable |
+| `DEEPL_API_KEY` | dictionary drafts | 500 naming the variable; manual entry still works |
+| `VITE_API_URL` | frontend build | defaults to `http://localhost:8000` |
+
+`SUPERADMIN_PASSWORD` is **retired**. Nothing reads it.
+
+---
+
+## 13. Local development
+
+```bash
+# backend  (venv bin dir is .venv/bin on Linux, .venv/Scripts on Windows)
+cd backend
+python -m venv .venv
+python -m pip install -r requirements.txt
+uvicorn app.main:app --reload            # needs DATABASE_URL
+
+# tests — SQLite, no container, no credentials
+pip install -r requirements-dev.txt
+pytest
+
+# frontend
+cd frontend && npm install && npm run dev
+npx tsc --noEmit -p tsconfig.app.json    # run before committing
+```
+
+`backend/tests/conftest.py` teaches SQLite the two Postgres-only column types
+(`JSONB`, `UUID`) with `@compiles`, so the **real models** are used verbatim
+rather than mirrored — a mirrored schema is a second source of truth that drifts.
+It drops and rebuilds the schema per test and disposes the pool afterwards
+(deleting the file fails on Windows while the pool holds it open).
+
+Docker Compose exists in `backend/` but is not required; pointing
+`DATABASE_URL` at Neon is the simpler path.
+
+---
+
+## 14. Outstanding backlog
+
+Deployment prerequisites, carried across several sessions:
+
+- [ ] **Migrations `005`, `006`, `009`** — required columns. Run before the
+      matching deploy or the API 500s on every restaurant query.
+- [ ] `007` and `008` are table-only and optional (`create_all` covers them).
+- [ ] **Bootstrap the first HQ account** (`scripts/promote_admin.py`, or the
+      equivalent SQL insert). Until it exists nobody can reach `/hq-access`.
+- [ ] **Remove `SUPERADMIN_PASSWORD`** from the Render environment once a real
+      account works. A retired secret left in place gets reused somewhere it
+      still opens a door.
+- [ ] **Rotate the Cloudinary API secret** — it was pasted into a chat long ago
+      and has never been rotated.
+- [ ] Register the Stripe webhook endpoint and set its three variables.
+- [ ] Restrict `GOOGLE_MAPS_API_KEY` to **Places API (New)** in Google Cloud.
+
+Known product gaps, not bugs:
+
+- No way to change an **HQ admin's** password through the app; the reset flow is
+  restaurant-only and the CLI does not rotate passwords.
+- `PUT /admin/restaurants/{id}` does not repoint an activated owner's login
+  email (§7).
+- The landing page contact form is still `action="#"` (marked TODO), and its
+  favicon still carries the retired "R" mark.
+- Scroll-spy tuning (`SPY_ROOT_MARGIN` in `useCategoryScrollSpy.ts`) has never
+  been verified against real scrolling — the preview pane cannot scroll.
