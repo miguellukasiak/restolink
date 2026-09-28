@@ -17,6 +17,8 @@ import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import LaunchRoundedIcon from '@mui/icons-material/LaunchRounded';
+import SupportAgentRoundedIcon from '@mui/icons-material/SupportAgentRounded';
+import CircularProgress from '@mui/material/CircularProgress';
 import RequestQuoteRoundedIcon from '@mui/icons-material/RequestQuoteRounded';
 import MailOutlineRoundedIcon from '@mui/icons-material/MailOutlineRounded';
 import PhoneRoundedIcon from '@mui/icons-material/PhoneRounded';
@@ -25,6 +27,8 @@ import WorkspacePremiumRoundedIcon from '@mui/icons-material/WorkspacePremiumRou
 import { format, isPast } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import { useRestaurants } from '../hooks/useRestaurants';
+import { useImpersonate } from '../hooks/useHq';
+import { useSnackbar } from '../components/feedback/SnackbarProvider';
 import { getApiErrorMessage } from '../services/api';
 import { StatusChip } from '../components/restaurants/StatusChip';
 import { ManualPaymentDialog } from '../components/restaurants/ManualPaymentDialog';
@@ -71,6 +75,24 @@ export function RestaurantsPage() {
 
   const { data, isLoading, isFetching, isError, error, refetch } =
     useRestaurants(paginationModel);
+  const impersonate = useImpersonate();
+  const { showError } = useSnackbar();
+
+  // Tracked per row so only the button that was pressed shows a spinner; the
+  // mutation's own isPending would light up all of them.
+  const [impersonating, setImpersonating] = useState<string | null>(null);
+
+  const startImpersonation = async (restaurant: RestaurantListItem) => {
+    setImpersonating(restaurant.id);
+    try {
+      // On success the hook stores the support session and navigates into the
+      // panel, so there is nothing to do here.
+      await impersonate.mutateAsync(restaurant.id);
+    } catch (err) {
+      showError(getApiErrorMessage(err));
+      setImpersonating(null);
+    }
+  };
 
   const rows = data?.data ?? [];
   const rowCount = data?.meta.total_items ?? 0;
@@ -163,7 +185,7 @@ export function RestaurantsPage() {
       {
         field: 'actions',
         headerName: 'Akcje',
-        width: 130,
+        width: 170,
         sortable: false,
         filterable: false,
         align: 'center',
@@ -185,6 +207,28 @@ export function RestaurantsPage() {
               >
                 <RequestQuoteRoundedIcon fontSize="small" />
               </IconButton>
+            </Tooltip>
+            <Tooltip title="Wejdź na konto restauratora (zapisywane w dzienniku)" arrow>
+              <span>
+                <IconButton
+                  color="warning"
+                  aria-label={`Wejdź na konto — ${params.row.name}`}
+                  onClick={() => void startImpersonation(params.row)}
+                  disabled={impersonating !== null}
+                  sx={{
+                    width: 36,
+                    height: 36,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                  }}
+                >
+                  {impersonating === params.row.id ? (
+                    <CircularProgress size={16} color="inherit" />
+                  ) : (
+                    <SupportAgentRoundedIcon fontSize="small" />
+                  )}
+                </IconButton>
+              </span>
             </Tooltip>
             <Tooltip title="Otwórz panel restauratora" arrow>
               <IconButton
@@ -208,7 +252,7 @@ export function RestaurantsPage() {
         ),
       },
     ],
-    [],
+    [impersonating],
   );
 
   return (

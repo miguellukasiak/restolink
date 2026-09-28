@@ -21,6 +21,7 @@ import { NavLink, Outlet, useLocation, useParams } from 'react-router-dom';
 import { useRestaurantInfo } from '../../hooks/useRestaurantInfo';
 import { LogoutButton } from '../auth/LogoutButton';
 import { Wordmark } from '../brand/Wordmark';
+import { ImpersonationBanner } from '../panel/ImpersonationBanner';
 import { useSnackbar } from '../feedback/SnackbarProvider';
 import {
   PAYMENT_PENDING_TOAST,
@@ -151,6 +152,9 @@ export function RestaurantPanelLayout() {
 
       <Box component="main" sx={{ flexGrow: 1, minWidth: 0, px: { xs: 2, md: 4 }, pb: 6 }}>
         <Toolbar />
+        {/* Above the subscription gate on purpose: an admin looking at a
+            blocked restaurant still needs to know whose panel this is. */}
+        <ImpersonationBanner />
         {access === 'BLOCKED' ? (
           // Expired/blocked: no access to builder, settings or QR tools.
           <SubscriptionPaywall onPay={handlePaymentCta} />

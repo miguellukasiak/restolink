@@ -35,6 +35,11 @@ ALGORITHM = "HS256"
 RESTAURANT_TOKEN_TTL = timedelta(days=7)
 #: The admin token is far more powerful, so it expires the same day.
 ADMIN_TOKEN_TTL = timedelta(hours=12)
+#: A support session opened by impersonating an owner. Far shorter than the
+#: owner's own week: this token is indistinguishable from a real sign-in once
+#: issued, so the window in which a forgotten browser tab still holds the keys
+#: to someone else's restaurant is kept to about the length of a support call.
+IMPERSONATION_TOKEN_TTL = timedelta(hours=1)
 #: Long enough to walk to a laptop, short enough that a forwarded email rots.
 PASSWORD_RESET_TTL = timedelta(minutes=30)
 

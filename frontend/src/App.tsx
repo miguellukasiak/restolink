@@ -4,6 +4,8 @@ import { AdminLayout } from './components/layout/AdminLayout';
 import { RestaurantPanelLayout } from './components/layout/RestaurantPanelLayout';
 import { RestaurantThemeProvider } from './components/public/RestaurantThemeProvider';
 import { RestaurantsPage } from './pages/RestaurantsPage';
+import { HqTeamPage } from './pages/admin/HqTeamPage';
+import { AuditLogPage } from './pages/admin/AuditLogPage';
 import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
 import { HqAccessPage } from './pages/auth/HqAccessPage';
 import { LoginPage } from './pages/auth/LoginPage';
@@ -36,6 +38,8 @@ export default function App() {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="restaurants" replace />} />
             <Route path="restaurants" element={<RestaurantsPage />} />
+            <Route path="team" element={<HqTeamPage />} />
+            <Route path="logs" element={<AuditLogPage />} />
           </Route>
         </Route>
 

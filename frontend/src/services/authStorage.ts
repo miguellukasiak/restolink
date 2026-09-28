@@ -22,6 +22,15 @@ export interface RestaurantSession {
   expiresAt: number;
   restaurantId: string;
   restaurantName: string;
+  /**
+   * True when HQ opened this session by impersonating the owner.
+   *
+   * Purely for the interface — the token is a real owner token and the server
+   * cannot tell the difference, which is exactly why the panel has to say so.
+   * An admin who forgets they are inside a customer's account will eventually
+   * change something in it believing it is their own.
+   */
+  impersonated?: boolean;
 }
 
 export interface AdminSession {

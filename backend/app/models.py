@@ -12,7 +12,7 @@ Conventions:
 
 import enum
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 
 from sqlalchemy import (
@@ -411,5 +411,50 @@ class AdminUser(Base):
         DateTime(timezone=True),
         server_default=func.now(),
         onupdate=func.now(),
+        nullable=False,
+    )
+
+
+class AuditLog(Base):
+    """One recorded action by one HQ account.
+
+    Append-only by convention: nothing in the application updates or deletes a
+    row here, and the panel that reads them offers no way to. An audit trail an
+    operator can edit answers the one question it exists for — "who did this" —
+    with whatever they would like the answer to be.
+
+    `admin_email` is a copy, not a foreign key. The point of the trail is to
+    survive the account: revoking or deleting an admin must not quietly rewrite
+    what they did, and a join would either break or take the evidence with it.
+    """
+
+    __tablename__ = "audit_log"
+    __table_args__ = (
+        # The panel reads this one way only — newest first, paginated — so the
+        # index matches that exactly.
+        Index("ix_audit_log_created_at", "created_at"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    #: Who acted, as spelled at the moment they acted.
+    admin_email: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    #: What they did — a stable machine token from `audit.py`, not prose, so
+    #: the log stays filterable and survives a change of wording in the UI.
+    action: Mapped[str] = mapped_column(String(64), nullable=False)
+    #: What they did it to, rendered for a human: a restaurant name and id, an
+    #: admin's email. Denormalised for the same reason `admin_email` is.
+    target_entity: Mapped[str] = mapped_column(String(255), nullable=False)
+    #: Stamped in Python, with `server_default` kept only for rows inserted by
+    #: hand in SQL. Not `func.now()` for application writes: on Postgres that
+    #: resolves to the *transaction* start time, so several entries written in
+    #: one request would share a timestamp to the microsecond and the "newest
+    #: first" ordering would fall through to a random UUID. A per-row clock
+    #: reading is what makes the trail's order mean anything.
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        server_default=func.now(),
         nullable=False,
     )

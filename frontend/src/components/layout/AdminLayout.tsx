@@ -9,6 +9,8 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded';
+import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded';
+import HistoryRoundedIcon from '@mui/icons-material/HistoryRounded';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { LogoutButton } from '../auth/LogoutButton';
 import { Wordmark } from '../brand/Wordmark';
@@ -23,6 +25,8 @@ const NAV_ITEMS = [
     to: '/admin/restaurants',
     icon: <StorefrontRoundedIcon />,
   },
+  { label: 'Zespół HQ', to: '/admin/team', icon: <GroupsRoundedIcon /> },
+  { label: 'Dziennik zdarzeń', to: '/admin/logs', icon: <HistoryRoundedIcon /> },
 ];
 
 /** Application shell: translucent top bar + permanent navigation drawer. */

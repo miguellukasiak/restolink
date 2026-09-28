@@ -406,3 +406,57 @@ class GoogleReviewsResponse(BaseModel):
     reviews: list[GoogleReviewItem] = Field(default_factory=list)
     #: When the data was last pulled from Google. NULL before the first sync.
     synced_at: datetime | None = None
+
+
+# --------------------------------------------------------------------------- #
+# HQ: team management, audit log, impersonation
+# --------------------------------------------------------------------------- #
+
+
+class AdminListItem(BaseModel):
+    """A row in the "Zespół HQ" table."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    email: str
+    is_superadmin: bool
+    created_at: datetime
+
+
+class AdminCreateRequest(BaseModel):
+    """Body for POST /admin/admins. The raw password never leaves this object."""
+
+    email: EmailStr
+    password: str = _password_field("Hasło nowego administratora (min. 8 znaków).")
+
+
+class AuditLogEntry(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    admin_email: str
+    #: A stable token such as `restaurant.impersonated`; the panel translates it.
+    action: str
+    target_entity: str
+    created_at: datetime
+
+
+class AuditLogResponse(BaseModel):
+    data: list[AuditLogEntry]
+    meta: PaginationMeta
+
+
+class ImpersonationResponse(BaseModel):
+    """A short-lived owner token, minted for support.
+
+    Shaped like the owner login's `TokenResponse` so the panel can store it
+    through the same code path, with `expires_in` carrying the much shorter
+    support window rather than an owner's week.
+    """
+
+    access_token: str
+    token_type: str = "bearer"
+    expires_in: int
+    restaurant_id: uuid.UUID
+    restaurant_name: str
