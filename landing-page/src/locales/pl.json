@@ -114,7 +114,13 @@
     "restaurant": "Nazwa lokalu (opcjonalnie)",
     "message": "Wiadomość",
     "submit": "Wyślij wiadomość",
-    "note": "Zwykle odpowiadamy tego samego dnia roboczego."
+    "note": "Zwykle odpowiadamy tego samego dnia roboczego.",
+    "sending": "Wysyłanie…",
+    "slow": "Wciąż wysyłamy — nasz serwer się wybudza, to może potrwać do minuty.",
+    "success": "Dziękujemy! Wiadomość jest już u nas — wkrótce się odezwiemy.",
+    "error": "Nie udało się wysłać wiadomości. Spróbuj ponownie za chwilę.",
+    "rateLimited": "Wysłano już kilka wiadomości. Spróbuj ponownie później.",
+    "invalid": "Sprawdź wpisane dane — zwłaszcza adres e-mail."
   },
   "footer": {
     "tagline": "Cyfrowe menu dla restauracji, kawiarni i barów. Kod QR zamiast drukowanej karty.",

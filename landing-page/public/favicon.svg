@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- RestoLink mark: a QR code, which is how every guest reaches a menu.
+       Three finder eyes and a few data modules on the brand green. -->
+  <rect width="32" height="32" rx="8" fill="#0f8256"/>
+  <g fill="#fff" fill-rule="evenodd">
+    <path d="M6 8a2 2 0 0 1 2-2h5a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2zm2 1v3a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1z"/>
+    <path d="M17 8a2 2 0 0 1 2-2h5a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-5a2 2 0 0 1-2-2zm2 1v3a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1h-3a1 1 0 0 0-1 1z"/>
+    <path d="M6 19a2 2 0 0 1 2-2h5a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2zm2 1v3a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1z"/>
+    <rect x="9.5" y="9.5" width="2" height="2" rx=".5"/>
+    <rect x="20.5" y="9.5" width="2" height="2" rx=".5"/>
+    <rect x="9.5" y="20.5" width="2" height="2" rx=".5"/>
+    <rect x="17" y="17" width="3.5" height="3.5" rx="1"/>
+    <rect x="22.5" y="17" width="3.5" height="3.5" rx="1"/>
+    <rect x="17" y="22.5" width="3.5" height="3.5" rx="1"/>
+    <rect x="22.5" y="22.5" width="3.5" height="3.5" rx="1"/>
+  </g>
+</svg>

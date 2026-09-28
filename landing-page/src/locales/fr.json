@@ -114,7 +114,13 @@
     "restaurant": "Nom de l'établissement (facultatif)",
     "message": "Message",
     "submit": "Envoyer le message",
-    "note": "Nous répondons généralement le même jour ouvré."
+    "note": "Nous répondons généralement le même jour ouvré.",
+    "sending": "Envoi en cours…",
+    "slow": "Envoi toujours en cours — notre serveur se réveille, cela peut prendre jusqu'à une minute.",
+    "success": "Merci ! Votre message nous est bien parvenu — nous vous répondrons très vite.",
+    "error": "Votre message n'a pas pu être envoyé. Veuillez réessayer dans un instant.",
+    "rateLimited": "Vous avez déjà envoyé plusieurs messages. Veuillez réessayer plus tard.",
+    "invalid": "Veuillez vérifier vos informations, en particulier l'adresse e-mail."
   },
   "footer": {
     "tagline": "Cartes numériques pour restaurants, cafés et bars. Un QR code plutôt qu'une carte imprimée.",
