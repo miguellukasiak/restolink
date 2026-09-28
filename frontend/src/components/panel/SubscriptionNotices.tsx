@@ -8,13 +8,20 @@ import { alpha } from '@mui/material/styles';
 import LockRoundedIcon from '@mui/icons-material/LockRounded';
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
 import CreditCardRoundedIcon from '@mui/icons-material/CreditCardRounded';
+import CircularProgress from '@mui/material/CircularProgress';
 
 /**
  * Full-content paywall shown in place of the dashboard when the restaurant's
  * subscription is blocked/expired. Owner cannot reach the menu builder,
  * settings or QR tools until they pay.
  */
-export function SubscriptionPaywall({ onPay }: { onPay: () => void }) {
+export function SubscriptionPaywall({
+  onPay,
+  loading = false,
+}: {
+  onPay: () => void;
+  loading?: boolean;
+}) {
   return (
     <Box
       sx={{
@@ -56,11 +63,18 @@ export function SubscriptionPaywall({ onPay }: { onPay: () => void }) {
             variant="contained"
             color="primary"
             size="large"
-            startIcon={<CreditCardRoundedIcon />}
+            startIcon={
+              loading ? (
+                <CircularProgress size={18} color="inherit" />
+              ) : (
+                <CreditCardRoundedIcon />
+              )
+            }
             onClick={onPay}
+            disabled={loading}
             sx={{ mt: 1 }}
           >
-            Opłać subskrypcję
+            {loading ? 'Otwieram płatność…' : 'Opłać subskrypcję'}
           </Button>
         </Stack>
       </Paper>
@@ -72,7 +86,16 @@ export function SubscriptionPaywall({ onPay }: { onPay: () => void }) {
  * Persistent banner shown above the dashboard while the restaurant is pending.
  * The owner can still build their menu; it just isn't publicly visible yet.
  */
-export function SubscriptionPendingBanner({ onActivate }: { onActivate: () => void }) {
+export function SubscriptionPendingBanner({
+  onActivate,
+  loading = false,
+  confirming = false,
+}: {
+  onActivate: () => void;
+  loading?: boolean;
+  /** True while waiting for Stripe's webhook to land after a payment. */
+  confirming?: boolean;
+}) {
   return (
     <Paper
       elevation={0}
@@ -93,17 +116,24 @@ export function SubscriptionPendingBanner({ onActivate }: { onActivate: () => vo
       >
         <WarningAmberRoundedIcon sx={{ color: 'warning.dark', flexShrink: 0 }} />
         <Typography variant="body2" sx={{ flex: 1, fontWeight: 500 }}>
-          Twoje menu nie jest jeszcze publicznie widoczne. Opłać subskrypcję, aby
-          aktywować kody QR.
+          {confirming
+            ? 'Potwierdzamy płatność u operatora — to potrwa kilka sekund.'
+            : 'Twoje menu nie jest jeszcze publicznie widoczne. Opłać subskrypcję, aby aktywować kody QR.'}
         </Typography>
         <Button
           variant="contained"
           color="warning"
           size="small"
           onClick={onActivate}
+          disabled={loading || confirming}
+          startIcon={
+            loading || confirming ? (
+              <CircularProgress size={16} color="inherit" />
+            ) : null
+          }
           sx={{ flexShrink: 0, alignSelf: { xs: 'flex-start', sm: 'center' } }}
         >
-          Aktywuj subskrypcję
+          {loading ? 'Otwieram płatność…' : 'Aktywuj subskrypcję'}
         </Button>
       </Stack>
     </Paper>

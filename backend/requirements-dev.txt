@@ -1,0 +1,12 @@
+# Test-only dependencies. Not installed on Render — `requirements.txt` is what
+# the Dockerfile reads, and the suite has no business running in production.
+#
+#     pip install -r requirements-dev.txt
+#     pytest
+-r requirements.txt
+
+pytest>=8.0
+# `asyncio_mode = auto` is not used; tests are marked explicitly.
+pytest-asyncio>=0.24
+# The suite runs against SQLite so it needs no container and no credentials.
+aiosqlite>=0.20

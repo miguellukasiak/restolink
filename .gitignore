@@ -38,3 +38,6 @@ Thumbs.db
 *.swp
 .idea/
 .vscode/
+
+# Local pytest scratch database.
+backend/tests/_test.db

@@ -23,6 +23,3 @@ export function resolveAccessState(
   }
   return 'ACTIVE';
 }
-
-/** Placeholder toast shown by the payment CTAs until Stripe is wired up. */
-export const PAYMENT_PENDING_TOAST = 'Payment gateway integration pending';

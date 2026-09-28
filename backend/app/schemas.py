@@ -499,3 +499,27 @@ class ActivationLinkResponse(BaseModel):
     expires_at: datetime
     #: Whether an email was also sent. False for the copy-to-clipboard path.
     emailed: bool = False
+
+
+# --------------------------------------------------------------------------- #
+# Billing (Stripe)
+# --------------------------------------------------------------------------- #
+
+
+class CheckoutSessionResponse(BaseModel):
+    """Where to send the owner to pay."""
+
+    checkout_url: str
+
+
+class WebhookAck(BaseModel):
+    """What the webhook did, for Stripe's dashboard and our logs.
+
+    Always returned with 200. The body is informational only — Stripe cares
+    about the status code, and every one of these outcomes is a deliberate
+    "do not retry this".
+    """
+
+    #: processed | duplicate | ignored | unmatched
+    status: str
+    event_type: str = ""

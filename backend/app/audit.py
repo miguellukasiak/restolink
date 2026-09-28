@@ -36,6 +36,10 @@ RESTAURANT_UPDATED = "restaurant.updated"
 #: inbox, the other was handed to an operator to pass on by hand.
 RESTAURANT_ACTIVATION_SENT = "restaurant.activation_sent"
 RESTAURANT_ACTIVATION_LINK_ISSUED = "restaurant.activation_link_issued"
+#: Written by the Stripe webhook, whose actor is not a person. `admin_email`
+#: holds `system:stripe-webhook` for these — the column is the actor, and
+#: pretending a human did it would be the one lie an audit trail cannot afford.
+SUBSCRIPTION_PAID = "subscription.paid"
 
 #: Bounds match the columns; a target longer than the column would otherwise
 #: fail the insert and take the whole action down with it.

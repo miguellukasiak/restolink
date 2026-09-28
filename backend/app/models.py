@@ -27,6 +27,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
     func,
+    text,
 )
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -122,6 +123,18 @@ class Restaurant(TimestampSoftDeleteMixin, Base):
     #: Google's Place ID finder. NULL means the reviews dashboard has not been
     #: connected yet — which is a first-class state in the panel, not an error.
     google_place_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
+    #: The Stripe customer this restaurant pays as, remembered at the first
+    #: successful checkout.
+    #:
+    #: Needed because renewals arrive as `invoice.payment_succeeded`, and an
+    #: invoice carries no `client_reference_id` — that field exists only on the
+    #: Checkout Session the owner personally went through. Without somewhere to
+    #: record the customer, every month-two payment would be an event we could
+    #: verify but not attribute.
+    stripe_customer_id: Mapped[str | None] = mapped_column(
+        String(255), index=True, nullable=True
+    )
     package_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("subscription_package.id"), nullable=False
     )
@@ -246,6 +259,23 @@ class TranslationDictionary(Base):
 
 class PaymentHistory(TimestampSoftDeleteMixin, Base):
     __tablename__ = "payment_history"
+    __table_args__ = (
+        # Stripe retries a webhook until it gets a 2xx, and one payment can
+        # arrive twice over anyway (`checkout.session.completed` and
+        # `invoice.payment_succeeded` both describe the first month). The event
+        # id goes in `external_transaction_id`, and this index is what makes
+        # "process each event once" a guarantee rather than a race between two
+        # retries landing together. Partial, because manual payments legitimately
+        # have no external id and Postgres would otherwise be fine with many
+        # NULLs but SQLite's plain unique index would not.
+        Index(
+            "uq_payment_external_transaction_id",
+            "external_transaction_id",
+            unique=True,
+            sqlite_where=text("external_transaction_id IS NOT NULL"),
+            postgresql_where=text("external_transaction_id IS NOT NULL"),
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4

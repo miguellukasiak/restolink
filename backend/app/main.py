@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .database import AsyncSessionLocal, engine
 from .models import Base
-from .routers import admin, auth, dictionary, google_maps, panel, public
+from .routers import admin, auth, billing, dictionary, google_maps, panel, public
 from .seed import seed_if_empty
 
 
@@ -50,6 +50,10 @@ app.include_router(admin.router)
 app.include_router(panel.router)
 app.include_router(dictionary.router)
 app.include_router(google_maps.router)
+app.include_router(billing.router)
+# Unauthenticated by necessity: Stripe holds no token of ours, so the
+# signature check on the raw body is the whole of its security.
+app.include_router(billing.webhook_router)
 app.include_router(public.router)
 
 

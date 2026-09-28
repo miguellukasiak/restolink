@@ -41,18 +41,21 @@ interface RetriableConfig extends InternalAxiosRequestConfig {
 function sessionScopeFor(url: string | undefined): 'admin' | 'restaurant' | null {
   if (!url) return null;
   if (url.startsWith('/api/v1/admin')) return 'admin';
-  // Two prefixes, both the owner's own data: `/restaurants` for the menu and
+  // Three prefixes, all the owner's own data: `/restaurants` for the menu and
   // theme, `/panel` for the translation dictionary and the Google reviews
-  // dashboard. Matching on prefixes means a route added under a *third* one
-  // silently loses its token — which is how the dictionary first shipped a
-  // 401 — so add any new owner prefix here.
+  // dashboard, `/subscriptions` for Stripe checkout. Matching on prefixes means
+  // a route added under a *fourth* one silently loses its token — which is how
+  // the dictionary first shipped a 401 — so add any new owner prefix here.
   if (
     url.startsWith('/api/v1/restaurants') ||
-    url.startsWith('/api/v1/panel')
+    url.startsWith('/api/v1/panel') ||
+    url.startsWith('/api/v1/subscriptions')
   ) {
     return 'restaurant';
   }
-  // `/api/v1/auth/*` and `/api/v1/public/*` are deliberately unauthenticated.
+  // `/api/v1/auth/*`, `/api/v1/public/*` and `/api/v1/webhooks/*` are
+  // deliberately unauthenticated — the last one is called by Stripe, which
+  // holds no token of ours and proves itself with a signature instead.
   return null;
 }
 

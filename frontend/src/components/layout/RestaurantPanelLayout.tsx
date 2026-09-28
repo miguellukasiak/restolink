@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -19,14 +20,13 @@ import TranslateRoundedIcon from '@mui/icons-material/TranslateRounded';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import { NavLink, Outlet, useLocation, useParams } from 'react-router-dom';
 import { useRestaurantInfo } from '../../hooks/useRestaurantInfo';
+import { useCheckout, useCheckoutReturn } from '../../hooks/useSubscription';
+import { getApiErrorMessage } from '../../services/api';
 import { LogoutButton } from '../auth/LogoutButton';
 import { Wordmark } from '../brand/Wordmark';
 import { ImpersonationBanner } from '../panel/ImpersonationBanner';
 import { useSnackbar } from '../feedback/SnackbarProvider';
-import {
-  PAYMENT_PENDING_TOAST,
-  resolveAccessState,
-} from '../../constants/subscription';
+import { resolveAccessState } from '../../constants/subscription';
 import {
   SubscriptionPaywall,
   SubscriptionPendingBanner,
@@ -43,7 +43,8 @@ export function RestaurantPanelLayout() {
   const { restaurantId = '' } = useParams<{ restaurantId: string }>();
   const location = useLocation();
   const restaurant = useRestaurantInfo(restaurantId);
-  const { showInfo } = useSnackbar();
+  const { showInfo, showSuccess, showError } = useSnackbar();
+  const checkout = useCheckout();
 
   // Access is only enforced once the restaurant details have loaded.
   const access = restaurant.data
@@ -53,8 +54,27 @@ export function RestaurantPanelLayout() {
       )
     : null;
 
-  // Stripe isn't wired up yet — the CTAs just surface a placeholder toast.
-  const handlePaymentCta = () => showInfo(PAYMENT_PENDING_TOAST);
+  // Returning from Stripe: re-read the restaurant so the banner reflects the
+  // new status without a manual refresh. The webhook can land after the
+  // redirect, so `confirming` covers the seconds in between.
+  const { outcome, confirming } = useCheckoutReturn(restaurantId, access === 'ACTIVE');
+
+  useEffect(() => {
+    if (outcome === 'success') {
+      showSuccess('Płatność przyjęta. Aktywujemy subskrypcję.');
+    } else if (outcome === 'cancelled') {
+      showInfo('Płatność anulowana — nic nie zostało pobrane.');
+    }
+  }, [outcome, showSuccess, showInfo]);
+
+  const handlePaymentCta = async () => {
+    try {
+      // On success this navigates to Stripe, so nothing after it runs.
+      await checkout.mutateAsync();
+    } catch (error) {
+      showError(getApiErrorMessage(error));
+    }
+  };
 
   const base = `/panel/${restaurantId}`;
   const navItems = [
@@ -157,11 +177,18 @@ export function RestaurantPanelLayout() {
         <ImpersonationBanner />
         {access === 'BLOCKED' ? (
           // Expired/blocked: no access to builder, settings or QR tools.
-          <SubscriptionPaywall onPay={handlePaymentCta} />
+          <SubscriptionPaywall
+            onPay={() => void handlePaymentCta()}
+            loading={checkout.isPending}
+          />
         ) : (
           <>
             {access === 'PENDING' && (
-              <SubscriptionPendingBanner onActivate={handlePaymentCta} />
+              <SubscriptionPendingBanner
+                onActivate={() => void handlePaymentCta()}
+                loading={checkout.isPending}
+                confirming={confirming}
+              />
             )}
             <Outlet />
           </>

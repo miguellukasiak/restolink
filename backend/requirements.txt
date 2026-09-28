@@ -23,3 +23,6 @@ deepl>=1.22
 # transitive dependency, but declared explicitly because app code imports it
 # directly — a pin that arrives by accident can leave by accident too.
 httpx>=0.27
+# Stripe Checkout + webhooks for subscription billing. Needs STRIPE_API_KEY,
+# STRIPE_WEBHOOK_SECRET and STRIPE_PRICE_ID in the environment.
+stripe>=11.0
