@@ -42,6 +42,12 @@ ADMIN_TOKEN_TTL = timedelta(hours=12)
 IMPERSONATION_TOKEN_TTL = timedelta(hours=1)
 #: Long enough to walk to a laptop, short enough that a forwarded email rots.
 PASSWORD_RESET_TTL = timedelta(minutes=30)
+#: An activation grant from the welcome email. Far longer than a reset, because
+#: the two are answers to different situations: a reset is requested by someone
+#: sitting at a keyboard right now, while a welcome email may land in a spam
+#: folder on a Friday and be found on Monday. A week is short enough to expire
+#: before the address changes hands, long enough not to strand a new customer.
+ACTIVATION_TTL = timedelta(days=7)
 
 #: bcrypt hashes at most 72 bytes and silently ignores the rest, which would
 #: make two different long passwords interchangeable. Callers must reject

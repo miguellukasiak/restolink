@@ -460,3 +460,42 @@ class ImpersonationResponse(BaseModel):
     expires_in: int
     restaurant_id: uuid.UUID
     restaurant_name: str
+
+
+# --------------------------------------------------------------------------- #
+# Onboarding: activation & HQ rescue
+# --------------------------------------------------------------------------- #
+
+
+class ActivateRequest(BaseModel):
+    """Body for POST /auth/activate — the welcome link's landing form."""
+
+    token: str = Field(min_length=1, max_length=512)
+    new_password: str = _password_field("Hasło do panelu (min. 8 znaków).")
+
+
+class RestaurantUpdate(BaseModel):
+    """Body for PUT /admin/restaurants/{id}. Only provided fields change.
+
+    Exists mainly for one situation: an owner who cannot reach the inbox the
+    welcome email went to. Correcting `contact_email` here and re-sending the
+    link is the whole rescue.
+    """
+
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    contact_email: EmailStr | None = None
+    contact_phone: str | None = Field(default=None, min_length=1, max_length=50)
+
+
+class ActivationLinkResponse(BaseModel):
+    """A raw activation URL, for an operator to pass on by hand.
+
+    Returned only to an authenticated superadmin, and the act of issuing it is
+    recorded in the audit log — handing out a credential that sets someone's
+    password should never be the one action nothing remembers.
+    """
+
+    activation_url: str
+    expires_at: datetime
+    #: Whether an email was also sent. False for the copy-to-clipboard path.
+    emailed: bool = False

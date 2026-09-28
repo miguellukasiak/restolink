@@ -18,6 +18,14 @@ import Button from '@mui/material/Button';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import LaunchRoundedIcon from '@mui/icons-material/LaunchRounded';
 import SupportAgentRoundedIcon from '@mui/icons-material/SupportAgentRounded';
+import MoreVertRoundedIcon from '@mui/icons-material/MoreVertRounded';
+import EditRoundedIcon from '@mui/icons-material/EditRounded';
+import ForwardToInboxRoundedIcon from '@mui/icons-material/ForwardToInboxRounded';
+import ContentCopyRoundedIcon from '@mui/icons-material/ContentCopyRounded';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
 import CircularProgress from '@mui/material/CircularProgress';
 import RequestQuoteRoundedIcon from '@mui/icons-material/RequestQuoteRounded';
 import MailOutlineRoundedIcon from '@mui/icons-material/MailOutlineRounded';
@@ -33,6 +41,13 @@ import { getApiErrorMessage } from '../services/api';
 import { StatusChip } from '../components/restaurants/StatusChip';
 import { ManualPaymentDialog } from '../components/restaurants/ManualPaymentDialog';
 import { AddRestaurantDialog } from '../components/restaurants/AddRestaurantDialog';
+import { EditRestaurantDialog } from '../components/restaurants/EditRestaurantDialog';
+import { ActivationLinkDialog } from '../components/restaurants/ActivationLinkDialog';
+import {
+  copyToClipboard,
+  useGenerateActivationLink,
+  useSendActivationLink,
+} from '../hooks/useOnboarding';
 import type { RestaurantListItem } from '../types';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25];
@@ -76,7 +91,44 @@ export function RestaurantsPage() {
   const { data, isLoading, isFetching, isError, error, refetch } =
     useRestaurants(paginationModel);
   const impersonate = useImpersonate();
-  const { showError } = useSnackbar();
+  const sendLink = useSendActivationLink();
+  const generateLink = useGenerateActivationLink();
+  const { showError, showSuccess } = useSnackbar();
+
+  // The overflow menu is per row, so the anchor carries the row with it.
+  const [menu, setMenu] = useState<{
+    el: HTMLElement;
+    restaurant: RestaurantListItem;
+  } | null>(null);
+  const [editTarget, setEditTarget] = useState<RestaurantListItem | null>(null);
+  const [linkDialog, setLinkDialog] = useState<{ url: string; manual: boolean } | null>(
+    null,
+  );
+
+  const closeMenu = () => setMenu(null);
+
+  const handleSendLink = async (restaurant: RestaurantListItem) => {
+    closeMenu();
+    try {
+      await sendLink.mutateAsync(restaurant.id);
+      showSuccess(`Link aktywacyjny wysłany na ${restaurant.contact_email}.`);
+    } catch (err) {
+      showError(getApiErrorMessage(err));
+    }
+  };
+
+  const handleCopyLink = async (restaurant: RestaurantListItem) => {
+    closeMenu();
+    try {
+      const result = await generateLink.mutateAsync(restaurant.id);
+      // Copy first, then show the dialog either way: on success it confirms
+      // what happened, on failure it is the only way to get the link out.
+      const copied = await copyToClipboard(result.activation_url);
+      setLinkDialog({ url: result.activation_url, manual: !copied });
+    } catch (err) {
+      showError(getApiErrorMessage(err));
+    }
+  };
 
   // Tracked per row so only the button that was pressed shows a spinner; the
   // mutation's own isPending would light up all of them.
@@ -185,7 +237,7 @@ export function RestaurantsPage() {
       {
         field: 'actions',
         headerName: 'Akcje',
-        width: 170,
+        width: 210,
         sortable: false,
         filterable: false,
         align: 'center',
@@ -246,6 +298,17 @@ export function RestaurantsPage() {
                 }}
               >
                 <LaunchRoundedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Więcej akcji" arrow>
+              <IconButton
+                aria-label={`Więcej akcji — ${params.row.name}`}
+                onClick={(event) =>
+                  setMenu({ el: event.currentTarget, restaurant: params.row })
+                }
+                sx={{ width: 36, height: 36 }}
+              >
+                <MoreVertRoundedIcon fontSize="small" />
               </IconButton>
             </Tooltip>
           </Stack>
@@ -339,6 +402,51 @@ export function RestaurantsPage() {
       />
 
       <AddRestaurantDialog open={addDialogOpen} onClose={() => setAddDialogOpen(false)} />
+
+      <Menu anchorEl={menu?.el ?? null} open={Boolean(menu)} onClose={closeMenu}>
+        <MenuItem
+          onClick={() => {
+            setEditTarget(menu!.restaurant);
+            closeMenu();
+          }}
+        >
+          <ListItemIcon>
+            <EditRoundedIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Edytuj dane</ListItemText>
+        </MenuItem>
+        <MenuItem
+          disabled={sendLink.isPending}
+          onClick={() => void handleSendLink(menu!.restaurant)}
+        >
+          <ListItemIcon>
+            <ForwardToInboxRoundedIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Wyślij link aktywacyjny</ListItemText>
+        </MenuItem>
+        <MenuItem
+          disabled={generateLink.isPending}
+          onClick={() => void handleCopyLink(menu!.restaurant)}
+        >
+          <ListItemIcon>
+            <ContentCopyRoundedIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Kopiuj link aktywacyjny</ListItemText>
+        </MenuItem>
+      </Menu>
+
+      <EditRestaurantDialog
+        open={Boolean(editTarget)}
+        restaurant={editTarget}
+        onClose={() => setEditTarget(null)}
+      />
+
+      <ActivationLinkDialog
+        open={Boolean(linkDialog)}
+        url={linkDialog?.url ?? ''}
+        manualCopy={linkDialog?.manual ?? false}
+        onClose={() => setLinkDialog(null)}
+      />
     </Box>
   );
 }

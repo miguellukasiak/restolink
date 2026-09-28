@@ -30,6 +30,12 @@ ADMIN_REVOKED = "admin.revoked"
 RESTAURANT_CREATED = "restaurant.created"
 RESTAURANT_PAYMENT_RECORDED = "restaurant.payment_recorded"
 RESTAURANT_IMPERSONATED = "restaurant.impersonated"
+RESTAURANT_UPDATED = "restaurant.updated"
+#: The welcome email was sent again. Separate from the one below because the
+#: difference matters when tracing how someone got access: one went to an
+#: inbox, the other was handed to an operator to pass on by hand.
+RESTAURANT_ACTIVATION_SENT = "restaurant.activation_sent"
+RESTAURANT_ACTIVATION_LINK_ISSUED = "restaurant.activation_link_issued"
 
 #: Bounds match the columns; a target longer than the column would otherwise
 #: fail the insert and take the whole action down with it.

@@ -135,3 +135,28 @@ export async function fetchAdminProfile(): Promise<AdminProfile> {
   const { data } = await api.get<AdminProfile>('/api/v1/admin/me');
   return data;
 }
+
+/**
+ * POST /api/v1/auth/activate — turns a welcome link into a working account.
+ *
+ * Returns a session, so a new owner lands in their panel instead of being sent
+ * to a login form to retype the password they just chose.
+ */
+export async function activateAccount(
+  token: string,
+  newPassword: string,
+): Promise<RestaurantSession> {
+  const { data } = await api.post<TokenResponse>('/api/v1/auth/activate', {
+    token,
+    new_password: newPassword,
+  });
+
+  const session: RestaurantSession = {
+    token: data.access_token,
+    expiresAt: expiresAtFrom(data.expires_in),
+    restaurantId: data.restaurant_id ?? '',
+    restaurantName: data.restaurant_name ?? '',
+  };
+  saveRestaurantSession(session);
+  return session;
+}

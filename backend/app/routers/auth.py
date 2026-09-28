@@ -16,6 +16,7 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import delete, func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import noload
 
@@ -23,6 +24,7 @@ from ..database import get_db
 from ..email_service import EmailSendError, send_password_reset
 from ..models import AdminUser, PasswordReset, Restaurant, RestaurantStatus
 from ..schemas import (
+    ActivateRequest,
     AdminLoginRequest,
     AdminProfile,
     AdminTokenResponse,
@@ -292,4 +294,118 @@ async def admin_login(
         access_token=token,
         expires_in=expires_in,
         admin=AdminProfile.model_validate(admin),
+    )
+
+
+# --------------------------------------------------------------------------- #
+# Activation (the welcome email's landing endpoint)
+# --------------------------------------------------------------------------- #
+
+#: One message for an activation link that cannot be used, whatever the reason.
+#: The caller is holding a link, not guessing at one, so there is nothing to
+#: conceal — but there is also nothing useful to distinguish: expired, already
+#: spent and never-existed all have the same fix, which is to ask for a new one.
+_LINK_UNUSABLE = HTTPException(
+    status_code=status.HTTP_400_BAD_REQUEST,
+    detail="Link aktywacyjny wygasł lub został już użyty. Poproś nas o nowy.",
+)
+
+
+@router.post("/activate", response_model=TokenResponse)
+async def activate(
+    payload: ActivateRequest, db: AsyncSession = Depends(get_db)
+) -> TokenResponse:
+    """Turn a welcome link into a working account, and sign the owner in.
+
+    This is where a restaurant created in HQ becomes usable. Two things happen
+    that the reset endpoint does not do, because until now the row had neither:
+    a password is set, and the **login identity** is filled in from
+    `contact_email`.
+
+    Deriving the login email here rather than at creation is what makes HQ's
+    rescue work. An operator who mistypes the address, or an owner who cannot
+    reach that inbox, is fixed by correcting `contact_email` and re-sending the
+    link — and the address they will sign in with follows automatically, because
+    it is read at this moment and not weeks earlier.
+    """
+    grant = (
+        await db.scalars(
+            select(PasswordReset).where(
+                PasswordReset.token_hash == hash_reset_token(payload.token)
+            )
+        )
+    ).first()
+
+    now = datetime.now(timezone.utc)
+    if grant is None or as_utc(grant.expires_at) <= now:
+        if grant is not None:
+            await db.delete(grant)
+            await db.commit()
+        raise _LINK_UNUSABLE
+
+    restaurant = await db.get(
+        Restaurant, grant.restaurant_id, options=[noload(Restaurant.package)]
+    )
+    if restaurant is None or restaurant.deleted_at is not None:
+        await db.delete(grant)
+        await db.commit()
+        raise _LINK_UNUSABLE
+
+    if restaurant.status is RestaurantStatus.BLOCKED:
+        # Checked before anything is written, and the grant is deliberately
+        # left alive: the link is not the problem here, the account is, and
+        # burning it would strip the owner of the one thing that still works
+        # once HQ unblocks them.
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Konto restauracji jest zablokowane. Skontaktuj się z nami.",
+        )
+
+    restaurant.hashed_password = hash_password(payload.new_password)
+    restaurant.password_changed_at = now
+    if not restaurant.email:
+        restaurant.email = _normalize_email(restaurant.contact_email)
+    # Single use: spent in the same transaction that sets the password.
+    await db.delete(grant)
+
+    # Read out before the commit, and used for everything after it. A rollback
+    # expires every instance in the session regardless of `expire_on_commit`,
+    # so touching `restaurant.id` in the failure branch below would trigger a
+    # lazy reload — synchronous IO in an async context, which SQLAlchemy raises
+    # `MissingGreenlet` for. That turns the clean 409 this branch exists to
+    # return into a 500 about greenlets.
+    activated_id = restaurant.id
+    activated_name = restaurant.name
+
+    try:
+        await db.commit()
+    except IntegrityError as exc:
+        await db.rollback()
+        # `email` is unique, so two restaurants sharing one contact address can
+        # only have one login identity. Rare, but it has to say something an
+        # owner can act on rather than a 500.
+        logger.warning(
+            "Activation for restaurant %s collided on the login email.",
+            activated_id,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=(
+                "Ten adres e-mail jest już używany przez inne konto. "
+                "Skontaktuj się z nami, żebyśmy przypisali inny."
+            ),
+        ) from exc
+
+    logger.info("Restaurant %s activated.", activated_id)
+
+    token, expires_in = create_access_token(
+        subject=str(activated_id),
+        role="restaurant",
+        expires_in=RESTAURANT_TOKEN_TTL,
+    )
+    return TokenResponse(
+        access_token=token,
+        expires_in=expires_in,
+        restaurant_id=activated_id,
+        restaurant_name=activated_name,
     )

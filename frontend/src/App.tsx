@@ -9,6 +9,7 @@ import { AuditLogPage } from './pages/admin/AuditLogPage';
 import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
 import { HqAccessPage } from './pages/auth/HqAccessPage';
 import { LoginPage } from './pages/auth/LoginPage';
+import { ActivatePage } from './pages/auth/ActivatePage';
 import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
 import { MenuBuilderPage } from './pages/panel/MenuBuilderPage';
 import { QrGeneratorPage } from './pages/panel/QrGeneratorPage';
@@ -31,6 +32,9 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        {/* Where the welcome email lands. Open by definition — the whole
+            point is that the owner has no password yet. */}
+        <Route path="/activate" element={<ActivatePage />} />
         <Route path="/hq-access" element={<HqAccessPage />} />
 
         {/* Admin ecosystem — super-admin token only. */}

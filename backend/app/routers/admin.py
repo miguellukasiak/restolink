@@ -1,20 +1,23 @@
 """Admin endpoints: restaurant management, manual payments, packages."""
 
+import logging
 import uuid
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import noload, selectinload
 
 from .. import audit
 from ..database import get_db
+from ..email_service import EmailSendError, activation_url, send_welcome
 from ..dependencies import get_current_superadmin
 from ..models import (
     AdminUser,
     AuditLog,
+    PasswordReset,
     PaymentHistory,
     PaymentMethod,
     PaymentStatus,
@@ -23,6 +26,7 @@ from ..models import (
     SubscriptionPackage,
 )
 from ..schemas import (
+    ActivationLinkResponse,
     AdminCreateRequest,
     AdminListItem,
     AdminProfile,
@@ -35,14 +39,19 @@ from ..schemas import (
     RestaurantCreate,
     RestaurantListItem,
     RestaurantListResponse,
+    RestaurantUpdate,
     UpdatedRestaurant,
 )
 from ..security import (
+    ACTIVATION_TTL,
     IMPERSONATION_TOKEN_TTL,
     as_utc,
     create_access_token,
+    generate_reset_token,
     hash_password,
 )
+
+logger = logging.getLogger(__name__)
 
 # These routes list every customer, create restaurants and record payments, so
 # the whole router sits behind the superadmin check — applied here rather than
@@ -113,6 +122,35 @@ async def list_restaurants(
     )
 
 
+async def _issue_activation_grant(
+    db: AsyncSession, restaurant_id: uuid.UUID
+) -> tuple[str, datetime]:
+    """Mint a fresh activation link, voiding any earlier one.
+
+    Same grant mechanism as a password reset — only the SHA-256 hash is stored,
+    and it is spent by deletion — with a far longer window, because a welcome
+    email may sit unread for days. Returns the raw token, which exists here and
+    in the email and nowhere else.
+
+    Previous grants for the restaurant are deleted first: issuing a new link
+    has to invalidate the old one, or an address an owner has lost access to
+    keeps working for as long as its link survives.
+    """
+    await db.execute(
+        delete(PasswordReset).where(PasswordReset.restaurant_id == restaurant_id)
+    )
+    raw_token, token_hash = generate_reset_token()
+    expires_at = datetime.now(timezone.utc) + ACTIVATION_TTL
+    db.add(
+        PasswordReset(
+            restaurant_id=restaurant_id,
+            token_hash=token_hash,
+            expires_at=expires_at,
+        )
+    )
+    return raw_token, expires_at
+
+
 @router.post("/restaurants", status_code=201, response_model=RestaurantListItem)
 async def create_restaurant(
     payload: RestaurantCreate,
@@ -141,6 +179,26 @@ async def create_restaurant(
         action=audit.RESTAURANT_CREATED,
         target_entity=f"{restaurant.name} ({restaurant.id})",
     )
+
+    # The welcome email is the whole onboarding flow, but it is not allowed to
+    # decide whether the restaurant exists. A bounced address or a Resend
+    # outage leaves a real account that HQ can rescue from the same screen;
+    # failing the request would leave the operator retyping the form instead.
+    raw_token, _ = await _issue_activation_grant(db, restaurant.id)
+    await db.flush()
+    try:
+        await send_welcome(
+            to_email=restaurant.contact_email,
+            restaurant_name=restaurant.name,
+            raw_token=raw_token,
+            valid_days=ACTIVATION_TTL.days,
+        )
+    except EmailSendError:
+        logger.exception(
+            "Welcome email failed for restaurant %s — the account exists and "
+            "the activation link can be re-sent from the panel.",
+            restaurant.id,
+        )
 
     created = await _get_restaurant_with_package(db, restaurant.id)
     assert created is not None
@@ -400,4 +458,163 @@ async def impersonate_restaurant(
         expires_in=expires_in,
         restaurant_id=restaurant.id,
         restaurant_name=restaurant.name,
+    )
+
+
+# --------------------------------------------------------------------------- #
+# Rescue tools: editing details and re-issuing the activation link
+# --------------------------------------------------------------------------- #
+
+
+@router.put("/restaurants/{restaurant_id}", response_model=RestaurantListItem)
+async def update_restaurant(
+    restaurant_id: uuid.UUID,
+    payload: RestaurantUpdate,
+    db: AsyncSession = Depends(get_db),
+    admin: AdminUser = Depends(get_current_superadmin),
+) -> Restaurant:
+    """Correct a restaurant's basic details.
+
+    The case this is built for is a typo in `contact_email`, or an owner who
+    can no longer open the inbox the welcome email went to. Fixing the address
+    here and re-sending the link is the entire rescue, because the login
+    identity is derived from `contact_email` at activation.
+
+    For an account that has **already** activated, this changes the contact
+    address only — the address they sign in with is `email`, and silently
+    repointing a live credential from an HQ form is not something this endpoint
+    should do on its own.
+    """
+    # Loaded *with* the package, not with `noload`. The response model needs it,
+    # and `noload` marks the relationship as loaded-and-empty on the instance —
+    # so a later query asking for it with `selectinload` hands back the same
+    # identity-mapped object and skips the loader, leaving `package` None and
+    # failing response validation.
+    restaurant = await _get_restaurant_with_package(db, restaurant_id)
+    if restaurant is None:
+        raise HTTPException(status_code=404, detail="Nie znaleziono restauracji.")
+
+    fields = payload.model_dump(exclude_unset=True, exclude_none=True)
+    if not fields:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Nie przekazano żadnych zmian.",
+        )
+
+    changed = [
+        f"{field}: {getattr(restaurant, field)} → {value}"
+        for field, value in fields.items()
+        if getattr(restaurant, field) != value
+    ]
+    for field, value in fields.items():
+        setattr(restaurant, field, value)
+
+    if changed:
+        await audit.record(
+            db,
+            admin_email=admin.email,
+            action=audit.RESTAURANT_UPDATED,
+            target_entity=f"{restaurant.name} ({restaurant.id}) — {'; '.join(changed)}",
+        )
+
+    await db.flush()
+    return restaurant
+
+
+async def _require_live_restaurant(
+    db: AsyncSession, restaurant_id: uuid.UUID
+) -> Restaurant:
+    restaurant = await db.get(
+        Restaurant, restaurant_id, options=[noload(Restaurant.package)]
+    )
+    if restaurant is None or restaurant.deleted_at is not None:
+        raise HTTPException(status_code=404, detail="Nie znaleziono restauracji.")
+    return restaurant
+
+
+@router.post(
+    "/restaurants/{restaurant_id}/send-activation-link",
+    response_model=ActivationLinkResponse,
+)
+async def send_activation_link(
+    restaurant_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    admin: AdminUser = Depends(get_current_superadmin),
+) -> ActivationLinkResponse:
+    """Send the welcome email again, with a fresh link.
+
+    For the ordinary case: it went to spam, or was deleted, or the address has
+    since been corrected here. A failure is reported rather than swallowed —
+    the operator picked this address a moment ago, so a bounce is a typo to fix
+    and not information about a stranger's account.
+    """
+    restaurant = await _require_live_restaurant(db, restaurant_id)
+
+    raw_token, expires_at = await _issue_activation_grant(db, restaurant.id)
+    await audit.record(
+        db,
+        admin_email=admin.email,
+        action=audit.RESTAURANT_ACTIVATION_SENT,
+        target_entity=f"{restaurant.name} ({restaurant.contact_email})",
+    )
+    await db.flush()
+
+    try:
+        await send_welcome(
+            to_email=restaurant.contact_email,
+            restaurant_name=restaurant.name,
+            raw_token=raw_token,
+            valid_days=ACTIVATION_TTL.days,
+        )
+    except EmailSendError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=(
+                "Nie udało się wysłać wiadomości. Sprawdź adres e-mail albo "
+                "skopiuj link aktywacyjny i przekaż go inną drogą."
+            ),
+        ) from exc
+
+    return ActivationLinkResponse(
+        activation_url=activation_url(raw_token),
+        expires_at=expires_at,
+        emailed=True,
+    )
+
+
+@router.post(
+    "/restaurants/{restaurant_id}/generate-activation-link",
+    response_model=ActivationLinkResponse,
+)
+async def generate_activation_link(
+    restaurant_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    admin: AdminUser = Depends(get_current_superadmin),
+) -> ActivationLinkResponse:
+    """Hand the raw link to the operator, sending nothing.
+
+    The escape hatch for when email is the problem rather than the channel: a
+    dead inbox, a domain that bounces us, a hotel address nobody checks. The
+    operator passes it on by SMS or in person.
+
+    This returns a credential in a response body, which is exactly why the
+    audit entry is written before the link is built. Anyone who can call it is
+    already a superadmin and could impersonate the restaurant outright — what
+    matters is that neither route is silent.
+    """
+    restaurant = await _require_live_restaurant(db, restaurant_id)
+
+    raw_token, expires_at = await _issue_activation_grant(db, restaurant.id)
+    await audit.record(
+        db,
+        admin_email=admin.email,
+        action=audit.RESTAURANT_ACTIVATION_LINK_ISSUED,
+        target_entity=f"{restaurant.name} ({restaurant.id})",
+    )
+    await db.flush()
+
+    return ActivationLinkResponse(
+        activation_url=activation_url(raw_token),
+        expires_at=expires_at,
+        emailed=False,
     )
