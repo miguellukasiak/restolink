@@ -63,51 +63,34 @@
       "caption": "Éditeur de carte · 4:3"
     },
     "b2": {
-      "title": "Console de commandes",
-      "body": "Une alerte sonore en cuisine et un statut de commande que toute l'équipe voit d'un coup d'œil.",
-      "point1": "Alertes sonores puissantes",
-      "point2": "Vue pour l'équipe en cuisine",
-      "caption": "Console de commandes · 4:3"
-    },
-    "b3": {
       "title": "Google Maps et avis",
       "body": "Un client satisfait arrive sur votre fiche avant même de quitter la table.",
       "point1": "Trafic orienté vers les avis",
       "point2": "Fiche toujours à jour",
       "caption": "Fiche et avis · 4:3"
     },
-    "b4": {
+    "b3": {
       "title": "Accessibilité (WCAG)",
-      "body": "Lecteurs d'écran, contraste calculé à partir de la luminance du fond et carte en deux langues.",
+      "body": "Lecteurs d'écran, contraste calculé à partir de la luminance du fond et carte en cinq langues.",
       "point1": "Prise en charge des lecteurs d'écran",
-      "point2": "Carte bilingue (i18n)",
+      "point2": "Carte en 5 langues (i18n)",
       "caption": "Réglages d'accessibilité · 4:3"
     }
   },
   "pricing": {
     "eyebrow": "Tarifs",
     "title": "Simple et prévisible.",
-    "subtitle": "Un seul tarif, aucune commission sur les commandes et aucuns frais de mise en service.",
+    "subtitle": "Un seul tarif, toutes les fonctionnalités et aucuns frais de mise en service.",
     "period": "PLN / mois",
-    "note": "Tarifs indicatifs — non définitifs.",
-    "start": {
-      "name": "Start",
-      "desc": "Tout ce qu'il faut à un établissement pour démarrer.",
-      "cta": "Choisir Start",
-      "point1": "Carte numérique et QR codes",
-      "point2": "Plats et photos illimités",
-      "point3": "Votre propre style de carte"
-    },
-    "pro": {
-      "name": "Pro",
-      "badge": "Le plus choisi",
-      "desc": "Pour les établissements qui prennent aussi les commandes via la carte.",
-      "cta": "Choisir Pro",
-      "point1": "Tout ce qu'inclut Start",
-      "point2": "Console de commandes",
-      "point3": "Google Maps et avis",
-      "point4": "Support prioritaire"
-    }
+    "point1": "Carte numérique et QR codes",
+    "point2": "Plats et photos illimités",
+    "point3": "Éditeur par glisser-déposer",
+    "point4": "Épuisé en une pression",
+    "point5": "Votre propre style de carte",
+    "point6": "Carte en 5 langues",
+    "point7": "Filtre d'allergènes pour les clients",
+    "point8": "Google Maps et avis",
+    "point9": "Lecteurs d'écran et contraste lisible"
   },
   "contact": {
     "title": "Discutons-en.",

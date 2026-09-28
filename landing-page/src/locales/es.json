@@ -63,51 +63,34 @@
       "caption": "Editor de la carta · 4:3"
     },
     "b2": {
-      "title": "Consola de pedidos",
-      "body": "Un aviso sonoro en cocina y un estado del pedido que todo el turno ve de un vistazo.",
-      "point1": "Avisos sonoros potentes",
-      "point2": "Vista para el turno de cocina",
-      "caption": "Consola de pedidos · 4:3"
-    },
-    "b3": {
       "title": "Google Maps y reseñas",
       "body": "Un cliente satisfecho llega a tu ficha antes de levantarse de la mesa.",
       "point1": "Tráfico dirigido a las reseñas",
       "point2": "Ficha siempre actualizada",
       "caption": "Ficha y reseñas · 4:3"
     },
-    "b4": {
+    "b3": {
       "title": "Accesibilidad (WCAG)",
-      "body": "Lectores de pantalla, contraste calculado a partir de la luminancia del fondo y carta en dos idiomas.",
+      "body": "Lectores de pantalla, contraste calculado a partir de la luminancia del fondo y carta en cinco idiomas.",
       "point1": "Compatible con lectores de pantalla",
-      "point2": "Carta bilingüe (i18n)",
+      "point2": "Carta en 5 idiomas (i18n)",
       "caption": "Ajustes de accesibilidad · 4:3"
     }
   },
   "pricing": {
     "eyebrow": "Precios",
     "title": "Sencillo y previsible.",
-    "subtitle": "Una sola tarifa, sin comisión por pedido y sin cuota de alta.",
+    "subtitle": "Una sola tarifa, todas las funciones y sin cuota de alta.",
     "period": "PLN / mes",
-    "note": "Precios provisionales: no son definitivos.",
-    "start": {
-      "name": "Start",
-      "desc": "Todo lo que un local necesita para empezar.",
-      "cta": "Elegir Start",
-      "point1": "Carta digital y códigos QR",
-      "point2": "Platos y fotos sin límite",
-      "point3": "Tu propio estilo de carta"
-    },
-    "pro": {
-      "name": "Pro",
-      "badge": "El más elegido",
-      "desc": "Para locales que además reciben pedidos a través de la carta.",
-      "cta": "Elegir Pro",
-      "point1": "Todo lo incluido en Start",
-      "point2": "Consola de pedidos",
-      "point3": "Google Maps y reseñas",
-      "point4": "Soporte prioritario"
-    }
+    "point1": "Carta digital y códigos QR",
+    "point2": "Platos y fotos sin límite",
+    "point3": "Editor de arrastrar y soltar",
+    "point4": "Agotado con un toque",
+    "point5": "Tu propio estilo de carta",
+    "point6": "Carta en 5 idiomas",
+    "point7": "Filtro de alérgenos para clientes",
+    "point8": "Google Maps y reseñas",
+    "point9": "Lectores de pantalla y contraste legible"
   },
   "contact": {
     "title": "Hablemos.",

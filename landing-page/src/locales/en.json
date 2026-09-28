@@ -63,51 +63,34 @@
       "caption": "Menu builder · 4:3"
     },
     "b2": {
-      "title": "Orders Console",
-      "body": "A loud alert in the kitchen and an order status the whole shift can see at a glance.",
-      "point1": "Loud audio alerts",
-      "point2": "Kitchen shift view",
-      "caption": "Orders console · 4:3"
-    },
-    "b3": {
       "title": "Google Maps & reviews",
       "body": "A happy guest lands on your listing before they get up from the table.",
       "point1": "Traffic routed to reviews",
       "point2": "Listing always current",
       "caption": "Listing and reviews · 4:3"
     },
-    "b4": {
+    "b3": {
       "title": "Accessibility (WCAG)",
-      "body": "Screen readers, contrast computed from background luminance, and a menu in two languages.",
+      "body": "Screen readers, contrast computed from background luminance, and a menu in five languages.",
       "point1": "Screen reader support",
-      "point2": "Bilingual menu (i18n)",
+      "point2": "Menu in 5 languages (i18n)",
       "caption": "Accessibility settings · 4:3"
     }
   },
   "pricing": {
     "eyebrow": "Pricing",
     "title": "Simple and predictable.",
-    "subtitle": "One rate, no commission on orders and no setup fee.",
+    "subtitle": "One rate, every feature and no setup fee.",
     "period": "PLN / month",
-    "note": "Placeholder pricing — not final.",
-    "start": {
-      "name": "Start",
-      "desc": "Everything a single venue needs to get going.",
-      "cta": "Choose Start",
-      "point1": "Digital menu and QR codes",
-      "point2": "Unlimited dishes and photos",
-      "point3": "Your own menu styling"
-    },
-    "pro": {
-      "name": "Pro",
-      "badge": "Most popular",
-      "desc": "For venues that also take orders through the menu.",
-      "cta": "Choose Pro",
-      "point1": "Everything in Start",
-      "point2": "Orders Console",
-      "point3": "Google Maps and reviews",
-      "point4": "Priority support"
-    }
+    "point1": "Digital menu and QR codes",
+    "point2": "Unlimited dishes and photos",
+    "point3": "Drag-and-drop editor",
+    "point4": "Sold out in one tap",
+    "point5": "Your own menu styling",
+    "point6": "Menu in 5 languages",
+    "point7": "Allergen filter for guests",
+    "point8": "Google Maps and reviews",
+    "point9": "Screen readers and readable contrast"
   },
   "contact": {
     "title": "Let's talk.",

@@ -63,51 +63,34 @@
       "caption": "Karten-Editor · 4:3"
     },
     "b2": {
-      "title": "Bestellkonsole",
-      "body": "Ein lauter Hinweis in der Küche und ein Bestellstatus, den die ganze Schicht auf einen Blick sieht.",
-      "point1": "Laute Signaltöne",
-      "point2": "Ansicht für die Küchenschicht",
-      "caption": "Bestellkonsole · 4:3"
-    },
-    "b3": {
       "title": "Google Maps und Bewertungen",
       "body": "Ein zufriedener Gast landet auf Ihrem Eintrag, noch bevor er vom Tisch aufsteht.",
       "point1": "Besucher zu Bewertungen lenken",
       "point2": "Eintrag immer aktuell",
       "caption": "Eintrag und Bewertungen · 4:3"
     },
-    "b4": {
+    "b3": {
       "title": "Barrierefreiheit (WCAG)",
-      "body": "Screenreader, aus der Hintergrundhelligkeit berechneter Kontrast und eine Karte in zwei Sprachen.",
+      "body": "Screenreader, aus der Hintergrundhelligkeit berechneter Kontrast und eine Karte in fünf Sprachen.",
       "point1": "Screenreader-Unterstützung",
-      "point2": "Zweisprachige Karte (i18n)",
+      "point2": "Karte in 5 Sprachen (i18n)",
       "caption": "Einstellungen zur Barrierefreiheit · 4:3"
     }
   },
   "pricing": {
     "eyebrow": "Preise",
     "title": "Einfach und planbar.",
-    "subtitle": "Ein Tarif, keine Provision auf Bestellungen und keine Einrichtungsgebühr.",
+    "subtitle": "Ein Tarif, alle Funktionen und keine Einrichtungsgebühr.",
     "period": "PLN / Monat",
-    "note": "Platzhalterpreise — nicht endgültig.",
-    "start": {
-      "name": "Start",
-      "desc": "Alles, was ein einzelner Betrieb für den Anfang braucht.",
-      "cta": "Start wählen",
-      "point1": "Digitale Karte und QR-Codes",
-      "point2": "Unbegrenzt Gerichte und Fotos",
-      "point3": "Eigene Gestaltung der Karte"
-    },
-    "pro": {
-      "name": "Pro",
-      "badge": "Am beliebtesten",
-      "desc": "Für Betriebe, die auch über die Karte Bestellungen annehmen.",
-      "cta": "Pro wählen",
-      "point1": "Alles aus Start",
-      "point2": "Bestellkonsole",
-      "point3": "Google Maps und Bewertungen",
-      "point4": "Bevorzugter Support"
-    }
+    "point1": "Digitale Karte und QR-Codes",
+    "point2": "Unbegrenzt Gerichte und Fotos",
+    "point3": "Editor per Drag-and-drop",
+    "point4": "Ausverkauft mit einem Tipp",
+    "point5": "Eigene Gestaltung der Karte",
+    "point6": "Karte in 5 Sprachen",
+    "point7": "Allergenfilter für Gäste",
+    "point8": "Google Maps und Bewertungen",
+    "point9": "Screenreader und gut lesbarer Kontrast"
   },
   "contact": {
     "title": "Sprechen wir.",

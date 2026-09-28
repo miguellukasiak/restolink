@@ -63,51 +63,34 @@
       "caption": "Kreator menu · 4:3"
     },
     "b2": {
-      "title": "Konsola Zamówień",
-      "body": "Donośny alert na kuchni i status zamówienia, który cała zmiana widzi jednym spojrzeniem.",
-      "point1": "Donośne alerty dźwiękowe",
-      "point2": "Widok dla zmiany w kuchni",
-      "caption": "Konsola zamówień · 4:3"
-    },
-    "b3": {
       "title": "Google Maps i opinie",
       "body": "Zadowolony gość trafia na Twoją wizytówkę, zanim wstanie od stolika.",
       "point1": "Kierowanie ruchu na opinie",
       "point2": "Wizytówka zawsze aktualna",
       "caption": "Wizytówka i opinie · 4:3"
     },
-    "b4": {
+    "b3": {
       "title": "Dostępność (WCAG)",
-      "body": "Czytniki ekranu, kontrast liczony z luminancji tła i menu w dwóch językach.",
+      "body": "Czytniki ekranu, kontrast liczony z luminancji tła i menu w pięciu językach.",
       "point1": "Obsługa czytników ekranu",
-      "point2": "Menu dwujęzyczne (i18n)",
+      "point2": "Menu w 5 językach (i18n)",
       "caption": "Ustawienia dostępności · 4:3"
     }
   },
   "pricing": {
     "eyebrow": "Cennik",
     "title": "Prosto i przewidywalnie.",
-    "subtitle": "Jedna stawka, bez prowizji od zamówień i bez opłaty wdrożeniowej.",
+    "subtitle": "Jedna stawka, wszystkie funkcje i bez opłaty wdrożeniowej.",
     "period": "zł / miesiąc",
-    "note": "Ceny zastępcze — nie są ostateczne.",
-    "start": {
-      "name": "Start",
-      "desc": "Wszystko, czego potrzebuje jeden lokal na początek.",
-      "cta": "Wybieram Start",
-      "point1": "Cyfrowe menu i kody QR",
-      "point2": "Bez limitu dań i zdjęć",
-      "point3": "Własna stylistyka menu"
-    },
-    "pro": {
-      "name": "Pro",
-      "badge": "Najczęściej wybierany",
-      "desc": "Dla lokali, które przyjmują też zamówienia przez menu.",
-      "cta": "Wybieram Pro",
-      "point1": "Wszystko z pakietu Start",
-      "point2": "Konsola Zamówień",
-      "point3": "Google Maps i opinie",
-      "point4": "Wsparcie priorytetowe"
-    }
+    "point1": "Cyfrowe menu i kody QR",
+    "point2": "Bez limitu dań i zdjęć",
+    "point3": "Edytor „przeciągnij i upuść”",
+    "point4": "Wyprzedane jednym dotknięciem",
+    "point5": "Własna stylistyka menu",
+    "point6": "Menu w 5 językach",
+    "point7": "Filtr alergenów dla gości",
+    "point8": "Google Maps i opinie",
+    "point9": "Czytniki ekranu i czytelny kontrast"
   },
   "contact": {
     "title": "Porozmawiajmy.",
