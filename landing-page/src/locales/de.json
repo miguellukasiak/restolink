@@ -114,7 +114,13 @@
     "restaurant": "Name des Betriebs (optional)",
     "message": "Nachricht",
     "submit": "Nachricht senden",
-    "note": "Wir antworten meist am selben Werktag."
+    "note": "Wir antworten meist am selben Werktag.",
+    "sending": "Wird gesendet…",
+    "slow": "Wird noch gesendet — unser Server startet gerade, das kann bis zu einer Minute dauern.",
+    "success": "Vielen Dank! Ihre Nachricht ist bei uns angekommen — wir melden uns in Kürze.",
+    "error": "Ihre Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es gleich noch einmal.",
+    "rateLimited": "Sie haben bereits mehrere Nachrichten gesendet. Bitte versuchen Sie es später erneut.",
+    "invalid": "Bitte prüfen Sie Ihre Angaben — insbesondere die E-Mail-Adresse."
   },
   "footer": {
     "tagline": "Digitale Speisekarten für Restaurants, Cafés und Bars. Ein QR-Code statt gedruckter Karte.",

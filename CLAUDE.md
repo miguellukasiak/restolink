@@ -33,7 +33,9 @@ server state, `react-router-dom` v7, `react-hook-form` + `zod`, `react-i18next`,
 
 **Landing page** — Vite vanilla TS + **Tailwind v4** (`@tailwindcss/vite`, tokens
 declared in `@theme` inside `src/style.css`; there is deliberately **no**
-`tailwind.config.js`). i18next for en/pl/de/fr/es.
+`tailwind.config.js`). i18next for en/pl/de/fr/es. Static output, with one
+runtime call: the contact form posts to the API, so the build **requires**
+`VITE_API_URL` and refuses to run without it.
 
 Tailwind exists **only** in `landing-page/`. The React app is MUI-only — do not
 introduce Tailwind there.
@@ -394,6 +396,19 @@ product and answers `REQUEST_DENIED` if only the new one is enabled. The cache
 row stores the `place_id` it describes, so correcting a mistyped id does not keep
 serving another restaurant's reviews.
 
+**Contact form (landing page).** `POST /api/v1/public/contact`
+(`routers/contact.py`) emails an inquiry via Resend to `CONTACT_INBOX_EMAIL`,
+with **Reply-To set to the visitor** so answering reaches the lead directly.
+It is the one public route that sends email, and Resend's quota is shared with
+resets and activations, so it carries a honeypot field (`website`, answered with
+a fake success and logged in case it was a person), a per-client limit (5/hour, left-most `X-Forwarded-For`) and a
+global cap (50/day) that holds when that header is spoofed. Limits are
+in-process memory — fine for Render's single instance. **A lead is never
+answered with a success unless Resend accepted it**: missing config is a 503
+naming the variable, a Resend failure a 502, and both write the whole inquiry to
+the log so it can be recovered. Every visitor-typed value is HTML-escaped in the
+email. The landing page's own origin must be listed in `CORS_ALLOWED_ORIGINS`.
+
 ---
 
 ## 10. Frontend conventions
@@ -488,12 +503,15 @@ Each of these cost real debugging time in this repo. They are not hypothetical.
 | `JWT_SECRET_KEY` | auth | **ephemeral per-process key**; all sessions die on restart. ≥32 bytes |
 | `APP_BASE_URL` | email links, Stripe URLs | defaults to the Vercel domain |
 | `CLOUDINARY_CLOUD_NAME` / `_API_KEY` / `_API_SECRET` | image upload | loud warning, uploads disabled |
-| `RESEND_API_KEY`, `RESEND_FROM` | reset + welcome email | **not sent**; the link is written to the log instead |
+| `RESEND_API_KEY`, `RESEND_FROM` | reset + welcome + contact email | reset/welcome: **not sent**, the link is written to the log instead. Contact form: 503 |
+| `CONTACT_INBOX_EMAIL` | landing contact form (comma-separated for several) | **503 naming the variable**; the inquiry is written to the log |
+| `CORS_ALLOWED_ORIGINS` | extra CORS origins, comma-separated — the landing page's domain(s) | only the built-in list; the contact form fails in the browser |
 | `STRIPE_API_KEY`, `STRIPE_PRICE_ID` | checkout | 503 from the checkout endpoint |
 | `STRIPE_WEBHOOK_SECRET` | webhook | **500, refuses to act** — never skips verification |
 | `GOOGLE_MAPS_API_KEY` | reviews | 503 naming the variable |
 | `DEEPL_API_KEY` | dictionary drafts | 500 naming the variable; manual entry still works |
 | `VITE_API_URL` | frontend build | defaults to `http://localhost:8000` |
+| `VITE_API_URL` | landing-page build | **build fails** — a form posting to localhost would lose every lead. `landing-page/.env.example` |
 
 `SUPERADMIN_PASSWORD` is **retired**. Nothing reads it.
 
@@ -532,8 +550,8 @@ Docker Compose exists in `backend/` but is not required; pointing
 
 Deployment prerequisites, carried across several sessions:
 
-- [ ] **Migrations `005`, `006`, `009`** — required columns. Run before the
-      matching deploy or the API 500s on every restaurant query.
+- [x] **Migrations `005`, `006`, `009`** — required columns. Applied to
+      production (confirmed by the owner, 2026-09-28).
 - [ ] `007` and `008` are table-only and optional (`create_all` covers them).
 - [ ] **Bootstrap the first HQ account** (`scripts/promote_admin.py`, or the
       equivalent SQL insert). Until it exists nobody can reach `/hq-access`.
@@ -544,6 +562,9 @@ Deployment prerequisites, carried across several sessions:
       and has never been rotated.
 - [ ] Register the Stripe webhook endpoint and set its three variables.
 - [ ] Restrict `GOOGLE_MAPS_API_KEY` to **Places API (New)** in Google Cloud.
+- [ ] **Contact form:** set `CONTACT_INBOX_EMAIL` and `CORS_ALLOWED_ORIGINS`
+      (the landing domain — **both** `www.` and apex if both serve it) on
+      Render, then rebuild the landing page with `VITE_API_URL`.
 
 Known product gaps, not bugs:
 
@@ -551,7 +572,8 @@ Known product gaps, not bugs:
   restaurant-only and the CLI does not rotate passwords.
 - `PUT /admin/restaurants/{id}` does not repoint an activated owner's login
   email (§7).
-- The landing page contact form is still `action="#"` (marked TODO), and its
-  favicon still carries the retired "R" mark.
+- The landing page footer still shows the placeholder `kontakt@example.com`.
+- The React app's `frontend/public/favicon.svg` is still Vite's default; the
+  landing page has the QR mark (`landing-page/public/favicon.svg`).
 - Scroll-spy tuning (`SPY_ROOT_MARGIN` in `useCategoryScrollSpy.ts`) has never
   been verified against real scrolling — the preview pane cannot scroll.

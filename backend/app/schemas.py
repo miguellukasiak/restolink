@@ -354,6 +354,33 @@ class MessageResponse(BaseModel):
 
 
 # --------------------------------------------------------------------------- #
+# Landing-page contact form (public)
+# --------------------------------------------------------------------------- #
+
+
+class ContactRequest(BaseModel):
+    """A sales inquiry from the landing page.
+
+    Limits match the `maxlength` attributes on the form, so a person typing
+    into it never meets a 422 the browser did not warn them about first. Only
+    what a person must type is constrained: a lead is never refused over
+    metadata such as `language`.
+    """
+
+    # Strips before validating, so a name of three spaces counts as empty.
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    name: str = Field(min_length=1, max_length=120)
+    email: EmailStr
+    restaurant: str | None = Field(None, max_length=160)
+    message: str = Field(min_length=1, max_length=5000)
+    language: str | None = None
+    #: Honeypot. Hidden from people and assistive tech alike, so anything in
+    #: it was put there by a bot filling in every field it could find.
+    website: str | None = None
+
+
+# --------------------------------------------------------------------------- #
 # Google Maps reviews (owner panel)
 # --------------------------------------------------------------------------- #
 

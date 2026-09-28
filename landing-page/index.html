@@ -13,10 +13,9 @@
       content="RestoLink turns a QR code into a fast, always up-to-date digital menu that guests open straight in their browser."
     />
     <meta name="theme-color" content="#0f8256" />
-    <link
-      rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f8256'/%3E%3Ctext x='16' y='22' font-family='sans-serif' font-size='18' font-weight='700' fill='white' text-anchor='middle'%3ER%3C/text%3E%3C/svg%3E"
-    />
+    <!-- A QR mark, replacing the retired "R" tile. From `public/`, so it is
+         copied as-is and the build rewrites the path to suit `base: './'`. -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -1298,16 +1297,19 @@
                 </p>
               </div>
 
-              <!-- TODO: point `action` at a real endpoint — this form does not
-                   submit anywhere yet. Validation is native: `required` and
-                   `type="email"` work without JavaScript. -->
-              <form action="#" method="post" class="mt-10 space-y-5">
+              <!-- Sent by `setupContactForm` in main.ts as JSON to
+                   `POST /api/v1/public/contact`, which emails it to our inbox.
+                   Validation stays native — `required`, `type="email"` and
+                   `maxlength` (matching the API's limits) — and the submit
+                   handler only runs once the browser is satisfied. -->
+              <form method="post" data-contact-form class="mt-10 space-y-5">
                 <div class="relative">
                   <input
                     id="cf-name"
                     name="name"
                     type="text"
                     autocomplete="name"
+                    maxlength="120"
                     placeholder=" "
                     required
                     class="peer w-full rounded-2xl border border-ink-900/15 bg-white px-5 pt-7 pb-2.5 text-base text-ink-900 outline-none transition-colors placeholder:text-transparent focus:border-brand-600 focus:ring-1 focus:ring-brand-600"
@@ -1327,6 +1329,7 @@
                     name="email"
                     type="email"
                     autocomplete="email"
+                    maxlength="254"
                     placeholder=" "
                     required
                     class="peer w-full rounded-2xl border border-ink-900/15 bg-white px-5 pt-7 pb-2.5 text-base text-ink-900 outline-none transition-colors placeholder:text-transparent focus:border-brand-600 focus:ring-1 focus:ring-brand-600"
@@ -1346,6 +1349,7 @@
                     name="restaurant"
                     type="text"
                     autocomplete="organization"
+                    maxlength="160"
                     placeholder=" "
                     class="peer w-full rounded-2xl border border-ink-900/15 bg-white px-5 pt-7 pb-2.5 text-base text-ink-900 outline-none transition-colors placeholder:text-transparent focus:border-brand-600 focus:ring-1 focus:ring-brand-600"
                   />
@@ -1363,6 +1367,7 @@
                     id="cf-message"
                     name="message"
                     rows="4"
+                    maxlength="5000"
                     placeholder=" "
                     required
                     class="peer w-full resize-y rounded-2xl border border-ink-900/15 bg-white px-5 pt-7 pb-3 text-base text-ink-900 outline-none transition-colors placeholder:text-transparent focus:border-brand-600 focus:ring-1 focus:ring-brand-600"
@@ -1376,13 +1381,40 @@
                   </label>
                 </div>
 
+                <!-- Honeypot. Off-screen rather than `display: none`, which
+                     some bots know to skip, and hidden from assistive tech so
+                     no person is ever asked to fill it in. Anything in it marks
+                     the sender as a bot; the API answers with a fake success. -->
+                <div
+                  aria-hidden="true"
+                  class="absolute -left-[9999px] h-px w-px overflow-hidden"
+                >
+                  <label for="cf-website">Leave this field empty</label>
+                  <input
+                    id="cf-website"
+                    name="website"
+                    type="text"
+                    tabindex="-1"
+                    autocomplete="off"
+                  />
+                </div>
+
                 <button
                   type="submit"
                   data-i18n="contact.submit"
-                  class="inline-flex w-full items-center justify-center rounded-full bg-ink-900 px-8 py-4 text-base font-semibold text-white transition-colors hover:bg-ink-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-900"
+                  class="inline-flex w-full items-center justify-center rounded-full bg-ink-900 px-8 py-4 text-base font-semibold text-white transition-colors hover:bg-ink-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-900 disabled:cursor-wait disabled:opacity-70 disabled:hover:bg-ink-900"
                 >
                   Send message
                 </button>
+
+                <!-- Filled by main.ts: sending, sent, or what went wrong. A
+                     live region, so the outcome is announced as well as shown. -->
+                <p
+                  data-contact-status
+                  role="status"
+                  aria-live="polite"
+                  class="hidden rounded-2xl px-5 py-4 text-center text-base font-medium"
+                ></p>
 
                 <p
                   data-i18n="contact.note"

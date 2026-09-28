@@ -9,9 +9,9 @@ import fr from './locales/fr.json';
 import pl from './locales/pl.json';
 
 /**
- * Everything the page needs at runtime: translations, scroll reveals and the
- * sticky scroll-telling scene. No framework — the page is fully readable
- * without any of it.
+ * Everything the page needs at runtime: translations, scroll reveals, the
+ * sticky scroll-telling scene and the contact form. No framework — the page is
+ * fully readable without any of it; only sending a message needs scripting.
  */
 
 /** Order here is the order shown in the header switcher. */
@@ -202,6 +202,154 @@ function setupScrollScene(): void {
   steps.forEach((step) => observer.observe(step));
 }
 
+/**
+ * The API the contact form posts to. A production build refuses to run without
+ * `VITE_API_URL` (see vite.config.ts), so the localhost fallback only ever
+ * serves `npm run dev`.
+ */
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(
+  /\/+$/,
+  '',
+);
+
+/**
+ * Generous on purpose. The API sits on Render's free tier, whose cold start can
+ * take most of a minute — and giving up early on a send the server may still
+ * complete invites a duplicate, which is still better than a lost lead.
+ */
+const CONTACT_TIMEOUT_MS = 60_000;
+
+/** When to explain that a long wait is the server waking up, not a hang. */
+const CONTACT_SLOW_AFTER_MS = 6_000;
+
+type ContactStatus =
+  | 'sending'
+  | 'slow'
+  | 'success'
+  | 'error'
+  | 'rateLimited'
+  | 'invalid';
+
+const STATUS_TONE: Record<ContactStatus, string> = {
+  sending: 'bg-white/60 text-ink-700',
+  slow: 'bg-white/60 text-ink-700',
+  success: 'bg-brand-50 text-brand-700',
+  error: 'bg-red-50 text-red-700',
+  rateLimited: 'bg-red-50 text-red-700',
+  invalid: 'bg-red-50 text-red-700',
+};
+
+/** Which message a failed response gets. Anything unlisted is `error`. */
+function failureStatus(httpStatus: number): ContactStatus {
+  if (httpStatus === 429) {
+    return 'rateLimited';
+  }
+  if (httpStatus === 422) {
+    // The browser already checked the required fields and the length limits,
+    // so what is left is almost always an address the browser accepted and
+    // the API did not, such as one without a dot in its domain.
+    return 'invalid';
+  }
+  return 'error';
+}
+
+/**
+ * The contact form: posts to the API and reports the outcome in place.
+ *
+ * Messages are shown by pointing `data-i18n` at a key rather than writing text
+ * directly, so `applyTranslations` keeps them in the right language if the
+ * visitor switches mid-send. A POST is never retried automatically — a timeout
+ * does not prove the server did nothing, and a second attempt is the
+ * visitor's call.
+ */
+function setupContactForm(): void {
+  const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
+  const status = form?.querySelector<HTMLElement>('[data-contact-status]');
+  const button = form?.querySelector<HTMLButtonElement>('button[type="submit"]');
+  if (!form || !status || !button) {
+    return;
+  }
+
+  const buttonKey = button.dataset['i18n'] ?? 'contact.submit';
+  let busy = false;
+  let tone: string[] = [];
+
+  // Wake a sleeping server while the visitor is still typing, so the cold
+  // start is mostly over by the time they press send. `no-cors`: only the
+  // side effect matters, so the response need not be readable.
+  form.addEventListener(
+    'focusin',
+    () => {
+      fetch(`${API_URL}/health`, { mode: 'no-cors' }).catch(() => undefined);
+    },
+    { once: true },
+  );
+
+  const show = (state: ContactStatus): void => {
+    status.classList.remove('hidden', ...tone);
+    tone = STATUS_TONE[state].split(' ');
+    status.classList.add(...tone);
+    status.dataset['i18n'] = `contact.${state}`;
+    status.textContent = translate(`contact.${state}`);
+  };
+
+  const setBusy = (value: boolean): void => {
+    busy = value;
+    button.disabled = value;
+    const key = value ? 'contact.sending' : buttonKey;
+    button.dataset['i18n'] = key;
+    button.textContent = translate(key);
+  };
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (busy) {
+      return;
+    }
+
+    const data = new FormData(form);
+    const field = (name: string): string => String(data.get(name) ?? '').trim();
+    const body = JSON.stringify({
+      name: field('name'),
+      email: field('email'),
+      restaurant: field('restaurant') || null,
+      message: field('message'),
+      language: i18next.resolvedLanguage ?? null,
+      website: field('website'),
+    });
+
+    setBusy(true);
+    show('sending');
+
+    const controller = new AbortController();
+    const abortTimer = window.setTimeout(() => controller.abort(), CONTACT_TIMEOUT_MS);
+    const slowTimer = window.setTimeout(() => show('slow'), CONTACT_SLOW_AFTER_MS);
+
+    fetch(`${API_URL}/api/v1/public/contact`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (response.ok) {
+          form.reset();
+          show('success');
+        } else {
+          show(failureStatus(response.status));
+        }
+      })
+      // Offline, blocked by CORS, or timed out: the form keeps what was typed,
+      // so trying again costs the visitor one click.
+      .catch(() => show('error'))
+      .finally(() => {
+        window.clearTimeout(abortTimer);
+        window.clearTimeout(slowTimer);
+        setBusy(false);
+      });
+  });
+}
+
 async function bootstrap(): Promise<void> {
   await i18next.use(LanguageDetector).init({
     resources: {
@@ -243,6 +391,7 @@ async function bootstrap(): Promise<void> {
   setupLanguageSwitcher();
   setupScrollReveal();
   setupScrollScene();
+  setupContactForm();
 }
 
 void bootstrap();

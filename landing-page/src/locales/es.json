@@ -114,7 +114,13 @@
     "restaurant": "Nombre del local (opcional)",
     "message": "Mensaje",
     "submit": "Enviar mensaje",
-    "note": "Normalmente respondemos el mismo día laborable."
+    "note": "Normalmente respondemos el mismo día laborable.",
+    "sending": "Enviando…",
+    "slow": "Seguimos enviando: nuestro servidor se está activando y puede tardar hasta un minuto.",
+    "success": "¡Gracias! Tu mensaje ya nos ha llegado; te responderemos pronto.",
+    "error": "No se ha podido enviar tu mensaje. Inténtalo de nuevo en un momento.",
+    "rateLimited": "Ya has enviado varios mensajes. Inténtalo de nuevo más tarde.",
+    "invalid": "Revisa tus datos, sobre todo la dirección de correo electrónico."
   },
   "footer": {
     "tagline": "Cartas digitales para restaurantes, cafeterías y bares. Un código QR en lugar de una carta impresa.",

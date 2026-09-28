@@ -114,7 +114,13 @@
     "restaurant": "Venue name (optional)",
     "message": "Message",
     "submit": "Send message",
-    "note": "We usually reply the same business day."
+    "note": "We usually reply the same business day.",
+    "sending": "Sending…",
+    "slow": "Still sending — our server is waking up, which can take up to a minute.",
+    "success": "Thank you! Your message is on its way — we will get back to you soon.",
+    "error": "We could not send your message. Please try again in a moment.",
+    "rateLimited": "You have already sent several messages. Please try again later.",
+    "invalid": "Please check your details — especially the email address."
   },
   "footer": {
     "tagline": "Digital menus for restaurants, cafés and bars. A QR code instead of a printed card.",

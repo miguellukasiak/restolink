@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "description": "Standalone marketing page for RestoLink. Builds to plain static files with no runtime dependency on the app or the API.",
+  "description": "Standalone marketing page for RestoLink. Builds to plain static files; the only runtime call is the contact form posting to the API (VITE_API_URL).",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
