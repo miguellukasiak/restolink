@@ -6,12 +6,17 @@ gets the menu in their browser. Three deployables live in this repository.
 | Path            | What it is                                   | Deployed to |
 | --------------- | -------------------------------------------- | ----------- |
 | `backend/`      | FastAPI API, Docker image                    | Render      |
-| `frontend/`     | React SPA — owner panel, HQ panel, public menu | Vercel    |
-| `landing-page/` | Standalone static marketing site             | static host |
+| `frontend/`     | React SPA — owner panel, HQ panel, public menu | Vercel project `restolink` |
+| `landing-page/` | Standalone static marketing site             | Vercel project `restolink-landing` |
 
 No infrastructure-as-code lives in the repo; Render and Vercel are configured in
-their own dashboards. `.claude/launch.json` defines the dev-server entry the
-Browser pane uses.
+their own dashboards. The two Vercel projects point at the same repository with
+different **Root Directory** settings (`frontend`, `landing-page`). Each deploys
+`main` to production on every push and builds a preview for every other branch,
+and each has **its own environment variables** — `VITE_API_URL` on `restolink`
+does nothing for `restolink-landing`. The landing page is served at
+`https://restolink-landing.vercel.app`. `.claude/launch.json` defines the
+dev-server entry the Browser pane uses.
 
 > This file is written in English to match every docstring and comment in the
 > codebase. UI strings and user-facing API messages are **Polish** — keep that
@@ -501,6 +506,11 @@ Each of these cost real debugging time in this repo. They are not hypothetical.
 12. **Loanwords defeat "identical means broken" heuristics.** "Tiramisu" is the
     same in German; a guard that rejected identical translations once caused an
     infinite client poll.
+13. **A build-time guard is a deploy-time outage.** When the landing build began
+    refusing to run without `VITE_API_URL`, every `restolink-landing` deploy
+    failed for over an hour, because the variable existed only on the other
+    Vercel project. Whenever a change adds a required build variable, name the
+    exact Vercel project it must be set on before the change reaches `main`.
 
 ---
 
@@ -520,7 +530,7 @@ Each of these cost real debugging time in this repo. They are not hypothetical.
 | `GOOGLE_MAPS_API_KEY` | reviews | 503 naming the variable |
 | `DEEPL_API_KEY` | dictionary drafts | 500 naming the variable; manual entry still works |
 | `VITE_API_URL` | frontend build | defaults to `http://localhost:8000` |
-| `VITE_API_URL` | landing-page build | **build fails** — a form posting to localhost would lose every lead. `landing-page/.env.example` |
+| `VITE_API_URL` | landing-page build | **build fails** — a form posting to localhost would lose every lead. Set it in the `restolink-landing` Vercel project (Production and Preview). `landing-page/.env.example` |
 
 `SUPERADMIN_PASSWORD` is **retired**. Nothing reads it.
 
@@ -571,9 +581,11 @@ Deployment prerequisites, carried across several sessions:
       and has never been rotated.
 - [ ] Register the Stripe webhook endpoint and set its three variables.
 - [ ] Restrict `GOOGLE_MAPS_API_KEY` to **Places API (New)** in Google Cloud.
-- [ ] **Contact form:** set `CONTACT_INBOX_EMAIL` and `CORS_ALLOWED_ORIGINS`
-      (the landing domain — **both** `www.` and apex if both serve it) on
-      Render, then rebuild the landing page with `VITE_API_URL`.
+- [ ] **Contact form:** `CONTACT_INBOX_EMAIL` on Render, and
+      `CORS_ALLOWED_ORIGINS` including `https://restolink-landing.vercel.app`
+      (plus a custom domain — **both** `www.` and apex — once there is one).
+      `VITE_API_URL` is set on `restolink-landing` and its builds are green
+      again as of 2026-09-28.
 
 Known product gaps, not bugs:
 
