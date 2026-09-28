@@ -17,7 +17,7 @@ import { visuallyHidden } from '@mui/utils';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import RestaurantMenuRoundedIcon from '@mui/icons-material/RestaurantMenuRounded';
 import type { PublicMenuItem } from '../../types';
-import { formatPln } from '../../constants/menu';
+import { formatPln, getTagI18nKey } from '../../constants/menu';
 import { getAllergenIcon, getTagIcon } from '../../constants/menuIcons';
 import { useBackButtonClose } from '../../hooks/useBackButtonClose';
 
@@ -75,6 +75,12 @@ function DishImage({ name, imageUrl }: { name: string; imageUrl: string | null }
 /** Detail content shared by the desktop and mobile layouts. */
 function DetailBody({ item }: { item: PublicMenuItem }) {
   const { t } = useTranslation();
+
+  /** A fixed-vocabulary tag in the guest's language; any other as stored. */
+  const tagLabel = (tag: string): string => {
+    const key = getTagI18nKey(tag);
+    return key ? t(key) : tag;
+  };
 
   const allergensText =
     item.allergens.length > 0 ? item.allergens.join(', ') : t('noAllergens');
@@ -172,7 +178,7 @@ function DetailBody({ item }: { item: PublicMenuItem }) {
                 key={tag}
                 role="listitem"
                 icon={getTagIcon(tag)}
-                label={tag}
+                label={tagLabel(tag)}
                 variant="outlined"
                 sx={{
                   bgcolor: (theme) => alpha(theme.palette.success.main, 0.08),

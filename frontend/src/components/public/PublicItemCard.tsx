@@ -146,7 +146,7 @@ function PublicItemCardComponent({ item, onOpen }: PublicItemCardProps) {
 
           {item.tags.includes('Nowość') && available && (
             <Chip
-              label="NEW"
+              label={t('tagNew')}
               size="small"
               color="primary"
               sx={{
@@ -156,7 +156,8 @@ function PublicItemCardComponent({ item, onOpen }: PublicItemCardProps) {
                 height: 18,
                 fontSize: 10,
                 fontWeight: 700,
-                '& .MuiChip-label': { px: 0.75 },
+                // The tag's own label, set in capitals as a badge.
+                '& .MuiChip-label': { px: 0.75, textTransform: 'uppercase' },
               }}
             />
           )}

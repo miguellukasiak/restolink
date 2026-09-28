@@ -573,7 +573,11 @@ Known product gaps, not bugs:
 - `PUT /admin/restaurants/{id}` does not repoint an activated owner's login
   email (§7).
 - The landing page footer still shows the placeholder `kontakt@example.com`.
-- The React app's `frontend/public/favicon.svg` is still Vite's default; the
-  landing page has the QR mark (`landing-page/public/favicon.svg`).
+- Public-menu **allergens** are still shown in Polish in every language
+  ("Ryby" to a German guest). Tags go through `getTagI18nKey` in
+  `constants/menu.ts` → i18next; allergens need the same mapping — and, being
+  a safety matter, translations checked before they ship.
+- `ItemDetailModal` builds its "Ingredients and allergens" heading with a
+  hardcoded Polish `i`, so German reads "Zutaten i allergene".
 - Scroll-spy tuning (`SPY_ROOT_MARGIN` in `useCategoryScrollSpy.ts`) has never
   been verified against real scrolling — the preview pane cannot scroll.

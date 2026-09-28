@@ -19,6 +19,29 @@ export const TAG_OPTIONS = [
   'Nowość',
 ] as const;
 
+export type MenuTag = (typeof TAG_OPTIONS)[number];
+
+/**
+ * The public-menu i18n key for each tag.
+ *
+ * A tag is stored as its Polish label — the owner panel shows it verbatim, and
+ * the API passes it through untranslated — so the guest-facing menu maps that
+ * stored value to a stable key instead of using Polish text as the key itself.
+ */
+const TAG_I18N_KEYS: Record<MenuTag, string> = {
+  Wegańskie: 'tagVegan',
+  Wegetariańskie: 'tagVegetarian',
+  Bestseller: 'tagBestseller',
+  Pikantne: 'tagSpicy',
+  Nowość: 'tagNew',
+};
+
+/** The i18n key for a stored tag, or `null` for one outside the fixed
+ *  vocabulary — which callers show as stored rather than blank. */
+export function getTagI18nKey(tag: string): string | null {
+  return Object.hasOwn(TAG_I18N_KEYS, tag) ? TAG_I18N_KEYS[tag as MenuTag] : null;
+}
+
 /** Font families offered in the visual settings page. */
 export const FONT_OPTIONS = [
   { value: 'Roboto', stack: '"Roboto", "Segoe UI", Arial, sans-serif' },
