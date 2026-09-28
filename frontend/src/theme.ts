@@ -3,18 +3,52 @@ import { createTheme, alpha } from '@mui/material/styles';
 /**
  * Material Design 3 inspired theme: generous corner radii, soft layered
  * shadows, tonal surfaces and a confident type scale.
+ *
+ * The palette is taken from the landing page rather than invented here. That
+ * page is what a restaurateur sees first, and until now the app contradicted
+ * it twice over — a blue-violet primary on the login and admin screens, a teal
+ * secondary in the owner panel — so the product changed colour twice between
+ * the marketing site and the panel someone signs into. These values are the
+ * same tokens `landing-page/src/style.css` declares for Tailwind.
  */
+
+/** `--color-brand-600`, the landing page's CTA button. The brand colour. */
+const BRAND = '#0F8256';
+/** `--color-brand-700`, its hover state. */
+const BRAND_DARK = '#0C6544';
+/** `--color-brand-500`, the lighter step. */
+const BRAND_LIGHT = '#16A06A';
+
+/** `--color-ink-900` / `--color-ink-500` from the same file. */
+const INK = '#161C25';
+const INK_MUTED = '#4B5563';
+
+/**
+ * The brand wordmark face, loaded in `index.html`.
+ *
+ * Only the logo uses it. It is a display face with one weight and no italic —
+ * excellent at 20px as a name, unreadable as a paragraph — so it is deliberately
+ * kept out of the body stack rather than added to `typography.fontFamily`.
+ */
+export const BRAND_FONT_FAMILY =
+  "'Dela Gothic One', 'Roboto', 'Segoe UI', sans-serif";
+
 export const theme = createTheme({
   palette: {
     mode: 'light',
-    primary: { main: '#5B4CDB', light: '#8B7FF0', dark: '#3F32A8' },
-    secondary: { main: '#00696D', light: '#4DA9AD', dark: '#004B4E' },
+    primary: { main: BRAND, light: BRAND_LIGHT, dark: BRAND_DARK },
+    // A lighter step of the same green rather than the old teal. The owner
+    // panel uses this for its tonal navigation, so it still reads as a
+    // different surface from the admin panel without leaving the brand.
+    secondary: { main: BRAND_LIGHT, light: '#4EC08F', dark: BRAND_DARK },
     success: { main: '#2E7D32' },
     error: { main: '#C62828' },
     warning: { main: '#ED6C02' },
-    background: { default: '#F6F5FB', paper: '#FFFFFF' },
-    text: { primary: '#1C1B22', secondary: '#5E5C6B' },
-    divider: alpha('#1C1B22', 0.08),
+    // Neutral, not the previous violet-tinted off-white: a login screen that
+    // tints its background toward the brand fights the card sitting on it.
+    background: { default: '#F7F9FA', paper: '#FFFFFF' },
+    text: { primary: INK, secondary: INK_MUTED },
+    divider: alpha(INK, 0.08),
   },
   shape: { borderRadius: 14 },
   typography: {
@@ -28,15 +62,15 @@ export const theme = createTheme({
   components: {
     MuiPaper: {
       styleOverrides: {
-        elevation1: { boxShadow: '0 2px 12px rgba(28, 27, 34, 0.06)' },
+        elevation1: { boxShadow: `0 2px 12px ${alpha(INK, 0.06)}` },
       },
     },
     MuiCard: {
       styleOverrides: {
         root: {
           borderRadius: 20,
-          boxShadow: '0 4px 24px rgba(28, 27, 34, 0.06)',
-          border: `1px solid ${alpha('#1C1B22', 0.06)}`,
+          boxShadow: `0 4px 24px ${alpha(INK, 0.06)}`,
+          border: `1px solid ${alpha(INK, 0.06)}`,
         },
       },
     },
@@ -44,16 +78,18 @@ export const theme = createTheme({
       styleOverrides: {
         paper: {
           borderRadius: 24,
-          boxShadow: '0 24px 64px rgba(28, 27, 34, 0.18)',
+          boxShadow: `0 24px 64px ${alpha(INK, 0.18)}`,
         },
       },
     },
     MuiButton: {
       styleOverrides: {
         root: { borderRadius: 999, paddingInline: 20 },
+        // Tinted to the brand, the way the landing page's CTA carries a green
+        // glow rather than a grey drop shadow.
         contained: {
-          boxShadow: '0 4px 14px rgba(91, 76, 219, 0.35)',
-          '&:hover': { boxShadow: '0 6px 18px rgba(91, 76, 219, 0.45)' },
+          boxShadow: `0 4px 14px ${alpha(BRAND, 0.35)}`,
+          '&:hover': { boxShadow: `0 6px 18px ${alpha(BRAND, 0.45)}` },
         },
       },
     },
@@ -80,8 +116,8 @@ export const theme = createTheme({
         root: {
           backgroundColor: alpha('#FFFFFF', 0.85),
           backdropFilter: 'blur(12px)',
-          color: '#1C1B22',
-          boxShadow: `inset 0 -1px 0 ${alpha('#1C1B22', 0.08)}`,
+          color: INK,
+          boxShadow: `inset 0 -1px 0 ${alpha(INK, 0.08)}`,
         },
       },
     },

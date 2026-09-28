@@ -9,6 +9,12 @@
   --font-sans: 'Outfit', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
     Roboto, 'Helvetica Neue', Arial, sans-serif;
 
+  /* The wordmark face, used by `font-brand` and nowhere else. Dela Gothic One
+     has one weight and no italic: it is a logo, not a text face, so it is kept
+     out of --font-sans deliberately. */
+  --font-brand: 'Dela Gothic One', 'Outfit', ui-sans-serif, system-ui,
+    sans-serif;
+
   /* Brand */
   --color-brand-50: #eefbf5;
   --color-brand-100: #d5f5e6;

@@ -4,7 +4,7 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { alpha, useTheme } from '@mui/material/styles';
+import { Wordmark } from '../brand/Wordmark';
 
 interface AuthLayoutProps {
   title: string;
@@ -16,11 +16,15 @@ interface AuthLayoutProps {
 
 /**
  * Shared shell for every credential screen: a centred Material 3 card on a
- * tonal background, with the brand mark above it.
+ * neutral background, with the wordmark above it.
+ *
+ * The background used to be a gradient washed with the primary colour. It is
+ * flat now: a tinted backdrop competes with the card it is meant to present,
+ * and it was the single loudest piece of colour on the first screen anyone
+ * sees. The green appears where it means something — the submit button and
+ * the focused field — rather than behind everything.
  */
 export function AuthLayout({ title, subtitle, children, footer }: AuthLayoutProps) {
-  const theme = useTheme();
-
   return (
     <Box
       sx={{
@@ -29,35 +33,12 @@ export function AuthLayout({ title, subtitle, children, footer }: AuthLayoutProp
         placeItems: 'center',
         px: 2,
         py: 6,
-        background: `linear-gradient(180deg, ${alpha(
-          theme.palette.primary.main,
-          0.08,
-        )} 0%, ${theme.palette.background.default} 55%)`,
+        bgcolor: 'background.default',
       }}
     >
       <Box sx={{ width: '100%', maxWidth: 440 }}>
-        <Stack spacing={1.5} sx={{ mb: 3, alignItems: 'center' }}>
-          <Box
-            aria-hidden
-            sx={{
-              width: 52,
-              height: 52,
-              display: 'grid',
-              placeItems: 'center',
-              // A string keeps this in pixels. `borderRadius: 999` would be a
-              // multiplier against theme.shape.borderRadius, not a pill.
-              borderRadius: '18px',
-              bgcolor: 'primary.main',
-              color: 'primary.contrastText',
-              fontWeight: 700,
-              fontSize: 22,
-            }}
-          >
-            R
-          </Box>
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>
-            RestoLink
-          </Typography>
+        <Stack sx={{ mb: 3, alignItems: 'center' }}>
+          <Wordmark size={30} color="text.primary" />
         </Stack>
 
         <Card sx={{ borderRadius: '28px' }}>

@@ -7,9 +7,9 @@ import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
 import Chip from '@mui/material/Chip';
+import Divider from '@mui/material/Divider';
 import Skeleton from '@mui/material/Skeleton';
 import { alpha } from '@mui/material/styles';
 import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded';
@@ -17,10 +17,10 @@ import QrCode2RoundedIcon from '@mui/icons-material/QrCode2Rounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import TranslateRoundedIcon from '@mui/icons-material/TranslateRounded';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
-import RestaurantRoundedIcon from '@mui/icons-material/RestaurantRounded';
 import { NavLink, Outlet, useLocation, useParams } from 'react-router-dom';
 import { useRestaurantInfo } from '../../hooks/useRestaurantInfo';
 import { LogoutButton } from '../auth/LogoutButton';
+import { Wordmark } from '../brand/Wordmark';
 import { useSnackbar } from '../feedback/SnackbarProvider';
 import {
   PAYMENT_PENDING_TOAST,
@@ -69,9 +69,12 @@ export function RestaurantPanelLayout() {
       <AppBar position="fixed" elevation={0} sx={{ zIndex: (t) => t.zIndex.drawer + 1 }}>
         <Toolbar>
           <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
-            <Avatar sx={{ bgcolor: 'secondary.main', width: 36, height: 36 }}>
-              <RestaurantRoundedIcon fontSize="small" />
-            </Avatar>
+            {/* The wordmark stands where the brand tile did, so the owner's
+                own restaurant name keeps the prominence it had — demoting it
+                to make room for ours would be the wrong trade on the screen
+                they work in all day. */}
+            <Wordmark size={18} color="text.primary" />
+            <Divider orientation="vertical" flexItem sx={{ my: 0.75 }} />
             <Box>
               {restaurant.isLoading ? (
                 <Skeleton variant="text" width={160} height={24} />

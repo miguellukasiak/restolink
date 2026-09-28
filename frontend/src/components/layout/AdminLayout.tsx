@@ -7,12 +7,11 @@ import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import Avatar from '@mui/material/Avatar';
 import Stack from '@mui/material/Stack';
 import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded';
-import RestaurantRoundedIcon from '@mui/icons-material/RestaurantRounded';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { LogoutButton } from '../auth/LogoutButton';
+import { Wordmark } from '../brand/Wordmark';
 import { useAdminProfile } from '../../hooks/useAdminProfile';
 import { getAdminSession } from '../../services/authStorage';
 
@@ -40,13 +39,17 @@ export function AdminLayout() {
       <AppBar position="fixed" elevation={0} sx={{ zIndex: (t) => t.zIndex.drawer + 1 }}>
         <Toolbar>
           <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
-            <Avatar sx={{ bgcolor: 'primary.main', width: 36, height: 36 }}>
-              <RestaurantRoundedIcon fontSize="small" />
-            </Avatar>
             <Box>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
-                RestoLink Admin
-              </Typography>
+              <Stack direction="row" spacing={0.75} sx={{ alignItems: 'baseline' }}>
+                <Wordmark size={19} color="text.primary" />
+                <Typography
+                  variant="subtitle2"
+                  color="text.secondary"
+                  sx={{ letterSpacing: '0.04em' }}
+                >
+                  Admin
+                </Typography>
+              </Stack>
               <Typography variant="caption" color="text.secondary">
                 {adminEmail || 'Panel administracyjny platformy'}
               </Typography>
