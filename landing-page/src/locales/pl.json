@@ -36,10 +36,6 @@
   "experience": {
     "title": "Trzy sekundy od stolika do menu.",
     "subtitle": "Żadnego sklepu z aplikacjami, żadnego czekania na kartę — tylko przeglądarka, którą gość i tak ma otwartą.",
-    "panel": {
-      "scan": "Skanowanie kodu QR",
-      "filter": "Filtrowanie i alergeny"
-    },
     "step1": {
       "title": "Widzi kod QR",
       "body": "Na stoliku, przy wejściu albo przy barze — tam, gdzie gość i tak patrzy. Stojak, naklejka czy podkładka: wystarczy, że kod jest na widoku."
@@ -51,6 +47,24 @@
     "step3": {
       "title": "Przegląda i filtruje",
       "body": "Zdjęcia, opisy i alergeny w jednym miejscu. Kto unika glutenu, jednym dotknięciem ukrywa wszystko, co go zawiera."
+    },
+    "mock": {
+      "openMenu": "Otwórz menu",
+      "code": "PL",
+      "filterActive": "Ukryto dania z glutenem",
+      "recommended": "Polecane",
+      "soups": "Zupy",
+      "desserts": "Desery",
+      "dish1": "Krem z pomidorów",
+      "dish1Desc": "Z bazylią i oliwą",
+      "dish2": "Łosoś z grilla",
+      "dish2Desc": "Z sosem cytrynowym",
+      "dish3": "Sałatka z burakiem",
+      "dish3Desc": "Kozi ser i orzechy włoskie",
+      "lactose": "Laktoza",
+      "celery": "Seler",
+      "fish": "Ryby",
+      "nuts": "Orzechy"
     }
   },
   "features": {

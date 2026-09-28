@@ -36,10 +36,6 @@
   "experience": {
     "title": "Trois secondes entre la table et la carte.",
     "subtitle": "Aucun magasin d'applications, aucune attente d'une carte imprimée — juste le navigateur que votre client a déjà ouvert.",
-    "panel": {
-      "scan": "Scan du QR code",
-      "filter": "Filtres et allergènes"
-    },
     "step1": {
       "title": "Repère le QR code",
       "body": "Sur la table, à l'entrée ou au bar — là où le regard se pose de toute façon. Chevalet, autocollant ou sous-verre : il suffit que le code soit bien en vue."
@@ -51,6 +47,24 @@
     "step3": {
       "title": "Parcourt et filtre",
       "body": "Photos, descriptions et allergènes au même endroit. Qui évite le gluten masque tout ce qui en contient d'une seule pression."
+    },
+    "mock": {
+      "openMenu": "Ouvrir la carte",
+      "code": "FR",
+      "filterActive": "Plats avec gluten masqués",
+      "recommended": "Suggestions",
+      "soups": "Soupes",
+      "desserts": "Desserts",
+      "dish1": "Velouté de tomates",
+      "dish1Desc": "Basilic et huile d'olive",
+      "dish2": "Saumon grillé",
+      "dish2Desc": "Sauce au citron",
+      "dish3": "Salade de betterave",
+      "dish3Desc": "Chèvre et noix",
+      "lactose": "Lactose",
+      "celery": "Céleri",
+      "fish": "Poisson",
+      "nuts": "Fruits à coque"
     }
   },
   "features": {

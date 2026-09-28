@@ -555,6 +555,81 @@
 }
 
 /* ------------------------------------------------------------------------- *
+ * Scene phone screens (steps 2 and 3), built from the same kit. The panel is
+ * the size container; its screen scales with the phone.
+ * ------------------------------------------------------------------------- */
+.scene-mock .mock-screen {
+  font-size: 4.4cqw;
+  padding-top: 1.6em;
+}
+
+.mock-desc {
+  color: var(--mock-muted);
+  font-size: 0.72em;
+}
+
+/* "Dishes with gluten are hidden" — the filter's one-tap result, stated. */
+.mock-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.45em;
+  margin-top: 0.9em;
+  padding: 0.5em 0.85em;
+  border-radius: 999px;
+  background-color: color-mix(in srgb, var(--mock-accent) 10%, transparent);
+  color: var(--mock-accent);
+  font-size: 0.75em;
+  font-weight: 600;
+}
+
+.mock-filter span {
+  flex: 1;
+}
+
+.mock-badge-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.mock-badge {
+  position: absolute;
+  top: -0.45em;
+  right: -0.55em;
+  display: grid;
+  place-items: center;
+  min-width: 1.3em;
+  height: 1.3em;
+  border-radius: 999px;
+  background-color: var(--mock-accent);
+  color: var(--mock-accent-ink);
+  font-size: 0.6em;
+  font-weight: 700;
+}
+
+.mock-food-salmon {
+  --food: #f08a6c;
+}
+
+.mock-food-beet {
+  --food: #9b2c4b;
+}
+
+/* The camera's scan line sweeping the QR window. Transform only: a paused
+   animation still shows the line. */
+.scan-line {
+  animation: scan-line 2.4s ease-in-out infinite alternate;
+}
+
+@keyframes scan-line {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(150px);
+  }
+}
+
+/* ------------------------------------------------------------------------- *
  * Hero chips: slow, out-of-step floating, the way Material product pages let
  * annotations drift. Transform only, so a paused animation is still visible.
  * ------------------------------------------------------------------------- */
@@ -606,7 +681,8 @@
   }
 
   .qr-ping,
-  .hero-float {
+  .hero-float,
+  .scan-line {
     animation: none;
   }
 

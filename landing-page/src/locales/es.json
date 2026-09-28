@@ -36,10 +36,6 @@
   "experience": {
     "title": "Tres segundos de la mesa a la carta.",
     "subtitle": "Sin tienda de aplicaciones y sin esperar la carta impresa: solo el navegador que tu cliente ya tiene abierto.",
-    "panel": {
-      "scan": "Escaneo del código QR",
-      "filter": "Filtros y alérgenos"
-    },
     "step1": {
       "title": "Ve el código QR",
       "body": "En la mesa, en la entrada o en la barra: donde el cliente ya está mirando. Un soporte, una pegatina o un posavasos; basta con que el código esté a la vista."
@@ -51,6 +47,24 @@
     "step3": {
       "title": "Explora y filtra",
       "body": "Fotos, descripciones y alérgenos en un mismo lugar. Quien evita el gluten oculta todo lo que lo contiene con un solo toque."
+    },
+    "mock": {
+      "openMenu": "Abrir la carta",
+      "code": "ES",
+      "filterActive": "Platos con gluten ocultos",
+      "recommended": "Recomendados",
+      "soups": "Sopas",
+      "desserts": "Postres",
+      "dish1": "Crema de tomate",
+      "dish1Desc": "Con albahaca y aceite de oliva",
+      "dish2": "Salmón a la parrilla",
+      "dish2Desc": "Con salsa de limón",
+      "dish3": "Ensalada de remolacha",
+      "dish3Desc": "Queso de cabra y nueces",
+      "lactose": "Lactosa",
+      "celery": "Apio",
+      "fish": "Pescado",
+      "nuts": "Frutos secos"
     }
   },
   "features": {

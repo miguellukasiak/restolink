@@ -36,10 +36,6 @@
   "experience": {
     "title": "Drei Sekunden vom Tisch zur Karte.",
     "subtitle": "Kein App-Store, kein Warten auf die gedruckte Karte — nur der Browser, den Ihr Gast längst offen hat.",
-    "panel": {
-      "scan": "QR-Code scannen",
-      "filter": "Filter und Allergene"
-    },
     "step1": {
       "title": "Entdeckt den QR-Code",
       "body": "Auf dem Tisch, am Eingang oder an der Bar — dort, wo Gäste ohnehin hinschauen. Aufsteller, Aufkleber oder Untersetzer: Hauptsache, der Code ist gut sichtbar."
@@ -51,6 +47,24 @@
     "step3": {
       "title": "Stöbert und filtert",
       "body": "Fotos, Beschreibungen und Allergene an einem Ort. Wer Gluten meidet, blendet mit einem Tipp alles Entsprechende aus."
+    },
+    "mock": {
+      "openMenu": "Karte öffnen",
+      "code": "DE",
+      "filterActive": "Gerichte mit Gluten ausgeblendet",
+      "recommended": "Empfohlen",
+      "soups": "Suppen",
+      "desserts": "Desserts",
+      "dish1": "Tomatencremesuppe",
+      "dish1Desc": "Mit Basilikum und Olivenöl",
+      "dish2": "Gegrillter Lachs",
+      "dish2Desc": "Mit Zitronensauce",
+      "dish3": "Rote-Bete-Salat",
+      "dish3Desc": "Ziegenkäse und Walnüsse",
+      "lactose": "Laktose",
+      "celery": "Sellerie",
+      "fish": "Fisch",
+      "nuts": "Nüsse"
     }
   },
   "features": {

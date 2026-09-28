@@ -36,10 +36,6 @@
   "experience": {
     "title": "Three seconds from table to menu.",
     "subtitle": "No app store, no waiting for a printed card — just a browser your guest already has open.",
-    "panel": {
-      "scan": "Scanning the QR code",
-      "filter": "Filters and allergens"
-    },
     "step1": {
       "title": "Spots the QR code",
       "body": "On the table, by the door or at the bar — wherever guests already look. A stand, a sticker or a coaster: all it takes is a code in plain sight."
@@ -51,6 +47,24 @@
     "step3": {
       "title": "Browses and filters",
       "body": "Photos, descriptions and allergens in one place. Whoever avoids gluten hides everything containing it with a single tap."
+    },
+    "mock": {
+      "openMenu": "Open menu",
+      "code": "EN",
+      "filterActive": "Hiding dishes with gluten",
+      "recommended": "Recommended",
+      "soups": "Soups",
+      "desserts": "Desserts",
+      "dish1": "Cream of tomato soup",
+      "dish1Desc": "With basil and olive oil",
+      "dish2": "Grilled salmon",
+      "dish2Desc": "With lemon sauce",
+      "dish3": "Beetroot salad",
+      "dish3Desc": "Goat cheese and walnuts",
+      "lactose": "Lactose",
+      "celery": "Celery",
+      "fish": "Fish",
+      "nuts": "Nuts"
     }
   },
   "features": {
