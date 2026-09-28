@@ -10,7 +10,7 @@
     "language": "Zmień język"
   },
   "nav": {
-    "guest": "Dla gościa",
+    "how": "Jak to działa",
     "features": "Funkcje",
     "pricing": "Cennik",
     "contact": "Kontakt",
@@ -23,34 +23,37 @@
     "badge": "Bez aplikacji, bez pobierania",
     "title": "Menu, wymyślone na nowo.",
     "subtitle": "Gość skanuje kod i menu już jest otwarte. Ty zmieniasz cenę, a ona jest aktualna wszędzie w kilka sekund.",
-    "ctaPrimary": "Zacznij bezpłatnie",
+    "ctaPrimary": "Umów prezentację",
     "ctaSecondary": "Zobacz, jak to działa",
-    "phoneCaption": "Menu gościa · 9:16"
+    "visualLabel": "To samo menu RestoLink na telefonie, komputerze i drugim telefonie — po polsku, angielsku i niemiecku, w jasnym i ciemnym motywie.",
+    "chips": {
+      "languages": "5 języków",
+      "contrast": "Czytelny kontrast",
+      "reader": "Czytniki ekranu",
+      "devices": "Każdy ekran"
+    }
   },
   "experience": {
-    "eyebrow": "Dla gościa",
     "title": "Trzy sekundy od stolika do menu.",
     "subtitle": "Żadnego sklepu z aplikacjami, żadnego czekania na kartę — tylko przeglądarka, którą gość i tak ma otwartą.",
     "panel": {
       "scan": "Skanowanie kodu QR",
-      "filter": "Filtrowanie i alergeny",
-      "order": "Zamówienie i płatność"
+      "filter": "Filtrowanie i alergeny"
     },
     "step1": {
+      "title": "Widzi kod QR",
+      "body": "Na stoliku, przy wejściu albo przy barze — tam, gdzie gość i tak patrzy. Stojak, naklejka czy podkładka: wystarczy, że kod jest na widoku."
+    },
+    "step2": {
       "title": "Skanuje kod QR",
       "body": "Wystarczy aparat. Menu otwiera się w przeglądarce — nic nie trzeba instalować ani zakładać konta."
     },
-    "step2": {
+    "step3": {
       "title": "Przegląda i filtruje",
       "body": "Zdjęcia, opisy i alergeny w jednym miejscu. Kto unika glutenu, jednym dotknięciem ukrywa wszystko, co go zawiera."
-    },
-    "step3": {
-      "title": "Zamawia i płaci",
-      "body": "Zamówienie trafia prosto na konsolę w kuchni, a rachunek reguluje się bez czekania na terminal."
     }
   },
   "features": {
-    "eyebrow": "Dla restauracji",
     "title": "Wszystko pod kontrolą.",
     "b1": {
       "title": "Pełna kontrola",

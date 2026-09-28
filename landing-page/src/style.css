@@ -152,6 +152,426 @@
   transform: scale(1.08);
 }
 
+/* Step 1 ("sees the code") shows an illustration of the table instead of the
+   phone; the phone rises into its place from step 2. Both layers share one
+   grid cell, so the sticky column keeps its size while they swap.
+   `data-current` is written by the scene script. */
+.scene-stage {
+  display: grid;
+}
+
+.scene-stage > * {
+  grid-area: 1 / 1;
+}
+
+.scene-illustration,
+.scene-device {
+  transition:
+    opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-current='0'] .scene-device {
+  opacity: 0;
+  transform: translateY(2.5rem) scale(0.96);
+}
+
+[data-scroll-scene]:not([data-current='0']) .scene-illustration {
+  opacity: 0;
+  transform: scale(0.96);
+}
+
+/* A slow ring pulsing out of the QR stand: "this is the thing to notice".
+   The first frame is a visible ring, so a paused animation (hidden tab) still
+   reads as intended. */
+.qr-ping {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: qr-ping 2.4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.qr-ping-late {
+  animation-delay: 1.2s;
+}
+
+@keyframes qr-ping {
+  from {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+}
+
+/* ------------------------------------------------------------------------- *
+ * Hero devices
+ *
+ * Coded mockups rather than screenshots: sharp at any width, no image request,
+ * and able to show the same menu in several languages at once. Each device is
+ * a size container and its screen sets `font-size` in `cqw`; everything inside
+ * is sized in `em`, so a device scales as one piece at every breakpoint.
+ * The stage is `role="img"` with a single label — none of this is read out.
+ * ------------------------------------------------------------------------- */
+.mock-device {
+  container-type: inline-size;
+}
+
+.mock-phone-body {
+  padding: 3.2cqw;
+  border-radius: 15cqw 15cqw 0 0;
+  background-color: var(--color-ink-900);
+  box-shadow: 0 2.5rem 5rem -1.5rem rgb(22 28 37 / 0.35);
+}
+
+.mock-phone-body::before {
+  content: '';
+  display: block;
+  width: 26%;
+  height: 1.8cqw;
+  margin: 0.6cqw auto 2.6cqw;
+  border-radius: 999px;
+  background-color: rgb(255 255 255 / 0.22);
+}
+
+.mock-phone .mock-screen {
+  aspect-ratio: 9 / 19;
+  border-radius: 11cqw 11cqw 0 0;
+  font-size: 4.3cqw;
+}
+
+.mock-browser-body {
+  overflow: hidden;
+  border-radius: 1.6cqw 1.6cqw 0 0;
+  background-color: #fff;
+  box-shadow: 0 2.5rem 5rem -1.5rem rgb(22 28 37 / 0.3);
+}
+
+.mock-browser-bar {
+  display: flex;
+  align-items: center;
+  gap: 1.4cqw;
+  padding: 1.3cqw 1.8cqw;
+  background-color: var(--color-surface-muted);
+  font-size: 1.25cqw;
+  color: var(--color-ink-400);
+}
+
+.mock-browser-dots {
+  display: flex;
+  gap: 0.6cqw;
+}
+
+.mock-browser-dots span {
+  width: 0.9cqw;
+  height: 0.9cqw;
+  border-radius: 999px;
+  background-color: var(--color-ink-300);
+  opacity: 0.55;
+}
+
+.mock-url {
+  display: inline-flex;
+  flex: 1;
+  align-items: center;
+  gap: 0.5em;
+  max-width: 55%;
+  margin-inline: auto;
+  padding: 0.45em 1em;
+  border-radius: 999px;
+  background-color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.mock-browser .mock-screen {
+  height: 100%;
+  font-size: 1.55cqw;
+  padding-inline: 2.4em;
+}
+
+/* Theme per screen: the menu adopts the restaurant's colours, as the product
+   does. `--mock-accent-ink` is the accent's readable text colour. */
+.mock-screen {
+  --mock-bg: #fcf4f6;
+  --mock-surface: #fff;
+  --mock-ink: #231a1c;
+  --mock-muted: #7b6a6e;
+  --mock-accent: #8c1d18;
+  --mock-accent-ink: #fff;
+  --mock-line: rgb(35 26 28 / 0.08);
+  height: 100%;
+  overflow: hidden;
+  padding: 1.2em 1em 0;
+  background-color: var(--mock-bg);
+  color: var(--mock-ink);
+  line-height: 1.25;
+  transition: opacity 0.35s ease;
+}
+
+.mock-screen.mock-theme-green {
+  --mock-bg: #f5f9f6;
+  --mock-ink: #14231b;
+  --mock-muted: #5f7267;
+  --mock-accent: #0f8256;
+  --mock-line: rgb(20 35 27 / 0.08);
+}
+
+.mock-screen.mock-theme-dark {
+  --mock-bg: #1a1a1a;
+  --mock-surface: #262626;
+  --mock-ink: #f5f1e6;
+  --mock-muted: #b7ad96;
+  --mock-accent: #d4af37;
+  --mock-accent-ink: #1a1a1a;
+  --mock-line: rgb(245 241 230 / 0.1);
+}
+
+/* Faded out for the moment the demo switches language. */
+.mock-screen.is-switching .mock-content {
+  opacity: 0;
+  transform: translateY(0.4em);
+}
+
+.mock-content {
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease;
+}
+
+.mock-top {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+}
+
+.mock-logo {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.3em;
+  height: 2.3em;
+  border-radius: 999px;
+  background-color: var(--mock-accent);
+  color: var(--mock-accent-ink);
+  font-size: 0.8em;
+  font-weight: 700;
+}
+
+.mock-name {
+  flex: 1;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.15em;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.mock-icon {
+  width: 1.15em;
+  height: 1.15em;
+  flex: none;
+}
+
+.mock-lang {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  padding: 0.3em 0.65em;
+  border: 1px solid var(--mock-line);
+  border-radius: 999px;
+  background-color: var(--mock-surface);
+  font-size: 0.8em;
+  font-weight: 700;
+}
+
+.mock-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  margin-top: 0.9em;
+  padding: 0.6em 0.9em;
+  border-radius: 999px;
+  background-color: var(--mock-surface);
+  box-shadow: 0 0 0 1px var(--mock-line);
+  color: var(--mock-muted);
+  font-size: 0.85em;
+  white-space: nowrap;
+}
+
+.mock-pills {
+  display: flex;
+  gap: 0.45em;
+  margin-top: 0.9em;
+  white-space: nowrap;
+}
+
+.mock-pill {
+  padding: 0.4em 0.85em;
+  border-radius: 999px;
+  background-color: var(--mock-line);
+  font-size: 0.8em;
+  font-weight: 600;
+}
+
+.mock-pill.is-active {
+  background-color: var(--mock-accent);
+  color: var(--mock-accent-ink);
+}
+
+.mock-heading {
+  margin-top: 1em;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.2em;
+  font-weight: 700;
+}
+
+.mock-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--mock-columns, 2), minmax(0, 1fr));
+  gap: 0.7em;
+  margin-top: 0.7em;
+}
+
+.mock-card {
+  overflow: hidden;
+  border-radius: 0.9em;
+  background-color: var(--mock-surface);
+  box-shadow: 0 0 0 1px var(--mock-line);
+}
+
+.mock-card-body {
+  display: grid;
+  gap: 0.3em;
+  padding: 0.6em 0.7em 0.75em;
+}
+
+.mock-dish {
+  font-size: 0.85em;
+  font-weight: 700;
+}
+
+.mock-price {
+  color: var(--mock-accent);
+  font-size: 0.8em;
+  font-weight: 700;
+}
+
+.mock-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3em;
+}
+
+.mock-chip {
+  padding: 0.2em 0.55em;
+  border: 1px solid rgb(176 96 0 / 0.35);
+  border-radius: 999px;
+  background-color: rgb(176 96 0 / 0.08);
+  font-size: 0.65em;
+  font-weight: 600;
+}
+
+.mock-theme-dark .mock-chip {
+  border-color: rgb(212 175 55 / 0.45);
+  background-color: rgb(212 175 55 / 0.12);
+}
+
+/* A top-down plate: the dish colour, a white rim, the table behind. */
+.mock-img {
+  display: block;
+  aspect-ratio: 4 / 3;
+  background:
+    radial-gradient(circle at 50% 50%, var(--food) 0 22%, transparent 23%),
+    radial-gradient(circle at 50% 50%, #fff 0 34%, rgb(0 0 0 / 0.06) 35%, transparent 37%),
+    var(--table, #f1e4d3);
+}
+
+.mock-food-pierogi {
+  background:
+    radial-gradient(ellipse 13% 9% at 42% 47%, #f6e2b8 0 90%, transparent 100%),
+    radial-gradient(ellipse 13% 9% at 58% 55%, #efd49c 0 90%, transparent 100%),
+    radial-gradient(ellipse 12% 8% at 50% 38%, #f3dcae 0 90%, transparent 100%),
+    radial-gradient(circle at 50% 50%, #fff 0 34%, rgb(0 0 0 / 0.06) 35%, transparent 37%),
+    #e7eddc;
+}
+
+.mock-food-soup {
+  --food: #c9794a;
+  --table: #f6e7d6;
+}
+
+.mock-food-cake {
+  --food: #f1d17f;
+  --table: #e8eef8;
+  background:
+    radial-gradient(circle at 56% 44%, #d9534f 0 3%, transparent 3.5%),
+    radial-gradient(circle at 46% 52%, #d9534f 0 2.5%, transparent 3%),
+    radial-gradient(circle at 50% 50%, #f8e6b0 0 17%, var(--food) 18% 22%, transparent 23%),
+    radial-gradient(circle at 50% 50%, #fff 0 34%, rgb(0 0 0 / 0.06) 35%, transparent 37%),
+    var(--table);
+}
+
+.mock-food-tomato {
+  --food: #d8553c;
+}
+
+.mock-food-rye {
+  --food: #cfb78d;
+}
+
+/* Table colours behind the plates. Declared after the dishes so they win. */
+.mock-table-rose {
+  --table: #f7e9e4;
+}
+
+.mock-table-sage {
+  --table: #eef1e6;
+}
+
+.mock-table-sky {
+  --table: #e8f0fe;
+}
+
+.mock-theme-dark .mock-img {
+  --table: #2e2b26;
+}
+
+/* The dark phone lists dishes as rows — the product's single-column layout on
+   narrow screens, with a larger type scale. */
+.mock-row {
+  display: grid;
+  grid-template-columns: 34% 1fr;
+  gap: 0.7em;
+  align-items: center;
+  padding: 0.55em;
+  border-radius: 0.9em;
+  background-color: var(--mock-surface);
+}
+
+.mock-row .mock-img {
+  border-radius: 0.6em;
+  aspect-ratio: 1;
+}
+
+/* ------------------------------------------------------------------------- *
+ * Hero chips: slow, out-of-step floating, the way Material product pages let
+ * annotations drift. Transform only, so a paused animation is still visible.
+ * ------------------------------------------------------------------------- */
+.hero-float {
+  animation: hero-float 7s ease-in-out infinite alternate;
+  animation-delay: var(--float-delay, 0s);
+}
+
+@keyframes hero-float {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-0.6rem);
+  }
+}
+
 /* Printing never scrolls, so the reveal state would blank the page.
    `.scene-panel` needs no override: exactly one is always `.is-visible`,
    because the scene activates its first step synchronously on load. */
@@ -177,8 +597,17 @@
     transition: none;
   }
 
-  .scene-panel {
+  .scene-panel,
+  .scene-illustration,
+  .scene-device,
+  .mock-screen,
+  .mock-content {
     transition: none;
+  }
+
+  .qr-ping,
+  .hero-float {
+    animation: none;
   }
 
   .scene-step,

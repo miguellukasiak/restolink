@@ -10,7 +10,7 @@
     "language": "Change language"
   },
   "nav": {
-    "guest": "For guests",
+    "how": "How it works",
     "features": "Features",
     "pricing": "Pricing",
     "contact": "Contact",
@@ -23,34 +23,37 @@
     "badge": "No app, no download",
     "title": "Menus, reinvented.",
     "subtitle": "Your guest scans a code and the menu is already open. You change a price and it is live everywhere in seconds.",
-    "ctaPrimary": "Start for free",
+    "ctaPrimary": "Book a demo",
     "ctaSecondary": "See how it works",
-    "phoneCaption": "Guest menu · 9:16"
+    "visualLabel": "The same RestoLink menu on a phone, a computer and a second phone — in Polish, English and German, in a light and a dark theme.",
+    "chips": {
+      "languages": "5 languages",
+      "contrast": "Readable contrast",
+      "reader": "Screen-reader friendly",
+      "devices": "Any screen"
+    }
   },
   "experience": {
-    "eyebrow": "For guests",
     "title": "Three seconds from table to menu.",
     "subtitle": "No app store, no waiting for a printed card — just a browser your guest already has open.",
     "panel": {
       "scan": "Scanning the QR code",
-      "filter": "Filters and allergens",
-      "order": "Order and payment"
+      "filter": "Filters and allergens"
     },
     "step1": {
+      "title": "Spots the QR code",
+      "body": "On the table, by the door or at the bar — wherever guests already look. A stand, a sticker or a coaster: all it takes is a code in plain sight."
+    },
+    "step2": {
       "title": "Scans the QR code",
       "body": "The camera is enough. The menu opens in the browser, with no app to install and nothing to sign up for."
     },
-    "step2": {
+    "step3": {
       "title": "Browses and filters",
       "body": "Photos, descriptions and allergens in one place. Whoever avoids gluten hides everything containing it with a single tap."
-    },
-    "step3": {
-      "title": "Orders and pays",
-      "body": "The order lands straight on the kitchen console, and the bill is settled without waiting for anyone to bring the terminal."
     }
   },
   "features": {
-    "eyebrow": "For restaurants",
     "title": "Everything under control.",
     "b1": {
       "title": "Full control",

@@ -137,8 +137,10 @@ function setupScrollReveal(): void {
 }
 
 /**
- * Sticky scroll-telling: the phone mockup on the left swaps its screen as each
- * text block on the right passes the middle of the viewport.
+ * Sticky scroll-telling: the visual on the left follows whichever text block on
+ * the right is passing the middle of the viewport. Panel `i` belongs to step
+ * `i`; the current index is also written to `data-current`, which the CSS uses
+ * to swap the step-1 illustration for the phone.
  */
 function setupScrollScene(): void {
   const scene = document.querySelector<HTMLElement>('[data-scroll-scene]');
@@ -159,6 +161,7 @@ function setupScrollScene(): void {
       return;
     }
     current = index;
+    scene.dataset['current'] = String(index);
 
     steps.forEach((step, i) => step.classList.toggle('is-current', i === index));
     // The panels duplicate text that the steps already carry, so all of them
@@ -350,6 +353,144 @@ function setupContactForm(): void {
   });
 }
 
+/** Languages the hero's browser mockup cycles through. Polish is already on
+ *  the phone beside it. */
+const DEMO_LANGUAGES = ['en', 'de', 'fr', 'es'] as const;
+
+type DemoLanguage = (typeof DEMO_LANGUAGES)[number];
+
+/**
+ * The browser mockup's copy per language. The interface strings are the
+ * product's own (its search placeholder, its allergen names), so the demo shows
+ * what a guest would actually read. English is also baked into the HTML.
+ */
+const DEMO_COPY: Record<DemoLanguage, Record<string, string>> = {
+  en: {
+    search: 'Search the menu...',
+    classics: 'Classics',
+    soups: 'Soups',
+    desserts: 'Desserts',
+    pierogi: 'Potato & cheese pierogi',
+    zurek: 'Sour rye soup',
+    cheesecake: 'Cheesecake',
+    lactose: 'Lactose',
+    eggs: 'Eggs',
+  },
+  de: {
+    search: 'Karte durchsuchen...',
+    classics: 'Klassiker',
+    soups: 'Suppen',
+    desserts: 'Desserts',
+    pierogi: 'Piroggen mit Quark',
+    zurek: 'Saure Mehlsuppe',
+    cheesecake: 'Käsekuchen',
+    lactose: 'Laktose',
+    eggs: 'Eier',
+  },
+  fr: {
+    search: 'Rechercher dans la carte...',
+    classics: 'Classiques',
+    soups: 'Soupes',
+    desserts: 'Desserts',
+    pierogi: 'Pierogi au fromage',
+    zurek: 'Soupe de seigle aigre',
+    cheesecake: 'Gâteau au fromage',
+    lactose: 'Lactose',
+    eggs: 'Œufs',
+  },
+  es: {
+    search: 'Buscar en la carta...',
+    classics: 'Clásicos',
+    soups: 'Sopas',
+    desserts: 'Postres',
+    pierogi: 'Pierogi de patata y queso',
+    zurek: 'Sopa de centeno agria',
+    cheesecake: 'Tarta de queso',
+    lactose: 'Lactosa',
+    eggs: 'Huevos',
+  },
+};
+
+/** How long each language stays on screen. */
+const DEMO_INTERVAL_MS = 3200;
+
+/** Matches the `.mock-content` fade in style.css. */
+const DEMO_FADE_MS = 350;
+
+/**
+ * Cycles the hero's browser mockup through the menu's languages: the same
+ * dishes, the same layout, a different language every few seconds.
+ *
+ * Runs only while the hero is on screen, and not at all for visitors who ask
+ * for reduced motion — they keep the static English version.
+ */
+function setupHeroDemo(): void {
+  const screen = document.querySelector<HTMLElement>('[data-demo-screen]');
+  if (
+    !screen ||
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  ) {
+    return;
+  }
+
+  // `code` and `label` live outside the screen (URL bar, language pill).
+  const browser = screen.closest<HTMLElement>('.mock-browser') ?? screen;
+  const targets = Array.from(browser.querySelectorAll<HTMLElement>('[data-demo]'));
+  let index = 0;
+  let timer: number | undefined;
+
+  const show = (language: DemoLanguage): void => {
+    const copy = DEMO_COPY[language];
+    screen.lang = language;
+    for (const target of targets) {
+      const key = target.dataset['demo'];
+      if (key === 'code') {
+        target.textContent = language;
+      } else if (key === 'label') {
+        target.textContent = language.toUpperCase();
+      } else if (key && copy[key]) {
+        target.textContent = copy[key];
+      }
+    }
+  };
+
+  const advance = (): void => {
+    index = (index + 1) % DEMO_LANGUAGES.length;
+    const language = DEMO_LANGUAGES[index] ?? 'en';
+    screen.classList.add('is-switching');
+    // Swap while faded out, then fade back in. On a timer, never
+    // `transitionend`: a hidden tab runs no transitions and would leave the
+    // screen blank.
+    window.setTimeout(() => {
+      show(language);
+      screen.classList.remove('is-switching');
+    }, DEMO_FADE_MS);
+  };
+
+  const start = (): void => {
+    timer ??= window.setInterval(advance, DEMO_INTERVAL_MS);
+  };
+  const stop = (): void => {
+    window.clearInterval(timer);
+    timer = undefined;
+  };
+
+  if (!('IntersectionObserver' in window)) {
+    start();
+    return;
+  }
+
+  new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (entry.isIntersecting) {
+        start();
+      } else {
+        stop();
+      }
+    }
+  }).observe(screen);
+}
+
 async function bootstrap(): Promise<void> {
   await i18next.use(LanguageDetector).init({
     resources: {
@@ -391,6 +532,7 @@ async function bootstrap(): Promise<void> {
   setupLanguageSwitcher();
   setupScrollReveal();
   setupScrollScene();
+  setupHeroDemo();
   setupContactForm();
 }
 

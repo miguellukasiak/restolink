@@ -69,10 +69,10 @@
         >
           <a
             href="#experience"
-            data-i18n="nav.guest"
+            data-i18n="nav.how"
             class="rounded-full text-sm font-medium text-ink-500 transition-colors hover:text-ink-900 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600"
           >
-            For guests
+            How it works
           </a>
           <a
             href="#features"
@@ -190,10 +190,10 @@
             class="reveal reveal-delay-3 mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row"
           >
             <a
-              href="#pricing"
+              href="#contact"
               class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-600 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-brand-600/20 transition-all hover:bg-brand-700 hover:shadow-xl hover:shadow-brand-600/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 sm:w-auto"
             >
-              <span data-i18n="hero.ctaPrimary">Start for free</span>
+              <span data-i18n="hero.ctaPrimary">Book a demo</span>
               <svg
                 class="size-4"
                 viewBox="0 0 24 24"
@@ -218,74 +218,224 @@
           </div>
         </div>
 
-        <!-- Phone floating over a stylised map. The "map" is a decorative
-             inline SVG — no image request, scales to any width. -->
+        <!-- One menu, every screen, every language. Coded mockups (see "Hero
+             devices" in style.css), not screenshots: a phone in Polish, a
+             browser that cycles through the other languages, and a phone in
+             the dark theme with a larger type scale. The stage is one image
+             to assistive tech; its label says what the picture shows. -->
         <div class="reveal mx-auto mt-16 max-w-7xl sm:mt-20">
           <div
-            class="relative overflow-hidden rounded-[2.5rem] bg-pastel-green px-6 pt-14 sm:rounded-[3rem] sm:px-10 sm:pt-20"
+            role="img"
+            data-i18n-aria-label="hero.visualLabel"
+            aria-label="The same RestoLink menu on a phone, a computer and a second phone — in Polish, English and German, in a light and a dark theme."
+            class="relative aspect-[4/5] overflow-hidden rounded-[2.5rem] bg-pastel-green sm:aspect-[4/3] sm:rounded-[3rem] lg:aspect-[2/1]"
           >
-            <svg
-              class="pointer-events-none absolute inset-0 size-full text-pop-green/15"
-              viewBox="0 0 800 500"
-              preserveAspectRatio="xMidYMid slice"
-              aria-hidden="true"
-              focusable="false"
-            >
-              <g stroke="currentColor" fill="none" stroke-linecap="round">
-                <path d="M-20 120h840" stroke-width="14" />
-                <path d="M-20 380h840" stroke-width="10" />
-                <path d="M160 -20v540" stroke-width="12" />
-                <path d="M620 -20v540" stroke-width="9" />
-                <path d="M160 250h460" stroke-width="7" />
-                <path d="M380 -20v540" stroke-width="5" />
-              </g>
-              <g fill="currentColor" opacity="0.7">
-                <rect x="200" y="150" width="120" height="70" rx="14" />
-                <rect x="430" y="160" width="150" height="60" rx="14" />
-                <rect x="210" y="290" width="140" height="60" rx="14" />
-                <rect x="450" y="280" width="110" height="80" rx="14" />
-                <rect x="660" y="170" width="110" height="170" rx="16" />
-                <rect x="20" y="160" width="100" height="180" rx="16" />
-              </g>
-            </svg>
-
-            <div
-              class="relative mx-auto w-full max-w-[19rem] rounded-t-[2.5rem] bg-ink-900 p-3 pb-0 shadow-2xl shadow-ink-900/25"
-            >
+            <!-- Soft colour fields and a dot grid behind the devices. -->
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
               <div
-                class="mx-auto mb-2.5 h-1.5 w-20 rounded-full bg-white/25"
-                aria-hidden="true"
+                class="absolute -top-1/4 -left-1/5 size-3/4 rounded-full bg-pastel-blue opacity-80 blur-3xl"
               ></div>
               <div
-                class="grid aspect-9/16 place-items-center rounded-t-[2rem] bg-white"
-              >
-                <div class="px-6 text-center">
-                  <svg
-                    class="mx-auto size-9 text-ink-300"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                    focusable="false"
-                  >
-                    <rect x="3" y="3" width="18" height="18" rx="3" />
-                    <circle cx="8.5" cy="8.5" r="1.5" />
-                    <path d="m21 15-5-5L5 21" />
-                  </svg>
-                  <p
-                    data-i18n="common.imagePlaceholder"
-                    class="mt-3 text-sm font-medium text-ink-500"
-                  >
-                    Image placeholder
-                  </p>
-                  <p data-i18n="hero.phoneCaption" class="mt-1 text-xs text-ink-400">
-                    Guest menu · 9:16
-                  </p>
+                class="absolute -right-1/5 -bottom-1/3 size-3/4 rounded-full bg-pastel-yellow opacity-90 blur-3xl"
+              ></div>
+              <div
+                class="absolute inset-0 bg-[radial-gradient(rgb(24_128_56/0.16)_1.2px,transparent_1.2px)] bg-[length:22px_22px]"
+              ></div>
+            </div>
+
+            <!-- Computer: the menu in a browser, cycling EN → DE → FR → ES
+                 (setupHeroDemo in main.ts). English is baked in, so it reads
+                 correctly with scripting off. -->
+            <div
+              class="mock-device mock-browser absolute top-[21%] bottom-0 left-1/2 w-[92%] -translate-x-1/2 sm:top-[14%] sm:w-[76%] lg:top-[11%] lg:w-[58%]"
+            >
+              <div class="mock-browser-body flex h-full flex-col">
+                <div class="mock-browser-bar">
+                  <span class="mock-browser-dots"><span></span><span></span><span></span></span>
+                  <span class="mock-url">
+                    <svg class="mock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>
+                    <span>menu/bistro-lipa?lang=<span data-demo="code">en</span></span>
+                  </span>
+                </div>
+                <div data-demo-screen lang="en" class="mock-screen mock-theme-green flex-1">
+                  <div class="mock-content">
+                    <div class="mock-top">
+                      <span class="mock-logo">BL</span>
+                      <span class="mock-name">Bistro Lipa</span>
+                      <span class="mock-search mt-0! w-2/5">
+                        <svg class="mock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" focusable="false"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+                        <span data-demo="search">Search the menu...</span>
+                      </span>
+                      <span class="mock-lang">
+                        <svg class="mock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" focusable="false"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18" /></svg>
+                        <span data-demo="label">EN</span>
+                      </span>
+                    </div>
+                    <div class="mock-pills">
+                      <span data-demo="classics" class="mock-pill is-active">Classics</span>
+                      <span data-demo="soups" class="mock-pill">Soups</span>
+                      <span data-demo="desserts" class="mock-pill">Desserts</span>
+                    </div>
+                    <p data-demo="classics" class="mock-heading">Classics</p>
+                    <div class="mock-grid [--mock-columns:3]">
+                      <div class="mock-card">
+                        <span class="mock-img mock-food-pierogi"></span>
+                        <div class="mock-card-body">
+                          <span data-demo="pierogi" class="mock-dish">Potato &amp; cheese pierogi</span>
+                          <span class="mock-price">28,00 zł</span>
+                          <span class="mock-chips"><span class="mock-chip">Gluten</span><span data-demo="lactose" class="mock-chip">Lactose</span></span>
+                        </div>
+                      </div>
+                      <div class="mock-card">
+                        <span class="mock-img mock-food-soup"></span>
+                        <div class="mock-card-body">
+                          <span data-demo="zurek" class="mock-dish">Sour rye soup</span>
+                          <span class="mock-price">24,00 zł</span>
+                          <span class="mock-chips"><span class="mock-chip">Gluten</span><span data-demo="eggs" class="mock-chip">Eggs</span></span>
+                        </div>
+                      </div>
+                      <div class="mock-card">
+                        <span class="mock-img mock-food-cake"></span>
+                        <div class="mock-card-body">
+                          <span data-demo="cheesecake" class="mock-dish">Cheesecake</span>
+                          <span class="mock-price">19,00 zł</span>
+                          <span class="mock-chips"><span data-demo="eggs" class="mock-chip">Eggs</span><span data-demo="lactose" class="mock-chip">Lactose</span></span>
+                        </div>
+                      </div>
+                    </div>
+                    <p data-demo="soups" class="mock-heading mt-[1.4em]!">Soups</p>
+                    <div class="mock-grid [--mock-columns:3]">
+                      <div class="mock-card"><span class="mock-img mock-food-tomato mock-table-rose"></span></div>
+                      <div class="mock-card"><span class="mock-img mock-food-rye mock-table-sage"></span></div>
+                      <div class="mock-card"><span class="mock-img mock-food-soup mock-table-sky"></span></div>
+                    </div>
+                  </div>
                 </div>
               </div>
+            </div>
+
+            <!-- Phone, Polish, the restaurant's own light theme. -->
+            <div
+              class="mock-device mock-phone absolute top-[47%] left-[3%] w-[46%] sm:top-[42%] sm:left-[5%] sm:w-[27%] lg:top-[34%] lg:left-[7%] lg:w-[19%]"
+            >
+              <div class="mock-phone-body">
+                <div lang="pl" class="mock-screen">
+                  <div class="mock-top">
+                    <span class="mock-logo">BL</span>
+                    <span class="mock-name">Bistro Lipa</span>
+                    <span class="mock-lang">PL</span>
+                  </div>
+                  <div class="mock-search">
+                    <svg class="mock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" focusable="false"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+                    Szukaj w menu...
+                  </div>
+                  <div class="mock-pills">
+                    <span class="mock-pill is-active">Klasyki</span>
+                    <span class="mock-pill">Zupy</span>
+                    <span class="mock-pill">Desery</span>
+                  </div>
+                  <p class="mock-heading">Klasyki</p>
+                  <div class="mock-grid">
+                    <div class="mock-card">
+                      <span class="mock-img mock-food-pierogi"></span>
+                      <div class="mock-card-body">
+                        <span class="mock-dish">Pierogi ruskie</span>
+                        <span class="mock-price">28,00 zł</span>
+                      </div>
+                    </div>
+                    <div class="mock-card">
+                      <span class="mock-img mock-food-soup"></span>
+                      <div class="mock-card-body">
+                        <span class="mock-dish">Żurek</span>
+                        <span class="mock-price">24,00 zł</span>
+                      </div>
+                    </div>
+                    <div class="mock-card">
+                      <span class="mock-img mock-food-cake"></span>
+                      <div class="mock-card-body">
+                        <span class="mock-dish">Sernik</span>
+                        <span class="mock-price">19,00 zł</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Phone, German, dark theme with a larger type scale. -->
+            <div
+              class="mock-device mock-phone absolute top-[57%] right-[3%] w-[40%] sm:top-[46%] sm:right-[5%] sm:w-[24%] lg:top-[40%] lg:right-[7%] lg:w-[17%]"
+            >
+              <div class="mock-phone-body">
+                <div lang="de" class="mock-screen mock-theme-dark text-[length:5.2cqw]!">
+                  <div class="mock-top">
+                    <span class="mock-logo">BL</span>
+                    <span class="mock-name">Bistro Lipa</span>
+                  </div>
+                  <p class="mock-heading">Suppen</p>
+                  <div class="mt-[0.7em] grid gap-[0.6em]">
+                    <div class="mock-row">
+                      <span class="mock-img mock-food-rye"></span>
+                      <div class="grid gap-[0.3em]">
+                        <span class="mock-dish">Saure Mehlsuppe</span>
+                        <span class="mock-price">24,00 zł</span>
+                        <span class="mock-chips"><span class="mock-chip">Gluten</span><span class="mock-chip">Eier</span></span>
+                      </div>
+                    </div>
+                    <div class="mock-row">
+                      <span class="mock-img mock-food-tomato"></span>
+                      <div class="grid gap-[0.3em]">
+                        <span class="mock-dish">Tomatensuppe</span>
+                        <span class="mock-price">18,00 zł</span>
+                        <span class="mock-chips"><span class="mock-chip">Sellerie</span></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Floating annotations: what the picture is saying, in the
+                 visitor's language. -->
+            <div aria-hidden="true">
+              <span
+                class="hero-float absolute top-[6%] left-[5%] inline-flex items-center gap-2 rounded-full bg-white py-1.5 pr-3.5 pl-1.5 text-xs font-semibold text-ink-700 shadow-[0_10px_30px_-8px_rgb(22_28_37/0.25)] sm:top-[8%] sm:text-sm lg:top-[10%] lg:left-[4%]"
+              >
+                <span class="grid size-7 place-items-center rounded-full bg-pastel-blue text-pop-blue sm:size-8">
+                  <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18" /></svg>
+                </span>
+                <span data-i18n="hero.chips.languages">5 languages</span>
+              </span>
+
+              <span
+                style="--float-delay: -2.5s"
+                class="hero-float absolute top-[6%] right-[5%] inline-flex items-center gap-2 rounded-full bg-white py-1.5 pr-3.5 pl-1.5 text-xs font-semibold text-ink-700 shadow-[0_10px_30px_-8px_rgb(22_28_37/0.25)] sm:top-[8%] sm:text-sm lg:top-[16%] lg:right-[4%]"
+              >
+                <span class="grid size-7 place-items-center rounded-full bg-pastel-yellow text-pop-yellow sm:size-8">
+                  <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" focusable="false"><circle cx="12" cy="12" r="9" /><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" /></svg>
+                </span>
+                <span data-i18n="hero.chips.contrast">Readable contrast</span>
+              </span>
+
+              <span
+                style="--float-delay: -4.5s"
+                class="hero-float absolute top-[84%] left-[2%] hidden items-center gap-2 rounded-full bg-white py-1.5 pr-3.5 pl-1.5 text-sm font-semibold text-ink-700 shadow-[0_10px_30px_-8px_rgb(22_28_37/0.25)] sm:inline-flex lg:top-[88%] lg:left-[2%]"
+              >
+                <span class="grid size-8 place-items-center rounded-full bg-pastel-purple text-pop-purple">
+                  <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><circle cx="12" cy="4.5" r="1.8" /><path d="M5 8.5l7 1.5 7-1.5M12 10v4.5M12 14.5 8.5 21M12 14.5 15.5 21" /></svg>
+                </span>
+                <span data-i18n="hero.chips.reader">Screen-reader friendly</span>
+              </span>
+
+              <span
+                style="--float-delay: -1s"
+                class="hero-float absolute top-[91%] right-[2%] hidden items-center gap-2 rounded-full bg-white py-1.5 pr-3.5 pl-1.5 text-sm font-semibold text-ink-700 shadow-[0_10px_30px_-8px_rgb(22_28_37/0.25)] sm:inline-flex lg:top-[82%] lg:right-[2%]"
+              >
+                <span class="grid size-8 place-items-center rounded-full bg-pastel-green text-pop-green">
+                  <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><rect x="2.5" y="4" width="13" height="10" rx="1.5" /><path d="M6 18h6" /><rect x="15.5" y="9" width="6" height="11" rx="1.5" /></svg>
+                </span>
+                <span data-i18n="hero.chips.devices">Any screen</span>
+              </span>
             </div>
           </div>
         </div>
@@ -299,16 +449,10 @@
       >
         <div class="mx-auto max-w-7xl">
           <div class="reveal mx-auto max-w-3xl text-center">
-            <p
-              data-i18n="experience.eyebrow"
-              class="text-sm font-semibold tracking-widest text-pop-green uppercase"
-            >
-              For guests
-            </p>
             <h2
               id="experience-heading"
               data-i18n="experience.title"
-              class="mt-4 text-4xl font-extrabold tracking-tighter text-balance text-ink-900 sm:text-6xl"
+              class="text-4xl font-extrabold tracking-tighter text-balance text-ink-900 sm:text-6xl"
             >
               Three seconds from table to menu.
             </h2>
@@ -325,124 +469,160 @@
             data-scroll-scene
             class="mt-16 grid gap-12 sm:mt-24 lg:grid-cols-2 lg:gap-20"
           >
-            <!-- Sticky phone. Decorative: every panel duplicates text that is
-                 already in the steps on the right. -->
+            <!-- Sticky visual. Step 1 shows the table the guest is sitting
+                 at; from step 2 the phone rises into its place. Decorative:
+                 the steps on the right carry all of the text. Panels are
+                 matched to steps by order, so the illustration is panel 0. -->
             <div class="hidden lg:block">
               <div class="sticky top-28">
-                <div
-                  class="relative mx-auto w-full max-w-[19rem] rounded-[2.5rem] bg-ink-900 p-3 shadow-2xl shadow-ink-900/25"
-                >
+                <div class="scene-stage mx-auto w-full max-w-[19rem]">
                   <div
-                    class="mx-auto mb-2.5 h-1.5 w-20 rounded-full bg-white/25"
+                    data-panel
+                    class="scene-illustration overflow-hidden rounded-[2.5rem] bg-pastel-yellow shadow-2xl shadow-ink-900/10"
                     aria-hidden="true"
-                  ></div>
+                  >
+                    <svg
+                      class="size-full"
+                      viewBox="0 0 360 640"
+                      preserveAspectRatio="xMidYMid slice"
+                      focusable="false"
+                    >
+                      <defs>
+                        <radialGradient id="lamp-glow">
+                          <stop offset="0" stop-color="#fff3c4" stop-opacity="0.95" />
+                          <stop offset="1" stop-color="#fff3c4" stop-opacity="0" />
+                        </radialGradient>
+                      </defs>
+
+                      <!-- Room: window with a hill, a shelf with a plant. -->
+                      <path d="M214 312V178a52 52 0 0 1 104 0v134z" fill="#e8f0fe" stroke="#fff" stroke-width="8" />
+                      <path d="M218 312c18-46 52-66 96-58v58z" fill="#ceead6" />
+                      <path d="M266 126v186M214 230h104" stroke="#fff" stroke-width="5" />
+                      <rect x="26" y="262" width="126" height="8" rx="4" fill="#e3b98a" />
+                      <path d="M60 224h40l-5 38H65z" fill="#e8846c" />
+                      <path d="M80 224c-6-24-24-34-40-32 4 18 20 30 40 32zM80 224c4-28 22-42 42-40-4 22-22 38-42 40zM80 224c0-22-4-40-14-52-6 18-2 36 14 52z" fill="#188038" />
+
+                      <!-- Pendant lamp, lighting the table. -->
+                      <circle cx="180" cy="150" r="120" fill="url(#lamp-glow)" />
+                      <path d="M180 0v78" stroke="#161c25" stroke-width="2.5" />
+                      <path d="M136 118a44 44 0 0 1 88 0z" fill="#0f8256" />
+                      <circle cx="180" cy="121" r="8" fill="#fff3c4" />
+
+                      <!-- Floor and table. -->
+                      <rect y="560" width="360" height="80" fill="#f6e7c4" />
+                      <rect x="44" y="470" width="16" height="190" rx="4" fill="#c08a58" />
+                      <rect x="300" y="470" width="16" height="190" rx="4" fill="#c08a58" />
+                      <rect x="-20" y="452" width="400" height="26" rx="13" fill="#d4a373" />
+                      <rect x="-20" y="436" width="400" height="30" rx="15" fill="#e9c8a0" />
+
+                      <!-- Vase with a flower. -->
+                      <path d="M58 446c-10 0-12-10-10-22 2-10 8-14 8-22h14c0 8 6 12 8 22 2 12 0 22-10 22z" fill="#e8f0fe" stroke="#c6d6f5" stroke-width="2" />
+                      <path d="M63 402c0-22 6-40 18-52" stroke="#188038" stroke-width="3" fill="none" stroke-linecap="round" />
+                      <path d="M68 380c10-10 20-10 26-4-8 8-18 8-26 4z" fill="#34a853" />
+                      <circle cx="82" cy="344" r="11" fill="#f28b82" />
+                      <circle cx="82" cy="344" r="4.5" fill="#fbbc04" />
+
+                      <!-- Coffee. -->
+                      <ellipse cx="290" cy="446" rx="36" ry="7" fill="#fff" />
+                      <path d="M268 410h44v14a22 20 0 0 1-44 0z" fill="#fff" />
+                      <path d="M312 414h5a8 8 0 0 1 0 16h-7" stroke="#fff" stroke-width="5" fill="none" />
+                      <ellipse cx="290" cy="410" rx="22" ry="5" fill="#8d5b3c" />
+                      <path d="M282 398c-6-8 6-12 0-22M296 398c-6-8 6-12 0-22" stroke="#b06000" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.35" />
+
+                      <!-- The QR stand, pulsing: the thing to notice. -->
+                      <ellipse cx="180" cy="448" rx="72" ry="8" fill="#161c25" opacity="0.12" />
+                      <path d="M136 444l16-176h56l16 176z" fill="#d5e3dc" />
+                      <rect class="qr-ping" x="113" y="250" width="134" height="206" rx="24" fill="none" stroke="#0f8256" stroke-width="3" opacity="0.3" />
+                      <rect class="qr-ping qr-ping-late" x="113" y="250" width="134" height="206" rx="24" fill="none" stroke="#0f8256" stroke-width="3" opacity="0" />
+                      <rect x="125" y="262" width="110" height="182" rx="14" fill="#fff" />
+                      <path d="M125 276a14 14 0 0 1 14-14h82a14 14 0 0 1 14 14v18H125z" fill="#0f8256" />
+                      <path d="M163 272h34v12h-34z" fill="#fff" opacity="0.9" />
+                      <path fill="#161c25" d="M138 306h28v4h-28zM170 306h8v4h-8zM182 306h4v4h-4zM194 306h28v4h-28zM138 310h4v4h-4zM162 310h4v4h-4zM170 310h8v4h-8zM182 310h8v4h-8zM194 310h4v4h-4zM218 310h4v4h-4zM138 314h4v4h-4zM146 314h12v4h-12zM162 314h4v4h-4zM170 314h12v4h-12zM186 314h4v4h-4zM194 314h4v4h-4zM202 314h12v4h-12zM218 314h4v4h-4zM138 318h4v4h-4zM146 318h12v4h-12zM162 318h4v4h-4zM170 318h4v4h-4zM186 318h4v4h-4zM194 318h4v4h-4zM202 318h12v4h-12zM218 318h4v4h-4zM138 322h4v4h-4zM146 322h12v4h-12zM162 322h4v4h-4zM174 322h4v4h-4zM182 322h8v4h-8zM194 322h4v4h-4zM202 322h12v4h-12zM218 322h4v4h-4zM138 326h4v4h-4zM162 326h4v4h-4zM170 326h8v4h-8zM182 326h4v4h-4zM194 326h4v4h-4zM218 326h4v4h-4zM138 330h28v4h-28zM170 330h4v4h-4zM178 330h4v4h-4zM186 330h4v4h-4zM194 330h28v4h-28zM174 334h4v4h-4zM182 334h8v4h-8zM138 338h4v4h-4zM146 338h8v4h-8zM158 338h12v4h-12zM178 338h4v4h-4zM198 338h4v4h-4zM206 338h8v4h-8zM218 338h4v4h-4zM142 342h4v4h-4zM166 342h4v4h-4zM182 342h4v4h-4zM194 342h4v4h-4zM202 342h4v4h-4zM138 346h8v4h-8zM150 346h24v4h-24zM178 346h12v4h-12zM194 346h8v4h-8zM218 346h4v4h-4zM138 350h8v4h-8zM154 350h8v4h-8zM166 350h8v4h-8zM182 350h16v4h-16zM138 354h4v4h-4zM158 354h16v4h-16zM178 354h44v4h-44zM178 358h20v4h-20zM206 358h4v4h-4zM214 358h8v4h-8zM138 362h28v4h-28zM170 362h8v4h-8zM182 362h8v4h-8zM198 362h4v4h-4zM206 362h4v4h-4zM138 366h4v4h-4zM162 366h4v4h-4zM174 366h12v4h-12zM198 366h8v4h-8zM138 370h4v4h-4zM146 370h12v4h-12zM162 370h4v4h-4zM178 370h4v4h-4zM186 370h20v4h-20zM214 370h4v4h-4zM138 374h4v4h-4zM146 374h12v4h-12zM162 374h4v4h-4zM178 374h20v4h-20zM210 374h4v4h-4zM138 378h4v4h-4zM146 378h12v4h-12zM162 378h4v4h-4zM170 378h4v4h-4zM190 378h8v4h-8zM202 378h4v4h-4zM214 378h8v4h-8zM138 382h4v4h-4zM162 382h4v4h-4zM178 382h12v4h-12zM198 382h4v4h-4zM214 382h4v4h-4zM138 386h28v4h-28zM170 386h8v4h-8zM194 386h4v4h-4zM206 386h16v4h-16z" />
+                      <rect x="150" y="404" width="60" height="7" rx="3.5" fill="#d5f5e6" />
+                      <rect x="162" y="418" width="36" height="7" rx="3.5" fill="#d5f5e6" />
+                    </svg>
+                  </div>
+
                   <div
-                    class="relative grid aspect-9/16 place-items-center overflow-hidden rounded-[2rem] bg-white"
+                    class="scene-device relative rounded-[2.5rem] bg-ink-900 p-3 shadow-2xl shadow-ink-900/25"
                   >
                     <div
-                      data-panel
-                      class="scene-panel absolute inset-0 grid place-items-center bg-pastel-green p-8 text-center"
+                      class="mx-auto mb-2.5 h-1.5 w-20 rounded-full bg-white/25"
                       aria-hidden="true"
-                    >
-                      <div>
-                        <svg
-                          class="mx-auto size-10 text-pop-green"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="1.75"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          focusable="false"
-                        >
-                          <path d="M4 9V5.5A1.5 1.5 0 0 1 5.5 4H9" />
-                          <path d="M15 4h3.5A1.5 1.5 0 0 1 20 5.5V9" />
-                          <path d="M20 15v3.5a1.5 1.5 0 0 1-1.5 1.5H15" />
-                          <path d="M9 20H5.5A1.5 1.5 0 0 1 4 18.5V15" />
-                          <path d="M8 12h8" />
-                        </svg>
-                        <p
-                          data-i18n="experience.panel.scan"
-                          class="mt-4 text-sm font-semibold text-ink-900"
-                        >
-                          Scanning the QR code
-                        </p>
-                        <p
-                          data-i18n="common.imagePlaceholder"
-                          class="mt-1 text-xs text-ink-500"
-                        >
-                          Image placeholder
-                        </p>
-                      </div>
-                    </div>
-
+                    ></div>
                     <div
-                      data-panel
-                      class="scene-panel absolute inset-0 grid place-items-center bg-pastel-blue p-8 text-center"
-                      aria-hidden="true"
+                      class="relative grid aspect-9/16 place-items-center overflow-hidden rounded-[2rem] bg-white"
                     >
-                      <div>
-                        <svg
-                          class="mx-auto size-10 text-pop-blue"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="1.75"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          focusable="false"
-                        >
-                          <path d="M4 6h16" />
-                          <path d="M7 12h10" />
-                          <path d="M10 18h4" />
-                        </svg>
-                        <p
-                          data-i18n="experience.panel.filter"
-                          class="mt-4 text-sm font-semibold text-ink-900"
-                        >
-                          Filters and allergens
-                        </p>
-                        <p
-                          data-i18n="common.imagePlaceholder"
-                          class="mt-1 text-xs text-ink-500"
-                        >
-                          Image placeholder
-                        </p>
+                      <div
+                        data-panel
+                        class="scene-panel absolute inset-0 grid place-items-center bg-pastel-green p-8 text-center"
+                        aria-hidden="true"
+                      >
+                        <div>
+                          <svg
+                            class="mx-auto size-10 text-pop-green"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.75"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            focusable="false"
+                          >
+                            <path d="M4 9V5.5A1.5 1.5 0 0 1 5.5 4H9" />
+                            <path d="M15 4h3.5A1.5 1.5 0 0 1 20 5.5V9" />
+                            <path d="M20 15v3.5a1.5 1.5 0 0 1-1.5 1.5H15" />
+                            <path d="M9 20H5.5A1.5 1.5 0 0 1 4 18.5V15" />
+                            <path d="M8 12h8" />
+                          </svg>
+                          <p
+                            data-i18n="experience.panel.scan"
+                            class="mt-4 text-sm font-semibold text-ink-900"
+                          >
+                            Scanning the QR code
+                          </p>
+                          <p
+                            data-i18n="common.imagePlaceholder"
+                            class="mt-1 text-xs text-ink-500"
+                          >
+                            Image placeholder
+                          </p>
+                        </div>
                       </div>
-                    </div>
 
-                    <div
-                      data-panel
-                      class="scene-panel absolute inset-0 grid place-items-center bg-pastel-yellow p-8 text-center"
-                      aria-hidden="true"
-                    >
-                      <div>
-                        <svg
-                          class="mx-auto size-10 text-pop-yellow"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="1.75"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          focusable="false"
-                        >
-                          <rect x="2.5" y="6" width="19" height="12" rx="2.5" />
-                          <path d="M2.5 10h19" />
-                          <path d="M6 14h4" />
-                        </svg>
-                        <p
-                          data-i18n="experience.panel.order"
-                          class="mt-4 text-sm font-semibold text-ink-900"
-                        >
-                          Order and payment
-                        </p>
-                        <p
-                          data-i18n="common.imagePlaceholder"
-                          class="mt-1 text-xs text-ink-500"
-                        >
-                          Image placeholder
-                        </p>
+                      <div
+                        data-panel
+                        class="scene-panel absolute inset-0 grid place-items-center bg-pastel-blue p-8 text-center"
+                        aria-hidden="true"
+                      >
+                        <div>
+                          <svg
+                            class="mx-auto size-10 text-pop-blue"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.75"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            focusable="false"
+                          >
+                            <path d="M4 6h16" />
+                            <path d="M7 12h10" />
+                            <path d="M10 18h4" />
+                          </svg>
+                          <p
+                            data-i18n="experience.panel.filter"
+                            class="mt-4 text-sm font-semibold text-ink-900"
+                          >
+                            Filters and allergens
+                          </p>
+                          <p
+                            data-i18n="common.imagePlaceholder"
+                            class="mt-1 text-xs text-ink-500"
+                          >
+                            Image placeholder
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -466,14 +646,15 @@
                   data-i18n="experience.step1.title"
                   class="mt-6 text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl"
                 >
-                  Scans the QR code
+                  Spots the QR code
                 </h3>
                 <p
                   data-i18n="experience.step1.body"
                   class="mt-4 max-w-md text-lg text-pretty text-ink-500"
                 >
-                  The camera is enough. The menu opens in the browser, with no
-                  app to install and nothing to sign up for.
+                  On the table, by the door or at the bar — wherever guests
+                  already look. A stand, a sticker or a coaster: all it takes
+                  is a code in plain sight.
                 </p>
               </li>
 
@@ -491,15 +672,14 @@
                   data-i18n="experience.step2.title"
                   class="mt-6 text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl"
                 >
-                  Browses and filters
+                  Scans the QR code
                 </h3>
                 <p
                   data-i18n="experience.step2.body"
                   class="mt-4 max-w-md text-lg text-pretty text-ink-500"
                 >
-                  Photos, descriptions and allergens in one place. Whoever
-                  avoids gluten hides everything containing it with a single
-                  tap.
+                  The camera is enough. The menu opens in the browser, with no
+                  app to install and nothing to sign up for.
                 </p>
               </li>
 
@@ -517,14 +697,15 @@
                   data-i18n="experience.step3.title"
                   class="mt-6 text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl"
                 >
-                  Orders and pays
+                  Browses and filters
                 </h3>
                 <p
                   data-i18n="experience.step3.body"
                   class="mt-4 max-w-md text-lg text-pretty text-ink-500"
                 >
-                  The order lands straight on the kitchen console, and the bill
-                  is settled without waiting for anyone to bring the terminal.
+                  Photos, descriptions and allergens in one place. Whoever
+                  avoids gluten hides everything containing it with a single
+                  tap.
                 </p>
               </li>
             </ol>
@@ -540,16 +721,10 @@
       >
         <div class="mx-auto max-w-7xl">
           <div class="reveal mx-auto max-w-3xl text-center">
-            <p
-              data-i18n="features.eyebrow"
-              class="text-sm font-semibold tracking-widest text-pop-blue uppercase"
-            >
-              For restaurants
-            </p>
             <h2
               id="features-heading"
               data-i18n="features.title"
-              class="mt-4 text-4xl font-extrabold tracking-tighter text-balance text-ink-900 sm:text-6xl"
+              class="text-4xl font-extrabold tracking-tighter text-balance text-ink-900 sm:text-6xl"
             >
               Everything under control.
             </h2>

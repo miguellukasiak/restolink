@@ -10,7 +10,7 @@
     "language": "Changer de langue"
   },
   "nav": {
-    "guest": "Pour les clients",
+    "how": "Comment ça marche",
     "features": "Fonctionnalités",
     "pricing": "Tarifs",
     "contact": "Contact",
@@ -23,34 +23,37 @@
     "badge": "Sans application, sans téléchargement",
     "title": "La carte, réinventée.",
     "subtitle": "Votre client scanne le code et la carte est déjà ouverte. Vous changez un prix et il est à jour partout en quelques secondes.",
-    "ctaPrimary": "Commencer gratuitement",
+    "ctaPrimary": "Réserver une démo",
     "ctaSecondary": "Voir comment ça marche",
-    "phoneCaption": "Carte client · 9:16"
+    "visualLabel": "La même carte RestoLink sur un téléphone, un ordinateur et un second téléphone — en polonais, en anglais et en allemand, en thème clair et sombre.",
+    "chips": {
+      "languages": "5 langues",
+      "contrast": "Contraste lisible",
+      "reader": "Compatible lecteurs d'écran",
+      "devices": "Tous les écrans"
+    }
   },
   "experience": {
-    "eyebrow": "Pour les clients",
     "title": "Trois secondes entre la table et la carte.",
     "subtitle": "Aucun magasin d'applications, aucune attente d'une carte imprimée — juste le navigateur que votre client a déjà ouvert.",
     "panel": {
       "scan": "Scan du QR code",
-      "filter": "Filtres et allergènes",
-      "order": "Commande et paiement"
+      "filter": "Filtres et allergènes"
     },
     "step1": {
+      "title": "Repère le QR code",
+      "body": "Sur la table, à l'entrée ou au bar — là où le regard se pose de toute façon. Chevalet, autocollant ou sous-verre : il suffit que le code soit bien en vue."
+    },
+    "step2": {
       "title": "Scanne le QR code",
       "body": "L'appareil photo suffit. La carte s'ouvre dans le navigateur, sans rien installer ni créer de compte."
     },
-    "step2": {
+    "step3": {
       "title": "Parcourt et filtre",
       "body": "Photos, descriptions et allergènes au même endroit. Qui évite le gluten masque tout ce qui en contient d'une seule pression."
-    },
-    "step3": {
-      "title": "Commande et paie",
-      "body": "La commande arrive directement sur la console de cuisine, et l'addition se règle sans attendre le terminal."
     }
   },
   "features": {
-    "eyebrow": "Pour les restaurants",
     "title": "Tout sous contrôle.",
     "b1": {
       "title": "Contrôle total",

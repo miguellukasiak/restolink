@@ -10,7 +10,7 @@
     "language": "Sprache wechseln"
   },
   "nav": {
-    "guest": "Für Gäste",
+    "how": "So funktioniert's",
     "features": "Funktionen",
     "pricing": "Preise",
     "contact": "Kontakt",
@@ -23,34 +23,37 @@
     "badge": "Keine App, kein Download",
     "title": "Speisekarten, neu gedacht.",
     "subtitle": "Ihr Gast scannt den Code und die Karte ist schon offen. Sie ändern einen Preis und er ist in Sekunden überall aktuell.",
-    "ctaPrimary": "Kostenlos starten",
+    "ctaPrimary": "Demo vereinbaren",
     "ctaSecondary": "So funktioniert es",
-    "phoneCaption": "Gästekarte · 9:16"
+    "visualLabel": "Dieselbe RestoLink-Karte auf einem Smartphone, einem Computer und einem zweiten Smartphone — auf Polnisch, Englisch und Deutsch, im hellen und im dunklen Design.",
+    "chips": {
+      "languages": "5 Sprachen",
+      "contrast": "Gut lesbarer Kontrast",
+      "reader": "Screenreader-tauglich",
+      "devices": "Jeder Bildschirm"
+    }
   },
   "experience": {
-    "eyebrow": "Für Gäste",
     "title": "Drei Sekunden vom Tisch zur Karte.",
     "subtitle": "Kein App-Store, kein Warten auf die gedruckte Karte — nur der Browser, den Ihr Gast längst offen hat.",
     "panel": {
       "scan": "QR-Code scannen",
-      "filter": "Filter und Allergene",
-      "order": "Bestellung und Zahlung"
+      "filter": "Filter und Allergene"
     },
     "step1": {
+      "title": "Entdeckt den QR-Code",
+      "body": "Auf dem Tisch, am Eingang oder an der Bar — dort, wo Gäste ohnehin hinschauen. Aufsteller, Aufkleber oder Untersetzer: Hauptsache, der Code ist gut sichtbar."
+    },
+    "step2": {
       "title": "Scannt den QR-Code",
       "body": "Die Kamera genügt. Die Karte öffnet sich im Browser — ohne Installation und ohne Registrierung."
     },
-    "step2": {
+    "step3": {
       "title": "Stöbert und filtert",
       "body": "Fotos, Beschreibungen und Allergene an einem Ort. Wer Gluten meidet, blendet mit einem Tipp alles Entsprechende aus."
-    },
-    "step3": {
-      "title": "Bestellt und bezahlt",
-      "body": "Die Bestellung landet direkt auf der Küchenkonsole, und die Rechnung wird ohne Warten auf das Terminal beglichen."
     }
   },
   "features": {
-    "eyebrow": "Für Restaurants",
     "title": "Alles unter Kontrolle.",
     "b1": {
       "title": "Volle Kontrolle",
