@@ -601,5 +601,11 @@ Known product gaps, not bugs:
   word (Nuts / Nüsse / Frutos secos) rather than the narrower "tree nuts".
 - The public menu's blocked-status screen ("Menu chwilowo niedostępne.") is
   hardcoded Polish.
+- The landing page promises **unlimited languages** (hero chip and pricing),
+  and deliberately names no number. The product today translates a menu from
+  Polish into en/de/fr/es only (`DICTIONARY_LANGUAGES` in
+  `translation_service.py`, `SUPPORTED_LANGUAGES` in the frontend's
+  `i18n/index.ts`, plus a UI locale per language). Extending that is planned;
+  do not "fix" the landing copy back to a count.
 - Scroll-spy tuning (`SPY_ROOT_MARGIN` in `useCategoryScrollSpy.ts`) has never
   been verified against real scrolling — the preview pane cannot scroll.
