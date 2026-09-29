@@ -1,6 +1,12 @@
 import { contrastRatio, hexToRgb } from '../../../utils/colors';
 import type { DotStyle, EyeStyle, QrLook } from './qrArt';
-import { FORMATS, type QrFormat, type QrWording } from './qrTemplates';
+import {
+  FORMATS,
+  printedCodeWidth,
+  type PrintSize,
+  type QrFormat,
+  type QrWording,
+} from './qrTemplates';
 
 /*
  * The owner-facing design model: what can be chosen, what is offered first,
@@ -22,8 +28,19 @@ export interface QrDesign {
   center: CenterChoice;
   centerSize: CenterSize;
   format: QrFormat;
+  /** The chosen print size of each format, so switching tabs keeps them. */
+  sizes: Record<QrFormat, string>;
+  /** The bare code's custom size, in centimetres, when `sizes.code` is 'custom'. */
+  customCm: number;
   wording: QrWording;
 }
+
+export const DEFAULT_SIZES: Record<QrFormat, string> = {
+  code: FORMATS.code.defaultSize,
+  tent: FORMATS.tent.defaultSize,
+  sticker: FORMATS.sticker.defaultSize,
+  poster: FORMATS.poster.defaultSize,
+};
 
 /** Share of the code's width the centre mark takes. Capped well inside what
  *  error correction H recovers, so a logo never costs readability. */
@@ -178,6 +195,8 @@ export function defaultDesign(brandColor: string, hasLogo: boolean): QrDesign {
     center: hasLogo ? 'logo' : 'icon',
     centerSize: 'M',
     format: 'tent',
+    sizes: DEFAULT_SIZES,
+    customCm: 6,
     wording: { cta: CTA_PRESETS[0], showName: true, surface: 'brand' },
   };
 }
@@ -218,15 +237,24 @@ function scanDistance(codeWidthMm: number): string {
   return cm >= 100 ? `${(cm / 100).toLocaleString('pl-PL')} m` : `${cm} cm`;
 }
 
+/** Smallest printed module that phones read comfortably, and the floor below
+ *  which even a steady hand at arm's length struggles, in millimetres. */
+const GOOD_MODULE = 0.5;
+const MIN_MODULE = 0.35;
+
+const cm = (mm: number) => `${(Math.round(mm) / 10).toLocaleString('pl-PL')} cm`;
+
 export function assessReadability({
   look,
   format,
+  size,
   modules,
   plainModules,
   decoded,
 }: {
   look: QrLook;
   format: QrFormat;
+  size: PrintSize;
   modules: number;
   plainModules: number;
   /** Result of decoding the rendered design; null while the test runs. */
@@ -281,13 +309,30 @@ export function assessReadability({
         : `${modules} × ${modules} punktów`,
   };
 
-  const distance: ReadabilityCheck = {
-    verdict: 'great',
-    label: 'Na wydruku',
-    detail: `kod ${(FORMATS[format].codeWidth / 10).toLocaleString('pl-PL')} cm — skanuje się z ok. ${scanDistance(
-      FORMATS[format].codeWidth,
-    )}`,
-  };
+  // Module size decides how small a print still scans; distance follows the
+  // code's width.
+  const codeWidth = printedCodeWidth(format, size);
+  const moduleSize = codeWidth / modules;
+  const share = FORMATS[format].codeWidth / FORMATS[format].width;
+  const comfortable = cm((GOOD_MODULE * modules) / share);
+  const distance: ReadabilityCheck =
+    moduleSize >= GOOD_MODULE
+      ? {
+          verdict: 'great',
+          label: 'Na wydruku',
+          detail: `kod ${cm(codeWidth)} — skanuje się z ok. ${scanDistance(codeWidth)}`,
+        }
+      : moduleSize >= MIN_MODULE
+        ? {
+            verdict: 'weak',
+            label: 'Na wydruku',
+            detail: `kod ${cm(codeWidth)} — mały, czyta się tylko z bliska; pewniej od rozmiaru ${comfortable}`,
+          }
+        : {
+            verdict: 'bad',
+            label: 'Na wydruku',
+            detail: `kod ${cm(codeWidth)} — za mały dla wielu telefonów; wybierz rozmiar od ${comfortable}`,
+          };
 
   const checks = [scan, contrast, density, distance];
   const verdict = checks.reduce<Verdict>(

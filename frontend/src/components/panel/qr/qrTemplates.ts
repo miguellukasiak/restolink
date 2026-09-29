@@ -32,22 +32,52 @@ export interface QrWording {
   surface: 'brand' | 'light';
 }
 
-export interface FormatSpec {
+/** A size the design can be printed at, in millimetres. */
+export interface PrintSize {
+  id: string;
   label: string;
-  /** Printed size, in millimetres. */
+  /** For the size picker, where the format is already known. */
+  short: string;
   width: number;
   height: number;
-  /** Width of the code itself when printed, for the scanning-distance hint. */
-  codeWidth: number;
-  sizeLabel: string;
-  sheet: {
-    orientation: 'portrait' | 'landscape';
-    cols: number;
-    rows: number;
-    gap: number;
-    label: string;
-  };
 }
+
+export interface FormatSpec {
+  label: string;
+  /**
+   * The design canvas, in millimetres at the default size. Other sizes scale
+   * the whole design — text and code together — so its proportions hold.
+   */
+  width: number;
+  height: number;
+  /** Width of the code itself on the design canvas. */
+  codeWidth: number;
+  sizes: PrintSize[];
+  defaultSize: string;
+  /** How copies are counted on a sheet: one / few / many. */
+  unit: [string, string, string];
+}
+
+/** Custom sizes for the bare code, in centimetres. Up to 18 so one still
+ *  fits inside an A4 page's printable area. */
+export const CUSTOM_CODE_CM = { min: 2, max: 18 } as const;
+
+const square = (cm: number): PrintSize => {
+  const label = `${String(cm).replace('.', ',')} × ${String(cm).replace('.', ',')} cm`;
+  return {
+    id: String(cm),
+    label,
+    short: `${String(cm).replace('.', ',')} cm`,
+    width: cm * 10,
+    height: cm * 10,
+  };
+};
+
+const round = (cm: number): PrintSize => ({
+  ...square(cm),
+  label: `Ø ${cm} cm`,
+  short: `Ø ${cm} cm`,
+});
 
 export const FORMATS: Record<QrFormat, FormatSpec> = {
   code: {
@@ -55,52 +85,84 @@ export const FORMATS: Record<QrFormat, FormatSpec> = {
     width: 50,
     height: 50,
     codeWidth: 42,
-    sizeLabel: '5 × 5 cm',
-    sheet: {
-      orientation: 'portrait',
-      cols: 3,
-      rows: 4,
-      gap: 15,
-      label: '12 kodów na arkuszu A4',
-    },
+    sizes: [3, 4, 5, 7, 10].map(square),
+    defaultSize: '5',
+    unit: ['kod', 'kody', 'kodów'],
   },
   tent: {
     label: 'Stojak na stolik',
     width: 105,
     height: 148,
     codeWidth: 60,
-    sizeLabel: 'A6 · 10,5 × 14,8 cm',
-    sheet: {
-      orientation: 'landscape',
-      cols: 2,
-      rows: 1,
-      gap: 12,
-      label: '2 karty na arkuszu A4',
-    },
+    sizes: [
+      { id: 'A7', label: 'A7 · 7,4 × 10,5 cm', short: 'A7', width: 74, height: 105 },
+      { id: 'A6', label: 'A6 · 10,5 × 14,8 cm', short: 'A6', width: 105, height: 148 },
+      { id: 'A5', label: 'A5 · 14,8 × 21 cm', short: 'A5', width: 148, height: 210 },
+    ],
+    defaultSize: 'A6',
+    unit: ['karta', 'karty', 'kart'],
   },
   sticker: {
     label: 'Naklejka',
     width: 80,
     height: 80,
     codeWidth: 36,
-    sizeLabel: 'Ø 8 cm',
-    sheet: {
-      orientation: 'portrait',
-      cols: 2,
-      rows: 3,
-      gap: 14,
-      label: '6 naklejek na arkuszu A4',
-    },
+    sizes: [5, 6, 8, 10].map(round),
+    defaultSize: '8',
+    unit: ['naklejka', 'naklejki', 'naklejek'],
   },
   poster: {
-    label: 'Plakat A4',
+    label: 'Plakat',
     width: 210,
     height: 297,
     codeWidth: 110,
-    sizeLabel: 'A4 · 21 × 29,7 cm',
-    sheet: { orientation: 'portrait', cols: 1, rows: 1, gap: 0, label: 'Cała strona A4' },
+    sizes: [
+      { id: 'A5', label: 'A5 · 14,8 × 21 cm', short: 'A5', width: 148, height: 210 },
+      { id: 'A4', label: 'A4 · 21 × 29,7 cm', short: 'A4', width: 210, height: 297 },
+      { id: 'A3', label: 'A3 · 29,7 × 42 cm', short: 'A3', width: 297, height: 420 },
+    ],
+    defaultSize: 'A4',
+    unit: ['plakat', 'plakaty', 'plakatów'],
   },
 };
+
+/** The chosen size of a format; `custom` (bare code only) is in centimetres. */
+export function resolveSize(
+  format: QrFormat,
+  sizeId: string,
+  customCm: number,
+): PrintSize {
+  const spec = FORMATS[format];
+  if (format === 'code' && sizeId === 'custom') {
+    const cm = Math.min(CUSTOM_CODE_CM.max, Math.max(CUSTOM_CODE_CM.min, customCm));
+    return { ...square(Math.round(cm * 10) / 10), id: 'custom' };
+  }
+  return (
+    spec.sizes.find((size) => size.id === sizeId) ??
+    spec.sizes.find((size) => size.id === spec.defaultSize) ??
+    spec.sizes[0]
+  );
+}
+
+/**
+ * The design canvas for a size: the format's width, and a height that
+ * follows the size's own proportions. The A-sizes are only nearly similar
+ * (A5 is not exactly √2 × A6 once rounded to millimetres), so a card or
+ * poster grows or shrinks by a millimetre rather than being stretched.
+ */
+export function designBox(format: QrFormat, size: PrintSize) {
+  const spec = FORMATS[format];
+  const height =
+    format === 'code' || format === 'sticker'
+      ? spec.height
+      : Math.round(((spec.width * size.height) / size.width) * 100) / 100;
+  return { width: spec.width, height, scale: size.width / spec.width };
+}
+
+/** Width of the printed code at a size, in millimetres. */
+export function printedCodeWidth(format: QrFormat, size: PrintSize): number {
+  return FORMATS[format].codeWidth * designBox(format, size).scale;
+}
 
 const INK = '#161C25';
 const CTA_FONT = 'Montserrat';
@@ -139,6 +201,14 @@ function fitText(
   const oneLine = Math.min(maxSize, maxWidth / textWidth(text, family, 1));
   const words = text.split(' ');
   if (oneLine >= minSize || words.length < 2) return { lines: [text], size: oneLine };
+
+  // "Zeskanuj menu · Scan the menu": a separator is where it wants to break,
+  // and it has no place at the start or end of a line.
+  const halves = text.split(' · ');
+  if (halves.length === 2) {
+    const widest = Math.max(...halves.map((half) => textWidth(half, family, 1)));
+    return { lines: halves, size: Math.min(maxSize, maxWidth / widest) };
+  }
 
   let best = { lines: [text], widest: Infinity };
   for (let cut = 1; cut < words.length; cut += 1) {
@@ -244,8 +314,8 @@ function panel(
   );
 }
 
-function tent(art: QrArtwork, brand: QrBrand, wording: QrWording): string {
-  const { width: W, height: H } = FORMATS.tent;
+function tent(art: QrArtwork, brand: QrBrand, wording: QrWording, H: number): string {
+  const W = FORMATS.tent.width;
   const colors = palette(brand, wording.surface);
   let body = `<rect width="${W}" height="${H}" fill="${colors.surface}"/>`;
   if (wording.showName && brand.name) {
@@ -316,8 +386,8 @@ function sticker(art: QrArtwork, brand: QrBrand, wording: QrWording, id: string)
   return body;
 }
 
-function poster(art: QrArtwork, brand: QrBrand, wording: QrWording): string {
-  const { width: W, height: H } = FORMATS.poster;
+function poster(art: QrArtwork, brand: QrBrand, wording: QrWording, H: number): string {
+  const W = FORMATS.poster.width;
   const colors = palette(brand, wording.surface);
   let body = `<rect width="${W}" height="${H}" fill="${colors.surface}"/>`;
   if (wording.showName && brand.name) {
@@ -361,39 +431,49 @@ function codeOnly(art: QrArtwork): string {
   );
 }
 
-/** The template's markup, in millimetres from its top-left corner. */
+/** The template's markup, in design millimetres from its top-left corner. */
 export function templateBody(
   format: QrFormat,
   art: QrArtwork,
   brand: QrBrand,
   wording: QrWording,
   id: string,
+  height: number = FORMATS[format].height,
 ): string {
   switch (format) {
     case 'tent':
-      return tent(art, brand, wording);
+      return tent(art, brand, wording, height);
     case 'sticker':
       return sticker(art, brand, wording, id);
     case 'poster':
-      return poster(art, brand, wording);
+      return poster(art, brand, wording, height);
     default:
       return codeOnly(art);
   }
 }
 
 /**
- * A standalone SVG document. `size: 'print'` gives it real millimetre
- * dimensions; `'fluid'` lets it fill whatever box it is placed in.
+ * A standalone SVG document over a `width` × `height` canvas. `size: 'print'`
+ * gives it real dimensions — `print` millimetres, or the canvas size when
+ * omitted; `'fluid'` lets it fill whatever box it is placed in.
  */
 export function svgDocument(
   width: number,
   height: number,
   body: string,
-  { size = 'print', fontCss = '' }: { size?: 'print' | 'fluid'; fontCss?: string } = {},
+  {
+    size = 'print',
+    fontCss = '',
+    print,
+  }: {
+    size?: 'print' | 'fluid';
+    fontCss?: string;
+    print?: { width: number; height: number };
+  } = {},
 ): string {
   const dimensions =
     size === 'print'
-      ? `width="${width}mm" height="${height}mm"`
+      ? `width="${print?.width ?? width}mm" height="${print?.height ?? height}mm"`
       : 'width="100%" height="100%"';
   return (
     `<svg ${SVG_NS} ${dimensions} viewBox="0 0 ${width} ${height}">` +
@@ -403,31 +483,91 @@ export function svgDocument(
   );
 }
 
-/** An A4 sheet of copies with light cutting guides, as an SVG document. */
-export function sheetDocument(format: QrFormat, itemBody: string, fontCss = ''): string {
-  const spec = FORMATS[format];
-  const { cols, rows, gap, orientation } = spec.sheet;
-  const pageW = orientation === 'portrait' ? 210 : 297;
-  const pageH = orientation === 'portrait' ? 297 : 210;
-  if (format === 'poster') return svgDocument(pageW, pageH, itemBody, { fontCss });
+/** How copies of a design fill a printed page. */
+export interface SheetPlan {
+  page: 'A5' | 'A4' | 'A3';
+  orientation: 'portrait' | 'landscape';
+  width: number;
+  height: number;
+  /** Top-left corner of each copy, in millimetres. */
+  positions: { x: number; y: number }[];
+}
 
-  const blockW = cols * spec.width + (cols - 1) * gap;
-  const blockH = rows * spec.height + (rows - 1) * gap;
-  const left = (pageW - blockW) / 2;
-  const top = (pageH - blockH) / 2;
-  let body = `<rect width="${pageW}" height="${pageH}" fill="#FFFFFF"/>`;
+const PAGES = {
+  A5: [148, 210],
+  A4: [210, 297],
+  A3: [297, 420],
+} as const;
+
+/** Space home printers cannot reach, and the gap left for cutting. */
+const MARGIN = 10;
+const GAP = 8;
+
+/**
+ * As many copies as fit on an A4 sheet, in whichever orientation fits more.
+ * A poster is its own page instead: A5, A4 or A3, edge to edge.
+ */
+export function planSheet(format: QrFormat, size: PrintSize): SheetPlan {
+  if (format === 'poster') {
+    const page = (size.id in PAGES ? size.id : 'A4') as SheetPlan['page'];
+    const [width, height] = PAGES[page];
+    return { page, orientation: 'portrait', width, height, positions: [{ x: 0, y: 0 }] };
+  }
+  const layouts = (['portrait', 'landscape'] as const).map((orientation) => {
+    const [width, height] = orientation === 'portrait' ? [210, 297] : [297, 210];
+    const cols = Math.floor((width - 2 * MARGIN + GAP) / (size.width + GAP));
+    const rows = Math.floor((height - 2 * MARGIN + GAP) / (size.height + GAP));
+    return { orientation, width, height, cols, rows, count: cols * rows };
+  });
+  const best = layouts[1].count > layouts[0].count ? layouts[1] : layouts[0];
+  const cols = Math.max(1, best.cols);
+  const rows = Math.max(1, best.rows);
+  const left = (best.width - (cols * size.width + (cols - 1) * GAP)) / 2;
+  const top = (best.height - (rows * size.height + (rows - 1) * GAP)) / 2;
+  const positions: { x: number; y: number }[] = [];
   for (let row = 0; row < rows; row += 1) {
     for (let col = 0; col < cols; col += 1) {
-      const x = left + col * (spec.width + gap);
-      const y = top + row * (spec.height + gap);
-      body += `<g transform="translate(${x} ${y})">${itemBody}</g>`;
-      body +=
-        format === 'sticker'
-          ? `<circle cx="${x + spec.width / 2}" cy="${y + spec.height / 2}" r="${spec.width / 2 + 0.4}"`
-          : `<rect x="${x - 0.4}" y="${y - 0.4}" width="${spec.width + 0.8}" height="${spec.height + 0.8}"`;
-      body +=
-        ' fill="none" stroke="#9AA0A6" stroke-width="0.2" stroke-dasharray="1.5 1.5"/>';
+      positions.push({
+        x: left + col * (size.width + GAP),
+        y: top + row * (size.height + GAP),
+      });
     }
   }
-  return svgDocument(pageW, pageH, body, { fontCss });
+  return {
+    page: 'A4',
+    orientation: best.orientation,
+    width: best.width,
+    height: best.height,
+    positions,
+  };
+}
+
+/** A printed page of copies with light cutting guides, as an SVG document. */
+export function sheetDocument(
+  format: QrFormat,
+  itemBody: string,
+  size: PrintSize,
+  plan: SheetPlan,
+  fontCss = '',
+): string {
+  const box = designBox(format, size);
+  if (format === 'poster') {
+    return svgDocument(box.width, box.height, itemBody, {
+      fontCss,
+      print: { width: plan.width, height: plan.height },
+    });
+  }
+  let body = `<rect width="${plan.width}" height="${plan.height}" fill="#FFFFFF"/>`;
+  for (const { x, y } of plan.positions) {
+    body +=
+      `<svg x="${x}" y="${y}" width="${size.width}" height="${size.height}" ` +
+      `viewBox="0 0 ${box.width} ${box.height}">${itemBody}</svg>`;
+    body +=
+      format === 'sticker'
+        ? `<circle cx="${x + size.width / 2}" cy="${y + size.height / 2}" r="${size.width / 2 + 0.4}"`
+        : `<rect x="${x - 0.4}" y="${y - 0.4}" width="${size.width + 0.8}" height="${size.height + 0.8}"`;
+    body +=
+      ' fill="none" stroke="#9AA0A6" stroke-width="0.2" stroke-dasharray="1.5 1.5"/>';
+  }
+  return svgDocument(plan.width, plan.height, body, { fontCss });
 }

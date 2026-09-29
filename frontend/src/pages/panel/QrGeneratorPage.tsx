@@ -43,6 +43,7 @@ import { useSnackbar } from '../../components/feedback/SnackbarProvider';
 import { FONT_OPTIONS } from '../../constants/menu';
 import { radii } from '../../theme';
 import { qrMenuPayload, shortMenuUrl } from '../../utils/menuLink';
+import { plCount } from '../../utils/plural';
 import {
   buildMatrix,
   dotSample,
@@ -53,7 +54,11 @@ import {
   type QrLook,
 } from '../../components/panel/qr/qrArt';
 import {
+  CUSTOM_CODE_CM,
   FORMATS,
+  designBox,
+  planSheet,
+  resolveSize,
   sheetDocument,
   svgDocument,
   templateBody,
@@ -65,6 +70,7 @@ import {
   CENTER_SCALE,
   CTA_MAX_LENGTH,
   CTA_PRESETS,
+  DEFAULT_SIZES,
   DOT_OPTIONS,
   EYE_OPTIONS,
   SAFE_SWATCHES,
@@ -137,9 +143,27 @@ function loadDesign(restaurantId: string): QrDesign | null {
       typeof wording.cta === 'string' &&
       typeof wording.showName === 'boolean' &&
       ['brand', 'light'].includes(wording.surface);
-    return valid
-      ? { ...saved, wording: { ...wording, cta: wording.cta.slice(0, CTA_MAX_LENGTH) } }
-      : null;
+    if (!valid) return null;
+    // Designs saved before print sizes existed have none: fill in defaults,
+    // and drop any size a format no longer offers.
+    const sizes = { ...DEFAULT_SIZES };
+    for (const format of Object.keys(FORMATS) as QrFormat[]) {
+      const id = saved.sizes?.[format];
+      const offered =
+        FORMATS[format].sizes.some((size) => size.id === id) ||
+        (format === 'code' && id === 'custom');
+      if (typeof id === 'string' && offered) sizes[format] = id;
+    }
+    const customCm =
+      typeof saved.customCm === 'number' && Number.isFinite(saved.customCm)
+        ? Math.min(CUSTOM_CODE_CM.max, Math.max(CUSTOM_CODE_CM.min, saved.customCm))
+        : 6;
+    return {
+      ...saved,
+      sizes,
+      customCm,
+      wording: { ...wording, cta: wording.cta.slice(0, CTA_MAX_LENGTH) },
+    };
   } catch {
     return null;
   }
@@ -300,6 +324,12 @@ export function QrGeneratorPage() {
 
   const format = design?.format ?? 'tent';
   const spec = FORMATS[format];
+  const size = resolveSize(
+    format,
+    design?.sizes[format] ?? spec.defaultSize,
+    design?.customCm ?? 6,
+  );
+  const box = designBox(format, size);
   const body = useMemo(() => {
     if (!design || !brand) return '';
     const art = qrArt({
@@ -311,8 +341,15 @@ export function QrGeneratorPage() {
       background: design.format === 'code' ? '#FFFFFF' : null,
       id: instanceId,
     });
-    return templateBody(design.format, art, brand, design.wording, instanceId);
-  }, [design, brand, matrix, centerMark, centerScale, instanceId]);
+    return templateBody(
+      design.format,
+      art,
+      brand,
+      design.wording,
+      instanceId,
+      box.height,
+    );
+  }, [design, brand, matrix, centerMark, centerScale, instanceId, box.height]);
 
   // The scan test: decode the design from its own pixels, as a phone would.
   const [scan, setScan] = useState<{ body: string; ok: boolean } | null>(null);
@@ -323,9 +360,9 @@ export function QrGeneratorPage() {
       // Sized so the code itself spans ~330px, a phone camera's typical view.
       const px = 330 / spec.codeWidth;
       decodesTo(
-        svgDocument(spec.width, spec.height, body),
-        spec.width * px,
-        spec.height * px,
+        svgDocument(box.width, box.height, body),
+        box.width * px,
+        box.height * px,
         payload.text,
       )
         .then((ok) => !cancelled && setScan({ body, ok }))
@@ -335,7 +372,7 @@ export function QrGeneratorPage() {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [body, spec, payload.text]);
+  }, [body, spec, box.width, box.height, payload.text]);
   const testing = scan?.body !== body;
 
   if (!design || !brand) {
@@ -350,6 +387,7 @@ export function QrGeneratorPage() {
   const readability = assessReadability({
     look: design.look,
     format,
+    size,
     modules: matrix.size,
     plainModules,
     decoded: testing ? null : (scan?.ok ?? null),
@@ -374,7 +412,24 @@ export function QrGeneratorPage() {
     ...SAFE_SWATCHES.filter((swatch) => swatch.color !== brandSwatch.color),
   ];
   const tooLight = weakestContrast(design.look) < 4.5;
-  const fileBase = `${slug(brand.name) || 'menu'}-${FORMAT_ORDER.find((f) => f.value === format)?.slug}-qr`;
+  const plan = planSheet(format, size);
+  const sheetLabel =
+    format === 'poster'
+      ? `Plakat ${size.id} drukuje się na całej stronie ${plan.page}${
+          plan.page === 'A3' ? ' — wydrukuj na A3 albo zanieś plik do drukarni' : ''
+        }`
+      : `${plCount(plan.positions.length, ...spec.unit)} na arkuszu A4`;
+  const sizeSlug = slug(
+    format === 'code' || format === 'sticker' ? `${size.id}cm` : size.id,
+  );
+  const fileBase = `${slug(brand.name) || 'menu'}-${FORMAT_ORDER.find((f) => f.value === format)?.slug}-${sizeSlug}-qr`;
+  const printed = { width: size.width, height: size.height };
+  const setSize = (id: string) =>
+    setDesign((current) =>
+      current
+        ? { ...current, sizes: { ...current.sizes, [current.format]: id } }
+        : current,
+    );
   const link = shortMenuUrl(origin, restaurantId);
 
   const exportAs = async (kind: 'print' | 'png' | 'svg') => {
@@ -383,17 +438,20 @@ export function QrGeneratorPage() {
       const fontCss =
         format === 'code' ? '' : await embeddedFontCss(['Montserrat', brand.fontFamily]);
       if (kind === 'print') {
-        await printSheet(sheetDocument(format, body, fontCss), spec.sheet.orientation);
+        await printSheet(sheetDocument(format, body, size, plan, fontCss), plan);
       } else if (kind === 'png') {
         await downloadPng(
-          svgDocument(spec.width, spec.height, body, { fontCss }),
-          spec.width,
-          spec.height,
+          svgDocument(box.width, box.height, body, { fontCss, print: printed }),
+          size.width,
+          size.height,
           fileBase,
         );
         showSuccess('Pobrano PNG w jakości do druku (300 dpi).');
       } else {
-        downloadSvg(svgDocument(spec.width, spec.height, body, { fontCss }), fileBase);
+        downloadSvg(
+          svgDocument(box.width, box.height, body, { fontCss, print: printed }),
+          fileBase,
+        );
         showSuccess('Pobrano SVG — plik wektorowy dla drukarni.');
       }
     } catch (error) {
@@ -513,17 +571,97 @@ export function QrGeneratorPage() {
                         {FORMATS[option.value].label}
                       </Typography>
                       <Typography variant="caption" noWrap component="p">
-                        {FORMATS[option.value].sizeLabel}
+                        {
+                          resolveSize(
+                            option.value,
+                            design.sizes[option.value],
+                            design.customCm,
+                          ).label
+                        }
                       </Typography>
                     </Box>
                   </ButtonBase>
                 );
               })}
             </Box>
+            <Stack
+              direction="row"
+              useFlexGap
+              spacing={0.75}
+              sx={{ flexWrap: 'wrap', alignItems: 'center', px: 0.5, mb: 1.5 }}
+            >
+              <Typography
+                variant="caption"
+                sx={{ fontWeight: 700, color: 'text.secondary', mr: 0.5 }}
+              >
+                Rozmiar
+              </Typography>
+              {spec.sizes.map((option) => {
+                const selected = design.sizes[format] === option.id;
+                return (
+                  <Chip
+                    key={option.id}
+                    label={option.short}
+                    clickable
+                    variant={selected ? 'filled' : 'outlined'}
+                    color={selected ? 'primary' : 'default'}
+                    onClick={() => setSize(option.id)}
+                    aria-pressed={selected}
+                  />
+                );
+              })}
+              {format === 'code' && (
+                <Chip
+                  label="Własny"
+                  clickable
+                  variant={design.sizes.code === 'custom' ? 'filled' : 'outlined'}
+                  color={design.sizes.code === 'custom' ? 'primary' : 'default'}
+                  onClick={() => setSize('custom')}
+                  aria-pressed={design.sizes.code === 'custom'}
+                />
+              )}
+              {format === 'code' && design.sizes.code === 'custom' && (
+                <TextField
+                  size="small"
+                  type="number"
+                  value={design.customCm}
+                  onChange={(event) => {
+                    const value = parseFloat(event.target.value.replace(',', '.'));
+                    if (Number.isFinite(value)) update({ customCm: value });
+                  }}
+                  onBlur={() =>
+                    update({
+                      customCm: Math.min(
+                        CUSTOM_CODE_CM.max,
+                        Math.max(CUSTOM_CODE_CM.min, design.customCm),
+                      ),
+                    })
+                  }
+                  sx={{ width: 112 }}
+                  slotProps={{
+                    htmlInput: {
+                      min: CUSTOM_CODE_CM.min,
+                      max: CUSTOM_CODE_CM.max,
+                      step: 0.5,
+                      'aria-label': 'Własny rozmiar kodu w centymetrach',
+                    },
+                    input: {
+                      endAdornment: <InputAdornment position="end">cm</InputAdornment>,
+                    },
+                  }}
+                />
+              )}
+              <Box sx={{ flex: 1 }} />
+              <Typography variant="caption" color="text.secondary">
+                {sheetLabel}
+              </Typography>
+            </Stack>
             <QrStage
               format={format}
-              svg={svgDocument(spec.width, spec.height, body, { size: 'fluid' })}
-              label={`Podgląd: ${spec.label.toLowerCase()} z kodem QR prowadzącym do menu`}
+              svg={svgDocument(box.width, box.height, body, { size: 'fluid' })}
+              label={`Podgląd: ${spec.label.toLowerCase()} ${size.label} z kodem QR prowadzącym do menu`}
+              sizeLabel={size.label}
+              box={box}
             />
           </Paper>
 
@@ -547,8 +685,8 @@ export function QrGeneratorPage() {
                 component="p"
                 sx={{ mb: 1.5 }}
               >
-                {spec.sheet.label} — w oknie drukowania wybierz „Zapisz jako PDF”, by
-                dostać plik dla drukarni.
+                {sheetLabel}. W oknie drukowania wybierz „Zapisz jako PDF”, by dostać plik
+                dla drukarni.
               </Typography>
               <Button
                 fullWidth

@@ -453,8 +453,20 @@ could pull another's dish into their menu.
 Old printed codes pointing at `/menu/<uuid>` keep working. The studio starts
 from designs built from the restaurant's own colour, darkened by
 `readableOnWhite` until it reaches 4.5:1 contrast. It shows the chosen design
-on templates in real millimetres: an A6 table card, an Ø8 cm sticker, an A4
-poster, or the bare code.
+on templates in real millimetres: a table card, a round sticker, a poster,
+or the bare code.
+
+Each template has print sizes:
+
+- table card: A7, A6, A5;
+- sticker: Ø 5–10 cm;
+- poster: A5, A4, A3;
+- bare code: 3–10 cm, or a custom size from 2 to 18 cm.
+
+A size scales the whole design. `planSheet` fits as many copies as possible
+on an A4 page, in whichever orientation holds more. A poster is its own page
+in its own size. The readability check warns when printed modules drop below
+0.5 mm.
 
 Every change is **decoded from the rendered pixels with jsQR**. Two rules come
 from that test:

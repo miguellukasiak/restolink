@@ -4,6 +4,7 @@ import playfairLatin from '@fontsource/playfair-display/files/playfair-display-l
 import playfairLatinExt from '@fontsource/playfair-display/files/playfair-display-latin-ext-700-normal.woff2?url';
 import robotoLatin from '@fontsource/roboto/files/roboto-latin-700-normal.woff2?url';
 import robotoLatinExt from '@fontsource/roboto/files/roboto-latin-ext-700-normal.woff2?url';
+import type { SheetPlan } from './qrTemplates';
 
 /*
  * Getting the design out of the browser: PNG, SVG, a print sheet, and the
@@ -148,16 +149,13 @@ export function downloadSvg(svg: string, name: string) {
 }
 
 /**
- * Prints an A4 sheet through the browser's own dialog, where "Save as PDF"
+ * Prints a sheet through the browser's own dialog, where "Save as PDF"
  * gives a vector PDF with the fonts embedded — the file a print shop wants.
  *
  * A hidden iframe rather than a new window: no pop-up blocker in the way,
  * and nothing left open afterwards.
  */
-export async function printSheet(
-  sheetSvg: string,
-  orientation: 'portrait' | 'landscape',
-) {
+export async function printSheet(sheetSvg: string, plan: SheetPlan) {
   const frame = document.createElement('iframe');
   frame.setAttribute('aria-hidden', 'true');
   frame.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
@@ -168,13 +166,13 @@ export async function printSheet(
     frame.remove();
     throw new Error('Przeglądarka zablokowała drukowanie.');
   }
-  const [w, h] = orientation === 'portrait' ? ['210mm', '297mm'] : ['297mm', '210mm'];
+  const [w, h] = [`${plan.width}mm`, `${plan.height}mm`];
   // `body>svg`, not `svg`: the codes are nested <svg> elements too, and a
   // page-sized rule on them blew each one up to the size of the sheet.
   doc.open();
   doc.write(
     `<!doctype html><html><head><meta charset="utf-8"><title>RestoLink – kody QR</title>` +
-      `<style>@page{size:A4 ${orientation};margin:0}html,body{margin:0;padding:0}` +
+      `<style>@page{size:${plan.page} ${plan.orientation};margin:0}html,body{margin:0;padding:0}` +
       `body>svg{display:block;width:${w};height:${h}}</style></head><body>${sheetSvg}</body></html>`,
   );
   doc.close();

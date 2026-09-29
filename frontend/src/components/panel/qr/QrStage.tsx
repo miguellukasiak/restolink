@@ -2,7 +2,7 @@ import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import type { SxProps, Theme } from '@mui/material/styles';
 import { radii } from '../../../theme';
-import { FORMATS, type QrFormat } from './qrTemplates';
+import type { QrFormat } from './qrTemplates';
 
 /**
  * Renders a trusted SVG string. Everything interpolated into the templates is
@@ -52,12 +52,16 @@ export function QrStage({
   format,
   svg,
   label,
+  sizeLabel,
+  box,
 }: {
   format: QrFormat;
   svg: string;
   label: string;
+  sizeLabel: string;
+  /** The design canvas, for the item's proportions. */
+  box: { width: number; height: number };
 }) {
-  const spec = FORMATS[format];
   const shadow =
     format === 'sticker'
       ? 'drop-shadow(0 10px 18px rgba(0,0,0,0.45))'
@@ -90,7 +94,7 @@ export function QrStage({
           position: 'relative',
           height: heightShare[format],
           maxWidth: '86%',
-          aspectRatio: `${spec.width} / ${spec.height}`,
+          aspectRatio: `${box.width} / ${box.height}`,
         }}
       >
         <SvgView
@@ -120,7 +124,7 @@ export function QrStage({
       </Box>
       <Chip
         size="small"
-        label={spec.sizeLabel}
+        label={sizeLabel}
         sx={{
           position: 'absolute',
           left: 16,
