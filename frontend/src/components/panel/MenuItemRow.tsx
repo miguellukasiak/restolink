@@ -19,7 +19,6 @@ import MoreHorizRoundedIcon from '@mui/icons-material/MoreHorizRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import ContentCopyRoundedIcon from '@mui/icons-material/ContentCopyRounded';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
-import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
 import type { MenuItem } from '../../types';
 import { formatPln } from '../../constants/menu';
 import { getTagIcon } from '../../constants/menuIcons';
@@ -239,7 +238,6 @@ function MenuItemRowComponent({
                   <Tooltip title={`Alergeny: ${item.allergens.join(', ')}`} arrow>
                     <Chip
                       size="small"
-                      icon={<WarningAmberRoundedIcon />}
                       label={plCount(
                         item.allergens.length,
                         'alergen',
@@ -251,11 +249,6 @@ function MenuItemRowComponent({
                         fontSize: 11,
                         bgcolor: (t) => alpha(t.palette.warning.main, 0.1),
                         color: 'warning.dark',
-                        '& .MuiChip-icon': {
-                          fontSize: 13,
-                          color: 'warning.main',
-                          ml: 0.5,
-                        },
                       }}
                     />
                   </Tooltip>
