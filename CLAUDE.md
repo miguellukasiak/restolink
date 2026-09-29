@@ -674,8 +674,8 @@ Deployment prerequisites, carried across several sessions:
 
 - [x] **Migrations `005`, `006`, `009`** — required columns. Applied to
       production (confirmed by the owner, 2026-09-28).
-- [ ] **Migration `010`** (`restaurant.menu_pattern`) — required column; apply
-      to production **before** the menu-themes change reaches `main`.
+- [x] **Migration `010`** (`restaurant.menu_pattern`) — required column.
+      Applied to production (confirmed by the owner, 2026-09-29).
 - [ ] `007` and `008` are table-only and optional (`create_all` covers them).
 - [ ] **Bootstrap the first HQ account** (`scripts/promote_admin.py`, or the
       equivalent SQL insert). Until it exists nobody can reach `/hq-access`.
