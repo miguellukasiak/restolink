@@ -598,12 +598,6 @@ Each of these cost real debugging time in this repo. They are not hypothetical.
     failed for over an hour, because the variable existed only on the other
     Vercel project. Whenever a change adds a required build variable, name the
     exact Vercel project it must be set on before the change reaches `main`.
-14. **`scrollIntoView` scrolls every ancestor, the page included** — `block:
-    'nearest'` only limits how far. The public menu is also rendered inside the
-    panel's live previews, which sit below the form on a phone; the category
-    strip's `scrollIntoView` dragged the whole Appearance page down to the
-    preview, and each category the spy then passed dragged it further.
-    `CategoryPills` now sets its own `scrollLeft`. Scroll the container you mean.
 14. **`borderRadius: 3` in `sx` is 42px, not 3px.** A bare number multiplies
     `theme.shape.borderRadius` (14 in the panel, 16 in the menu theme). It
     turned the builder's dish cards into pills around two lines of text and its
@@ -614,6 +608,12 @@ Each of these cost real debugging time in this repo. They are not hypothetical.
     mockup on a desktop screen got the four-column desktop grid. The guest
     menu's grid uses container queries on `<main>` for this reason; anything
     rendered inside `PhoneFrame` must size itself from its container too.
+16. **`scrollIntoView` scrolls every ancestor, the page included** — `block:
+    'nearest'` only limits how far. The public menu is also rendered inside the
+    panel's live previews, which sit below the form on a phone; the category
+    strip's `scrollIntoView` dragged the whole Appearance page down to the
+    preview, and each category the spy then passed dragged it further.
+    `CategoryPills` now sets its own `scrollLeft`. Scroll the container you mean.
 
 ---
 
