@@ -34,7 +34,8 @@ SQLAlchemy 2.0 async with `asyncpg`, Pydantic v2. Postgres is hosted on **Neon**
 **Frontend** — React 19 + TypeScript (strict) + Vite 8, **MUI v9** (Material
 Design 3) with emotion, `@mui/x-data-grid` for tables, TanStack Query v5 for all
 server state, `react-router-dom` v7, `react-hook-form` + `zod`, `react-i18next`,
-`@hello-pangea/dnd`, `react-scroll`, `date-fns`.
+`@hello-pangea/dnd`, `react-scroll`, `date-fns`, `qrcode-generator` + `jsqr` (QR
+studio).
 
 **Landing page** — Vite vanilla TS + **Tailwind v4** (`@tailwindcss/vite`, tokens
 declared in `@theme` inside `src/style.css`; there is deliberately **no**
@@ -438,6 +439,41 @@ upsert likewise proves a body-supplied dish id belongs to the restaurant —
 dish ids are public on every guest menu, and without that check one owner
 could pull another's dish into their menu.
 
+**QR studio ("Kody QR").** `components/panel/qr/`. Our own SVG renderer
+(`qrArt.ts`) on `qrcode-generator`, not a styling library, because:
+
+- The printed code carries a **short link**, `/m/<25-char base-36 id>`, which
+  `ShortMenuLink` expands to `/menu/<uuid>` (`utils/menuLink.ts`).
+- The link is upper-cased after the scheme and split into two segments:
+  `https://` in byte mode, the rest in alphanumeric mode. At error correction
+  H (with a logo) that is 41×41 modules instead of 49×49; at Q (without one)
+  33×33 instead of 45×45.
+- Styling libraries take a single string and cannot express two segments.
+
+Old printed codes pointing at `/menu/<uuid>` keep working. The studio starts
+from designs built from the restaurant's own colour, darkened by
+`readableOnWhite` until it reaches 4.5:1 contrast. It shows the chosen design
+on templates in real millimetres: an A6 table card, an Ø8 cm sticker, an A4
+poster, or the bare code.
+
+Every change is **decoded from the rendered pixels with jsQR**. Two rules come
+from that test:
+
+- Alignment patterns are drawn whole, never as loose dots. As dots they fail
+  to decode in 3 of 4 formats.
+- A new dot or eye style must pass the decode test in every format before it
+  ships.
+
+Exports:
+
+- **PDF:** an A4 sheet printed through a hidden iframe; the browser's "Save as
+  PDF" produces a vector file with the fonts embedded.
+- **PNG:** 300 dpi.
+- **SVG:** fonts inlined from `@fontsource` as data URIs.
+
+In the print document, style `body>svg`, never `svg` — the codes are nested
+`<svg>` elements and a page-sized rule enlarges each one to the whole sheet.
+
 ---
 
 ## 10. Frontend conventions
@@ -473,6 +509,7 @@ could pull another's dish into their menu.
 /admin/{restaurants,team,logs}          (RequireAdminAuth)
 /panel/:restaurantId/{menu,qr,dictionary,google,settings}   (RequireRestaurantAuth)
 /menu/:restaurantId     public, themed, no account
+/m/:code                short link printed in QR codes → /menu/:restaurantId
 ```
 
 ---

@@ -17,6 +17,7 @@ import { AppearancePage } from './pages/panel/AppearancePage';
 import { DictionaryPage } from './pages/panel/DictionaryPage';
 import { GoogleReviewsPage } from './pages/panel/GoogleReviewsPage';
 import { PublicMenuPage } from './pages/public/PublicMenuPage';
+import { ShortMenuLink } from './pages/public/ShortMenuLink';
 
 export default function App() {
   return (
@@ -70,6 +71,9 @@ export default function App() {
             </RestaurantThemeProvider>
           }
         />
+
+        {/* The short form printed in QR codes; expands to the route above. */}
+        <Route path="/m/:code" element={<ShortMenuLink />} />
 
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
