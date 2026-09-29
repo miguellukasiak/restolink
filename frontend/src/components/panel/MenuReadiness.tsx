@@ -11,7 +11,7 @@ import NotesRoundedIcon from '@mui/icons-material/NotesRounded';
 import VisibilityOffRoundedIcon from '@mui/icons-material/VisibilityOffRounded';
 import type { MenuCategory } from '../../types';
 import { radii } from '../../theme';
-import { plPlural } from '../../utils/plural';
+import { usePanelT } from '../../i18n/panel';
 
 /** Which dishes the board is narrowed to. */
 export type DishFilter = 'all' | 'no-photo' | 'no-description' | 'unavailable';
@@ -36,6 +36,7 @@ export function MenuReadiness({
   filter,
   onFilterChange,
 }: MenuReadinessProps) {
+  const { t } = usePanelT();
   const dishes = categories.flatMap((category) => category.items);
   if (dishes.length === 0) return null;
 
@@ -48,20 +49,18 @@ export function MenuReadiness({
   const complete = score === 100;
 
   const missing = [
-    withoutPhoto > 0 &&
-      `${withoutPhoto} ${plPlural(withoutPhoto, 'zdjęcia', 'zdjęć', 'zdjęć')}`,
-    withoutDescription > 0 &&
-      `${withoutDescription} ${plPlural(withoutDescription, 'opisu', 'opisów', 'opisów')}`,
+    withoutPhoto > 0 && t('readiness.photos', { count: withoutPhoto }),
+    withoutDescription > 0 && t('readiness.descriptions', { count: withoutDescription }),
   ].filter(Boolean);
 
   const title = complete
-    ? 'Menu dopięte na ostatni guzik'
+    ? t('readiness.complete')
     : score >= 70
-      ? `Menu gotowe w ${score}%`
-      : `Menu gotowe w ${score}% — dopracujmy je`;
+      ? t('readiness.ready', { score })
+      : t('readiness.readyLow', { score });
   const hint = complete
-    ? 'Każde danie ma zdjęcie i opis. Właśnie tak wygląda menu, z którego chce się zamawiać.'
-    : `Brakuje jeszcze ${missing.join(' i ')}. Dania ze zdjęciem i opisem kuszą najbardziej.`;
+    ? t('readiness.completeHint')
+    : t('readiness.missingHint', { list: missing.join(t('readiness.and')) });
 
   const toggle = (next: DishFilter) => onFilterChange(filter === next ? 'all' : next);
 
@@ -85,7 +84,7 @@ export function MenuReadiness({
             value={score}
             size={56}
             thickness={5}
-            aria-label={`Menu gotowe w ${score}%`}
+            aria-label={t('readiness.ready', { score })}
             sx={{ position: 'absolute', '& circle': { strokeLinecap: 'round' } }}
           />
           <Box
@@ -127,7 +126,7 @@ export function MenuReadiness({
             {withoutPhoto > 0 && (
               <Chip
                 icon={<HideImageRoundedIcon />}
-                label={`Bez zdjęcia · ${withoutPhoto}`}
+                label={t('readiness.noPhoto', { count: withoutPhoto })}
                 clickable
                 onClick={() => toggle('no-photo')}
                 aria-pressed={filter === 'no-photo'}
@@ -138,7 +137,7 @@ export function MenuReadiness({
             {withoutDescription > 0 && (
               <Chip
                 icon={<NotesRoundedIcon />}
-                label={`Bez opisu · ${withoutDescription}`}
+                label={t('readiness.noDescription', { count: withoutDescription })}
                 clickable
                 onClick={() => toggle('no-description')}
                 aria-pressed={filter === 'no-description'}
@@ -149,7 +148,7 @@ export function MenuReadiness({
             {unavailable > 0 && (
               <Chip
                 icon={<VisibilityOffRoundedIcon />}
-                label={`Niedostępne · ${unavailable}`}
+                label={t('readiness.unavailable', { count: unavailable })}
                 clickable
                 onClick={() => toggle('unavailable')}
                 aria-pressed={filter === 'unavailable'}

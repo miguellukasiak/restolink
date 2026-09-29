@@ -13,6 +13,10 @@ import { SVG_NS, escapeXml } from './qrArt';
  * same markup serves the on-screen preview, the PNG and SVG downloads, and
  * the A4 print sheet — what the owner sees is exactly what comes out of the
  * printer.
+ *
+ * The words printed on them ("Otwórz aparat…") are for guests, so they are in
+ * the menu's language, not the panel's: an owner reading the panel in English
+ * still prints a card for Polish guests.
  */
 
 export type QrFormat = 'code' | 'tent' | 'sticker' | 'poster';
@@ -37,15 +41,13 @@ export interface QrWording {
 /** A size the design can be printed at, in millimetres. */
 export interface PrintSize {
   id: string;
-  label: string;
-  /** For the size picker, where the format is already known. */
-  short: string;
   width: number;
   height: number;
 }
 
+/** A format's name, and how copies of it are counted, are panel strings
+ *  (`qr.format.<format>`, `qr.unit.<format>`). */
 export interface FormatSpec {
-  label: string;
   /**
    * The design canvas, in millimetres at the default size. Other sizes scale
    * the whole design — text and code together — so its proportions hold.
@@ -56,75 +58,81 @@ export interface FormatSpec {
   codeWidth: number;
   sizes: PrintSize[];
   defaultSize: string;
-  /** How copies are counted on a sheet: one / few / many. */
-  unit: [string, string, string];
 }
 
 /** Custom sizes for the bare code, in centimetres. Up to 18 so one still
  *  fits inside an A4 page's printable area. */
 export const CUSTOM_CODE_CM = { min: 2, max: 18 } as const;
 
-const square = (cm: number): PrintSize => {
-  const label = `${String(cm).replace('.', ',')} × ${String(cm).replace('.', ',')} cm`;
-  return {
-    id: String(cm),
-    label,
-    short: `${String(cm).replace('.', ',')} cm`,
-    width: cm * 10,
-    height: cm * 10,
-  };
-};
-
-const round = (cm: number): PrintSize => ({
-  ...square(cm),
-  label: `Ø ${cm} cm`,
-  short: `Ø ${cm} cm`,
+const square = (cm: number): PrintSize => ({
+  id: String(cm),
+  width: cm * 10,
+  height: cm * 10,
 });
+
+/**
+ * How a size reads — in full on the stage, short in the size picker — with
+ * numbers written the way `locale` writes them ("7,4" or "7.4").
+ */
+export function sizeLabels(
+  format: QrFormat,
+  size: PrintSize,
+  locale: string,
+): { label: string; short: string } {
+  const cm = (mm: number) =>
+    (mm / 10).toLocaleString(locale, { maximumFractionDigits: 1 });
+  if (format === 'sticker') {
+    const diameter = `Ø ${cm(size.width)} cm`;
+    return { label: diameter, short: diameter };
+  }
+  if (format === 'code') {
+    return {
+      label: `${cm(size.width)} × ${cm(size.height)} cm`,
+      short: `${cm(size.width)} cm`,
+    };
+  }
+  return {
+    label: `${size.id} · ${cm(size.width)} × ${cm(size.height)} cm`,
+    short: size.id,
+  };
+}
 
 export const FORMATS: Record<QrFormat, FormatSpec> = {
   code: {
-    label: 'Sam kod',
     width: 50,
     height: 50,
     codeWidth: 42,
     sizes: [3, 4, 5, 7, 10].map(square),
     defaultSize: '5',
-    unit: ['kod', 'kody', 'kodów'],
   },
   tent: {
-    label: 'Stojak na stolik',
     width: 105,
     height: 148,
     codeWidth: 60,
     sizes: [
-      { id: 'A7', label: 'A7 · 7,4 × 10,5 cm', short: 'A7', width: 74, height: 105 },
-      { id: 'A6', label: 'A6 · 10,5 × 14,8 cm', short: 'A6', width: 105, height: 148 },
-      { id: 'A5', label: 'A5 · 14,8 × 21 cm', short: 'A5', width: 148, height: 210 },
+      { id: 'A7', width: 74, height: 105 },
+      { id: 'A6', width: 105, height: 148 },
+      { id: 'A5', width: 148, height: 210 },
     ],
     defaultSize: 'A6',
-    unit: ['karta', 'karty', 'kart'],
   },
   sticker: {
-    label: 'Naklejka',
     width: 80,
     height: 80,
     codeWidth: 36,
-    sizes: [5, 6, 8, 10].map(round),
+    sizes: [5, 6, 8, 10].map(square),
     defaultSize: '8',
-    unit: ['naklejka', 'naklejki', 'naklejek'],
   },
   poster: {
-    label: 'Plakat',
     width: 210,
     height: 297,
     codeWidth: 110,
     sizes: [
-      { id: 'A5', label: 'A5 · 14,8 × 21 cm', short: 'A5', width: 148, height: 210 },
-      { id: 'A4', label: 'A4 · 21 × 29,7 cm', short: 'A4', width: 210, height: 297 },
-      { id: 'A3', label: 'A3 · 29,7 × 42 cm', short: 'A3', width: 297, height: 420 },
+      { id: 'A5', width: 148, height: 210 },
+      { id: 'A4', width: 210, height: 297 },
+      { id: 'A3', width: 297, height: 420 },
     ],
     defaultSize: 'A4',
-    unit: ['plakat', 'plakaty', 'plakatów'],
   },
 };
 

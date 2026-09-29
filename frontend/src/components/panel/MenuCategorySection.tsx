@@ -30,7 +30,7 @@ import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import MoreHorizRoundedIcon from '@mui/icons-material/MoreHorizRounded';
 import type { MenuCategory, MenuItem } from '../../types';
 import { radii } from '../../theme';
-import { plCount } from '../../utils/plural';
+import { usePanelT } from '../../i18n/panel';
 import { MenuItemRow } from './MenuItemRow';
 
 interface MenuCategorySectionProps {
@@ -75,6 +75,7 @@ function MenuCategorySectionComponent({
   onRenameCategory,
   onRequestDeleteCategory,
 }: MenuCategorySectionProps) {
+  const { t } = usePanelT();
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(category.name);
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
@@ -122,7 +123,7 @@ function MenuCategorySectionComponent({
             >
               <Box
                 {...dragProvided.dragHandleProps}
-                aria-label={`Przeciągnij kategorię ${category.name}`}
+                aria-label={t('category.drag', { name: category.name })}
                 sx={{
                   display: 'flex',
                   alignSelf: 'stretch',
@@ -149,15 +150,15 @@ function MenuCategorySectionComponent({
                     size="small"
                     autoFocus
                     fullWidth
-                    slotProps={{ htmlInput: { 'aria-label': 'Nazwa kategorii' } }}
+                    slotProps={{ htmlInput: { 'aria-label': t('category.name') } }}
                     sx={{ flex: 1 }}
                   />
-                  <Tooltip title="Zapisz" arrow>
+                  <Tooltip title={t('common.save')} arrow>
                     <span>
                       <IconButton
                         size="small"
                         color="primary"
-                        aria-label="Zapisz nazwę kategorii"
+                        aria-label={t('category.saveName')}
                         onClick={saveEdit}
                         disabled={!draft.trim()}
                       >
@@ -165,10 +166,10 @@ function MenuCategorySectionComponent({
                       </IconButton>
                     </span>
                   </Tooltip>
-                  <Tooltip title="Anuluj" arrow>
+                  <Tooltip title={t('common.cancel')} arrow>
                     <IconButton
                       size="small"
-                      aria-label="Anuluj edycję nazwy"
+                      aria-label={t('category.cancelRename')}
                       onClick={cancelEdit}
                       sx={{ color: 'text.secondary' }}
                     >
@@ -221,7 +222,7 @@ function MenuCategorySectionComponent({
                           color: 'primary.dark',
                         }}
                       >
-                        {plCount(total, 'danie', 'dania', 'dań')}
+                        {t('count.dishes', { count: total })}
                       </Typography>
                       <ExpandMoreRoundedIcon
                         fontSize="small"
@@ -235,11 +236,11 @@ function MenuCategorySectionComponent({
                     </ButtonBase>
                   </Typography>
 
-                  <Tooltip title="Dodaj danie" arrow>
+                  <Tooltip title={t('category.addDish')} arrow>
                     <IconButton
                       size="small"
                       color="primary"
-                      aria-label={`Dodaj danie do kategorii ${category.name}`}
+                      aria-label={t('category.addDishTo', { name: category.name })}
                       onClick={() => onAddItem(category)}
                     >
                       <AddRoundedIcon fontSize="small" />
@@ -247,7 +248,7 @@ function MenuCategorySectionComponent({
                   </Tooltip>
                   <IconButton
                     size="small"
-                    aria-label={`Więcej akcji: kategoria ${category.name}`}
+                    aria-label={t('category.more', { name: category.name })}
                     aria-haspopup="menu"
                     onClick={(event) => setMenuAnchor(event.currentTarget)}
                     sx={{ color: 'text.secondary' }}
@@ -270,7 +271,7 @@ function MenuCategorySectionComponent({
                       <ListItemIcon>
                         <EditRoundedIcon fontSize="small" />
                       </ListItemIcon>
-                      <ListItemText>Zmień nazwę</ListItemText>
+                      <ListItemText>{t('category.rename')}</ListItemText>
                     </MuiMenuItem>
                     <MuiMenuItem
                       onClick={() => {
@@ -282,7 +283,7 @@ function MenuCategorySectionComponent({
                       <ListItemIcon sx={{ color: 'inherit' }}>
                         <DeleteOutlineRoundedIcon fontSize="small" />
                       </ListItemIcon>
-                      <ListItemText>Usuń kategorię</ListItemText>
+                      <ListItemText>{t('category.delete')}</ListItemText>
                     </MuiMenuItem>
                   </Menu>
                 </>
@@ -365,7 +366,9 @@ function MenuCategorySectionComponent({
                         </Box>
                         <Box sx={{ textAlign: 'left' }}>
                           <Typography variant="subtitle2">
-                            {total === 0 ? 'Dodaj pierwsze danie' : 'Dodaj danie'}
+                            {total === 0
+                              ? t('category.addFirstDish')
+                              : t('category.addDish')}
                           </Typography>
                           {total === 0 && (
                             <Typography
@@ -373,7 +376,7 @@ function MenuCategorySectionComponent({
                               color="text.secondary"
                               component="p"
                             >
-                              …albo przeciągnij tu danie z innej kategorii
+                              {t('category.dropHint')}
                             </Typography>
                           )}
                         </Box>

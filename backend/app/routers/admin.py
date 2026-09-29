@@ -167,6 +167,7 @@ async def create_restaurant(
         contact_email=payload.contact_email,
         contact_phone=payload.contact_phone,
         package_id=payload.package_id,
+        panel_language=payload.panel_language,
         status=RestaurantStatus.PENDING,
         subscription_valid_until=datetime.now(timezone.utc) + timedelta(days=14),
     )
@@ -192,6 +193,7 @@ async def create_restaurant(
             restaurant_name=restaurant.name,
             raw_token=raw_token,
             valid_days=ACTIVATION_TTL.days,
+            language=restaurant.panel_language,
         )
     except EmailSendError:
         logger.exception(
@@ -495,6 +497,9 @@ async def update_restaurant(
         raise HTTPException(status_code=404, detail="Nie znaleziono restauracji.")
 
     fields = payload.model_dump(exclude_unset=True, exclude_none=True)
+    # A null second language is a change (English only), not an omission.
+    if "panel_language" in payload.model_fields_set:
+        fields["panel_language"] = payload.panel_language
     if not fields:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -565,6 +570,7 @@ async def send_activation_link(
             restaurant_name=restaurant.name,
             raw_token=raw_token,
             valid_days=ACTIVATION_TTL.days,
+            language=restaurant.panel_language,
         )
     except EmailSendError as exc:
         raise HTTPException(
@@ -576,7 +582,7 @@ async def send_activation_link(
         ) from exc
 
     return ActivationLinkResponse(
-        activation_url=activation_url(raw_token),
+        activation_url=activation_url(raw_token, restaurant.panel_language),
         expires_at=expires_at,
         emailed=True,
     )
@@ -614,7 +620,7 @@ async def generate_activation_link(
     await db.flush()
 
     return ActivationLinkResponse(
-        activation_url=activation_url(raw_token),
+        activation_url=activation_url(raw_token, restaurant.panel_language),
         expires_at=expires_at,
         emailed=False,
     )

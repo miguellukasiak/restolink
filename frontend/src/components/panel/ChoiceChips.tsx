@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography';
 import { alpha } from '@mui/material/styles';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import { radii } from '../../theme';
+import { usePanelT } from '../../i18n/panel';
 
 /** Mirrors MAX_LABEL_LENGTH and MAX_LABELS in the backend's menu_labels.py. */
 export const MAX_LABEL_LENGTH = 40;
@@ -22,6 +23,8 @@ interface ChoiceChipsProps {
   value: string[];
   onChange: (next: string[]) => void;
   iconFor: (option: string) => ReactElement;
+  /** How a stored value reads in the panel's language; built-ins are translated. */
+  labelFor?: (option: string) => string;
   /** Warning for allergens (the guest filters them out), primary for tags. */
   tone: 'warning' | 'primary';
   /** Shown on the chip that adds the owner's own label. */
@@ -44,8 +47,9 @@ function tidy(raw: string): string {
  * Beside the built-in vocabulary the owner can add their own — "Sezam",
  * "Z pieca" — and a label once used on any dish is offered on every other,
  * so the menu does not end up with "Sezam" and "sezam" as two allergens.
- * Typing a built-in by hand ("gluten") selects the built-in one: that is the
- * label guests get translated and can filter by.
+ * Typing a built-in by hand ("gluten", or "lactose" in the English panel)
+ * selects the built-in one: that is the label guests get translated and can
+ * filter by.
  */
 export function ChoiceChips({
   label,
@@ -55,10 +59,12 @@ export function ChoiceChips({
   value,
   onChange,
   iconFor,
+  labelFor = (option) => option,
   tone,
   addLabel,
   disabled = false,
 }: ChoiceChipsProps) {
+  const { t } = usePanelT();
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -97,14 +103,16 @@ export function ChoiceChips({
       return;
     }
     if (text.length > MAX_LABEL_LENGTH) {
-      setError(`Najwyżej ${MAX_LABEL_LENGTH} znaków.`);
+      setError(t('chips.tooLong', { max: MAX_LABEL_LENGTH }));
       return;
     }
-    const existing = shown.all.find((option) => fold(option) === fold(text));
+    const existing = shown.all.find(
+      (option) => fold(option) === fold(text) || fold(labelFor(option)) === fold(text),
+    );
     const chosen = existing ?? text;
     if (!value.includes(chosen)) {
       if (value.length >= MAX_LABELS) {
-        setError(`Najwyżej ${MAX_LABELS} pozycji na danie.`);
+        setError(t('chips.tooMany', { max: MAX_LABELS }));
         return;
       }
       onChange([...value, chosen]);
@@ -138,7 +146,7 @@ export function ChoiceChips({
         </Typography>
         {value.length > 0 && (
           <Typography variant="caption" color="text.secondary">
-            Zaznaczone: {value.length}
+            {t('chips.selected', { count: value.length })}
           </Typography>
         )}
       </Stack>
@@ -153,7 +161,7 @@ export function ChoiceChips({
           return (
             <Chip
               key={option}
-              label={option}
+              label={labelFor(option)}
               icon={iconFor(option)}
               variant="outlined"
               clickable
@@ -203,7 +211,7 @@ export function ChoiceChips({
               }}
               onKeyDown={onKeyDown}
               onBlur={commit}
-              placeholder="Wpisz i naciśnij Enter"
+              placeholder={t('chips.placeholder')}
               inputProps={{
                 'aria-label': addLabel,
                 maxLength: MAX_LABEL_LENGTH + 10,
@@ -243,7 +251,7 @@ export function ChoiceChips({
           component="p"
           sx={{ mt: 0.75 }}
         >
-          Własne pozycje przetłumaczysz w zakładce „Języki” — wbudowane tłumaczą się same.
+          {t('chips.customHint')}
         </Typography>
       )}
     </Box>

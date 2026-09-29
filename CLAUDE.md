@@ -19,8 +19,10 @@ does nothing for `restolink-landing`. The landing page is served at
 dev-server entry the Browser pane uses.
 
 > This file is written in English to match every docstring and comment in the
-> codebase. UI strings and user-facing API messages are **Polish** — keep that
-> split.
+> codebase. The HQ panel and the guest menu's base content are **Polish**; the
+> owner panel is **English by default** with Polish (and later others) as a
+> translation — see "Owner panel language" in §9. API messages are written in
+> Polish where they are raised and swapped to English per request.
 
 ---
 
@@ -86,6 +88,7 @@ baseline revision against a production database whose schema it never authored.
 | `009_stripe_billing.sql`          | `restaurant.stripe_customer_id` + unique index on `payment_history.external_transaction_id` | **required** |
 | `010_add_menu_pattern.sql`        | `restaurant.menu_pattern`                           | **required** |
 | `011_add_menu_languages.sql`      | `restaurant.menu_languages`                         | **required** |
+| `012_add_panel_language.sql`      | `restaurant.panel_language` (existing rows get `pl`) | **required** |
 
 ### 2.2 Configuration comes only from the environment
 
@@ -414,6 +417,44 @@ wrong ("Smażony ser" came back as *boiled* cheese). Owners now maintain
 reviews and saves. Fallback chain per phrase: requested language → English →
 original.
 
+**Owner panel language.** Every owner panel is **English**. HQ may give a
+restaurant one more language (`restaurant.panel_language`, set in the HQ
+create/edit forms, "Dodatkowy język panelu"); the panel's app bar then shows a
+switch between the two, and the choice is remembered per device
+(`restolink.panel.lang`). NULL means English only; migration 012 gave every
+existing restaurant `pl`. The panel speaks exactly the languages in
+`PANEL_LANGUAGES` — `backend/app/panel_language.py` and `src/i18n/panel.ts`
+must list the same codes. Pieces:
+
+- **Strings** live in `src/i18n/panel/<code>.json`, read through `usePanelT()`
+  (or `tp()` outside React). It is a **second i18next instance**, deliberately
+  not registered with react-i18next, so every `useTranslation()` in the guest
+  components still means the guest menu's instance. Guest components shown
+  inside the panel (phone previews, the dish preview) are wrapped in
+  `GuestPreviewLanguage`, which gives them a private instance in the panel's
+  language. Plurals use i18next's `_one/_few/_many/_other` keys; language and
+  country names come from `Intl.DisplayNames`, never a hand-kept list.
+- **Before sign-in** the auth screens offer every panel language; links in
+  emails carry `&lang=<code>` so the page continues in the email's language.
+  `/hq-access` has no switch — HQ is Polish only.
+- **Server messages** are raised in Polish and localised on the way out
+  (`app/messages.py`, applied by the exception handlers in `main.py`) from the
+  request's `Accept-Language`, which `services/api.ts` sets: `pl` for HQ
+  routes, the panel language for owner routes, nothing for guest routes.
+  `tests/test_panel_language.py` fails if a raised message has no English.
+- **Emails** (welcome, reset) go out in `panel_language`, else English
+  (`EMAIL_COPY` in `email_service.py`).
+- What stays Polish whatever the panel's language, because it is the **menu's**
+  content, not the panel's: category suggestions and the starter layout, the
+  words printed on QR templates, the stored allergen/tag values (the panel
+  shows built-ins translated, `usePanelLabels`).
+
+Adding a language (Czech, say): its `src/i18n/panel/<code>.json` with every
+key, the code in both `PANEL_LANGUAGES`, its `EMAIL_COPY` block, and — if the
+panel shows the guest preview in it — nothing more, the guest locales exist
+already. `src/i18n/panel.test.ts` checks key parity, plural forms, placeholders
+and that every key the code asks for exists.
+
 **Menu languages ("Języki", `/panel/:id/dictionary`).** A catalogue of 34
 languages, `MENU_LANGUAGES` in `backend/app/menu_languages.py` — mirrored by
 `constants/menuLanguages.ts` and backed by one guest-interface locale per code
@@ -565,8 +606,9 @@ In the print document, style `body>svg`, never `svg` — the codes are nested
   dark `#0C6544`, light `#16A06A`. The wordmark is the `Wordmark` component in
   **Dela Gothic One** — one weight, display only, deliberately not in the body
   font stack. There is no letter-tile logo any more.
-- Owner nav order is the setup order: **Kreator menu → Wygląd menu → Kody QR**,
-  then the extras (Języki, Opinie Google) below a divider.
+- Owner nav order is the setup order: **Menu builder → Menu design → QR codes**
+  (Kreator menu → Wygląd menu → Kody QR), then the extras (Languages, Google
+  reviews) below a divider.
 - Route guards (`RequireAuth.tsx`) are a **convenience, not the boundary** —
   every protected endpoint is enforced server-side.
 - **Phone previews keep a real phone's proportions.** `PhoneFrame` defaults
@@ -575,6 +617,12 @@ In the print document, style `body>svg`, never `svg` — the codes are nested
   the screen height on its own: a fixed 300px frame over `calc(100vh − …)`
   came out stubby at 100% zoom on a laptop. A page with a side preview puts
   its heading in the left column so the preview starts at the top.
+- **No hardcoded text in the owner panel.** Every string a restaurant owner
+  reads goes through `usePanelT()` with a key in **every**
+  `src/i18n/panel/<code>.json`; `src/i18n/panel.test.ts` fails on Polish
+  letters in panel code outside its short allowlist (HQ-facing and printed
+  guest content). Zod schemas carry keys as their messages, translated where
+  shown. The HQ panel stays plain Polish strings.
 - **Corner radii come from `radii` in `theme.ts`** (`xs` 8 … `xl` 28, px
   strings). Never a bare number in `sx` — see §11, trap 14. Nested surfaces
   follow outer − padding so the curves stay concentric.
@@ -728,6 +776,8 @@ Deployment prerequisites, carried across several sessions:
       Applied to production (confirmed by the owner, 2026-09-29).
 - [x] **Migration `011`** (`restaurant.menu_languages`) — required column.
       Applied to production (confirmed by the owner, 2026-09-29).
+- [ ] **Migration `012`** (`restaurant.panel_language`) — required column.
+      Must be applied on Neon **before** this change reaches `main`.
 - [ ] `007` and `008` are table-only and optional (`create_all` covers them).
 - [ ] **DeepL quota is shared by every restaurant.** Drafting a whole menu into
       one language costs its character count; with 34 languages on offer, a
@@ -768,5 +818,10 @@ Known product gaps, not bugs:
   and deliberately names no number. The catalogue is 34 languages
   (`menu_languages.py`), each with a hand-written guest interface; do not "fix"
   the landing copy back to a count.
+- A restaurant outside Poland gets its panel in its language, but the **menu**
+  is still Polish-based: the base language is `pl`, prices are in zł, the
+  starter categories and printed QR words are Polish, Google reviews are
+  fetched in Polish, and "Języki" recommends languages for Poland. Serving
+  another country is its own piece of work, separate from the panel language.
 - Scroll-spy tuning (`SPY_ROOT_MARGIN` in `useCategoryScrollSpy.ts`) has never
   been verified against real scrolling — the preview pane cannot scroll.

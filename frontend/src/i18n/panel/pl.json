@@ -1,0 +1,772 @@
+{
+  "errors": {
+    "notFound": "Nie znaleziono restauracji o podanym ID.",
+    "invalid": "Błąd walidacji — sprawdź wprowadzone dane.",
+    "coldStart": "Serwer się wybudza po okresie bezczynności — pierwsze żądanie może potrwać do 30 sekund. Odczekaj chwilę i spróbuj ponownie.",
+    "offline": "Brak połączenia z serwerem. Sprawdź połączenie internetowe i spróbuj ponownie.",
+    "unexpected": "Wystąpił nieoczekiwany błąd. Spróbuj ponownie."
+  },
+  "language": {
+    "switch": "Język panelu"
+  },
+  "common": {
+    "cancel": "Anuluj",
+    "save": "Zapisz",
+    "saveChanges": "Zapisz zmiany",
+    "saving": "Zapisywanie…",
+    "close": "Zamknij",
+    "delete": "Usuń",
+    "add": "Dodaj",
+    "edit": "Edytuj",
+    "confirm": "Potwierdź",
+    "retry": "Spróbuj ponownie",
+    "loading": "Wczytywanie",
+    "open": "Otwórz",
+    "phone": "Telefon",
+    "computer": "Komputer"
+  },
+  "nav": {
+    "builder": "Kreator menu",
+    "appearance": "Wygląd menu",
+    "qr": "Kody QR",
+    "languages": "Języki",
+    "reviews": "Opinie Google",
+    "ownerPanel": "Panel restauratora",
+    "tagline": "Zarządzaj swoją restauracją",
+    "logout": "Wyloguj"
+  },
+  "billing": {
+    "paid": "Płatność przyjęta. Aktywujemy subskrypcję.",
+    "cancelled": "Płatność anulowana — nic nie zostało pobrane."
+  },
+  "auth": {
+    "email": "Adres e-mail",
+    "password": "Hasło",
+    "showPassword": "Pokaż hasło",
+    "hidePassword": "Ukryj hasło",
+    "backToLogin": "Wróć do logowania",
+    "goToLogin": "Przejdź do logowania",
+    "invalidLink": "Nieprawidłowy link",
+    "passwordTooLong": "Hasło jest za długie (maks. {{max}} bajtów).",
+    "passwordMin": "Minimum {{min}} znaków.",
+    "passwordMismatch": "Hasła nie są takie same."
+  },
+  "login": {
+    "title": "Zaloguj się",
+    "subtitle": "Wpisz dane dostępowe do panelu swojej restauracji.",
+    "noAccount": "Nie masz jeszcze konta?",
+    "contactUs": "Skontaktuj się z nami",
+    "submitting": "Logowanie…",
+    "submit": "Zaloguj się",
+    "forgot": "Nie pamiętasz hasła?"
+  },
+  "forgot": {
+    "sentTitle": "Sprawdź skrzynkę",
+    "sentSubtitle": "Jeśli konto istnieje, link do zmiany hasła jest już w drodze.",
+    "validity": "Link jest ważny przez 30 minut i zadziała tylko raz. Jeśli wiadomość nie dotarła, sprawdź folder ze spamem.",
+    "otherAddress": "Wpisz inny adres",
+    "title": "Nie pamiętasz hasła?",
+    "subtitle": "Podaj adres e-mail powiązany z kontem, a wyślemy link do ustawienia nowego hasła.",
+    "sending": "Wysyłanie…",
+    "send": "Wyślij link"
+  },
+  "reset": {
+    "noTokenSubtitle": "Ten adres nie zawiera tokenu resetującego.",
+    "openExactly": "Otwórz link dokładnie tak, jak przyszedł w wiadomości e-mail — razem z częścią po znaku zapytania.",
+    "requestNew": "Poproś o nowy link",
+    "doneTitle": "Hasło zmienione",
+    "doneSubtitle": "Możesz teraz zalogować się nowym hasłem.",
+    "spent": "Link został zużyty i nie zadziała ponownie.",
+    "otherSessions": "Ze względów bezpieczeństwa wszystkie pozostałe sesje zostały wylogowane — na innych urządzeniach trzeba zalogować się ponownie.",
+    "title": "Ustaw nowe hasło",
+    "subtitle": "Wpisz nowe hasło do panelu. Link jednorazowy wygaśnie po użyciu.",
+    "newPassword": "Nowe hasło",
+    "repeat": "Powtórz nowe hasło",
+    "submit": "Zapisz nowe hasło"
+  },
+  "activate": {
+    "noTokenSubtitle": "Ten adres nie zawiera tokenu aktywacyjnego.",
+    "openExactly": "Otwórz link dokładnie tak, jak przyszedł w wiadomości — razem z częścią po znaku zapytania. Jeśli nie działa, napisz do nas: wyślemy nowy albo przekażemy go inną drogą.",
+    "title": "Ustaw hasło i aktywuj konto",
+    "subtitle": "To ostatni krok. Potem od razu wejdziesz do panelu i zbudujesz swoje menu.",
+    "haveAccount": "Masz już hasło? Zaloguj się",
+    "repeat": "Powtórz hasło",
+    "submitting": "Aktywuję…",
+    "submit": "Aktywuj konto"
+  },
+  "preview": {
+    "live": "Podgląd na żywo",
+    "close": "Zamknij podgląd",
+    "emptyMenu": "Tu pojawi się Twoje menu",
+    "clickToEdit": "Kliknij danie w telefonie, aby je edytować.",
+    "inMenu": "W MENU",
+    "onTap": "PO KLIKNIĘCIU"
+  },
+  "appearance": {
+    "intro": "Wybierz motyw jak tło przed wideorozmową — Twoje menu od razu go przymierzy. Zapisz, gdy trafisz na ten właściwy.",
+    "saved": "Wygląd menu zapisany — goście już go widzą.",
+    "themes": "Motywy",
+    "themesHint": "Kliknij, żeby przymierzyć — na miniaturach widać Twoje własne dania.",
+    "surprise": "Zaskocz mnie",
+    "themeAria": "Motyw {{name}}: {{vibe}}",
+    "details": "Dopasuj szczegóły",
+    "detailsChosen": "Wybrany motyw: {{name}}. Każdą rzecz możesz zmienić po swojemu.",
+    "detailsOwn": "Twój własny motyw — zmieniaj kolory, czcionkę i wzór, ile chcesz.",
+    "logo": "Logo",
+    "logoHint": "PNG lub JPG, najlepiej kwadratowe. Pojawi się w nagłówku menu i w kodach QR.",
+    "logoChange": "Zmień",
+    "logoAdd": "Dodaj logo",
+    "logoRemove": "Usuń logo",
+    "hexError": "Podaj kolor w formacie #RRGGBB",
+    "primary": "Kolor główny",
+    "background": "Kolor tła",
+    "pickPalette": "Wybierz z palety",
+    "pickPaletteAria": "{{label}} — wybierz z palety",
+    "paletteAria": "{{label}} — paleta kolorów",
+    "typeface": "Czcionka",
+    "fontSample": "Pierogi ruskie",
+    "pattern": {
+      "title": "Wzór tła",
+      "hint": "Delikatny motyw w tle — dania dostają wtedy własne karty, żeby wszystko było czytelne.",
+      "none": "Bez wzoru",
+      "dots": "Groszki",
+      "grid": "Kratka",
+      "gingham": "Obrus",
+      "stripes": "Paski",
+      "waves": "Fale",
+      "seigaiha": "Seigaiha",
+      "palms": "Palmy",
+      "leaves": "Liście",
+      "terrazzo": "Posypka",
+      "wood": "Drewno"
+    },
+    "unsaved": "Masz niezapisane zmiany",
+    "unsavedGuests": "— goście widzą jeszcze poprzedni wygląd.",
+    "allSaved": "Wszystkie zmiany zapisane",
+    "previewMode": "Tryb podglądu",
+    "previewPhone": "Podgląd na telefonie",
+    "previewComputer": "Podgląd na komputerze",
+    "sample": {
+      "category": "Dania główne",
+      "dish1": "Pierogi ruskie",
+      "dish2": "Żurek",
+      "dish3": "Schabowy",
+      "dish4": "Sernik"
+    },
+    "font": {
+      "classic": "Klasyczna",
+      "modern": "Nowoczesna",
+      "elegant": "Elegancka",
+      "homely": "Domowa",
+      "friendly": "Przyjazna",
+      "scandi": "Skandynawska",
+      "bold": "Mocna",
+      "refined": "Szlachetna",
+      "holiday": "Wakacyjna",
+      "handwritten": "Odręczna"
+    },
+    "venue": {
+      "all": "Wszystkie",
+      "restaurant": "Restauracja",
+      "cafe": "Kawiarnia i cukiernia",
+      "bar": "Bar i pub",
+      "street": "Street food",
+      "world": "Kuchnie świata",
+      "fine": "Fine dining"
+    },
+    "theme": {
+      "classic": {
+        "name": "Czysta klasyka",
+        "vibe": "Biel i grafit — pasuje wszędzie"
+      },
+      "trattoria": {
+        "name": "Włoska trattoria",
+        "vibe": "Pomidorowa czerwień i obrus w kratkę"
+      },
+      "hawaii": {
+        "name": "Hawajska plaża",
+        "vibe": "Koral, piasek i liście palm"
+      },
+      "nordic": {
+        "name": "Nordycki spokój",
+        "vibe": "Chłodny błękit, len i dużo oddechu"
+      },
+      "pub": {
+        "name": "Pub i piwiarnia",
+        "vibe": "Ciemne drewno i bursztynowe piwo"
+      },
+      "japan": {
+        "name": "Japoński minimalizm",
+        "vibe": "Papier ryżowy, cynober i fale"
+      },
+      "cafe": {
+        "name": "Kawiarnia",
+        "vibe": "Kawa z mlekiem i odręczne napisy"
+      },
+      "street": {
+        "name": "Street food",
+        "vibe": "Musztardowa żółć, czerń i energia"
+      },
+      "bistro": {
+        "name": "Paryskie bistro",
+        "vibe": "Butelkowa zieleń i markiza w paski"
+      },
+      "greek": {
+        "name": "Grecka tawerna",
+        "vibe": "Biel Santorini i błękit morza"
+      },
+      "cocktail": {
+        "name": "Bar koktajlowy",
+        "vibe": "Granatowa noc i neonowy róż"
+      },
+      "vegan": {
+        "name": "Zielona kuchnia",
+        "vibe": "Świeże liście i len"
+      },
+      "mexican": {
+        "name": "Meksykańska fiesta",
+        "vibe": "Papryka, limonka i pasiasty koc"
+      },
+      "karczma": {
+        "name": "Polska karczma",
+        "vibe": "Ciepłe drewno, len i czerwień"
+      },
+      "patisserie": {
+        "name": "Cukiernia",
+        "vibe": "Pastelowy róż i kolorowa posypka"
+      },
+      "seafood": {
+        "name": "Owoce morza",
+        "vibe": "Morska zieleń i piasek"
+      },
+      "steakhouse": {
+        "name": "Steakhouse",
+        "vibe": "Grafit, miedź i ogień z grilla"
+      },
+      "dark-elegance": {
+        "name": "Ciemna elegancja",
+        "vibe": "Głęboka czerń ze złotem"
+      },
+      "vivid": {
+        "name": "Wyrazisty fiolet",
+        "vibe": "Energetyczny fiolet na jasnym tle"
+      }
+    }
+  },
+  "builder": {
+    "subtitle": "Przeciągaj, edytuj, dodawaj — a podgląd od razu pokaże, co zobaczy gość.",
+    "search": "Szukaj dania",
+    "clearSearch": "Wyczyść wyszukiwanie",
+    "preview": "Podgląd",
+    "previewDialog": "Podgląd menu",
+    "newCategory": "Nowa kategoria",
+    "showAll": "Pokaż wszystko",
+    "noMatch": "Nic nie pasuje. Spróbuj innej nazwy.",
+    "filtered": "Pokazuję tylko pasujące dania. Przeciąganie wróci, gdy wyczyścisz filtr.",
+    "copySuffix": "(kopia)",
+    "copied": "Utworzono kopię „{{name}}”. Zmień w niej, co trzeba.",
+    "categoryAdded": "Dodano kategorię „{{name}}”.",
+    "started": "Gotowe! Teraz dodaj pierwsze dania.",
+    "categoryDeleted": "Usunięto kategorię „{{name}}”.",
+    "dishDeleted": "Usunięto „{{name}}”.",
+    "deleteDishTitle": "Usunąć danie?",
+    "deleteCategoryTitle": "Usunąć kategorię?",
+    "deleteCategoryBody": "Kategoria „{{name}}” i wszystkie jej dania zostaną trwale usunięte.",
+    "deleteDishBody": "Danie „{{name}}” zostanie usunięte z menu."
+  },
+  "count": {
+    "dishes_one": "{{count}} danie",
+    "dishes_few": "{{count}} dania",
+    "dishes_many": "{{count}} dań",
+    "dishes_other": "{{count}} dania",
+    "allergens_one": "{{count}} alergen",
+    "allergens_few": "{{count}} alergeny",
+    "allergens_many": "{{count}} alergenów",
+    "allergens_other": "{{count}} alergenu",
+    "languages_one": "{{count}} język",
+    "languages_few": "{{count}} języki",
+    "languages_many": "{{count}} języków",
+    "languages_other": "{{count}} języka",
+    "phrases_one": "{{count}} fraza",
+    "phrases_few": "{{count}} frazy",
+    "phrases_many": "{{count}} fraz",
+    "phrases_other": "{{count}} frazy"
+  },
+  "category": {
+    "drag": "Przeciągnij kategorię {{name}}",
+    "name": "Nazwa kategorii",
+    "saveName": "Zapisz nazwę kategorii",
+    "cancelRename": "Anuluj edycję nazwy",
+    "addDish": "Dodaj danie",
+    "addDishTo": "Dodaj danie do kategorii {{name}}",
+    "more": "Więcej akcji: kategoria {{name}}",
+    "rename": "Zmień nazwę",
+    "delete": "Usuń kategorię",
+    "addFirstDish": "Dodaj pierwsze danie",
+    "dropHint": "…albo przeciągnij tu danie z innej kategorii"
+  },
+  "labels": {
+    "allergenGluten": "Gluten",
+    "allergenLactose": "Laktoza",
+    "allergenNuts": "Orzechy",
+    "allergenEggs": "Jaja",
+    "allergenSoy": "Soja",
+    "allergenFish": "Ryby",
+    "allergenCelery": "Seler",
+    "allergenMustard": "Gorczyca",
+    "tagVegan": "Wegańskie",
+    "tagVegetarian": "Wegetariańskie",
+    "tagBestseller": "Bestseller",
+    "tagSpicy": "Pikantne",
+    "tagNew": "Nowość"
+  },
+  "dish": {
+    "drag": "Przeciągnij danie {{name}}",
+    "edit": "Edytuj danie {{name}}",
+    "noDescription": "Bez opisu",
+    "unavailable": "Niedostępne",
+    "allergensTooltip": "Alergeny: {{list}}",
+    "availableHint": "Dostępne — kliknij, aby ukryć",
+    "availability": "Dostępność dania {{name}}",
+    "more": "Więcej akcji: {{name}}",
+    "duplicate": "Duplikuj"
+  },
+  "readiness": {
+    "photos_one": "{{count}} zdjęcia",
+    "photos_few": "{{count}} zdjęć",
+    "photos_many": "{{count}} zdjęć",
+    "photos_other": "{{count}} zdjęcia",
+    "descriptions_one": "{{count}} opisu",
+    "descriptions_few": "{{count}} opisów",
+    "descriptions_many": "{{count}} opisów",
+    "descriptions_other": "{{count}} opisu",
+    "and": " i ",
+    "complete": "Menu dopięte na ostatni guzik",
+    "ready": "Menu gotowe w {{score}}%",
+    "readyLow": "Menu gotowe w {{score}}% — dopracujmy je",
+    "completeHint": "Każde danie ma zdjęcie i opis. Właśnie tak wygląda menu, z którego chce się zamawiać.",
+    "missingHint": "Brakuje jeszcze {{list}}. Dania ze zdjęciem i opisem kuszą najbardziej.",
+    "noPhoto": "Bez zdjęcia · {{count}}",
+    "noDescription": "Bez opisu · {{count}}",
+    "unavailable": "Niedostępne · {{count}}"
+  },
+  "starter": {
+    "title": "Zacznijmy od kategorii",
+    "body": "Kategorie to działy Twojego menu. Utwórz typowy układ jednym kliknięciem — nazwy zmienisz w każdej chwili.",
+    "creating": "Tworzę kategorie…",
+    "create": "Utwórz podstawowy układ",
+    "custom": "Własna kategoria"
+  },
+  "addCategory": {
+    "title": "Dodaj kategorię",
+    "pickOrName": "Wybierz jedną z popularnych albo nazwij po swojemu.",
+    "nameNew": "Nazwij nowy dział swojego menu.",
+    "quickAdd": "Dodaj kategorię {{name}}",
+    "customName": "Własna nazwa…",
+    "nameMin": "Nazwa musi mieć co najmniej 2 znaki",
+    "created": "Kategoria „{{name}}” została utworzona.",
+    "subtitle": "Dodaj sekcję do swojego menu",
+    "placeholder": "np. Napoje",
+    "popular": "Popularne:",
+    "creating": "Tworzenie…",
+    "create": "Utwórz kategorię"
+  },
+  "chips": {
+    "selected": "Zaznaczone: {{count}}",
+    "tooLong": "Najwyżej {{max}} znaków.",
+    "tooMany": "Najwyżej {{max}} pozycji na danie.",
+    "placeholder": "Wpisz i naciśnij Enter",
+    "customHint": "Własne pozycje przetłumaczysz w zakładce „Języki” — wbudowane tłumaczą się same."
+  },
+  "dishForm": {
+    "nameMin": "Nazwa musi mieć co najmniej 2 znaki",
+    "nameMax": "Nazwa może mieć maksymalnie 150 znaków",
+    "priceRequired": "Podaj cenę",
+    "priceFormat": "Podaj cenę, np. 24,90",
+    "pricePositive": "Cena musi być większa od zera",
+    "priceTooHigh": "Cena jest zbyt wysoka",
+    "categoryRequired": "Wybierz kategorię",
+    "descriptionMax": "Opis może mieć maksymalnie {{max}} znaków",
+    "ingredientsMax": "Lista składników może mieć maksymalnie {{max}} znaków",
+    "name": "Nazwa dania",
+    "namePlaceholder": "np. Pierogi ruskie",
+    "price": "Cena",
+    "category": "Kategoria",
+    "description": "Opis",
+    "descriptionPlaceholder": "Co sprawia, że to danie warto zamówić? Np. „Ręcznie lepione, podawane z chrupiącą cebulką”",
+    "descriptionHint": "Goście widzą go na karcie i w szczegółach.",
+    "ingredients": "Składniki",
+    "ingredientsPlaceholder": "np. mąka, ziemniaki, twaróg, cebula",
+    "ingredientsHint": "Oddziel przecinkami.",
+    "allergens": "Alergeny",
+    "allergensHint": "Goście z alergią odfiltrowują po nich menu — zaznacz wszystkie, które zawiera danie.",
+    "customAllergen": "Własny alergen",
+    "tags": "Oznaczenia",
+    "tagsHint": "Wyróżniają danie na karcie.",
+    "customTag": "Własne oznaczenie",
+    "available": "Dostępne w menu",
+    "availableOn": "Goście mogą je wybrać.",
+    "availableOff": "Zostaje w menu, ale wyszarzone jako niedostępne — np. gdy się skończy.",
+    "addedNext": "Dodano „{{name}}”. Czas na kolejne danie!",
+    "savedChanges": "Zapisano zmiany w „{{name}}”.",
+    "added": "Danie „{{name}}” jest już w menu.",
+    "editTitle": "Edytuj: {{name}}",
+    "newTitle": "Nowe danie",
+    "inCategory": "Kategoria „{{name}}”",
+    "guestPreview": "Podgląd dla gości",
+    "guestsSee": "Tak zobaczą je goście",
+    "previewHint": "Podgląd zmienia się, gdy piszesz — w kolorach Twojego menu.",
+    "shortcutSaves": "{{shortcut}} zapisuje",
+    "saveAndNext": "Zapisz i dodaj kolejne",
+    "addToMenu": "Dodaj do menu",
+    "discardTitle": "Porzucić zmiany?",
+    "discardBody": "Masz niezapisane zmiany w tym daniu. Jeśli zamkniesz okno, przepadną.",
+    "discard": "Porzuć zmiany",
+    "keepEditing": "Wróć do edycji"
+  },
+  "photo": {
+    "notImage": "To nie jest zdjęcie — wybierz plik PNG, JPG lub WEBP.",
+    "alt": "Zdjęcie dania",
+    "change": "Zmień",
+    "remove": "Usuń zdjęcie",
+    "dropToReplace": "Upuść, aby podmienić",
+    "addAria": "Dodaj zdjęcie dania",
+    "add": "Dodaj zdjęcie",
+    "dropHere": "Upuść tutaj",
+    "dragOrClick": "Przeciągnij plik lub kliknij"
+  },
+  "crop": {
+    "failed": "Nie udało się przyciąć zdjęcia. Spróbuj ponownie.",
+    "title": "Przytnij zdjęcie",
+    "subtitle": "Przeciągnij i przybliż, aby dopasować kadr 1:1",
+    "zoom": "Przybliżenie zdjęcia",
+    "processing": "Przetwarzanie…",
+    "apply": "Zastosuj"
+  },
+  "subscription": {
+    "expired": "Twoja subskrypcja wygasła",
+    "expiredHint": "Opłać zaległości, aby odblokować menu.",
+    "opening": "Otwieram płatność…",
+    "pay": "Opłać subskrypcję",
+    "confirming": "Potwierdzamy płatność u operatora — to potrwa kilka sekund.",
+    "pending": "Twoje menu nie jest jeszcze publicznie widoczne. Opłać subskrypcję, aby aktywować kody QR.",
+    "activate": "Aktywuj subskrypcję"
+  },
+  "qr": {
+    "format": {
+      "code": "Sam kod",
+      "tent": "Stojak na stolik",
+      "sticker": "Naklejka",
+      "poster": "Plakat"
+    },
+    "unit": {
+      "code_one": "{{count}} kod",
+      "code_few": "{{count}} kody",
+      "code_many": "{{count}} kodów",
+      "code_other": "{{count}} kodu",
+      "tent_one": "{{count}} karta",
+      "tent_few": "{{count}} karty",
+      "tent_many": "{{count}} kart",
+      "tent_other": "{{count}} karty",
+      "sticker_one": "{{count}} naklejka",
+      "sticker_few": "{{count}} naklejki",
+      "sticker_many": "{{count}} naklejek",
+      "sticker_other": "{{count}} naklejki",
+      "poster_one": "{{count}} plakat",
+      "poster_few": "{{count}} plakaty",
+      "poster_many": "{{count}} plakatów",
+      "poster_other": "{{count}} plakatu"
+    },
+    "fileSlug": {
+      "code": "kod",
+      "tent": "stojak",
+      "sticker": "naklejka",
+      "poster": "plakat"
+    },
+    "centerSize": {
+      "S": "Mały",
+      "M": "Średni",
+      "L": "Duży"
+    },
+    "dots": {
+      "square": "Kwadraty",
+      "fluid": "Płynne",
+      "dots": "Kropki",
+      "tiles": "Kafelki",
+      "lines": "Linie"
+    },
+    "eyes": {
+      "square": "Kwadratowe",
+      "rounded": "Zaokrąglone",
+      "circle": "Okrągłe",
+      "leaf": "Listek"
+    },
+    "swatch": {
+      "brand": "Kolor marki",
+      "graphite": "Grafit",
+      "black": "Czarny",
+      "navy": "Granat",
+      "bottleGreen": "Butelkowa zieleń",
+      "burgundy": "Bordo",
+      "chocolate": "Czekolada"
+    },
+    "preset": {
+      "brand": "Twoja marka",
+      "classic": "Klasyczny",
+      "accent": "Akcent",
+      "soft": "Miękki",
+      "lines": "Linie",
+      "elegant": "Elegancki"
+    },
+    "customColour": "Własny kolor",
+    "anyColour": "wybierz dowolny kolor",
+    "checking": "Sprawdzam czytelność…",
+    "verdict": {
+      "great": "Świetna czytelność",
+      "ok": "Dobra czytelność",
+      "weak": "Czytelność do poprawy",
+      "bad": "Ten kod może się nie skanować"
+    },
+    "check": {
+      "scan": {
+        "label": "Test odczytu",
+        "pending": "Sprawdzam…",
+        "great": "Kod odczytany poprawnie z obrazu",
+        "bad": "Nie udało się odczytać — przyciemnij kolor lub zmniejsz logo"
+      },
+      "contrast": {
+        "label": "Kontrast",
+        "great": "{{ratio}} : 1 — doskonały",
+        "ok": "{{ratio}} : 1 — dobry",
+        "weak": "{{ratio}} : 1 — słaby, przy gorszym świetle kod może zawodzić",
+        "bad": "{{ratio}} : 1 — za jasny, wybierz ciemniejszy kolor"
+      },
+      "density": {
+        "label": "Skrócony link",
+        "saved": "{{modules}} × {{modules}} punktów zamiast {{plain}} × {{plain}} — o {{saved}}% mniej",
+        "plain": "{{modules}} × {{modules}} punktów"
+      },
+      "print": {
+        "label": "Na wydruku",
+        "great": "kod {{code}} — skanuje się z ok. {{distance}}",
+        "weak": "kod {{code}} — mały, czyta się tylko z bliska; pewniej od rozmiaru {{comfortable}}",
+        "bad": "kod {{code}} — za mały dla wielu telefonów; wybierz rozmiar od {{comfortable}}"
+      }
+    },
+    "errors": {
+      "draw": "Nie udało się narysować projektu.",
+      "canvas": "Przeglądarka nie obsługuje rysowania obrazów.",
+      "save": "Nie udało się zapisać obrazu.",
+      "print": "Przeglądarka zablokowała drukowanie.",
+      "file": "Nie udało się przygotować pliku.",
+      "image": "Nie udało się wczytać obrazu."
+    },
+    "printTitle": "kody QR",
+    "posterSheet": "Plakat {{size}} drukuje się na całej stronie {{page}}",
+    "posterA3": " — wydrukuj na A3 albo zanieś plik do drukarni",
+    "perSheet": "{{copies}} na arkuszu A4",
+    "pngSaved": "Pobrano PNG w jakości do druku (300 dpi).",
+    "svgSaved": "Pobrano SVG — plik wektorowy dla drukarni.",
+    "linkCopied": "Link do menu skopiowany.",
+    "linkCopyFailed": "Nie udało się skopiować linku.",
+    "center": {
+      "logo": "Logo",
+      "icon": "Sztućce",
+      "upload": "Obraz",
+      "none": "Bez",
+      "addLogo": "Dodaj logo w zakładce „Wygląd menu”",
+      "logoFailed": "Nie udało się wczytać logo — wgraj plik"
+    },
+    "subtitle": "Wybierz projekt w kolorach swojej restauracji, zobacz go na stoliku i wydrukuj. Każdy kod sprawdzamy, zanim trafi do druku.",
+    "formatTabs": "Na czym wydrukujesz kod",
+    "size": "Rozmiar",
+    "customSize": "Własny",
+    "customSizeAria": "Własny rozmiar kodu w centymetrach",
+    "stageLabel": "Podgląd: {{format}} {{size}} z kodem QR prowadzącym do menu",
+    "download": "Pobierz i wydrukuj",
+    "downloadHint": "{{sheet}}. W oknie drukowania wybierz „Zapisz jako PDF”, by dostać plik dla drukarni.",
+    "print": "Drukuj / PDF",
+    "menuLink": "Link do menu",
+    "copyLink": "Kopiuj link",
+    "copyLinkAria": "Kopiuj link do menu",
+    "openMenu": "Otwórz menu",
+    "neverChanges": "Ten kod się nie zmienia. Edytujesz dania, ceny i zdjęcia — goście od razu widzą nowe menu, bez ponownego drukowania.",
+    "presets": "Gotowe projekty",
+    "presetsHint": "W kolorach Twojej restauracji.",
+    "presetsHintDarkened": "W kolorach Twojej restauracji — kolor marki lekko przyciemniony, by kod pewnie się skanował.",
+    "centerTitle": "Środek kodu",
+    "centerHint": "Z logo kod ma mocniejszą korekcję błędów — dalej czyta się bez problemu.",
+    "changeImage": "Zmień obraz",
+    "centerSizeAria": "Wielkość środka",
+    "wording": "Napis",
+    "wordingHint": "Drukowany dla gości, w języku Twojego menu.",
+    "customText": "Własny napis",
+    "restaurantName": "Nazwa restauracji",
+    "showName": "Pokaż nazwę restauracji",
+    "background": "Tło",
+    "surface": {
+      "brand": "Kolor marki",
+      "light": "Jasne tło"
+    },
+    "tune": "Dopasuj kształty i kolory",
+    "dotsTitle": "Kropki",
+    "eyesTitle": "Narożniki",
+    "codeColour": "Kolor kodu",
+    "eyeColour": "Kolor narożników",
+    "gradient": "Przejście koloru",
+    "gradientSecond": "Drugi kolor przejścia",
+    "darken": "Przyciemnij",
+    "tooLight": "Kolor jest za jasny, by kod czytał się pewnie."
+  },
+  "languages": {
+    "reason": {
+      "en": "Czyta go większość zagranicznych gości — od niego warto zacząć.",
+      "de": "Niemcy to najliczniejsza grupa zagranicznych turystów w Polsce.",
+      "uk": "W Polsce mieszka i pracuje bardzo wielu Ukraińców.",
+      "fr": "Francuzi chętnie zwiedzają Kraków i Warszawę.",
+      "es": "Hiszpanie chętnie zwiedzają polskie miasta, a po hiszpańsku czyta pół Ameryki.",
+      "it": "Włosi licznie odwiedzają Kraków, Warszawę i Gdańsk.",
+      "cs": "Czesi to części goście, zwłaszcza na południu Polski.",
+      "sk": "Słowacy chętnie przyjeżdżają w Tatry i do Małopolski.",
+      "ru": "Rozumie go wielu gości z Ukrainy, Białorusi i krajów bałtyckich.",
+      "lt": "Litwini to części goście na Podlasiu i w Warszawie.",
+      "sv": "Szwedzi często przypływają promami na Pomorze.",
+      "he": "Izraelczycy licznie odwiedzają Kraków i Warszawę.",
+      "ar": "Turyści z krajów Zatoki Perskiej chętnie odwiedzają Zakopane."
+    },
+    "subtitle": "Pokaż menu gościom w ich języku. Mapa podpowie, gdzie już je przeczytają — dodawaj języki tam, skąd przychodzą Twoi goście.",
+    "addedReady": "Dodano: {{name}}. Tłumaczenia są gotowe — goście już go widzą.",
+    "addedTranslate": "Dodano: {{name}}. Goście już go widzą — przetłumacz menu poniżej.",
+    "added": "Dodano: {{name}}.",
+    "hidden": "Ukryto: {{name}}. Tłumaczenia zostają — możesz wrócić w każdej chwili.",
+    "yours": "Twoje języki",
+    "yoursHint": "Te języki goście widzą w przełączniku menu.",
+    "add": "Dodaj język",
+    "addHint": "Najedź na język, a mapa pokaże, gdzie przybędzie czytelników.",
+    "translations": "Tłumaczenia",
+    "translationsHint": "Automat podpowiada — ostatnie słowo należy do Ciebie. Nic nie trafi do gości przed zapisaniem.",
+    "addFirst": "Dodaj język, a tu przetłumaczysz na niego menu.",
+    "discardTitle": "Porzucić niezapisane tłumaczenia?",
+    "discardBody": "Masz niezapisane zmiany w tym języku. Jeśli przejdziesz do innego, przepadną.",
+    "manyTitle": "{{count}}. język?",
+    "addAnyway": "Dodaj mimo to",
+    "manyBody": "Każde nowe danie trzeba będzie przetłumaczyć na {{languages}}, a obecne menu to {{phrases}} w każdym z nich. Większość zagranicznych gości przeczyta menu po angielsku — dodaj {{name}}, jeśli naprawdę przychodzą goście, którzy go potrzebują.",
+    "thisLanguage": "ten język"
+  },
+  "reach": {
+    "readBy": "Twoje menu przeczyta",
+    "people": "ludzi",
+    "inLanguages_one": "w {{count}} języku",
+    "inLanguages_few": "w {{count}} językach",
+    "inLanguages_many": "w {{count}} językach",
+    "inLanguages_other": "w {{count}} języka",
+    "worldShare": "ok. {{percent}} mieszkańców świata, {{inLanguages}}",
+    "preview": "+ {{name}}: {{people}} nowych osób",
+    "previewSmall": "Niewiele — tamtejsi goście w większości przeczytają już Twoje menu.",
+    "previewTotal": "Razem {{total}}. Na mapie na żółto — tam przybędzie czytelników.",
+    "hint": "Najedź na kraj, żeby zobaczyć, ilu gości dołączy. Kliknij, żeby dodać jego język.",
+    "countryStats": "{{people}} mieszkańców · menu przeczyta {{percent}}",
+    "home": "Tu jest Twój lokal.",
+    "clickToAdd": "Kliknij, by dodać: {{name}} → {{percent}}",
+    "alreadyRead": "Tu już czytają Twoje menu.",
+    "notInCatalogue": "Tutejszego języka nie ma jeszcze w katalogu.",
+    "mapView": "Widok mapy",
+    "world": "Świat",
+    "europe": "Europa",
+    "legendTitle": "Czyta Twoje menu:",
+    "legend": {
+      "3": "prawie wszyscy",
+      "2": "większość",
+      "1": "część",
+      "0": "mało kto"
+    },
+    "mapAria": "Mapa świata: kraje, w których goście przeczytają Twoje menu",
+    "country": {
+      "CYN": "Cypr Północny",
+      "SOL": "Somaliland"
+    }
+  },
+  "offered": {
+    "fallback": {
+      "polish": "po polsku",
+      "english": "po angielsku",
+      "englishOrPolish": "po angielsku lub po polsku"
+    },
+    "baseSubtitle": "język menu — tak piszesz w Kreatorze",
+    "onlyPolish": "Goście widzą menu tylko po polsku. Zacznij od angielskiego — czyta go większość zagranicznych gości.",
+    "done": "Gotowe — goście czytają całe menu w tym języku.",
+    "untranslated": "Nieprzetłumaczone — goście widzą menu {{fallback}}.",
+    "partial": "{{percent}} gotowe — resztę goście widzą {{fallback}}.",
+    "only": "tylko dzięki niemu: {{people}}",
+    "revise": "Popraw",
+    "translate": "Tłumacz",
+    "hideTooltip": "Ukryj przed gośćmi (tłumaczenia zostaną)",
+    "hideAria": "Ukryj język {{name}}",
+    "workTitle": "Ile to pracy",
+    "work": "Każde nowe danie to do {{translations}} tłumaczeń — nazwa, opis i skład {{inLanguages}}.",
+    "waiting": " Do przetłumaczenia: {{phrases}}.",
+    "allDone": " Teraz wszystko jest gotowe.",
+    "many": "To już {{languages}}. Każdy kolejny dokłada pracy przy każdej zmianie menu, a niedokończony pokazuje gościom menu pół na pół. Dodawaj tylko te, w których naprawdę przychodzą goście."
+  },
+  "addLanguage": {
+    "recommended": "Polecane w Polsce",
+    "all": "Wszystkie ({{count}})",
+    "search": "Szukaj języka",
+    "sortHint": "Od największego zysku: ilu nowych ludzi przeczyta Twoje menu po dodaniu języka.",
+    "allRecommended": "Masz już wszystkie polecane języki. Inne znajdziesz w zakładce „Wszystkie”.",
+    "noSuch": "Nie ma takiego języka w katalogu.",
+    "prepared": "Masz już {{done}} z {{total}} tłumaczeń — wrócą od razu.",
+    "gainTitle": "Nowi czytelnicy menu po dodaniu tego języka",
+    "addAria": "Dodaj język: {{name}}"
+  },
+  "editor": {
+    "suggestions_one": "{{count}} propozycję",
+    "suggestions_few": "{{count}} propozycje",
+    "suggestions_many": "{{count}} propozycji",
+    "suggestions_other": "{{count}} propozycji",
+    "partialFail": "Przetłumaczono {{drafted}} z {{total}}. Reszty nie udało się pobrać — uzupełnij ją ręcznie.",
+    "inserted": "Wstawiono {{suggestions}}. Sprawdź je i zapisz.",
+    "insertedThenError": "Wstawiono {{suggestions}}, potem wystąpił błąd: {{error}}",
+    "saved": "{{name}}: tłumaczenia zapisane — goście już je widzą.",
+    "nothing": "To menu nie ma jeszcze żadnych tekstów do przetłumaczenia. Dodaj kategorie i dania w Kreatorze menu, a pojawią się tutaj.",
+    "progress": "Przetłumaczono {{filled}} z {{total}} fraz",
+    "translating": "Tłumaczę…",
+    "suggestMissing": "Podpowiedz brakujące ({{count}})",
+    "fetching": "Pobieram propozycje z DeepL. Nic nie zostanie zapisane, dopóki ich nie sprawdzisz i nie klikniesz „Zapisz”.",
+    "unsaved": "Masz niezapisane zmiany — goście widzą jeszcze poprzednią wersję.",
+    "onlyMissing": "Pokaż tylko nieprzetłumaczone",
+    "original": "Oryginał ({{code}})",
+    "allDone": "Wszystko przetłumaczone. 🎉",
+    "changed": "zmienione",
+    "placeholder": "Tłumaczenie ({{code}})",
+    "phraseAria": "Tłumaczenie frazy: {{phrase}}",
+    "fallbackNote": "Frazy bez tłumaczenia goście zobaczą po angielsku, a jeśli i tego brak — po polsku."
+  },
+  "google": {
+    "placeIdHelper": "Identyfikator wizytówki, nie adres URL z Google Maps.",
+    "connectTitle": "Połącz opinie z Google",
+    "connectBody": "Podaj Place ID swojej wizytówki, a zobaczysz tutaj ocenę i najnowsze opinie gości — bez wychodzenia z panelu.",
+    "step1": "Otwórz wyszukiwarkę Place ID Finder.",
+    "step2": "Wpisz nazwę i adres swojej restauracji.",
+    "step3": "Skopiuj identyfikator z dymka nad pinezką.",
+    "connecting": "Łączę…",
+    "connect": "Połącz wizytówkę",
+    "noComment": "Ocena bez komentarza.",
+    "connected": "Wizytówka Google połączona.",
+    "disconnected": "Wizytówka Google odłączona.",
+    "subtitle": "Ocena i najnowsze opinie z Twojej wizytówki w Google Maps.",
+    "disconnect": "Odłącz wizytówkę",
+    "noRatings": "Brak ocen",
+    "noRatingsBody": "Ta wizytówka nie ma jeszcze żadnych ocen.",
+    "basedOn_one": "na podstawie {{total}} oceny",
+    "basedOn_few": "na podstawie {{total}} ocen",
+    "basedOn_many": "na podstawie {{total}} ocen",
+    "basedOn_other": "na podstawie {{total}} oceny",
+    "listing": "Wizytówka Google",
+    "viewInMaps": "Zobacz w Google Maps",
+    "changePlaceId": "Zmień Place ID",
+    "latest": "Najnowsze opinie",
+    "noText": "Google nie udostępnia jeszcze żadnych opinii tekstowych dla tej wizytówki.",
+    "synced": "Zsynchronizowano: {{at}} · dane odświeżają się raz na dobę"
+  }
+}

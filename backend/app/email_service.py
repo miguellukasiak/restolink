@@ -60,55 +60,162 @@ async def _deliver(params: dict[str, Any]) -> None:
     await run_in_threadpool(resend.Emails.send, {"from": _from_address(), **params})
 
 
-def reset_password_url(raw_token: str) -> str:
-    return f"{APP_BASE_URL}/reset-password?token={raw_token}"
+# --------------------------------------------------------------------------- #
+# Owner emails: reset and welcome, in the restaurant's panel language
+# --------------------------------------------------------------------------- #
+
+#: Owner emails go out in the restaurant's second panel language when it has
+#: one (an email has no language switch, so the owner's own is the safer
+#: choice), and in English otherwise. Every code in
+#: panel_language.PANEL_LANGUAGES needs an entry; a test checks.
+EMAIL_COPY: dict[str, dict[str, str]] = {
+    "en": {
+        "reset_subject": "Reset your RestoLink password",
+        "reset_greeting": "Hello, {name}!",
+        "reset_body": (
+            "We received a request to reset the password to your panel. Use the "
+            "button below to set a new one. The link is valid for {minutes} "
+            "minutes and works only once."
+        ),
+        "reset_button": "Set a new password",
+        "reset_ignore": (
+            "If you did not ask for this, ignore this message — your password "
+            "stays as it is."
+        ),
+        "welcome_subject": "Welcome to RestoLink — activate your account",
+        "welcome_greeting": "Welcome to RestoLink, {name}!",
+        "welcome_body": (
+            "Your account is ready. One step left — set a password and you go "
+            "straight to your panel, where you build your menu and create the QR "
+            "code for your guests."
+        ),
+        "welcome_button": "Activate account",
+        "welcome_validity": (
+            "The link is valid for {days} days and works only once. If it "
+            "expires, write to us and we will send a new one."
+        ),
+        "fallback": "If the button does not work, paste this address into your browser:",
+    },
+    "pl": {
+        "reset_subject": "Reset hasła do panelu RestoLink",
+        "reset_greeting": "Cześć, {name}!",
+        "reset_body": (
+            "Otrzymaliśmy prośbę o zresetowanie hasła do panelu. Kliknij przycisk "
+            "poniżej, aby ustawić nowe hasło. Link jest ważny przez {minutes} "
+            "minut i zadziała tylko raz."
+        ),
+        "reset_button": "Ustaw nowe hasło",
+        "reset_ignore": (
+            "Jeśli to nie Ty prosiłeś o zmianę, zignoruj tę wiadomość — Twoje "
+            "hasło pozostanie bez zmian."
+        ),
+        "welcome_subject": "Witamy w RestoLink — aktywuj swoje konto",
+        "welcome_greeting": "Witamy w RestoLink, {name}!",
+        "welcome_body": (
+            "Twoje konto jest już gotowe. Zostaw jeszcze jedną rzecz za sobą — "
+            "ustaw hasło, a od razu wejdziesz do panelu, w którym zbudujesz menu "
+            "i wygenerujesz kod QR dla gości."
+        ),
+        "welcome_button": "Aktywuj konto",
+        "welcome_validity": (
+            "Link jest ważny {days} dni i zadziała tylko raz. Jeśli wygaśnie, "
+            "napisz do nas — wyślemy nowy."
+        ),
+        "fallback": "Gdyby przycisk nie działał, wklej ten adres w przeglądarkę:",
+    },
+}
+
+RESET_TTL_MINUTES = 30
 
 
-def _reset_email_html(restaurant_name: str, url: str) -> str:
-    minutes = 30
+def _copy(language: str | None) -> dict[str, str]:
+    return EMAIL_COPY.get(language or "en", EMAIL_COPY["en"])
+
+
+def _lang_query(language: str | None) -> str:
+    # The link opens the panel's page in the email's language.
+    return f"&lang={language}" if language in EMAIL_COPY else "&lang=en"
+
+
+def reset_password_url(raw_token: str, language: str | None = None) -> str:
+    return f"{APP_BASE_URL}/reset-password?token={raw_token}{_lang_query(language)}"
+
+
+def activation_url(raw_token: str, language: str | None = None) -> str:
+    return f"{APP_BASE_URL}/activate?token={raw_token}{_lang_query(language)}"
+
+
+def _owner_email_html(
+    *, language: str, greeting: str, body: str, button: str, url: str, note: str
+) -> str:
+    """One layout for both owner emails. Every interpolated value is escaped:
+    the restaurant name is typed by HQ, and the URL carries a token."""
+    fallback = _copy(language)["fallback"]
+    safe_url = html.escape(url, quote=True)
     return f"""\
 <!doctype html>
-<html lang="pl">
+<html lang="{html.escape(language)}">
   <body style="margin:0;padding:24px;background:#f7f9fa;font-family:'Segoe UI',Roboto,Arial,sans-serif;color:#2c3542;">
     <div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:20px;padding:32px;">
       <p style="margin:0 0 24px;font-size:20px;font-weight:700;color:#161c25;">RestoLink</p>
-      <p style="margin:0 0 16px;font-size:16px;">Cześć, {restaurant_name}!</p>
-      <p style="margin:0 0 24px;font-size:16px;line-height:1.6;">
-        Otrzymaliśmy prośbę o zresetowanie hasła do panelu. Kliknij przycisk
-        poniżej, aby ustawić nowe hasło. Link jest ważny przez {minutes} minut
-        i zadziała tylko raz.
-      </p>
+      <p style="margin:0 0 16px;font-size:18px;font-weight:600;color:#161c25;">{html.escape(greeting)}</p>
+      <p style="margin:0 0 24px;font-size:16px;line-height:1.6;">{html.escape(body)}</p>
       <p style="margin:0 0 28px;">
-        <a href="{url}" style="display:inline-block;background:#0f8256;color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:999px;font-weight:600;font-size:16px;">
-          Ustaw nowe hasło
+        <a href="{safe_url}" style="display:inline-block;background:#0f8256;color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:999px;font-weight:600;font-size:16px;">
+          {html.escape(button)}
         </a>
       </p>
-      <p style="margin:0 0 8px;font-size:14px;color:#6b7787;">
-        Jeśli to nie Ty prosiłeś o zmianę, zignoruj tę wiadomość — Twoje hasło
-        pozostanie bez zmian.
-      </p>
+      <p style="margin:0 0 8px;font-size:14px;color:#6b7787;">{html.escape(note)}</p>
       <p style="margin:24px 0 0;font-size:12px;color:#9aa4b2;word-break:break-all;">
-        Gdyby przycisk nie działał, wklej ten adres w przeglądarkę:<br />{url}
+        {html.escape(fallback)}<br />{safe_url}
       </p>
     </div>
   </body>
 </html>"""
 
 
-def _reset_email_text(restaurant_name: str, url: str) -> str:
-    return (
-        f"Cześć, {restaurant_name}!\n\n"
-        "Otrzymaliśmy prośbę o zresetowanie hasła do panelu RestoLink.\n"
-        "Otwórz poniższy link, aby ustawić nowe hasło. Jest ważny przez 30 "
-        "minut i zadziała tylko raz.\n\n"
-        f"{url}\n\n"
-        "Jeśli to nie Ty prosiłeś o zmianę, zignoruj tę wiadomość — Twoje "
-        "hasło pozostanie bez zmian.\n"
-    )
+def reset_email(restaurant_name: str, url: str, language: str | None) -> dict[str, str]:
+    """Subject, HTML and text of the reset email in `language`."""
+    copy = _copy(language)
+    greeting = copy["reset_greeting"].format(name=restaurant_name)
+    body = copy["reset_body"].format(minutes=RESET_TTL_MINUTES)
+    return {
+        "subject": copy["reset_subject"],
+        "html": _owner_email_html(
+            language=language if language in EMAIL_COPY else "en",
+            greeting=greeting,
+            body=body,
+            button=copy["reset_button"],
+            url=url,
+            note=copy["reset_ignore"],
+        ),
+        "text": f"{greeting}\n\n{body}\n\n{url}\n\n{copy['reset_ignore']}\n",
+    }
+
+
+def welcome_email(
+    restaurant_name: str, url: str, days: int, language: str | None
+) -> dict[str, str]:
+    """Subject, HTML and text of the welcome email in `language`."""
+    copy = _copy(language)
+    greeting = copy["welcome_greeting"].format(name=restaurant_name)
+    note = copy["welcome_validity"].format(days=days)
+    return {
+        "subject": copy["welcome_subject"],
+        "html": _owner_email_html(
+            language=language if language in EMAIL_COPY else "en",
+            greeting=greeting,
+            body=copy["welcome_body"],
+            button=copy["welcome_button"],
+            url=url,
+            note=note,
+        ),
+        "text": f"{greeting}\n\n{copy['welcome_body']}\n\n{url}\n\n{note}\n",
+    }
 
 
 async def send_password_reset(
-    *, to_email: str, restaurant_name: str, raw_token: str
+    *, to_email: str, restaurant_name: str, raw_token: str, language: str | None = None
 ) -> None:
     """Email a password reset link.
 
@@ -117,7 +224,7 @@ async def send_password_reset(
     reports "we could not email that address" tells an attacker the address is
     registered.
     """
-    url = reset_password_url(raw_token)
+    url = reset_password_url(raw_token, language)
 
     if not is_configured():
         logger.warning(
@@ -129,73 +236,19 @@ async def send_password_reset(
         return
 
     try:
-        await _deliver(
-            {
-                "to": [to_email],
-                "subject": "Reset hasła do panelu RestoLink",
-                "html": _reset_email_html(restaurant_name, url),
-                "text": _reset_email_text(restaurant_name, url),
-            }
-        )
+        await _deliver({"to": [to_email], **reset_email(restaurant_name, url, language)})
     except Exception as exc:  # noqa: BLE001 — SDK raises a variety of errors
         logger.exception("Resend failed to send the password reset email")
         raise EmailSendError(str(exc)) from exc
 
 
-# --------------------------------------------------------------------------- #
-# Welcome / activation
-# --------------------------------------------------------------------------- #
-
-
-def activation_url(raw_token: str) -> str:
-    return f"{APP_BASE_URL}/activate?token={raw_token}"
-
-
-def _welcome_email_html(restaurant_name: str, url: str, days: int) -> str:
-    return f"""\
-<!doctype html>
-<html lang="pl">
-  <body style="margin:0;padding:24px;background:#f7f9fa;font-family:'Segoe UI',Roboto,Arial,sans-serif;color:#2c3542;">
-    <div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:20px;padding:32px;">
-      <p style="margin:0 0 24px;font-size:20px;font-weight:700;color:#161c25;">RestoLink</p>
-      <p style="margin:0 0 16px;font-size:18px;font-weight:600;color:#161c25;">
-        Witamy w RestoLink, {restaurant_name}!
-      </p>
-      <p style="margin:0 0 24px;font-size:16px;line-height:1.6;">
-        Twoje konto jest już gotowe. Zostaw jeszcze jedną rzecz za sobą —
-        ustaw hasło, a od razu wejdziesz do panelu, w którym zbudujesz menu
-        i wygenerujesz kod QR dla gości.
-      </p>
-      <p style="margin:0 0 28px;">
-        <a href="{url}" style="display:inline-block;background:#0f8256;color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:999px;font-weight:600;font-size:16px;">
-          Aktywuj konto
-        </a>
-      </p>
-      <p style="margin:0 0 8px;font-size:14px;color:#6b7787;">
-        Link jest ważny {days} dni i zadziała tylko raz. Jeśli wygaśnie,
-        napisz do nas — wyślemy nowy.
-      </p>
-      <p style="margin:24px 0 0;font-size:12px;color:#9aa4b2;word-break:break-all;">
-        Gdyby przycisk nie działał, wklej ten adres w przeglądarkę:<br />{url}
-      </p>
-    </div>
-  </body>
-</html>"""
-
-
-def _welcome_email_text(restaurant_name: str, url: str, days: int) -> str:
-    return (
-        f"Witamy w RestoLink, {restaurant_name}!\n\n"
-        "Twoje konto jest już gotowe. Ustaw hasło poniższym linkiem, a od razu "
-        "wejdziesz do panelu, w którym zbudujesz menu i wygenerujesz kod QR.\n\n"
-        f"{url}\n\n"
-        f"Link jest ważny {days} dni i zadziała tylko raz. Jeśli wygaśnie, "
-        "napisz do nas — wyślemy nowy.\n"
-    )
-
-
 async def send_welcome(
-    *, to_email: str, restaurant_name: str, raw_token: str, valid_days: int
+    *,
+    to_email: str,
+    restaurant_name: str,
+    raw_token: str,
+    valid_days: int,
+    language: str | None = None,
 ) -> None:
     """Email the activation link to a newly created restaurant.
 
@@ -205,7 +258,7 @@ async def send_welcome(
     stranger. There is nothing to conceal — the operator already knows the
     account exists, because they just created it.
     """
-    url = activation_url(raw_token)
+    url = activation_url(raw_token, language)
 
     if not is_configured():
         # Same contract as the reset email: development works without
@@ -220,12 +273,7 @@ async def send_welcome(
 
     try:
         await _deliver(
-            {
-                "to": [to_email],
-                "subject": "Witamy w RestoLink — aktywuj swoje konto",
-                "html": _welcome_email_html(restaurant_name, url, valid_days),
-                "text": _welcome_email_text(restaurant_name, url, valid_days),
-            }
+            {"to": [to_email], **welcome_email(restaurant_name, url, valid_days, language)}
         )
     except Exception as exc:  # noqa: BLE001 — SDK raises a variety of errors
         logger.exception("Resend failed to send the welcome email")

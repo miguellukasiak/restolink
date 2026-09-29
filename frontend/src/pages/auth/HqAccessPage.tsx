@@ -65,6 +65,7 @@ export function HqAccessPage() {
 
   return (
     <AuthLayout
+      languageSwitch={false}
       title="Dostęp serwisowy"
       subtitle="Ta strona jest przeznaczona wyłącznie dla administratorów RestoLink."
     >

@@ -14,6 +14,8 @@ import { createRestaurantTheme } from '../public/RestaurantThemeProvider';
 import { PublicMenuView } from '../public/PublicMenuView';
 import { MenuSkeleton } from '../public/MenuSkeleton';
 import { PhoneFrame } from './PhoneFrame';
+import { GuestPreviewLanguage } from './GuestPreviewLanguage';
+import { usePanelT } from '../../i18n/panel';
 
 interface LiveMenuPreviewProps {
   restaurantId: string;
@@ -48,6 +50,7 @@ export function LiveMenuPreview({
   phone,
   onClose,
 }: LiveMenuPreviewProps) {
+  const { t } = usePanelT();
   const theme = publicMenu?.restaurant.theme;
   const menuTheme = useMemo(
     () =>
@@ -89,7 +92,7 @@ export function LiveMenuPreview({
               '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
             }}
           />
-          <Typography variant="subtitle2">Podgląd na żywo</Typography>
+          <Typography variant="subtitle2">{t('preview.live')}</Typography>
         </Stack>
         <Button
           size="small"
@@ -99,10 +102,10 @@ export function LiveMenuPreview({
           endIcon={<OpenInNewRoundedIcon sx={{ fontSize: '16px !important' }} />}
           sx={{ px: 1.5 }}
         >
-          Otwórz
+          {t('common.open')}
         </Button>
         {onClose && (
-          <IconButton aria-label="Zamknij podgląd" onClick={onClose} sx={{ ml: 0.5 }}>
+          <IconButton aria-label={t('preview.close')} onClick={onClose} sx={{ ml: 0.5 }}>
             <CloseRoundedIcon />
           </IconButton>
         )}
@@ -116,41 +119,45 @@ export function LiveMenuPreview({
         measureKey={Boolean(publicMenu)}
       >
         {publicMenu ? (
-          <ThemeProvider theme={menuTheme}>
-            <Box
-              sx={{
-                bgcolor: 'background.default',
-                minHeight: 560,
-                '& header': { pointerEvents: 'none' },
-              }}
-            >
-              <PublicMenuView
-                restaurantName={publicMenu.restaurant.name}
-                logoUrl={publicMenu.restaurant.theme.logo_url}
-                languages={publicMenu.restaurant.languages}
-                categories={categories}
-                onOpenItem={(dish) => onOpenItem(dish.id)}
-              />
-              {categories.length === 0 && (
-                <Stack
-                  spacing={1.5}
-                  sx={{ alignItems: 'center', pt: 14, px: 4, color: 'text.secondary' }}
-                >
-                  <MenuBookRoundedIcon sx={{ fontSize: 56, opacity: 0.35 }} />
-                  <Typography sx={{ fontSize: 17, fontWeight: 600, textAlign: 'center' }}>
-                    Tu pojawi się Twoje menu
-                  </Typography>
-                </Stack>
-              )}
-            </Box>
-          </ThemeProvider>
+          <GuestPreviewLanguage>
+            <ThemeProvider theme={menuTheme}>
+              <Box
+                sx={{
+                  bgcolor: 'background.default',
+                  minHeight: 560,
+                  '& header': { pointerEvents: 'none' },
+                }}
+              >
+                <PublicMenuView
+                  restaurantName={publicMenu.restaurant.name}
+                  logoUrl={publicMenu.restaurant.theme.logo_url}
+                  languages={publicMenu.restaurant.languages}
+                  categories={categories}
+                  onOpenItem={(dish) => onOpenItem(dish.id)}
+                />
+                {categories.length === 0 && (
+                  <Stack
+                    spacing={1.5}
+                    sx={{ alignItems: 'center', pt: 14, px: 4, color: 'text.secondary' }}
+                  >
+                    <MenuBookRoundedIcon sx={{ fontSize: 56, opacity: 0.35 }} />
+                    <Typography
+                      sx={{ fontSize: 17, fontWeight: 600, textAlign: 'center' }}
+                    >
+                      {t('preview.emptyMenu')}
+                    </Typography>
+                  </Stack>
+                )}
+              </Box>
+            </ThemeProvider>
+          </GuestPreviewLanguage>
         ) : (
           <MenuSkeleton />
         )}
       </PhoneFrame>
 
       <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center' }}>
-        Kliknij danie w telefonie, aby je edytować.
+        {t('preview.clickToEdit')}
       </Typography>
     </Stack>
   );

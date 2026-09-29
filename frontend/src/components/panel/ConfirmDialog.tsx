@@ -10,6 +10,7 @@ import Avatar from '@mui/material/Avatar';
 import CircularProgress from '@mui/material/CircularProgress';
 import { alpha } from '@mui/material/styles';
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
+import { usePanelT } from '../../i18n/panel';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -26,18 +27,22 @@ interface ConfirmDialogProps {
 /**
  * Reusable Material 3 confirmation dialog. Rounded surface, tonal warning icon,
  * pill buttons — used to guard destructive actions like deletions.
+ *
+ * The default labels are the owner panel's; HQ, which is Polish only, passes
+ * its own.
  */
 export function ConfirmDialog({
   open,
   title,
   description,
-  confirmLabel = 'Potwierdź',
-  cancelLabel = 'Anuluj',
+  confirmLabel,
+  cancelLabel,
   confirmColor = 'error',
   loading = false,
   onConfirm,
   onClose,
 }: ConfirmDialogProps) {
+  const { t } = usePanelT();
   return (
     <Dialog
       open={open}
@@ -68,7 +73,7 @@ export function ConfirmDialog({
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2, justifyContent: 'center', gap: 1 }}>
         <Button onClick={onClose} color="inherit" disabled={loading}>
-          {cancelLabel}
+          {cancelLabel ?? t('common.cancel')}
         </Button>
         <Button
           onClick={onConfirm}
@@ -79,7 +84,7 @@ export function ConfirmDialog({
             loading ? <CircularProgress size={18} color="inherit" /> : undefined
           }
         >
-          {confirmLabel}
+          {confirmLabel ?? t('common.confirm')}
         </Button>
       </DialogActions>
     </Dialog>

@@ -6,6 +6,7 @@ import {
   getAdminSession,
   getRestaurantSession,
 } from './authStorage';
+import { panelLanguage, tp } from '../i18n/panel';
 
 /**
  * Shared Axios instance pointed at the FastAPI backend.
@@ -61,7 +62,17 @@ function sessionScopeFor(url: string | undefined): 'admin' | 'restaurant' | null
 
 /** Attaches the bearer token that matches the endpoint being called. */
 api.interceptors.request.use((config) => {
-  const scope = sessionScopeFor(config.url);
+  // Server messages come back in the language of the panel that asked: the
+  // owner's panel language, or Polish for HQ, whose panel is Polish. Guest
+  // requests are left alone — the menu does not show server messages.
+  const url = config.url ?? '';
+  if (/\/api\/v1\/(admin|auth\/admin)\b/.test(url)) {
+    config.headers.set('Accept-Language', 'pl');
+  } else if (!/\/api\/v1\/(public|webhooks)\b/.test(url)) {
+    config.headers.set('Accept-Language', panelLanguage());
+  }
+
+  const scope = sessionScopeFor(url);
   if (!scope) return config;
 
   const token =
@@ -158,22 +169,19 @@ export function getApiErrorMessage(error: unknown): string {
     if (typeof body?.message === 'string') return body.message;
 
     if (axiosError.response?.status === 404) {
-      return 'Nie znaleziono restauracji o podanym ID.';
+      return tp('errors.notFound');
     }
     if (axiosError.response?.status === 400) {
-      return 'Błąd walidacji — sprawdź wprowadzone dane.';
+      return tp('errors.invalid');
     }
     if (axiosError.code === 'ECONNABORTED') {
-      return (
-        'Serwer się wybudza po okresie bezczynności — pierwsze żądanie może ' +
-        'potrwać do 30 sekund. Odczekaj chwilę i spróbuj ponownie.'
-      );
+      return tp('errors.coldStart');
     }
     if (!axiosError.response) {
-      return 'Brak połączenia z serwerem. Sprawdź połączenie internetowe i spróbuj ponownie.';
+      return tp('errors.offline');
     }
   }
 
   if (error instanceof Error && error.message) return error.message;
-  return 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie.';
+  return tp('errors.unexpected');
 }

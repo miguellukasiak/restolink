@@ -27,7 +27,7 @@ import type {
   PublicMenuItem,
   RestaurantThemeSettings,
 } from '../../types';
-import { ALLERGEN_OPTIONS, TAG_OPTIONS } from '../../constants/menu';
+import { ALLERGEN_OPTIONS, CURRENCY_SYMBOL, TAG_OPTIONS } from '../../constants/menu';
 import { getAllergenIcon, getTagIcon } from '../../constants/menuIcons';
 import { useSaveMenuItem } from '../../hooks/useSaveMenuItem';
 import { getApiErrorMessage } from '../../services/api';
@@ -38,6 +38,8 @@ import { ConfirmDialog } from './ConfirmDialog';
 import { DishPhotoField } from './DishPhotoField';
 import { GuestDishPreview } from './GuestDishPreview';
 import { TonalIcon } from './TonalIcon';
+import { usePanelT } from '../../i18n/panel';
+import { usePanelLabels } from '../../hooks/usePanelLabels';
 
 /** "24", "24,9", "24.90" — a comma is what a Polish keyboard types. */
 const PRICE_PATTERN = /^\d{1,6}(?:[.,]\d{1,2})?$/;
@@ -52,29 +54,22 @@ const SAVE_SHORTCUT =
 const parsePrice = (value: string) => Number(value.trim().replace(',', '.'));
 const formatPriceInput = (value: number) => value.toFixed(2).replace('.', ',');
 
+// Messages are panel keys, translated where they are shown.
 const dishSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(2, 'Nazwa musi mieć co najmniej 2 znaki')
-    .max(150, 'Nazwa może mieć maksymalnie 150 znaków'),
+  name: z.string().trim().min(2, 'dishForm.nameMin').max(150, 'dishForm.nameMax'),
   // Text, not a number input: `type="number"` rejects "24,90" in browsers
   // set to an English locale, and the owner then sees a price error for a
   // perfectly ordinary Polish price.
   price: z
     .string()
     .trim()
-    .min(1, 'Podaj cenę')
-    .regex(PRICE_PATTERN, 'Podaj cenę, np. 24,90')
-    .refine((value) => parsePrice(value) > 0, 'Cena musi być większa od zera')
-    .refine((value) => parsePrice(value) <= 100_000, 'Cena jest zbyt wysoka'),
-  categoryId: z.string().min(1, 'Wybierz kategorię'),
-  description: z
-    .string()
-    .max(TEXT_LIMIT, `Opis może mieć maksymalnie ${TEXT_LIMIT} znaków`),
-  ingredients: z
-    .string()
-    .max(TEXT_LIMIT, `Lista składników może mieć maksymalnie ${TEXT_LIMIT} znaków`),
+    .min(1, 'dishForm.priceRequired')
+    .regex(PRICE_PATTERN, 'dishForm.priceFormat')
+    .refine((value) => parsePrice(value) > 0, 'dishForm.pricePositive')
+    .refine((value) => parsePrice(value) <= 100_000, 'dishForm.priceTooHigh'),
+  categoryId: z.string().min(1, 'dishForm.categoryRequired'),
+  description: z.string().max(TEXT_LIMIT, 'dishForm.descriptionMax'),
+  ingredients: z.string().max(TEXT_LIMIT, 'dishForm.ingredientsMax'),
   allergens: z.array(z.string()),
   tags: z.array(z.string()),
   isAvailable: z.boolean(),
@@ -135,6 +130,11 @@ export function MenuItemEditorDialog({
   onSaved,
   onRequestDelete,
 }: MenuItemEditorDialogProps) {
+  const { t } = usePanelT();
+  const { allergenLabel, tagLabel } = usePanelLabels();
+  /** A schema message (a panel key) in the panel's language. */
+  const problem = (message?: string) =>
+    message ? t(message, { max: TEXT_LIMIT }) : undefined;
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
   const { showSuccess, showError } = useSnackbar();
@@ -173,7 +173,7 @@ export function MenuItemEditorDialog({
   const previewDish: PublicMenuItem = {
     id: item?.id ?? 'draft',
     category_id: watched.categoryId ?? categoryId,
-    name: watched.name?.trim() || 'Nazwa dania',
+    name: watched.name?.trim() || t('dishForm.name'),
     price: PRICE_PATTERN.test(watched.price?.trim() ?? '')
       ? parsePrice(watched.price ?? '')
       : 0,
@@ -242,7 +242,7 @@ export function MenuItemEditorDialog({
           onSuccess: (saved) => {
             onSaved(saved);
             if (then === 'next') {
-              showSuccess(`Dodano „${name}". Czas na kolejne danie!`);
+              showSuccess(t('dishForm.addedNext', { name }));
               reset(formValuesFor(null, values.categoryId));
               // Deferred: the field is still disabled until the render that
               // follows the finished request, and a disabled input ignores focus.
@@ -250,8 +250,8 @@ export function MenuItemEditorDialog({
             } else {
               showSuccess(
                 isEdit
-                  ? `Zapisano zmiany w „${name}".`
-                  : `Danie „${name}" jest już w menu.`,
+                  ? t('dishForm.savedChanges', { name })
+                  : t('dishForm.added', { name }),
               );
               onClose();
             }
@@ -296,12 +296,12 @@ export function MenuItemEditorDialog({
 
         <Stack spacing={2}>
           <TextField
-            label="Nazwa dania"
-            placeholder="np. Pierogi ruskie"
+            label={t('dishForm.name')}
+            placeholder={t('dishForm.namePlaceholder')}
             fullWidth
             autoFocus={!isEdit && !fullScreen}
             error={Boolean(errors.name)}
-            helperText={errors.name?.message}
+            helperText={problem(errors.name?.message)}
             disabled={isSubmitting}
             {...register('name')}
           />
@@ -313,15 +313,17 @@ export function MenuItemEditorDialog({
             }}
           >
             <TextField
-              label="Cena"
+              label={t('dishForm.price')}
               placeholder="0,00"
               fullWidth
               error={Boolean(errors.price)}
-              helperText={errors.price?.message}
+              helperText={problem(errors.price?.message)}
               disabled={isSubmitting}
               slotProps={{
                 input: {
-                  endAdornment: <InputAdornment position="end">zł</InputAdornment>,
+                  endAdornment: (
+                    <InputAdornment position="end">{CURRENCY_SYMBOL}</InputAdornment>
+                  ),
                 },
                 htmlInput: { inputMode: 'decimal', autoComplete: 'off' },
               }}
@@ -333,14 +335,14 @@ export function MenuItemEditorDialog({
               render={({ field }) => (
                 <TextField
                   select
-                  label="Kategoria"
+                  label={t('dishForm.category')}
                   fullWidth
                   value={field.value}
                   onChange={field.onChange}
                   onBlur={field.onBlur}
                   inputRef={field.ref}
                   error={Boolean(errors.categoryId)}
-                  helperText={errors.categoryId?.message}
+                  helperText={problem(errors.categoryId?.message)}
                   disabled={isSubmitting}
                 >
                   {categories.map((category) => (
@@ -356,8 +358,8 @@ export function MenuItemEditorDialog({
       </Box>
 
       <TextField
-        label="Opis"
-        placeholder="Co sprawia, że to danie warto zamówić? Np. „Ręcznie lepione, podawane z chrupiącą cebulką”"
+        label={t('dishForm.description')}
+        placeholder={t('dishForm.descriptionPlaceholder')}
         fullWidth
         multiline
         minRows={3}
@@ -369,8 +371,7 @@ export function MenuItemEditorDialog({
             sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}
           >
             <span>
-              {errors.description?.message ??
-                'Goście widzą go na karcie i w szczegółach.'}
+              {problem(errors.description?.message) ?? t('dishForm.descriptionHint')}
             </span>
             <span>
               {description.length}/{TEXT_LIMIT}
@@ -381,13 +382,13 @@ export function MenuItemEditorDialog({
       />
 
       <TextField
-        label="Składniki"
-        placeholder="np. mąka, ziemniaki, twaróg, cebula"
+        label={t('dishForm.ingredients')}
+        placeholder={t('dishForm.ingredientsPlaceholder')}
         fullWidth
         multiline
         minRows={2}
         error={Boolean(errors.ingredients)}
-        helperText={errors.ingredients?.message ?? 'Oddziel przecinkami.'}
+        helperText={problem(errors.ingredients?.message) ?? t('dishForm.ingredientsHint')}
         disabled={isSubmitting}
         {...register('ingredients')}
       />
@@ -397,14 +398,15 @@ export function MenuItemEditorDialog({
         control={control}
         render={({ field }) => (
           <ChoiceChips
-            label="Alergeny"
-            hint="Goście z alergią odfiltrowują po nich menu — zaznacz wszystkie, które zawiera danie."
+            label={t('dishForm.allergens')}
+            hint={t('dishForm.allergensHint')}
             options={ALLERGEN_OPTIONS}
             known={customLabels.allergens}
-            addLabel="Własny alergen"
+            addLabel={t('dishForm.customAllergen')}
             value={field.value}
             onChange={field.onChange}
             iconFor={getAllergenIcon}
+            labelFor={allergenLabel}
             tone="warning"
             disabled={isSubmitting}
           />
@@ -416,14 +418,15 @@ export function MenuItemEditorDialog({
         control={control}
         render={({ field }) => (
           <ChoiceChips
-            label="Oznaczenia"
-            hint="Wyróżniają danie na karcie."
+            label={t('dishForm.tags')}
+            hint={t('dishForm.tagsHint')}
             options={TAG_OPTIONS}
             known={customLabels.tags}
-            addLabel="Własne oznaczenie"
+            addLabel={t('dishForm.customTag')}
             value={field.value}
             onChange={field.onChange}
             iconFor={getTagIcon}
+            labelFor={tagLabel}
             tone="primary"
             disabled={isSubmitting}
           />
@@ -448,11 +451,9 @@ export function MenuItemEditorDialog({
             }}
           >
             <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography variant="subtitle2">Dostępne w menu</Typography>
+              <Typography variant="subtitle2">{t('dishForm.available')}</Typography>
               <Typography variant="caption" color="text.secondary" component="p">
-                {field.value
-                  ? 'Goście mogą je wybrać.'
-                  : 'Zostaje w menu, ale wyszarzone jako niedostępne — np. gdy się skończy.'}
+                {field.value ? t('dishForm.availableOn') : t('dishForm.availableOff')}
               </Typography>
             </Box>
             <Switch
@@ -525,13 +526,21 @@ export function MenuItemEditorDialog({
           </TonalIcon>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography variant="h6" component="h2" id="dish-editor-title" noWrap>
-              {isEdit ? `Edytuj: ${item.name}` : 'Nowe danie'}
+              {isEdit
+                ? t('dishForm.editTitle', { name: item.name })
+                : t('dishForm.newTitle')}
             </Typography>
             <Typography variant="body2" color="text.secondary" noWrap>
-              {selectedCategory ? `Kategoria „${selectedCategory.name}"` : ' '}
+              {selectedCategory
+                ? t('dishForm.inCategory', { name: selectedCategory.name })
+                : ' '}
             </Typography>
           </Box>
-          <IconButton aria-label="Zamknij" onClick={requestClose} disabled={isSubmitting}>
+          <IconButton
+            aria-label={t('common.close')}
+            onClick={requestClose}
+            disabled={isSubmitting}
+          >
             <CloseRoundedIcon />
           </IconButton>
         </Stack>
@@ -549,7 +558,7 @@ export function MenuItemEditorDialog({
           <Box sx={{ overflowY: { md: 'auto' }, p: { xs: 2, sm: 3 } }}>{form}</Box>
           <Box
             component="aside"
-            aria-label="Podgląd dla gości"
+            aria-label={t('dishForm.guestPreview')}
             sx={{
               overflowY: { md: 'auto' },
               p: { xs: 2, sm: 3 },
@@ -561,7 +570,7 @@ export function MenuItemEditorDialog({
           >
             <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 0.5 }}>
               <VisibilityRoundedIcon sx={{ fontSize: 18, color: 'primary.main' }} />
-              <Typography variant="subtitle2">Tak zobaczą je goście</Typography>
+              <Typography variant="subtitle2">{t('dishForm.guestsSee')}</Typography>
             </Stack>
             <Typography
               variant="caption"
@@ -569,7 +578,7 @@ export function MenuItemEditorDialog({
               component="p"
               sx={{ mb: 2 }}
             >
-              Podgląd zmienia się, gdy piszesz — w kolorach Twojego menu.
+              {t('dishForm.previewHint')}
             </Typography>
             {preview}
           </Box>
@@ -597,7 +606,7 @@ export function MenuItemEditorDialog({
               disabled={isSubmitting}
               sx={{ px: { xs: 1.5, sm: 2.5 } }}
             >
-              Usuń
+              {t('common.delete')}
             </Button>
           )}
           <Box sx={{ flex: 1 }} />
@@ -606,10 +615,10 @@ export function MenuItemEditorDialog({
             color="text.secondary"
             sx={{ display: { xs: 'none', lg: 'block' }, mr: 1 }}
           >
-            {SAVE_SHORTCUT} zapisuje
+            {t('dishForm.shortcutSaves', { shortcut: SAVE_SHORTCUT })}
           </Typography>
           <Button color="inherit" onClick={requestClose} disabled={isSubmitting}>
-            Anuluj
+            {t('common.cancel')}
           </Button>
           {!isEdit && (
             <Button
@@ -618,7 +627,7 @@ export function MenuItemEditorDialog({
               disabled={isSubmitting}
               sx={{ display: { xs: 'none', sm: 'inline-flex' } }}
             >
-              Zapisz i dodaj kolejne
+              {t('dishForm.saveAndNext')}
             </Button>
           )}
           <Button
@@ -629,17 +638,21 @@ export function MenuItemEditorDialog({
               isSubmitting ? <CircularProgress size={18} color="inherit" /> : undefined
             }
           >
-            {isSubmitting ? 'Zapisywanie…' : isEdit ? 'Zapisz zmiany' : 'Dodaj do menu'}
+            {isSubmitting
+              ? t('common.saving')
+              : isEdit
+                ? t('common.saveChanges')
+                : t('dishForm.addToMenu')}
           </Button>
         </Stack>
       </Dialog>
 
       <ConfirmDialog
         open={confirmDiscard}
-        title="Porzucić zmiany?"
-        description="Masz niezapisane zmiany w tym daniu. Jeśli zamkniesz okno, przepadną."
-        confirmLabel="Porzuć zmiany"
-        cancelLabel="Wróć do edycji"
+        title={t('dishForm.discardTitle')}
+        description={t('dishForm.discardBody')}
+        confirmLabel={t('dishForm.discard')}
+        cancelLabel={t('dishForm.keepEditing')}
         onConfirm={() => {
           setConfirmDiscard(false);
           onClose();

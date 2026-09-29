@@ -43,7 +43,7 @@ import { useSnackbar } from '../../components/feedback/SnackbarProvider';
 import { getFontPairing } from '../../constants/menuStyle';
 import { radii } from '../../theme';
 import { qrMenuPayload, shortMenuUrl } from '../../utils/menuLink';
-import { plCount } from '../../utils/plural';
+import { usePanelT } from '../../i18n/panel';
 import {
   buildMatrix,
   dotSample,
@@ -60,6 +60,7 @@ import {
   planSheet,
   resolveSize,
   sheetDocument,
+  sizeLabels,
   svgDocument,
   templateBody,
   type QrBrand,
@@ -105,18 +106,12 @@ const HEX = /^#[0-9a-fA-F]{6}$/;
 const safeHex = (value: unknown, fallback: string) =>
   typeof value === 'string' && HEX.test(value) ? value.toUpperCase() : fallback;
 
-const FORMAT_ORDER: { value: QrFormat; icon: ReactNode; slug: string }[] = [
-  { value: 'tent', icon: <TableRestaurantRoundedIcon />, slug: 'stojak' },
-  { value: 'sticker', icon: <PanoramaFishEyeRoundedIcon />, slug: 'naklejka' },
-  { value: 'poster', icon: <ArticleRoundedIcon />, slug: 'plakat' },
-  { value: 'code', icon: <QrCode2RoundedIcon />, slug: 'kod' },
+const FORMAT_ORDER: { value: QrFormat; icon: ReactNode }[] = [
+  { value: 'tent', icon: <TableRestaurantRoundedIcon /> },
+  { value: 'sticker', icon: <PanoramaFishEyeRoundedIcon /> },
+  { value: 'poster', icon: <ArticleRoundedIcon /> },
+  { value: 'code', icon: <QrCode2RoundedIcon /> },
 ];
-
-const CENTER_SIZE_LABEL: Record<CenterSize, string> = {
-  S: 'Mały',
-  M: 'Średni',
-  L: 'Duży',
-};
 
 /** Where the last design is remembered, per restaurant and per browser. */
 const storageKey = (restaurantId: string) => `restolink.qr-design.${restaurantId}`;
@@ -132,8 +127,8 @@ function loadDesign(restaurantId: string): QrDesign | null {
     const saved = JSON.parse(raw) as QrDesign;
     const { look, wording } = saved;
     const valid =
-      DOT_OPTIONS.some((option) => option.value === look.dots) &&
-      EYE_OPTIONS.some((option) => option.value === look.eyes) &&
+      DOT_OPTIONS.includes(look.dots) &&
+      EYE_OPTIONS.includes(look.eyes) &&
       HEX.test(look.color) &&
       HEX.test(look.eyeColor) &&
       (look.gradientTo === null || HEX.test(look.gradientTo)) &&
@@ -184,7 +179,7 @@ function readImage(file: File): Promise<string> {
     reader.onerror = () => reject(reader.error);
     reader.onload = () => {
       const image = new Image();
-      image.onerror = () => reject(new Error('Nie udało się wczytać obrazu.'));
+      image.onerror = () => reject(new Error('Could not load the image.'));
       image.onload = () => {
         // An SVG without width/height reports 0×0; give it a square to fill.
         const width = image.width || 512;
@@ -227,6 +222,7 @@ function slug(text: string): string {
  * changes: editing the menu never means reprinting.
  */
 export function QrGeneratorPage() {
+  const { t, i18n } = usePanelT();
   const { restaurantId = '' } = useParams<{ restaurantId: string }>();
   const { showSuccess, showError } = useSnackbar();
   const publicMenu = usePublicMenu(restaurantId);
@@ -412,23 +408,30 @@ export function QrGeneratorPage() {
       current ? { ...current, wording: { ...current.wording, ...patch } } : current,
     );
 
-  const brandSwatch = { color: readableOnWhite(brand.primary), label: 'Kolor marki' };
+  const brandSwatch = {
+    color: readableOnWhite(brand.primary),
+    label: t('qr.swatch.brand'),
+  };
   const swatches = [
     brandSwatch,
-    ...SAFE_SWATCHES.filter((swatch) => swatch.color !== brandSwatch.color),
+    ...SAFE_SWATCHES.filter((swatch) => swatch.color !== brandSwatch.color).map(
+      (swatch) => ({ color: swatch.color, label: t(`qr.swatch.${swatch.id}`) }),
+    ),
   ];
   const tooLight = weakestContrast(design.look) < 4.5;
   const plan = planSheet(format, size);
   const sheetLabel =
     format === 'poster'
-      ? `Plakat ${size.id} drukuje się na całej stronie ${plan.page}${
-          plan.page === 'A3' ? ' — wydrukuj na A3 albo zanieś plik do drukarni' : ''
-        }`
-      : `${plCount(plan.positions.length, ...spec.unit)} na arkuszu A4`;
+      ? t('qr.posterSheet', { size: size.id, page: plan.page }) +
+        (plan.page === 'A3' ? t('qr.posterA3') : '')
+      : t('qr.perSheet', {
+          copies: t(`qr.unit.${format}`, { count: plan.positions.length }),
+        });
+  const sizeText = sizeLabels(format, size, i18n.language);
   const sizeSlug = slug(
     format === 'code' || format === 'sticker' ? `${size.id}cm` : size.id,
   );
-  const fileBase = `${slug(brand.name) || 'menu'}-${FORMAT_ORDER.find((f) => f.value === format)?.slug}-${sizeSlug}-qr`;
+  const fileBase = `${slug(brand.name) || 'menu'}-${t(`qr.fileSlug.${format}`)}-${sizeSlug}-qr`;
   const printed = { width: size.width, height: size.height };
   const setSize = (id: string) =>
     setDesign((current) =>
@@ -452,18 +455,16 @@ export function QrGeneratorPage() {
           size.height,
           fileBase,
         );
-        showSuccess('Pobrano PNG w jakości do druku (300 dpi).');
+        showSuccess(t('qr.pngSaved'));
       } else {
         downloadSvg(
           svgDocument(box.width, box.height, body, { fontCss, print: printed }),
           fileBase,
         );
-        showSuccess('Pobrano SVG — plik wektorowy dla drukarni.');
+        showSuccess(t('qr.svgSaved'));
       }
     } catch (error) {
-      showError(
-        error instanceof Error ? error.message : 'Nie udało się przygotować pliku.',
-      );
+      showError(error instanceof Error ? error.message : t('qr.errors.file'));
     } finally {
       setBusy(null);
     }
@@ -472,9 +473,9 @@ export function QrGeneratorPage() {
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(link);
-      showSuccess('Link do menu skopiowany.');
+      showSuccess(t('qr.linkCopied'));
     } catch {
-      showError('Nie udało się skopiować linku.');
+      showError(t('qr.linkCopyFailed'));
     }
   };
 
@@ -487,7 +488,7 @@ export function QrGeneratorPage() {
   }[] = [
     {
       value: 'logo',
-      label: 'Logo',
+      label: t('qr.center.logo'),
       icon: logo.data ? (
         <Box
           component="img"
@@ -500,25 +501,24 @@ export function QrGeneratorPage() {
       ),
       disabled: !logoUrl || logo.isError,
       hint: !logoUrl
-        ? 'Dodaj logo w zakładce „Wygląd menu”'
+        ? t('qr.center.addLogo')
         : logo.isError
-          ? 'Nie udało się wczytać logo — wgraj plik'
+          ? t('qr.center.logoFailed')
           : undefined,
     },
-    { value: 'icon', label: 'Sztućce', icon: <RestaurantMenuRoundedIcon /> },
-    { value: 'upload', label: 'Obraz', icon: <UploadRoundedIcon /> },
-    { value: 'none', label: 'Bez', icon: <BlockRoundedIcon /> },
+    { value: 'icon', label: t('qr.center.icon'), icon: <RestaurantMenuRoundedIcon /> },
+    { value: 'upload', label: t('qr.center.upload'), icon: <UploadRoundedIcon /> },
+    { value: 'none', label: t('qr.center.none'), icon: <BlockRoundedIcon /> },
   ];
 
   return (
     <Box sx={{ maxWidth: 1320, mx: 'auto', pt: 4 }}>
       <Stack spacing={0.5} sx={{ mb: 3 }}>
         <Typography variant="h4" component="h1">
-          Kody QR
+          {t('nav.qr')}
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Wybierz projekt w kolorach swojej restauracji, zobacz go na stoliku i wydrukuj.
-          Każdy kod sprawdzamy, zanim trafi do druku.
+          {t('qr.subtitle')}
         </Typography>
       </Stack>
 
@@ -535,7 +535,7 @@ export function QrGeneratorPage() {
           <Paper elevation={1} sx={{ borderRadius: radii.lg, p: 1.5 }}>
             <Box
               role="tablist"
-              aria-label="Na czym wydrukujesz kod"
+              aria-label={t('qr.formatTabs')}
               sx={{
                 display: 'grid',
                 gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' },
@@ -574,14 +574,18 @@ export function QrGeneratorPage() {
                         noWrap
                         sx={{ color: selected ? 'primary.dark' : 'text.primary' }}
                       >
-                        {FORMATS[option.value].label}
+                        {t(`qr.format.${option.value}`)}
                       </Typography>
                       <Typography variant="caption" noWrap component="p">
                         {
-                          resolveSize(
+                          sizeLabels(
                             option.value,
-                            design.sizes[option.value],
-                            design.customCm,
+                            resolveSize(
+                              option.value,
+                              design.sizes[option.value],
+                              design.customCm,
+                            ),
+                            i18n.language,
                           ).label
                         }
                       </Typography>
@@ -600,14 +604,14 @@ export function QrGeneratorPage() {
                 variant="caption"
                 sx={{ fontWeight: 700, color: 'text.secondary', mr: 0.5 }}
               >
-                Rozmiar
+                {t('qr.size')}
               </Typography>
               {spec.sizes.map((option) => {
                 const selected = design.sizes[format] === option.id;
                 return (
                   <Chip
                     key={option.id}
-                    label={option.short}
+                    label={sizeLabels(format, option, i18n.language).short}
                     clickable
                     variant={selected ? 'filled' : 'outlined'}
                     color={selected ? 'primary' : 'default'}
@@ -618,7 +622,7 @@ export function QrGeneratorPage() {
               })}
               {format === 'code' && (
                 <Chip
-                  label="Własny"
+                  label={t('qr.customSize')}
                   clickable
                   variant={design.sizes.code === 'custom' ? 'filled' : 'outlined'}
                   color={design.sizes.code === 'custom' ? 'primary' : 'default'}
@@ -649,7 +653,7 @@ export function QrGeneratorPage() {
                       min: CUSTOM_CODE_CM.min,
                       max: CUSTOM_CODE_CM.max,
                       step: 0.5,
-                      'aria-label': 'Własny rozmiar kodu w centymetrach',
+                      'aria-label': t('qr.customSizeAria'),
                     },
                     input: {
                       endAdornment: <InputAdornment position="end">cm</InputAdornment>,
@@ -665,8 +669,11 @@ export function QrGeneratorPage() {
             <QrStage
               format={format}
               svg={svgDocument(box.width, box.height, body, { size: 'fluid' })}
-              label={`Podgląd: ${spec.label.toLowerCase()} ${size.label} z kodem QR prowadzącym do menu`}
-              sizeLabel={size.label}
+              label={t('qr.stageLabel', {
+                format: t(`qr.format.${format}`).toLocaleLowerCase(i18n.language),
+                size: sizeText.label,
+              })}
+              sizeLabel={sizeText.label}
               box={box}
             />
           </Paper>
@@ -683,7 +690,7 @@ export function QrGeneratorPage() {
 
             <Paper elevation={1} sx={{ borderRadius: radii.md, p: 2 }}>
               <Typography variant="subtitle2" component="h2">
-                Pobierz i wydrukuj
+                {t('qr.download')}
               </Typography>
               <Typography
                 variant="caption"
@@ -691,8 +698,7 @@ export function QrGeneratorPage() {
                 component="p"
                 sx={{ mb: 1.5 }}
               >
-                {sheetLabel}. W oknie drukowania wybierz „Zapisz jako PDF”, by dostać plik
-                dla drukarni.
+                {t('qr.downloadHint', { sheet: sheetLabel })}
               </Typography>
               <Button
                 fullWidth
@@ -708,7 +714,7 @@ export function QrGeneratorPage() {
                   )
                 }
               >
-                Drukuj / PDF
+                {t('qr.print')}
               </Button>
               <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
                 <Button
@@ -752,7 +758,7 @@ export function QrGeneratorPage() {
               sx={{ alignItems: { sm: 'center' } }}
             >
               <TextField
-                label="Link do menu"
+                label={t('qr.menuLink')}
                 value={link}
                 fullWidth
                 size="small"
@@ -761,10 +767,10 @@ export function QrGeneratorPage() {
                     readOnly: true,
                     endAdornment: (
                       <InputAdornment position="end">
-                        <Tooltip title="Kopiuj link" arrow>
+                        <Tooltip title={t('qr.copyLink')} arrow>
                           <IconButton
                             edge="end"
-                            aria-label="Kopiuj link do menu"
+                            aria-label={t('qr.copyLinkAria')}
                             onClick={() => void copyLink()}
                           >
                             <ContentCopyRoundedIcon fontSize="small" />
@@ -782,14 +788,13 @@ export function QrGeneratorPage() {
                 endIcon={<OpenInNewRoundedIcon />}
                 sx={{ flexShrink: 0 }}
               >
-                Otwórz menu
+                {t('qr.openMenu')}
               </Button>
             </Stack>
             <Stack direction="row" spacing={1} sx={{ mt: 1.5, alignItems: 'flex-start' }}>
               <CheckCircleRoundedIcon color="primary" sx={{ fontSize: 18, mt: '1px' }} />
               <Typography variant="body2" color="text.secondary">
-                Ten kod się nie zmienia. Edytujesz dania, ceny i zdjęcia — goście od razu
-                widzą nowe menu, bez ponownego drukowania.
+                {t('qr.neverChanges')}
               </Typography>
             </Stack>
           </Paper>
@@ -799,11 +804,11 @@ export function QrGeneratorPage() {
         <Paper elevation={1} sx={{ borderRadius: radii.lg, p: 2.5 }}>
           <Stack spacing={3}>
             <ControlGroup
-              title="Gotowe projekty"
+              title={t('qr.presets')}
               hint={
                 brandSwatch.color === brand.primary
-                  ? 'W kolorach Twojej restauracji.'
-                  : 'W kolorach Twojej restauracji — kolor marki lekko przyciemniony, by kod pewnie się skanował.'
+                  ? t('qr.presetsHint')
+                  : t('qr.presetsHintDarkened')
               }
             >
               <Box
@@ -847,7 +852,7 @@ export function QrGeneratorPage() {
                           color: selected ? 'primary.dark' : 'text.primary',
                         }}
                       >
-                        {preset.name}
+                        {t(`qr.preset.${preset.id}`)}
                       </Typography>
                     </ButtonBase>
                   );
@@ -855,10 +860,7 @@ export function QrGeneratorPage() {
               </Box>
             </ControlGroup>
 
-            <ControlGroup
-              title="Środek kodu"
-              hint="Z logo kod ma mocniejszą korekcję błędów — dalej czyta się bez problemu."
-            >
+            <ControlGroup title={t('qr.centerTitle')} hint={t('qr.centerHint')}>
               <OptionGrid columns={4}>
                 {centerOptions.map((option) => {
                   const tile = (
@@ -899,7 +901,7 @@ export function QrGeneratorPage() {
                       setUpload(dataUri);
                       update({ center: 'upload' });
                     })
-                    .catch(() => showError('Nie udało się wczytać obrazu.'));
+                    .catch(() => showError(t('qr.errors.image')));
                 }}
               />
               {design.center === 'upload' && upload && (
@@ -908,7 +910,7 @@ export function QrGeneratorPage() {
                   onClick={() => uploadRef.current?.click()}
                   sx={{ mt: 1 }}
                 >
-                  Zmień obraz
+                  {t('qr.changeImage')}
                 </Button>
               )}
               {design.center !== 'none' && (
@@ -919,12 +921,12 @@ export function QrGeneratorPage() {
                   onChange={(_event, value: CenterSize | null) =>
                     value && update({ centerSize: value })
                   }
-                  aria-label="Wielkość środka"
+                  aria-label={t('qr.centerSizeAria')}
                   sx={{ mt: 1.25, display: 'flex' }}
                 >
                   {(['S', 'M', 'L'] as const).map((size) => (
                     <ToggleButton key={size} value={size} sx={{ flex: 1, py: 0.5 }}>
-                      {CENTER_SIZE_LABEL[size]}
+                      {t(`qr.centerSize.${size}`)}
                     </ToggleButton>
                   ))}
                 </ToggleButtonGroup>
@@ -932,7 +934,7 @@ export function QrGeneratorPage() {
             </ControlGroup>
 
             {format !== 'code' && (
-              <ControlGroup title="Napis">
+              <ControlGroup title={t('qr.wording')} hint={t('qr.wordingHint')}>
                 <Stack
                   direction="row"
                   useFlexGap
@@ -952,7 +954,7 @@ export function QrGeneratorPage() {
                   ))}
                 </Stack>
                 <TextField
-                  label="Własny napis"
+                  label={t('qr.customText')}
                   size="small"
                   fullWidth
                   value={design.wording.cta}
@@ -966,13 +968,13 @@ export function QrGeneratorPage() {
                   direction="row"
                   sx={{ alignItems: 'center', justifyContent: 'space-between', mt: 0.5 }}
                 >
-                  <Typography variant="body2">Nazwa restauracji</Typography>
+                  <Typography variant="body2">{t('qr.restaurantName')}</Typography>
                   <Switch
                     checked={design.wording.showName}
                     onChange={(event) =>
                       updateWording({ showName: event.target.checked })
                     }
-                    slotProps={{ input: { 'aria-label': 'Pokaż nazwę restauracji' } }}
+                    slotProps={{ input: { 'aria-label': t('qr.showName') } }}
                   />
                 </Stack>
                 <ToggleButtonGroup
@@ -982,7 +984,7 @@ export function QrGeneratorPage() {
                   onChange={(_event, value: QrWording['surface'] | null) =>
                     value && updateWording({ surface: value })
                   }
-                  aria-label="Tło"
+                  aria-label={t('qr.background')}
                   sx={{ display: 'flex', mt: 0.5 }}
                 >
                   <ToggleButton value="brand" sx={{ flex: 1, gap: 1 }}>
@@ -994,7 +996,7 @@ export function QrGeneratorPage() {
                         bgcolor: brand.primary,
                       }}
                     />
-                    Kolor marki
+                    {t('qr.surface.brand')}
                   </ToggleButton>
                   <ToggleButton value="light" sx={{ flex: 1, gap: 1 }}>
                     <Box
@@ -1006,7 +1008,7 @@ export function QrGeneratorPage() {
                         boxShadow: `inset 0 0 0 1px ${alpha('#000', 0.2)}`,
                       }}
                     />
-                    Jasne tło
+                    {t('qr.surface.light')}
                   </ToggleButton>
                 </ToggleButtonGroup>
               </ControlGroup>
@@ -1027,7 +1029,7 @@ export function QrGeneratorPage() {
               >
                 <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                   <TuneRoundedIcon fontSize="small" color="primary" />
-                  <Typography variant="subtitle2">Dopasuj kształty i kolory</Typography>
+                  <Typography variant="subtitle2">{t('qr.tune')}</Typography>
                 </Stack>
                 <ExpandMoreRoundedIcon
                   sx={{
@@ -1038,48 +1040,48 @@ export function QrGeneratorPage() {
               </ButtonBase>
               <Collapse in={tuneOpen} unmountOnExit>
                 <Stack spacing={3} sx={{ mt: 2 }}>
-                  <ControlGroup title="Kropki">
+                  <ControlGroup title={t('qr.dotsTitle')}>
                     <OptionGrid>
                       {DOT_OPTIONS.map((option) => (
                         <OptionTile
-                          key={option.value}
-                          label={option.label}
-                          selected={design.look.dots === option.value}
-                          onClick={() => updateLook({ dots: option.value })}
+                          key={option}
+                          label={t(`qr.dots.${option}`)}
+                          selected={design.look.dots === option}
+                          onClick={() => updateLook({ dots: option })}
                         >
-                          <ShapeSample svg={dotSample(option.value)} />
+                          <ShapeSample svg={dotSample(option)} />
                         </OptionTile>
                       ))}
                     </OptionGrid>
                   </ControlGroup>
-                  <ControlGroup title="Narożniki">
+                  <ControlGroup title={t('qr.eyesTitle')}>
                     <OptionGrid>
                       {EYE_OPTIONS.map((option) => (
                         <OptionTile
-                          key={option.value}
-                          label={option.label}
-                          selected={design.look.eyes === option.value}
-                          onClick={() => updateLook({ eyes: option.value })}
+                          key={option}
+                          label={t(`qr.eyes.${option}`)}
+                          selected={design.look.eyes === option}
+                          onClick={() => updateLook({ eyes: option })}
                         >
-                          <ShapeSample svg={eyeSample(option.value)} />
+                          <ShapeSample svg={eyeSample(option)} />
                         </OptionTile>
                       ))}
                     </OptionGrid>
                   </ControlGroup>
-                  <ControlGroup title="Kolor kodu">
+                  <ControlGroup title={t('qr.codeColour')}>
                     <SwatchRow
                       swatches={swatches}
                       value={design.look.color}
                       onChange={(color) => updateLook({ color })}
-                      label="Kolor kodu"
+                      label={t('qr.codeColour')}
                     />
                   </ControlGroup>
-                  <ControlGroup title="Kolor narożników">
+                  <ControlGroup title={t('qr.eyeColour')}>
                     <SwatchRow
                       swatches={swatches}
                       value={design.look.eyeColor}
                       onChange={(eyeColor) => updateLook({ eyeColor })}
-                      label="Kolor narożników"
+                      label={t('qr.eyeColour')}
                     />
                   </ControlGroup>
                   <Box>
@@ -1088,7 +1090,7 @@ export function QrGeneratorPage() {
                       sx={{ alignItems: 'center', justifyContent: 'space-between' }}
                     >
                       <Typography variant="subtitle2" component="h3">
-                        Przejście koloru
+                        {t('qr.gradient')}
                       </Typography>
                       <Switch
                         checked={design.look.gradientTo !== null}
@@ -1099,7 +1101,7 @@ export function QrGeneratorPage() {
                               : null,
                           })
                         }
-                        slotProps={{ input: { 'aria-label': 'Przejście koloru' } }}
+                        slotProps={{ input: { 'aria-label': t('qr.gradient') } }}
                       />
                     </Stack>
                     {design.look.gradientTo !== null && (
@@ -1107,7 +1109,7 @@ export function QrGeneratorPage() {
                         swatches={swatches}
                         value={design.look.gradientTo}
                         onChange={(gradientTo) => updateLook({ gradientTo })}
-                        label="Drugi kolor przejścia"
+                        label={t('qr.gradientSecond')}
                       />
                     )}
                   </Box>
@@ -1131,11 +1133,11 @@ export function QrGeneratorPage() {
                         })
                       }
                     >
-                      Przyciemnij
+                      {t('qr.darken')}
                     </Button>
                   }
                 >
-                  Kolor jest za jasny, by kod czytał się pewnie.
+                  {t('qr.tooLight')}
                 </Alert>
               )}
             </Box>

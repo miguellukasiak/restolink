@@ -265,13 +265,36 @@ export function coverageStep(value: number): 0 | 1 | 2 | 3 {
   return 0;
 }
 
-/** "1,6 mld", "41 mln", "850 tys." — rounded as a person would say it. */
-export function formatPeople(value: number): string {
-  if (value >= 1e9)
-    return `${(value / 1e9).toLocaleString('pl-PL', { maximumFractionDigits: 1 })} mld`;
-  if (value >= 1e6) {
-    const millions = value / 1e6;
-    return `${millions.toLocaleString('pl-PL', { maximumFractionDigits: millions < 10 ? 1 : 0 })} mln`;
+/** "1,6 mld", "41 mln", "850 tys." (or "1.6B", "41M", "850K") — rounded as
+ *  a person would say it: one decimal only below ten of a unit. */
+export function formatPeople(value: number, locale = 'pl'): string {
+  const unit = value >= 1e9 ? 1e9 : value >= 1e6 ? 1e6 : 1e3;
+  const digits = unit === 1e9 || (unit === 1e6 && value / unit < 10) ? 1 : 0;
+  return new Intl.NumberFormat(locale, {
+    notation: 'compact',
+    maximumFractionDigits: digits,
+  }).format(value);
+}
+
+const regionNames = new Map<string, Intl.DisplayNames | null>();
+
+/**
+ * A country's name in `locale`, from the browser's own data. The map's file
+ * carries a Polish name for the few keys the browser may not know.
+ */
+export function countryName(key: string, fallback: string, locale: string): string {
+  if (!regionNames.has(locale)) {
+    try {
+      regionNames.set(locale, new Intl.DisplayNames([locale], { type: 'region' }));
+    } catch {
+      regionNames.set(locale, null);
+    }
   }
-  return `${Math.round(value / 1e3).toLocaleString('pl-PL')} tys.`;
+  try {
+    const name = regionNames.get(locale)?.of(key);
+    if (name && name !== key) return name;
+  } catch {
+    // Not a region code the browser accepts.
+  }
+  return fallback;
 }

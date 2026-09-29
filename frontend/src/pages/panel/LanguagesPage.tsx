@@ -14,7 +14,8 @@ import { AddLanguagePanel } from '../../components/panel/languages/AddLanguagePa
 import { OfferedLanguages } from '../../components/panel/languages/OfferedLanguages';
 import { ReachHero } from '../../components/panel/languages/ReachHero';
 import { TranslationEditor } from '../../components/panel/languages/TranslationEditor';
-import { CONFIRM_LANGUAGES_OVER, getMenuLanguage } from '../../constants/menuLanguages';
+import { CONFIRM_LANGUAGES_OVER } from '../../constants/menuLanguages';
+import { useLanguageName, usePanelT } from '../../i18n/panel';
 import { useMenuLanguages, useSaveMenuLanguages } from '../../hooks/useMenuLanguages';
 import { getApiErrorMessage } from '../../services/api';
 import { radii } from '../../theme';
@@ -62,6 +63,8 @@ function Section({
  * past ten, it asks.
  */
 export default function LanguagesPage() {
+  const { t } = usePanelT();
+  const languageName = useLanguageName();
   const { restaurantId = '' } = useParams<{ restaurantId: string }>();
   const { showSuccess, showError } = useSnackbar();
   const data = useMenuLanguages(restaurantId);
@@ -121,22 +124,21 @@ export default function LanguagesPage() {
       setPendingAdd(code);
       return;
     }
-    const name = getMenuLanguage(code)?.name ?? code;
+    const name = languageName(code);
     commit(
       [...offered, code],
       translated(code) >= phrasesTotal && phrasesTotal > 0
-        ? `Dodano: ${name}. Tłumaczenia są gotowe — goście już go widzą.`
-        : `Dodano: ${name}. Goście już go widzą — przetłumacz menu poniżej.`,
+        ? t('languages.addedReady', { name })
+        : t('languages.addedTranslate', { name }),
     );
     setPreview(null);
     if (!editorDirty) setEditing(code);
   };
 
   const remove = (code: string) => {
-    const name = getMenuLanguage(code)?.name ?? code;
     commit(
       offered.filter((entry) => entry !== code),
-      `Ukryto: ${name}. Tłumaczenia zostają — możesz wrócić w każdej chwili.`,
+      t('languages.hidden', { name: languageName(code) }),
     );
   };
 
@@ -152,11 +154,10 @@ export default function LanguagesPage() {
     <Box sx={{ maxWidth: 1360, mx: 'auto', pt: 4 }}>
       <Stack spacing={0.5} sx={{ mb: 3 }}>
         <Typography variant="h4" component="h1">
-          Języki
+          {t('nav.languages')}
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Pokaż menu gościom w ich języku. Mapa podpowie, gdzie już je przeczytają —
-          dodawaj języki tam, skąd przychodzą Twoi goście.
+          {t('languages.subtitle')}
         </Typography>
       </Stack>
 
@@ -187,10 +188,7 @@ export default function LanguagesPage() {
               alignItems: 'start',
             }}
           >
-            <Section
-              title="Twoje języki"
-              hint="Te języki goście widzą w przełączniku menu."
-            >
+            <Section title={t('languages.yours')} hint={t('languages.yoursHint')}>
               <OfferedLanguages
                 base={base}
                 offered={offered}
@@ -203,10 +201,7 @@ export default function LanguagesPage() {
               />
             </Section>
 
-            <Section
-              title="Dodaj język"
-              hint="Najedź na język, a mapa pokaże, gdzie przybędzie czytelników."
-            >
+            <Section title={t('languages.add')} hint={t('languages.addHint')}>
               <AddLanguagePanel
                 languages={languages}
                 phrasesTotal={phrasesTotal}
@@ -220,8 +215,8 @@ export default function LanguagesPage() {
 
           <Box ref={editorRef} sx={{ scrollMarginTop: 88 }}>
             <Section
-              title="Tłumaczenia"
-              hint="Automat podpowiada — ostatnie słowo należy do Ciebie. Nic nie trafi do gości przed zapisaniem."
+              title={t('languages.translations')}
+              hint={t('languages.translationsHint')}
             >
               {current ? (
                 <Stack spacing={2.5}>
@@ -231,7 +226,7 @@ export default function LanguagesPage() {
                       return (
                         <Chip
                           key={code}
-                          label={`${getMenuLanguage(code)?.name ?? code} · ${Math.round(
+                          label={`${languageName(code)} · ${Math.round(
                             Math.min(share, 1) * 100,
                           )}%`}
                           color={code === current ? 'primary' : 'default'}
@@ -251,7 +246,7 @@ export default function LanguagesPage() {
                 </Stack>
               ) : (
                 <Alert severity="info" sx={{ borderRadius: radii.md }}>
-                  Dodaj język, a tu przetłumaczysz na niego menu.
+                  {t('languages.addFirst')}
                 </Alert>
               )}
             </Section>
@@ -261,9 +256,9 @@ export default function LanguagesPage() {
 
       <ConfirmDialog
         open={pendingEdit !== null}
-        title="Porzucić niezapisane tłumaczenia?"
-        description="Masz niezapisane zmiany w tym języku. Jeśli przejdziesz do innego, przepadną."
-        confirmLabel="Porzuć zmiany"
+        title={t('languages.discardTitle')}
+        description={t('languages.discardBody')}
+        confirmLabel={t('dishForm.discard')}
         onConfirm={() => {
           if (pendingEdit) setEditing(pendingEdit);
           setEditorDirty(false);
@@ -274,24 +269,19 @@ export default function LanguagesPage() {
 
       <ConfirmDialog
         open={pendingAdd !== null}
-        title={`${offered.length + 1}. język?`}
+        title={t('languages.manyTitle', { count: offered.length + 1 })}
         confirmColor="primary"
-        confirmLabel="Dodaj mimo to"
-        description={
-          <>
-            Każde nowe danie trzeba będzie przetłumaczyć na {offered.length + 1} języków,
-            a obecne menu to {phrasesTotal} fraz w każdym z nich. Większość zagranicznych
-            gości przeczyta menu po angielsku — dodaj{' '}
-            {pendingAdd ? getMenuLanguage(pendingAdd)?.name : 'ten język'}, jeśli naprawdę
-            przychodzą goście, którzy go potrzebują.
-          </>
-        }
+        confirmLabel={t('languages.addAnyway')}
+        description={t('languages.manyBody', {
+          languages: t('count.languages', { count: offered.length + 1 }),
+          phrases: t('count.phrases', { count: phrasesTotal }),
+          name: pendingAdd ? languageName(pendingAdd) : t('languages.thisLanguage'),
+        })}
         onConfirm={() => {
           const code = pendingAdd;
           setPendingAdd(null);
           if (!code) return;
-          const name = getMenuLanguage(code)?.name ?? code;
-          commit([...offered, code], `Dodano: ${name}.`);
+          commit([...offered, code], t('languages.added', { name: languageName(code) }));
         }}
         onClose={() => setPendingAdd(null)}
       />

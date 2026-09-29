@@ -22,7 +22,10 @@ export async function fetchRestaurants(
 export async function createRestaurant(
   payload: CreateRestaurantRequest,
 ): Promise<RestaurantListItem> {
-  const { data } = await api.post<RestaurantListItem>('/api/v1/admin/restaurants', payload);
+  const { data } = await api.post<RestaurantListItem>(
+    '/api/v1/admin/restaurants',
+    payload,
+  );
   return data;
 }
 
@@ -43,6 +46,8 @@ export interface RestaurantUpdateRequest {
   name?: string;
   contact_email?: string;
   contact_phone?: string;
+  /** null takes the second panel language away. */
+  panel_language?: string | null;
 }
 
 /** An activation link, for an operator to pass on. */

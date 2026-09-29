@@ -10,6 +10,7 @@ import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
 import CreditCardRoundedIcon from '@mui/icons-material/CreditCardRounded';
 import CircularProgress from '@mui/material/CircularProgress';
 import { radii } from '../../theme';
+import { usePanelT } from '../../i18n/panel';
 
 /**
  * Full-content paywall shown in place of the dashboard when the restaurant's
@@ -23,6 +24,7 @@ export function SubscriptionPaywall({
   onPay: () => void;
   loading?: boolean;
 }) {
+  const { t } = usePanelT();
   return (
     <Box
       sx={{
@@ -55,10 +57,10 @@ export function SubscriptionPaywall({
             <LockRoundedIcon sx={{ fontSize: 32 }} />
           </Avatar>
           <Typography variant="h5" component="h1">
-            Twoja subskrypcja wygasła
+            {t('subscription.expired')}
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Opłać zaległości, aby odblokować menu.
+            {t('subscription.expiredHint')}
           </Typography>
           <Button
             variant="contained"
@@ -75,7 +77,7 @@ export function SubscriptionPaywall({
             disabled={loading}
             sx={{ mt: 1 }}
           >
-            {loading ? 'Otwieram płatność…' : 'Opłać subskrypcję'}
+            {loading ? t('subscription.opening') : t('subscription.pay')}
           </Button>
         </Stack>
       </Paper>
@@ -97,6 +99,7 @@ export function SubscriptionPendingBanner({
   /** True while waiting for Stripe's webhook to land after a payment. */
   confirming?: boolean;
 }) {
+  const { t } = usePanelT();
   return (
     <Paper
       elevation={0}
@@ -118,8 +121,8 @@ export function SubscriptionPendingBanner({
         <WarningAmberRoundedIcon sx={{ color: 'warning.dark', flexShrink: 0 }} />
         <Typography variant="body2" sx={{ flex: 1, fontWeight: 500 }}>
           {confirming
-            ? 'Potwierdzamy płatność u operatora — to potrwa kilka sekund.'
-            : 'Twoje menu nie jest jeszcze publicznie widoczne. Opłać subskrypcję, aby aktywować kody QR.'}
+            ? t('subscription.confirming')
+            : t('subscription.pending')}
         </Typography>
         <Button
           variant="contained"
@@ -134,7 +137,7 @@ export function SubscriptionPendingBanner({
           }
           sx={{ flexShrink: 0, alignSelf: { xs: 'flex-start', sm: 'center' } }}
         >
-          {loading ? 'Otwieram płatność…' : 'Aktywuj subskrypcję'}
+          {loading ? t('subscription.opening') : t('subscription.activate')}
         </Button>
       </Stack>
     </Paper>

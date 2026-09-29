@@ -2,6 +2,7 @@ import { memo, useMemo } from 'react';
 import Box from '@mui/material/Box';
 import worldMap from './worldCountries.json';
 import { coverage, coverageStep } from './reach';
+import { usePanelT } from '../../../i18n/panel';
 import {
   PREVIEW_FILL,
   STEP_FILLS,
@@ -34,6 +35,7 @@ function WorldLanguageMapComponent({
   onHover,
   onPick,
 }: WorldLanguageMapProps) {
+  const { t } = usePanelT();
   const fills = useMemo(() => {
     const result = new Map<string, string>();
     for (const country of worldMap.countries) {
@@ -59,7 +61,7 @@ function WorldLanguageMapComponent({
       component="svg"
       viewBox={`0 0 ${WORLD_W} ${WORLD_H}`}
       role="img"
-      aria-label="Mapa świata: kraje, w których goście przeczytają Twoje menu"
+      aria-label={t('reach.mapAria')}
       onMouseLeave={() => onHover(null)}
       sx={{ display: 'block', width: '100%', height: 'auto', overflow: 'hidden' }}
     >

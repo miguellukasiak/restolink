@@ -215,6 +215,7 @@ export function HqTeamPage() {
             : ''
         }
         confirmLabel="Odbierz dostęp"
+        cancelLabel="Anuluj"
         loading={revoke.isPending}
         onConfirm={() => void confirmRevoke()}
         onClose={() => setRevokeTarget(null)}

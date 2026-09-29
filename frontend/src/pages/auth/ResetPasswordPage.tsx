@@ -7,6 +7,7 @@ import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import { AuthLayout } from '../../components/auth/AuthLayout';
+import { usePanelT } from '../../i18n/panel';
 import { getApiErrorMessage } from '../../services/api';
 import { resetPassword } from '../../services/authService';
 
@@ -19,6 +20,7 @@ function byteLength(value: string): number {
 }
 
 export function ResetPasswordPage() {
+  const { t } = usePanelT();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token') ?? '';
@@ -56,18 +58,17 @@ export function ResetPasswordPage() {
   if (!token) {
     return (
       <AuthLayout
-        title="Nieprawidłowy link"
-        subtitle="Ten adres nie zawiera tokenu resetującego."
+        title={t('auth.invalidLink')}
+        subtitle={t('reset.noTokenSubtitle')}
         footer={
           <Link component={RouterLink} to="/login" underline="hover" variant="body2">
-            Wróć do logowania
+            {t('auth.backToLogin')}
           </Link>
         }
       >
         <Stack spacing={2}>
           <Alert severity="warning" sx={{ borderRadius: '16px' }}>
-            Otwórz link dokładnie tak, jak przyszedł w wiadomości e-mail — razem
-            z częścią po znaku zapytania.
+            {t('reset.openExactly')}
           </Alert>
           <Button
             component={RouterLink}
@@ -75,7 +76,7 @@ export function ResetPasswordPage() {
             variant="contained"
             sx={{ borderRadius: '999px', py: 1.2 }}
           >
-            Poproś o nowy link
+            {t('reset.requestNew')}
           </Button>
         </Stack>
       </AuthLayout>
@@ -85,16 +86,15 @@ export function ResetPasswordPage() {
   if (done) {
     return (
       <AuthLayout
-        title="Hasło zmienione"
-        subtitle="Możesz teraz zalogować się nowym hasłem."
+        title={t('reset.doneTitle')}
+        subtitle={t('reset.doneSubtitle')}
       >
         <Stack spacing={2}>
           <Alert severity="success" sx={{ borderRadius: '16px' }}>
-            Link został zużyty i nie zadziała ponownie.
+            {t('reset.spent')}
           </Alert>
           <Alert severity="info" sx={{ borderRadius: '16px' }}>
-            Ze względów bezpieczeństwa wszystkie pozostałe sesje zostały
-            wylogowane — na innych urządzeniach trzeba zalogować się ponownie.
+            {t('reset.otherSessions')}
           </Alert>
           <Button
             variant="contained"
@@ -103,7 +103,7 @@ export function ResetPasswordPage() {
             onClick={() => navigate('/login', { replace: true })}
             sx={{ borderRadius: '999px', py: 1.4 }}
           >
-            Przejdź do logowania
+            {t('auth.goToLogin')}
           </Button>
         </Stack>
       </AuthLayout>
@@ -112,11 +112,11 @@ export function ResetPasswordPage() {
 
   return (
     <AuthLayout
-      title="Ustaw nowe hasło"
-      subtitle="Wpisz nowe hasło do panelu. Link jednorazowy wygaśnie po użyciu."
+      title={t('reset.title')}
+      subtitle={t('reset.subtitle')}
       footer={
         <Link component={RouterLink} to="/login" underline="hover" variant="body2">
-          Wróć do logowania
+          {t('auth.backToLogin')}
         </Link>
       }
     >
@@ -129,7 +129,7 @@ export function ResetPasswordPage() {
           ) : null}
 
           <TextField
-            label="Nowe hasło"
+            label={t('reset.newPassword')}
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -141,13 +141,13 @@ export function ResetPasswordPage() {
             error={tooShort || tooLong}
             helperText={
               tooLong
-                ? `Hasło jest za długie (maks. ${MAX_PASSWORD_BYTES} bajtów).`
-                : `Minimum ${MIN_PASSWORD_LENGTH} znaków.`
+                ? t('auth.passwordTooLong', { max: MAX_PASSWORD_BYTES })
+                : t('auth.passwordMin', { min: MIN_PASSWORD_LENGTH })
             }
           />
 
           <TextField
-            label="Powtórz nowe hasło"
+            label={t('reset.repeat')}
             type="password"
             value={confirmation}
             onChange={(e) => setConfirmation(e.target.value)}
@@ -156,7 +156,7 @@ export function ResetPasswordPage() {
             fullWidth
             disabled={submitting}
             error={mismatch}
-            helperText={mismatch ? 'Hasła nie są takie same.' : ' '}
+            helperText={mismatch ? t('auth.passwordMismatch') : ' '}
           />
 
           <Button
@@ -170,7 +170,7 @@ export function ResetPasswordPage() {
               submitting ? <CircularProgress size={18} color="inherit" /> : null
             }
           >
-            {submitting ? 'Zapisywanie…' : 'Zapisz nowe hasło'}
+            {submitting ? t('common.saving') : t('reset.submit')}
           </Button>
         </Stack>
       </form>

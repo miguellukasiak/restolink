@@ -18,6 +18,8 @@ export interface RestaurantListItem {
   contact_phone: string;
   status: RestaurantStatus;
   subscription_valid_until: string;
+  /** The owner panel's second language beside English; null for English only. */
+  panel_language?: string | null;
   package: PackageSummary;
 }
 
@@ -52,6 +54,8 @@ export interface CreateRestaurantRequest {
   contact_email: string;
   contact_phone: string;
   package_id: string;
+  /** The owner panel's second language; null for English only. */
+  panel_language?: string | null;
 }
 
 /** Schema: RestaurantPanelInfo — restaurant details + subscription gating. */
@@ -60,6 +64,8 @@ export interface RestaurantPanelInfo {
   name: string;
   status: RestaurantStatus;
   subscription_valid_until: string | null;
+  /** The owner panel's second language beside English; null for English only. */
+  panel_language?: string | null;
 }
 
 /** Schema: MenuItem */

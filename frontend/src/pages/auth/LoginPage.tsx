@@ -12,10 +12,12 @@ import Typography from '@mui/material/Typography';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { AuthLayout } from '../../components/auth/AuthLayout';
+import { usePanelT } from '../../i18n/panel';
 import { getApiErrorMessage } from '../../services/api';
 import { login } from '../../services/authService';
 
 export function LoginPage() {
+  const { t } = usePanelT();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -48,13 +50,13 @@ export function LoginPage() {
 
   return (
     <AuthLayout
-      title="Zaloguj się"
-      subtitle="Wpisz dane dostępowe do panelu swojej restauracji."
+      title={t('login.title')}
+      subtitle={t('login.subtitle')}
       footer={
         <Typography variant="body2" color="text.secondary">
-          Nie masz jeszcze konta?{' '}
+          {t('login.noAccount')}{' '}
           <Link component={RouterLink} to="/#kontakt" underline="hover">
-            Skontaktuj się z nami
+            {t('login.contactUs')}
           </Link>
         </Typography>
       }
@@ -68,7 +70,7 @@ export function LoginPage() {
           ) : null}
 
           <TextField
-            label="Adres e-mail"
+            label={t('auth.email')}
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -80,7 +82,7 @@ export function LoginPage() {
           />
 
           <TextField
-            label="Hasło"
+            label={t('auth.password')}
             type={showPassword ? 'text' : 'password'}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -95,7 +97,7 @@ export function LoginPage() {
                     <IconButton
                       onClick={() => setShowPassword((visible) => !visible)}
                       edge="end"
-                      aria-label={showPassword ? 'Ukryj hasło' : 'Pokaż hasło'}
+                      aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
                     >
                       {showPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
@@ -116,7 +118,7 @@ export function LoginPage() {
               submitting ? <CircularProgress size={18} color="inherit" /> : null
             }
           >
-            {submitting ? 'Logowanie…' : 'Zaloguj się'}
+            {submitting ? t('login.submitting') : t('login.submit')}
           </Button>
 
           <Link
@@ -126,7 +128,7 @@ export function LoginPage() {
             variant="body2"
             sx={{ textAlign: 'center' }}
           >
-            Nie pamiętasz hasła?
+            {t('login.forgot')}
           </Link>
         </Stack>
       </form>

@@ -1,10 +1,13 @@
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Wordmark } from '../brand/Wordmark';
+import { PanelLanguageSwitch } from '../panel/PanelLanguageSwitch';
+import { PANEL_LANGUAGES, isPanelLanguage, setPanelLanguage } from '../../i18n/panel';
 
 interface AuthLayoutProps {
   title: string;
@@ -12,6 +15,11 @@ interface AuthLayoutProps {
   children: ReactNode;
   /** Links below the card — "forgot password", "back to sign in", etc. */
   footer?: ReactNode;
+  /**
+   * Offer the owner panel's languages. Off for the HQ door, whose panel is
+   * Polish only.
+   */
+  languageSwitch?: boolean;
 }
 
 /**
@@ -23,8 +31,25 @@ interface AuthLayoutProps {
  * and it was the single loudest piece of colour on the first screen anyone
  * sees. The green appears where it means something — the submit button and
  * the focused field — rather than behind everything.
+ *
+ * Before sign-in nobody knows which restaurant this is, so the switch offers
+ * every panel language. Links in emails carry `?lang=`, the language the email
+ * was written in, so the page it opens continues in that language.
  */
-export function AuthLayout({ title, subtitle, children, footer }: AuthLayoutProps) {
+export function AuthLayout({
+  title,
+  subtitle,
+  children,
+  footer,
+  languageSwitch = true,
+}: AuthLayoutProps) {
+  const [searchParams] = useSearchParams();
+  const linkLanguage = searchParams.get('lang');
+
+  useEffect(() => {
+    if (languageSwitch && isPanelLanguage(linkLanguage)) setPanelLanguage(linkLanguage);
+  }, [languageSwitch, linkLanguage]);
+
   return (
     <Box
       sx={{
@@ -34,8 +59,15 @@ export function AuthLayout({ title, subtitle, children, footer }: AuthLayoutProp
         px: 2,
         py: 6,
         bgcolor: 'background.default',
+        position: 'relative',
       }}
     >
+      {languageSwitch ? (
+        <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
+          <PanelLanguageSwitch languages={PANEL_LANGUAGES} />
+        </Box>
+      ) : null}
+
       <Box sx={{ width: '100%', maxWidth: 440 }}>
         <Stack sx={{ mb: 3, alignItems: 'center' }}>
           <Wordmark size={30} color="text.primary" />

@@ -10,8 +10,8 @@
  */
 
 export interface MenuPattern {
+  /** Stored value; also names it in the panel (`appearance.pattern.<id>`). */
   id: string;
-  label: string;
   /** Tile width and height, in CSS pixels. */
   size: [number, number];
   /** Opacity on a light background; dark backgrounds get a little more. */
@@ -46,7 +46,6 @@ const frond = (x: number, y: number, rotate: number, c: string) => {
 export const MENU_PATTERNS: readonly MenuPattern[] = [
   {
     id: 'dots',
-    label: 'Groszki',
     size: [26, 26],
     opacity: 0.12,
     draw: (c) =>
@@ -54,7 +53,6 @@ export const MENU_PATTERNS: readonly MenuPattern[] = [
   },
   {
     id: 'grid',
-    label: 'Kratka',
     size: [28, 28],
     opacity: 0.1,
     draw: (c) =>
@@ -62,7 +60,6 @@ export const MENU_PATTERNS: readonly MenuPattern[] = [
   },
   {
     id: 'gingham',
-    label: 'Obrus',
     size: [32, 32],
     opacity: 0.08,
     draw: (c) =>
@@ -70,7 +67,6 @@ export const MENU_PATTERNS: readonly MenuPattern[] = [
   },
   {
     id: 'stripes',
-    label: 'Paski',
     size: [36, 36],
     opacity: 0.08,
     draw: (c) =>
@@ -78,7 +74,6 @@ export const MENU_PATTERNS: readonly MenuPattern[] = [
   },
   {
     id: 'waves',
-    label: 'Fale',
     size: [48, 24],
     opacity: 0.14,
     draw: (c) =>
@@ -86,7 +81,6 @@ export const MENU_PATTERNS: readonly MenuPattern[] = [
   },
   {
     id: 'seigaiha',
-    label: 'Seigaiha',
     size: [40, 20],
     opacity: 0.12,
     draw: (c) => {
@@ -102,7 +96,6 @@ export const MENU_PATTERNS: readonly MenuPattern[] = [
   },
   {
     id: 'palms',
-    label: 'Palmy',
     size: [150, 150],
     opacity: 0.11,
     draw: (c) =>
@@ -113,7 +106,6 @@ export const MENU_PATTERNS: readonly MenuPattern[] = [
   },
   {
     id: 'leaves',
-    label: 'Liście',
     size: [90, 90],
     opacity: 0.12,
     draw: (c) =>
@@ -124,7 +116,6 @@ export const MENU_PATTERNS: readonly MenuPattern[] = [
   },
   {
     id: 'terrazzo',
-    label: 'Posypka',
     size: [80, 80],
     opacity: 0.16,
     draw: (c) =>
@@ -146,7 +137,6 @@ export const MENU_PATTERNS: readonly MenuPattern[] = [
   },
   {
     id: 'wood',
-    label: 'Drewno',
     size: [200, 48],
     opacity: 0.1,
     draw: (c) =>

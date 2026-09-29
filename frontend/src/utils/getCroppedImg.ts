@@ -19,7 +19,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const image = new Image();
     image.addEventListener('load', () => resolve(image));
-    image.addEventListener('error', () => reject(new Error('Nie udało się wczytać zdjęcia.')));
+    image.addEventListener('error', () => reject(new Error('Could not load the image.')));
     image.crossOrigin = 'anonymous';
     image.src = src;
   });
@@ -39,7 +39,7 @@ export async function getCroppedImg(imageSrc: string, pixelCrop: Area): Promise<
   canvas.height = OUTPUT_SIZE;
 
   const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('Przeglądarka nie obsługuje przetwarzania obrazów.');
+  if (!ctx) throw new Error('This browser cannot process images.');
 
   // High-quality downscale — the source region is almost always far larger than
   // 600px, so good resampling keeps the shrunk photo crisp.
@@ -60,7 +60,7 @@ export async function getCroppedImg(imageSrc: string, pixelCrop: Area): Promise<
 
   return new Promise((resolve, reject) => {
     canvas.toBlob(
-      (blob) => (blob ? resolve(blob) : reject(new Error('Nie udało się przetworzyć zdjęcia.'))),
+      (blob) => (blob ? resolve(blob) : reject(new Error('Could not process the image.'))),
       OUTPUT_MIME,
       OUTPUT_QUALITY,
     );
@@ -72,7 +72,7 @@ export function blobToDataUrl(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(new Error('Nie udało się odczytać zdjęcia.'));
+    reader.onerror = () => reject(new Error('Could not read the image.'));
     reader.readAsDataURL(blob);
   });
 }

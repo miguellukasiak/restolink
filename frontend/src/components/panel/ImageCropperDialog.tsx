@@ -19,6 +19,7 @@ import { getCroppedImg, blobToDataUrl } from '../../utils/getCroppedImg';
 import { radii } from '../../theme';
 import { useSnackbar } from '../feedback/SnackbarProvider';
 import { TonalIcon } from './TonalIcon';
+import { usePanelT } from '../../i18n/panel';
 
 interface ImageCropperDialogProps {
   open: boolean;
@@ -39,6 +40,7 @@ export function ImageCropperDialog({
   onApply,
   onCancel,
 }: ImageCropperDialogProps) {
+  const { t } = usePanelT();
   const { showError } = useSnackbar();
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -65,7 +67,7 @@ export function ImageCropperDialog({
       const dataUrl = await blobToDataUrl(blob);
       onApply(dataUrl);
     } catch {
-      showError('Nie udało się przyciąć zdjęcia. Spróbuj ponownie.');
+      showError(t('crop.failed'));
     } finally {
       setIsProcessing(false);
     }
@@ -85,14 +87,14 @@ export function ImageCropperDialog({
           </TonalIcon>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography variant="h6" component="div">
-              Przytnij zdjęcie
+              {t('crop.title')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Przeciągnij i przybliż, aby dopasować kadr 1:1
+              {t('crop.subtitle')}
             </Typography>
           </Box>
           <IconButton
-            aria-label="Zamknij"
+            aria-label={t('common.close')}
             onClick={onCancel}
             disabled={isProcessing}
             edge="end"
@@ -136,14 +138,14 @@ export function ImageCropperDialog({
             min={1}
             max={3}
             step={0.05}
-            aria-label="Przybliżenie zdjęcia"
+            aria-label={t('crop.zoom')}
           />
         </Stack>
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 3 }}>
         <Button onClick={onCancel} color="inherit" disabled={isProcessing}>
-          Anuluj
+          {t('common.cancel')}
         </Button>
         <Button
           onClick={() => void handleApply()}
@@ -153,7 +155,7 @@ export function ImageCropperDialog({
             isProcessing ? <CircularProgress size={18} color="inherit" /> : undefined
           }
         >
-          {isProcessing ? 'Przetwarzanie…' : 'Zastosuj'}
+          {isProcessing ? t('crop.processing') : t('crop.apply')}
         </Button>
       </DialogActions>
     </Dialog>

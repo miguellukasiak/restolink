@@ -84,6 +84,9 @@ export function getTagI18nKey(tag: string): string | null {
   return lookupKey(TAG_I18N_KEYS, tag);
 }
 
+/** The currency's sign, as the menu's prices write it. */
+export const CURRENCY_SYMBOL = 'zł';
+
 /** Formats a price in PLN with Polish conventions (e.g. "24,90 zł"). */
 export function formatPln(value: number): string {
   return new Intl.NumberFormat('pl-PL', {

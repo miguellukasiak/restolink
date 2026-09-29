@@ -22,7 +22,7 @@ import {
   useSaveDictionary,
 } from '../../../hooks/useDictionary';
 import { getApiErrorMessage } from '../../../services/api';
-import { getMenuLanguage } from '../../../constants/menuLanguages';
+import { useLanguageName, usePanelT } from '../../../i18n/panel';
 import { radii } from '../../../theme';
 
 const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
@@ -50,6 +50,8 @@ export function TranslationEditor({
   language,
   onDirtyChange,
 }: TranslationEditorProps) {
+  const { t } = usePanelT();
+  const languageName = useLanguageName();
   const { showSuccess, showError } = useSnackbar();
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [onlyMissing, setOnlyMissing] = useState(false);
@@ -58,7 +60,6 @@ export function TranslationEditor({
   const save = useSaveDictionary(restaurantId, language);
   const auto = useAutoTranslate(restaurantId, language);
 
-  const meta = getMenuLanguage(language);
   const code = language.toUpperCase();
 
   // Reset the working copy whenever the server hands us a new one — on load,
@@ -128,16 +129,21 @@ export function TranslationEditor({
         });
       }
       if (failed > 0) {
-        showError(
-          `Przetłumaczono ${drafted} z ${drafted + failed}. Reszty nie udało się pobrać — uzupełnij ją ręcznie.`,
-        );
+        showError(t('editor.partialFail', { drafted, total: drafted + failed }));
       } else {
-        showSuccess(`Wstawiono ${drafted} propozycji. Sprawdź je i zapisz.`);
+        showSuccess(
+          t('editor.inserted', {
+            suggestions: t('editor.suggestions', { count: drafted }),
+          }),
+        );
       }
     } catch (error) {
       if (drafted > 0) {
         showError(
-          `Wstawiono ${drafted} propozycji, potem wystąpił błąd: ${getApiErrorMessage(error)}`,
+          t('editor.insertedThenError', {
+            suggestions: t('editor.suggestions', { count: drafted }),
+            error: getApiErrorMessage(error),
+          }),
         );
       } else {
         showError(getApiErrorMessage(error));
@@ -153,9 +159,7 @@ export function TranslationEditor({
           translated_text: drafts[entry.original_text] ?? '',
         })),
       );
-      showSuccess(
-        `${capitalize(meta?.name ?? code)}: tłumaczenia zapisane — goście już je widzą.`,
-      );
+      showSuccess(t('editor.saved', { name: capitalize(languageName(language)) }));
     } catch (error) {
       showError(getApiErrorMessage(error));
     }
@@ -178,8 +182,7 @@ export function TranslationEditor({
   if (entries.length === 0) {
     return (
       <Alert severity="info" sx={{ borderRadius: radii.md }}>
-        To menu nie ma jeszcze żadnych tekstów do przetłumaczenia. Dodaj kategorie i dania
-        w Kreatorze menu, a pojawią się tutaj.
+        {t('editor.nothing')}
       </Alert>
     );
   }
@@ -193,7 +196,7 @@ export function TranslationEditor({
       >
         <Box sx={{ minWidth: 0, flexGrow: 1 }}>
           <Typography variant="subtitle2" sx={{ mb: 0.75 }}>
-            Przetłumaczono {filled} z {entries.length} fraz
+            {t('editor.progress', { filled, total: entries.length })}
           </Typography>
           <LinearProgress
             variant="determinate"
@@ -220,8 +223,8 @@ export function TranslationEditor({
             }
           >
             {auto.isPending
-              ? 'Tłumaczę…'
-              : `Podpowiedz brakujące (${emptyPhrases.length})`}
+              ? t('editor.translating')
+              : t('editor.suggestMissing', { count: emptyPhrases.length })}
           </Button>
           <Button
             variant="contained"
@@ -235,22 +238,13 @@ export function TranslationEditor({
               )
             }
           >
-            Zapisz
+            {t('common.save')}
           </Button>
         </Stack>
       </Stack>
 
-      {auto.isPending && (
-        <Alert severity="info">
-          Pobieram propozycje z DeepL. Nic nie zostanie zapisane, dopóki ich nie
-          sprawdzisz i nie klikniesz „Zapisz”.
-        </Alert>
-      )}
-      {dirty && !busy && (
-        <Alert severity="warning">
-          Masz niezapisane zmiany — goście widzą jeszcze poprzednią wersję.
-        </Alert>
-      )}
+      {auto.isPending && <Alert severity="info">{t('editor.fetching')}</Alert>}
+      {dirty && !busy && <Alert severity="warning">{t('editor.unsaved')}</Alert>}
 
       <FormControlLabel
         control={
@@ -260,7 +254,7 @@ export function TranslationEditor({
             onChange={(event) => setOnlyMissing(event.target.checked)}
           />
         }
-        label="Pokaż tylko nieprzetłumaczone"
+        label={t('editor.onlyMissing')}
         sx={{ alignSelf: 'flex-start', ml: 0 }}
       />
 
@@ -271,30 +265,31 @@ export function TranslationEditor({
             gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
           }}
         >
-          {['Oryginał (PL)', `${capitalize(meta?.name ?? code)} (${code})`].map(
-            (heading) => (
-              <Box
-                key={heading}
-                sx={{
-                  display: { xs: 'none', md: 'block' },
-                  px: 2.5,
-                  py: 1.25,
-                  borderBottom: '1px solid',
-                  borderColor: 'divider',
-                  bgcolor: (theme) => alpha(theme.palette.text.primary, 0.03),
-                }}
-              >
-                <Typography variant="subtitle2" color="text.secondary">
-                  {heading}
-                </Typography>
-              </Box>
-            ),
-          )}
+          {[
+            t('editor.original', { code: 'PL' }),
+            `${capitalize(languageName(language))} (${code})`,
+          ].map((heading) => (
+            <Box
+              key={heading}
+              sx={{
+                display: { xs: 'none', md: 'block' },
+                px: 2.5,
+                py: 1.25,
+                borderBottom: '1px solid',
+                borderColor: 'divider',
+                bgcolor: (theme) => alpha(theme.palette.text.primary, 0.03),
+              }}
+            >
+              <Typography variant="subtitle2" color="text.secondary">
+                {heading}
+              </Typography>
+            </Box>
+          ))}
 
           {shown.length === 0 && (
             <Box sx={{ gridColumn: '1 / -1', px: 2.5, py: 3 }}>
               <Typography variant="body2" color="text.secondary">
-                Wszystko przetłumaczone. 🎉
+                {t('editor.allDone')}
               </Typography>
             </Box>
           )}
@@ -325,7 +320,7 @@ export function TranslationEditor({
                   {changed && (
                     <Chip
                       size="small"
-                      label="zmienione"
+                      label={t('editor.changed')}
                       color="warning"
                       variant="outlined"
                       sx={{ flexShrink: 0, height: 20, fontSize: 11 }}
@@ -348,7 +343,7 @@ export function TranslationEditor({
                         [entry.original_text]: event.target.value,
                       }))
                     }
-                    placeholder={`Tłumaczenie (${code})`}
+                    placeholder={t('editor.placeholder', { code })}
                     size="small"
                     fullWidth
                     multiline
@@ -356,7 +351,9 @@ export function TranslationEditor({
                     disabled={busy}
                     slotProps={{
                       htmlInput: {
-                        'aria-label': `Tłumaczenie frazy: ${entry.original_text}`,
+                        'aria-label': t('editor.phraseAria', {
+                          phrase: entry.original_text,
+                        }),
                         lang: language,
                         // Arabic and Hebrew type right to left.
                         dir: 'auto',
@@ -371,8 +368,7 @@ export function TranslationEditor({
       </Paper>
 
       <Typography variant="caption" color="text.secondary">
-        Frazy bez tłumaczenia goście zobaczą po angielsku, a jeśli i tego brak — po
-        polsku.
+        {t('editor.fallbackNote')}
       </Typography>
     </Stack>
   );

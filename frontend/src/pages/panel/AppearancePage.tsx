@@ -47,6 +47,8 @@ import { PhoneFrame } from '../../components/panel/PhoneFrame';
 import { ThemeThumb, type ThumbDish } from '../../components/panel/ThemeThumb';
 import { useMeasuredHeight } from '../../hooks/useMeasuredHeight';
 import { useFittedPhone } from '../../hooks/useFittedPhone';
+import { GuestPreviewLanguage } from '../../components/panel/GuestPreviewLanguage';
+import { usePanelT } from '../../i18n/panel';
 
 const HEX_PATTERN = /^#[0-9a-fA-F]{6}$/;
 
@@ -92,12 +94,13 @@ const BACKGROUND_SWATCHES = [
   '#141A33',
 ];
 
-/** What the thumbnails show when the menu has no dishes yet. */
-const SAMPLE_DISHES: ThumbDish[] = [
-  { name: 'Pierogi ruskie', price: 29, image_url: null },
-  { name: 'Żurek', price: 22, image_url: null },
-  { name: 'Schabowy', price: 39, image_url: null },
-  { name: 'Sernik', price: 18, image_url: null },
+/** The dishes the thumbnails show when the menu has none yet; named by
+ *  `appearance.sample.<key>`. */
+const SAMPLE_DISHES = [
+  { key: 'dish1', price: 29 },
+  { key: 'dish2', price: 22 },
+  { key: 'dish3', price: 39 },
+  { key: 'dish4', price: 18 },
 ];
 
 const sameColor = (a?: string | null, b?: string | null) =>
@@ -200,6 +203,7 @@ interface ColorFieldProps {
 
 /** Preset swatches + hex input + native colour picker for one colour setting. */
 function ColorField({ label, value, onChange, presets, error }: ColorFieldProps) {
+  const { t } = usePanelT();
   const nativeInputRef = useRef<HTMLInputElement>(null);
   return (
     <Box>
@@ -254,10 +258,10 @@ function ColorField({ label, value, onChange, presets, error }: ColorFieldProps)
               />
             ),
             endAdornment: (
-              <Tooltip title="Wybierz z palety" arrow>
+              <Tooltip title={t('appearance.pickPalette')} arrow>
                 <IconButton
                   size="small"
-                  aria-label={`${label} — wybierz z palety`}
+                  aria-label={t('appearance.pickPaletteAria', { label })}
                   onClick={() => nativeInputRef.current?.click()}
                 >
                   <ColorizeRoundedIcon fontSize="small" />
@@ -272,7 +276,7 @@ function ColorField({ label, value, onChange, presets, error }: ColorFieldProps)
         type="color"
         value={HEX_PATTERN.test(value) ? value : '#000000'}
         onChange={(event) => onChange(event.target.value.toUpperCase())}
-        aria-label={`${label} — paleta kolorów`}
+        aria-label={t('appearance.paletteAria', { label })}
         style={{
           position: 'absolute',
           width: 1,
@@ -296,6 +300,7 @@ function ColorField({ label, value, onChange, presets, error }: ColorFieldProps)
  * "Zapisz zmiany".
  */
 export function AppearancePage() {
+  const { t } = usePanelT();
   const { restaurantId = '' } = useParams<{ restaurantId: string }>();
   const { showSuccess, showError } = useSnackbar();
   const menu = usePublicMenu(restaurantId);
@@ -367,10 +372,20 @@ export function AppearancePage() {
     );
     return {
       thumbCategory:
-        categories.find((category) => category.items.length > 0)?.name ?? 'Dania główne',
-      thumbDishes: chosen.length > 0 ? chosen : SAMPLE_DISHES,
+        categories.find((category) => category.items.length > 0)?.name ??
+        t('appearance.sample.category'),
+      thumbDishes:
+        chosen.length > 0
+          ? chosen
+          : SAMPLE_DISHES.map(
+              ({ key, price }): ThumbDish => ({
+                name: t(`appearance.sample.${key}`),
+                price,
+                image_url: null,
+              }),
+            ),
     };
-  }, [menu.data]);
+  }, [menu.data, t]);
 
   const visibleThemes =
     venue === 'all'
@@ -405,7 +420,7 @@ export function AppearancePage() {
   const onSubmit = handleSubmit((values) => {
     updateTheme.mutate(values, {
       onSuccess: () => {
-        showSuccess('Wygląd menu zapisany — goście już go widzą.');
+        showSuccess(t('appearance.saved'));
         reset(values);
       },
       onError: (error) => showError(getApiErrorMessage(error)),
@@ -421,16 +436,18 @@ export function AppearancePage() {
     menu.isLoading || !menu.data ? (
       <MenuSkeleton />
     ) : (
-      <ThemeProvider theme={previewTheme}>
-        <Box sx={{ pointerEvents: 'none', bgcolor: 'background.default' }}>
-          <PublicMenuView
-            restaurantName={menu.data.restaurant.name}
-            logoUrl={watched.logo_url}
-            languages={menu.data.restaurant.languages}
-            categories={menu.data.categories}
-          />
-        </Box>
-      </ThemeProvider>
+      <GuestPreviewLanguage>
+        <ThemeProvider theme={previewTheme}>
+          <Box sx={{ pointerEvents: 'none', bgcolor: 'background.default' }}>
+            <PublicMenuView
+              restaurantName={menu.data.restaurant.name}
+              logoUrl={watched.logo_url}
+              languages={menu.data.restaurant.languages}
+              categories={menu.data.categories}
+            />
+          </Box>
+        </ThemeProvider>
+      </GuestPreviewLanguage>
     );
 
   return (
@@ -450,24 +467,23 @@ export function AppearancePage() {
               start at the top of the page and have the height it needs. */}
           <Stack spacing={0.5}>
             <Typography variant="h4" component="h1">
-              Wygląd menu
+              {t('nav.appearance')}
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              Wybierz motyw jak tło przed wideorozmową — Twoje menu od razu go przymierzy.
-              Zapisz, gdy trafisz na ten właściwy.
+              {t('appearance.intro')}
             </Typography>
           </Stack>
 
           <Section
-            title="Motywy"
-            hint="Kliknij, żeby przymierzyć — na miniaturach widać Twoje własne dania."
+            title={t('appearance.themes')}
+            hint={t('appearance.themesHint')}
             action={
               <Button
                 onClick={surpriseMe}
                 startIcon={<CasinoRoundedIcon />}
                 sx={{ flexShrink: 0 }}
               >
-                Zaskocz mnie
+                {t('appearance.surprise')}
               </Button>
             }
           >
@@ -477,16 +493,16 @@ export function AppearancePage() {
               spacing={0.75}
               sx={{ flexWrap: 'wrap', mb: 2 }}
             >
-              {[{ id: 'all' as const, label: 'Wszystkie' }, ...VENUES].map((option) => (
+              {(['all', ...VENUES] as const).map((option) => (
                 <Chip
                   size="small"
-                  key={option.id}
-                  label={option.label}
+                  key={option}
+                  label={t(`appearance.venue.${option}`)}
                   clickable
-                  onClick={() => setVenue(option.id)}
-                  variant={venue === option.id ? 'filled' : 'outlined'}
-                  color={venue === option.id ? 'primary' : 'default'}
-                  aria-pressed={venue === option.id}
+                  onClick={() => setVenue(option)}
+                  variant={venue === option ? 'filled' : 'outlined'}
+                  color={venue === option ? 'primary' : 'default'}
+                  aria-pressed={venue === option}
                 />
               ))}
             </Stack>
@@ -499,12 +515,14 @@ export function AppearancePage() {
             >
               {visibleThemes.map((theme) => {
                 const selected = activeTheme?.id === theme.id;
+                const name = t(`appearance.theme.${theme.id}.name`);
+                const vibe = t(`appearance.theme.${theme.id}.vibe`);
                 return (
                   <ButtonBase
                     key={theme.id}
                     onClick={() => applyTheme(theme)}
                     aria-pressed={selected}
-                    aria-label={`Motyw ${theme.name}: ${theme.vibe}`}
+                    aria-label={t('appearance.themeAria', { name, vibe })}
                     sx={{
                       position: 'relative',
                       flexDirection: 'column',
@@ -546,7 +564,7 @@ export function AppearancePage() {
                         noWrap
                         sx={{ color: selected ? 'primary.dark' : 'text.primary' }}
                       >
-                        {theme.name}
+                        {name}
                       </Typography>
                       <Typography
                         variant="caption"
@@ -560,7 +578,7 @@ export function AppearancePage() {
                           overflow: 'hidden',
                         }}
                       >
-                        {theme.vibe}
+                        {vibe}
                       </Typography>
                     </Box>
                     {selected && (
@@ -582,11 +600,13 @@ export function AppearancePage() {
           </Section>
 
           <Section
-            title="Dopasuj szczegóły"
+            title={t('appearance.details')}
             hint={
               activeTheme
-                ? `Wybrany motyw: ${activeTheme.name}. Każdą rzecz możesz zmienić po swojemu.`
-                : 'Twój własny motyw — zmieniaj kolory, czcionkę i wzór, ile chcesz.'
+                ? t('appearance.detailsChosen', {
+                    name: t(`appearance.theme.${activeTheme.id}.name`),
+                  })
+                : t('appearance.detailsOwn')
             }
           >
             <Stack spacing={3.5}>
@@ -613,7 +633,7 @@ export function AppearancePage() {
                     </Avatar>
                     <Box sx={{ flex: 1, minWidth: 0 }}>
                       <Typography variant="subtitle2" component="h3">
-                        Logo
+                        {t('appearance.logo')}
                       </Typography>
                       <Typography
                         variant="caption"
@@ -621,8 +641,7 @@ export function AppearancePage() {
                         component="p"
                         sx={{ display: { xs: 'none', sm: 'block' } }}
                       >
-                        PNG lub JPG, najlepiej kwadratowe. Pojawi się w nagłówku menu i w
-                        kodach QR.
+                        {t('appearance.logoHint')}
                       </Typography>
                     </Box>
                     <Button
@@ -630,12 +649,12 @@ export function AppearancePage() {
                       size="small"
                       onClick={() => logoInputRef.current?.click()}
                     >
-                      {field.value ? 'Zmień' : 'Dodaj logo'}
+                      {field.value ? t('appearance.logoChange') : t('appearance.logoAdd')}
                     </Button>
                     {field.value && (
-                      <Tooltip title="Usuń logo" arrow>
+                      <Tooltip title={t('appearance.logoRemove')} arrow>
                         <IconButton
-                          aria-label="Usuń logo"
+                          aria-label={t('appearance.logoRemove')}
                           onClick={() =>
                             setValue('logo_url', null, { shouldDirty: true })
                           }
@@ -669,12 +688,12 @@ export function AppearancePage() {
                   rules={{
                     pattern: {
                       value: HEX_PATTERN,
-                      message: 'Podaj kolor w formacie #RRGGBB',
+                      message: t('appearance.hexError'),
                     },
                   }}
                   render={({ field }) => (
                     <ColorField
-                      label="Kolor główny"
+                      label={t('appearance.primary')}
                       value={field.value}
                       onChange={field.onChange}
                       presets={PRIMARY_SWATCHES}
@@ -688,12 +707,12 @@ export function AppearancePage() {
                   rules={{
                     pattern: {
                       value: HEX_PATTERN,
-                      message: 'Podaj kolor w formacie #RRGGBB',
+                      message: t('appearance.hexError'),
                     },
                   }}
                   render={({ field }) => (
                     <ColorField
-                      label="Kolor tła"
+                      label={t('appearance.background')}
                       value={field.value}
                       onChange={field.onChange}
                       presets={BACKGROUND_SWATCHES}
@@ -706,7 +725,7 @@ export function AppearancePage() {
               {/* Typeface */}
               <Box>
                 <Typography variant="subtitle2" component="h3" sx={{ mb: 1 }}>
-                  Czcionka
+                  {t('appearance.typeface')}
                 </Typography>
                 <Controller
                   name="font_family"
@@ -722,7 +741,7 @@ export function AppearancePage() {
                       {FONT_PAIRINGS.map((pairing) => (
                         <ChoiceTile
                           key={pairing.value}
-                          label={pairing.label}
+                          label={t(`appearance.font.${pairing.id}`)}
                           selected={field.value === pairing.value}
                           onClick={() => field.onChange(pairing.value)}
                         >
@@ -758,7 +777,7 @@ export function AppearancePage() {
                                 opacity: 0.75,
                               }}
                             >
-                              Pierogi ruskie
+                              {t('appearance.fontSample')}
                             </Box>
                           </Box>
                         </ChoiceTile>
@@ -771,7 +790,7 @@ export function AppearancePage() {
               {/* Pattern */}
               <Box>
                 <Typography variant="subtitle2" component="h3">
-                  Wzór tła
+                  {t('appearance.pattern.title')}
                 </Typography>
                 <Typography
                   variant="caption"
@@ -779,8 +798,7 @@ export function AppearancePage() {
                   component="p"
                   sx={{ mb: 1 }}
                 >
-                  Delikatny motyw w tle — dania dostają wtedy własne karty, żeby wszystko
-                  było czytelne.
+                  {t('appearance.pattern.hint')}
                 </Typography>
                 <Controller
                   name="menu_pattern"
@@ -794,7 +812,7 @@ export function AppearancePage() {
                       }}
                     >
                       <ChoiceTile
-                        label="Bez wzoru"
+                        label={t('appearance.pattern.none')}
                         selected={!field.value}
                         onClick={() => field.onChange(null)}
                       >
@@ -816,7 +834,7 @@ export function AppearancePage() {
                       {MENU_PATTERNS.map((pattern) => (
                         <ChoiceTile
                           key={pattern.id}
-                          label={pattern.label}
+                          label={t(`appearance.pattern.${pattern.id}`)}
                           selected={field.value === pattern.id}
                           onClick={() => field.onChange(pattern.id)}
                         >
@@ -863,14 +881,14 @@ export function AppearancePage() {
               >
                 {isDirty ? (
                   <>
-                    Masz niezapisane zmiany
+                    {t('appearance.unsaved')}
                     <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
                       {' '}
-                      — goście widzą jeszcze poprzedni wygląd.
+                      {t('appearance.unsavedGuests')}
                     </Box>
                   </>
                 ) : (
-                  'Wszystkie zmiany zapisane'
+                  t('appearance.allSaved')
                 )}
               </Typography>
               <Button
@@ -885,7 +903,7 @@ export function AppearancePage() {
                   )
                 }
               >
-                {isSaving ? 'Zapisywanie…' : 'Zapisz zmiany'}
+                {isSaving ? t('common.saving') : t('common.saveChanges')}
               </Button>
             </Paper>
           </Box>
@@ -901,15 +919,15 @@ export function AppearancePage() {
                 if (value) setDevice(value);
               }}
               size="small"
-              aria-label="Tryb podglądu"
+              aria-label={t('appearance.previewMode')}
             >
-              <ToggleButton value="mobile" aria-label="Podgląd na telefonie">
+              <ToggleButton value="mobile" aria-label={t('appearance.previewPhone')}>
                 <SmartphoneRoundedIcon fontSize="small" sx={{ mr: 1 }} />
-                Telefon
+                {t('common.phone')}
               </ToggleButton>
-              <ToggleButton value="desktop" aria-label="Podgląd na komputerze">
+              <ToggleButton value="desktop" aria-label={t('appearance.previewComputer')}>
                 <DesktopWindowsRoundedIcon fontSize="small" sx={{ mr: 1 }} />
-                Komputer
+                {t('common.computer')}
               </ToggleButton>
             </ToggleButtonGroup>
 

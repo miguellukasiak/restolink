@@ -23,12 +23,14 @@ import { usePackages } from '../../hooks/usePackages';
 import { useAddRestaurant } from '../../hooks/useAddRestaurant';
 import { useSnackbar } from '../feedback/SnackbarProvider';
 import { getApiErrorMessage } from '../../services/api';
+import { PanelLanguageField } from './PanelLanguageField';
 
 const addRestaurantSchema = z.object({
   name: z.string().trim().min(2, 'Nazwa musi mieć co najmniej 2 znaki'),
   contact_email: z.email('Podaj poprawny adres e-mail'),
   contact_phone: z.string().trim().min(9, 'Telefon musi mieć co najmniej 9 znaków'),
   package_id: z.string().min(1, 'Wybierz pakiet'),
+  panel_language: z.string(),
 });
 
 type AddRestaurantFormValues = z.infer<typeof addRestaurantSchema>;
@@ -38,6 +40,7 @@ const EMPTY_FORM: AddRestaurantFormValues = {
   contact_email: '',
   contact_phone: '',
   package_id: '',
+  panel_language: '',
 };
 
 interface AddRestaurantDialogProps {
@@ -81,6 +84,7 @@ export function AddRestaurantDialog({ open, onClose }: AddRestaurantDialogProps)
         contact_email: values.contact_email.trim(),
         contact_phone: values.contact_phone.trim(),
         package_id: values.package_id,
+        panel_language: values.panel_language || null,
       },
       {
         onSuccess: (created) => {
@@ -209,6 +213,18 @@ export function AddRestaurantDialog({ open, onClose }: AddRestaurantDialogProps)
                   </MenuItem>
                 ))}
               </TextField>
+            )}
+          />
+
+          <Controller
+            name="panel_language"
+            control={control}
+            render={({ field }) => (
+              <PanelLanguageField
+                value={field.value}
+                onChange={field.onChange}
+                disabled={isSubmitting}
+              />
             )}
           />
         </Stack>

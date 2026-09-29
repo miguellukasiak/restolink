@@ -12,6 +12,7 @@ import { useSnackbar } from '../feedback/SnackbarProvider';
 import { useUpdateRestaurant } from '../../hooks/useOnboarding';
 import { getApiErrorMessage } from '../../services/api';
 import type { RestaurantListItem } from '../../types';
+import { PanelLanguageField } from './PanelLanguageField';
 
 interface EditRestaurantDialogProps {
   open: boolean;
@@ -39,6 +40,7 @@ export function EditRestaurantDialog({
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [panelLanguage, setPanelLanguage] = useState('');
 
   // Reseed whenever a different row opens the dialog, so it never shows the
   // previous restaurant's details for a frame.
@@ -47,6 +49,7 @@ export function EditRestaurantDialog({
       setName(restaurant.name);
       setEmail(restaurant.contact_email);
       setPhone(restaurant.contact_phone);
+      setPanelLanguage(restaurant.panel_language ?? '');
     }
   }, [open, restaurant]);
 
@@ -54,7 +57,8 @@ export function EditRestaurantDialog({
     Boolean(restaurant) &&
     (name !== restaurant?.name ||
       email !== restaurant?.contact_email ||
-      phone !== restaurant?.contact_phone);
+      phone !== restaurant?.contact_phone ||
+      panelLanguage !== (restaurant?.panel_language ?? ''));
   const valid = name.trim().length > 0 && email.includes('@') && phone.trim().length > 0;
 
   async function handleSubmit(event: FormEvent) {
@@ -70,6 +74,9 @@ export function EditRestaurantDialog({
           ...(name !== restaurant.name ? { name } : {}),
           ...(email !== restaurant.contact_email ? { contact_email: email } : {}),
           ...(phone !== restaurant.contact_phone ? { contact_phone: phone } : {}),
+          ...(panelLanguage !== (restaurant.panel_language ?? '')
+            ? { panel_language: panelLanguage || null }
+            : {}),
         },
       });
       showSuccess('Dane zaktualizowane.');
@@ -112,9 +119,14 @@ export function EditRestaurantDialog({
               fullWidth
               disabled={update.isPending}
             />
+            <PanelLanguageField
+              value={panelLanguage}
+              onChange={setPanelLanguage}
+              disabled={update.isPending}
+            />
             <Alert severity="info" sx={{ borderRadius: '12px' }}>
-              Zapisanie zmian nie wysyła żadnej wiadomości. Po poprawieniu adresu
-              użyj akcji „Wyślij link aktywacyjny”.
+              Zapisanie zmian nie wysyła żadnej wiadomości. Po poprawieniu adresu użyj
+              akcji „Wyślij link aktywacyjny”.
             </Alert>
             {update.isError && (
               <Alert severity="error">{getApiErrorMessage(update.error)}</Alert>

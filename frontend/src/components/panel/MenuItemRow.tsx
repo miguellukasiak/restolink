@@ -23,7 +23,8 @@ import type { MenuItem } from '../../types';
 import { formatPln } from '../../constants/menu';
 import { getTagIcon } from '../../constants/menuIcons';
 import { radii } from '../../theme';
-import { plCount } from '../../utils/plural';
+import { usePanelT } from '../../i18n/panel';
+import { usePanelLabels } from '../../hooks/usePanelLabels';
 
 const THUMB = 56;
 
@@ -61,6 +62,8 @@ function MenuItemRowComponent({
   onDuplicate,
   onRequestDelete,
 }: MenuItemRowProps) {
+  const { t } = usePanelT();
+  const { allergenLabel, tagLabel } = usePanelLabels();
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
   const available = item.is_available;
   const description = item.description.trim();
@@ -107,7 +110,7 @@ function MenuItemRowComponent({
         <Box
           {...provided.dragHandleProps}
           className="drag-handle"
-          aria-label={`Przeciągnij danie ${item.name}`}
+          aria-label={t('dish.drag', { name: item.name })}
           sx={{
             display: 'flex',
             alignSelf: 'stretch',
@@ -125,7 +128,7 @@ function MenuItemRowComponent({
 
         <ButtonBase
           onClick={() => onEdit(item)}
-          aria-label={`Edytuj danie ${item.name}`}
+          aria-label={t('dish.edit', { name: item.name })}
           sx={{
             flex: 1,
             minWidth: 0,
@@ -203,7 +206,7 @@ function MenuItemRowComponent({
                 fontStyle: description ? 'normal' : 'italic',
               }}
             >
-              {description || 'Bez opisu'}
+              {description || t('dish.noDescription')}
             </Typography>
             {(!available || item.tags.length > 0 || item.allergens.length > 0) && (
               <Stack
@@ -215,7 +218,7 @@ function MenuItemRowComponent({
                 {!available && (
                   <Chip
                     size="small"
-                    label="Niedostępne"
+                    label={t('dish.unavailable')}
                     sx={{ height: 20, fontSize: 11, bgcolor: 'action.selected' }}
                   />
                 )}
@@ -224,7 +227,7 @@ function MenuItemRowComponent({
                     key={tag}
                     size="small"
                     icon={getTagIcon(tag)}
-                    label={tag}
+                    label={tagLabel(tag)}
                     sx={{
                       height: 20,
                       fontSize: 11,
@@ -235,15 +238,15 @@ function MenuItemRowComponent({
                   />
                 ))}
                 {item.allergens.length > 0 && (
-                  <Tooltip title={`Alergeny: ${item.allergens.join(', ')}`} arrow>
+                  <Tooltip
+                    title={t('dish.allergensTooltip', {
+                      list: item.allergens.map(allergenLabel).join(', '),
+                    })}
+                    arrow
+                  >
                     <Chip
                       size="small"
-                      label={plCount(
-                        item.allergens.length,
-                        'alergen',
-                        'alergeny',
-                        'alergenów',
-                      )}
+                      label={t('count.allergens', { count: item.allergens.length })}
                       sx={{
                         height: 20,
                         fontSize: 11,
@@ -274,21 +277,23 @@ function MenuItemRowComponent({
         </ButtonBase>
 
         <Tooltip
-          title={available ? 'Dostępne — kliknij, aby ukryć' : 'Niedostępne'}
+          title={available ? t('dish.availableHint') : t('dish.unavailable')}
           arrow
         >
           <Switch
             size="small"
             checked={available}
             onChange={(event) => onToggleAvailability(item, event.target.checked)}
-            slotProps={{ input: { 'aria-label': `Dostępność dania ${item.name}` } }}
+            slotProps={{
+              input: { 'aria-label': t('dish.availability', { name: item.name }) },
+            }}
             sx={{ ml: 0.5 }}
           />
         </Tooltip>
 
         <IconButton
           size="small"
-          aria-label={`Więcej akcji: ${item.name}`}
+          aria-label={t('dish.more', { name: item.name })}
           aria-haspopup="menu"
           onClick={(event) => setMenuAnchor(event.currentTarget)}
           sx={{ color: 'text.secondary' }}
@@ -311,7 +316,7 @@ function MenuItemRowComponent({
             <ListItemIcon>
               <EditRoundedIcon fontSize="small" />
             </ListItemIcon>
-            <ListItemText>Edytuj</ListItemText>
+            <ListItemText>{t('common.edit')}</ListItemText>
           </MuiMenuItem>
           <MuiMenuItem
             onClick={() => {
@@ -322,7 +327,7 @@ function MenuItemRowComponent({
             <ListItemIcon>
               <ContentCopyRoundedIcon fontSize="small" />
             </ListItemIcon>
-            <ListItemText>Duplikuj</ListItemText>
+            <ListItemText>{t('dish.duplicate')}</ListItemText>
           </MuiMenuItem>
           <MuiMenuItem
             onClick={() => {
@@ -334,7 +339,7 @@ function MenuItemRowComponent({
             <ListItemIcon sx={{ color: 'inherit' }}>
               <DeleteOutlineRoundedIcon fontSize="small" />
             </ListItemIcon>
-            <ListItemText>Usuń</ListItemText>
+            <ListItemText>{t('common.delete')}</ListItemText>
           </MuiMenuItem>
         </Menu>
       </Stack>

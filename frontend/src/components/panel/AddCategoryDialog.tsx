@@ -21,9 +21,11 @@ import { useAddCategory } from '../../hooks/useAddCategory';
 import { useSnackbar } from '../feedback/SnackbarProvider';
 import { getApiErrorMessage } from '../../services/api';
 import { TonalIcon } from './TonalIcon';
+import { usePanelT } from '../../i18n/panel';
 
+// Messages are panel keys, translated where they are shown.
 const addCategorySchema = z.object({
-  name: z.string().trim().min(2, 'Nazwa musi mieć co najmniej 2 znaki'),
+  name: z.string().trim().min(2, 'addCategory.nameMin'),
 });
 
 type AddCategoryFormValues = z.infer<typeof addCategorySchema>;
@@ -45,6 +47,7 @@ export function AddCategoryDialog({
   onClose,
   onCreated,
 }: AddCategoryDialogProps) {
+  const { t } = usePanelT();
   const { showSuccess, showError } = useSnackbar();
   const addCategory = useAddCategory(restaurantId);
 
@@ -70,7 +73,7 @@ export function AddCategoryDialog({
   const onSubmit = handleSubmit((values) => {
     addCategory.mutate(values.name.trim(), {
       onSuccess: (created) => {
-        showSuccess(`Kategoria „${created.name}" została utworzona.`);
+        showSuccess(t('addCategory.created', { name: created.name }));
         onCreated?.(created);
         onClose();
       },
@@ -97,14 +100,14 @@ export function AddCategoryDialog({
           </TonalIcon>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography variant="h6" component="div">
-              Nowa kategoria
+              {t('builder.newCategory')}
             </Typography>
             <Typography variant="body2" color="text.secondary" noWrap>
-              Dodaj sekcję do swojego menu
+              {t('addCategory.subtitle')}
             </Typography>
           </Box>
           <IconButton
-            aria-label="Zamknij"
+            aria-label={t('common.close')}
             onClick={onClose}
             disabled={isSubmitting}
             edge="end"
@@ -116,20 +119,20 @@ export function AddCategoryDialog({
 
       <DialogContent>
         <TextField
-          label="Nazwa kategorii"
-          placeholder="np. Napoje"
+          label={t('category.name')}
+          placeholder={t('addCategory.placeholder')}
           autoFocus
           fullWidth
           sx={{ mt: 1 }}
           error={Boolean(errors.name)}
-          helperText={errors.name?.message ?? ' '}
+          helperText={errors.name?.message ? t(errors.name.message) : ' '}
           disabled={isSubmitting}
           {...register('name')}
         />
         {suggestions.length > 0 && (
           <>
             <Typography variant="caption" color="text.secondary" component="p">
-              Popularne:
+              {t('addCategory.popular')}
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
               {suggestions.map((name) => (
@@ -151,7 +154,7 @@ export function AddCategoryDialog({
 
       <DialogActions sx={{ px: 3, pb: 3 }}>
         <Button onClick={onClose} color="inherit" disabled={isSubmitting}>
-          Anuluj
+          {t('common.cancel')}
         </Button>
         <Button
           type="submit"
@@ -161,7 +164,7 @@ export function AddCategoryDialog({
             isSubmitting ? <CircularProgress size={18} color="inherit" /> : undefined
           }
         >
-          {isSubmitting ? 'Tworzenie…' : 'Utwórz kategorię'}
+          {isSubmitting ? t('addCategory.creating') : t('addCategory.create')}
         </Button>
       </DialogActions>
     </Dialog>

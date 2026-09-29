@@ -13,6 +13,7 @@ import { MANY_LANGUAGES, getMenuLanguage } from '../../../constants/menuLanguage
 import { radii } from '../../../theme';
 import worldMap from './worldCountries.json';
 import { formatPeople, reach } from './reach';
+import { useLanguageName, usePanelT } from '../../../i18n/panel';
 
 interface OfferedLanguagesProps {
   base: string;
@@ -26,19 +27,19 @@ interface OfferedLanguagesProps {
 }
 
 /**
- * What guests read where a language is not finished. The fallback runs per
- * phrase — English where it exists, then Polish — so an unfinished English
- * cannot be promised as the safety net.
+ * What guests read where a language is not finished (`offered.fallback.*`).
+ * The fallback runs per phrase — English where it exists, then Polish — so
+ * an unfinished English cannot be promised as the safety net.
  */
-function fallbackText(
+function fallbackKey(
   offered: readonly string[],
   code: string,
   englishDone: number,
   phrasesTotal: number,
 ) {
-  if (code === 'en' || !offered.includes('en') || englishDone === 0) return 'po polsku';
-  if (englishDone >= phrasesTotal) return 'po angielsku';
-  return 'po angielsku lub po polsku';
+  if (code === 'en' || !offered.includes('en') || englishDone === 0) return 'polish';
+  if (englishDone >= phrasesTotal) return 'english';
+  return 'englishOrPolish';
 }
 
 /**
@@ -56,6 +57,8 @@ export function OfferedLanguages({
   onEdit,
   onRemove,
 }: OfferedLanguagesProps) {
+  const { t, i18n } = usePanelT();
+  const languageName = useLanguageName();
   const all = [base, ...offered];
   const everyone = reach(worldMap.countries, all);
   const missing = offered.reduce(
@@ -65,15 +68,11 @@ export function OfferedLanguages({
 
   return (
     <Stack spacing={1.5}>
-      <Row
-        title={getMenuLanguage(base)?.name ?? base}
-        subtitle="język menu — tak piszesz w Kreatorze"
-      />
+      <Row title={languageName(base)} subtitle={t('offered.baseSubtitle')} />
 
       {offered.length === 0 && (
         <Alert severity="info" sx={{ borderRadius: radii.md }}>
-          Goście widzą menu tylko po polsku. Zacznij od angielskiego — czyta go większość
-          zagranicznych gości.
+          {t('offered.onlyPolish')}
         </Alert>
       )}
 
@@ -87,22 +86,28 @@ export function OfferedLanguages({
             worldMap.countries,
             all.filter((entry) => entry !== code),
           );
+        const fallback = t(
+          `offered.fallback.${fallbackKey(offered, code, translated('en'), phrasesTotal)}`,
+        );
         const status =
           share >= 1
-            ? 'Gotowe — goście czytają całe menu w tym języku.'
+            ? t('offered.done')
             : done === 0
-              ? `Nieprzetłumaczone — goście widzą menu ${fallbackText(offered, code, translated('en'), phrasesTotal)}.`
-              : `${Math.round(share * 100)}% gotowe — resztę goście widzą ${fallbackText(offered, code, translated('en'), phrasesTotal)}.`;
+              ? t('offered.untranslated', { fallback })
+              : t('offered.partial', {
+                  percent: `${Math.round(share * 100)}%`,
+                  fallback,
+                });
 
         return (
           <Row
             key={code}
             selected={editing === code}
-            title={meta?.name ?? code}
+            title={languageName(code)}
             endonym={meta?.endonym}
             code={code}
             subtitle={status}
-            aside={`tylko dzięki niemu: ${formatPeople(only)}`}
+            aside={t('offered.only', { people: formatPeople(only, i18n.language) })}
             progress={share}
             actions={
               <>
@@ -112,13 +117,13 @@ export function OfferedLanguages({
                   startIcon={<EditNoteRoundedIcon />}
                   onClick={() => onEdit(code)}
                 >
-                  {share >= 1 ? 'Popraw' : 'Tłumacz'}
+                  {share >= 1 ? t('offered.revise') : t('offered.translate')}
                 </Button>
-                <Tooltip title="Ukryj przed gośćmi (tłumaczenia zostaną)" arrow>
+                <Tooltip title={t('offered.hideTooltip')} arrow>
                   <span>
                     <IconButton
                       size="small"
-                      aria-label={`Ukryj język ${meta?.name ?? code}`}
+                      aria-label={t('offered.hideAria', { name: languageName(code) })}
                       disabled={busy}
                       onClick={() => onRemove(code)}
                     >
@@ -141,22 +146,24 @@ export function OfferedLanguages({
             bgcolor: (t) => alpha(t.palette.text.primary, 0.04),
           }}
         >
-          <Typography variant="subtitle2">Ile to pracy</Typography>
+          <Typography variant="subtitle2">{t('offered.workTitle')}</Typography>
           <Typography variant="body2" color="text.secondary">
-            Każde nowe danie to do {offered.length * 3} tłumaczeń — nazwa, opis i skład w{' '}
-            {offered.length} {offered.length === 1 ? 'języku' : 'językach'}.
+            {t('offered.work', {
+              translations: offered.length * 3,
+              inLanguages: t('reach.inLanguages', { count: offered.length }),
+            })}
             {missing > 0
-              ? ` Teraz czeka ${missing} fraz.`
-              : ' Teraz wszystko jest gotowe.'}
+              ? t('offered.waiting', { phrases: t('count.phrases', { count: missing }) })
+              : t('offered.allDone')}
           </Typography>
         </Box>
       )}
 
       {offered.length >= MANY_LANGUAGES && (
         <Alert severity="warning" sx={{ borderRadius: radii.md }}>
-          To już {offered.length} języków. Każdy kolejny dokłada pracy przy każdej zmianie
-          menu, a niedokończony pokazuje gościom menu pół na pół. Dodawaj tylko te, w
-          których naprawdę przychodzą goście.
+          {t('offered.many', {
+            languages: t('count.languages', { count: offered.length }),
+          })}
         </Alert>
       )}
     </Stack>
@@ -213,7 +220,7 @@ function Row({
             >
               {title}
             </Typography>
-            {endonym && (
+            {endonym && endonym.toLowerCase() !== title.toLowerCase() && (
               <Typography variant="body2" color="text.secondary" lang={code} dir="auto">
                 {endonym}
               </Typography>

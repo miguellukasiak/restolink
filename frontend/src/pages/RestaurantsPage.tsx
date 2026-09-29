@@ -39,6 +39,7 @@ import { useImpersonate } from '../hooks/useHq';
 import { useSnackbar } from '../components/feedback/SnackbarProvider';
 import { getApiErrorMessage } from '../services/api';
 import { StatusChip } from '../components/restaurants/StatusChip';
+import { panelLanguageLabel } from '../components/restaurants/panelLanguageLabel';
 import { ManualPaymentDialog } from '../components/restaurants/ManualPaymentDialog';
 import { AddRestaurantDialog } from '../components/restaurants/AddRestaurantDialog';
 import { EditRestaurantDialog } from '../components/restaurants/EditRestaurantDialog';
@@ -175,7 +176,11 @@ export function RestaurantsPage() {
         sortable: false,
         renderCell: (params: GridRenderCellParams<RestaurantListItem>) => (
           <Stack spacing={0.25} sx={{ py: 1, minWidth: 0 }}>
-            <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center', minWidth: 0 }}>
+            <Stack
+              direction="row"
+              spacing={0.75}
+              sx={{ alignItems: 'center', minWidth: 0 }}
+            >
               <MailOutlineRoundedIcon sx={{ fontSize: 15, color: 'text.secondary' }} />
               <Typography variant="body2" noWrap>
                 {params.row.contact_email}
@@ -204,6 +209,30 @@ export function RestaurantsPage() {
             icon={<WorkspacePremiumRoundedIcon />}
             label={params.row.package?.name ?? '—'}
           />
+        ),
+      },
+      {
+        field: 'panel_language',
+        headerName: 'Panel',
+        width: 110,
+        sortable: false,
+        renderCell: (params: GridRenderCellParams<RestaurantListItem>) => (
+          <Tooltip
+            title={
+              params.row.panel_language
+                ? `Angielski i ${panelLanguageLabel(params.row.panel_language).toLocaleLowerCase('pl')}`
+                : 'Tylko angielski'
+            }
+            arrow
+          >
+            <Chip
+              size="small"
+              variant="outlined"
+              label={['EN', params.row.panel_language?.toUpperCase()]
+                .filter(Boolean)
+                .join(' · ')}
+            />
+          </Tooltip>
         ),
       },
       {

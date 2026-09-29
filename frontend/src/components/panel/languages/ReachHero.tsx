@@ -9,9 +9,17 @@ import Typography from '@mui/material/Typography';
 import { alpha } from '@mui/material/styles';
 import PublicRoundedIcon from '@mui/icons-material/PublicRounded';
 import { getMenuLanguage } from '../../../constants/menuLanguages';
+import { useLanguageName, usePanelT } from '../../../i18n/panel';
 import { radii } from '../../../theme';
 import worldMap from './worldCountries.json';
-import { bestLanguageFor, coverage, formatPeople, gain, reach } from './reach';
+import {
+  bestLanguageFor,
+  countryName,
+  coverage,
+  formatPeople,
+  gain,
+  reach,
+} from './reach';
 import { WorldLanguageMap } from './WorldLanguageMap';
 import { PREVIEW_FILL, STEP_FILLS, countryAnchor, type MapView } from './mapGeometry';
 
@@ -20,14 +28,8 @@ const WORLD_POPULATION = worldMap.countries.reduce(
   0,
 );
 
-const LEGEND = [
-  { fill: STEP_FILLS[3], label: 'prawie wszyscy' },
-  { fill: STEP_FILLS[2], label: 'większość' },
-  { fill: STEP_FILLS[1], label: 'część' },
-  { fill: STEP_FILLS[0], label: 'mało kto' },
-];
-
-const percent = (value: number) => `${Math.round(value * 100)}%`;
+/** Coverage steps, most first; worded by `reach.legend.<step>`. */
+const LEGEND = [3, 2, 1, 0] as const;
 
 interface ReachHeroProps {
   /** Languages guests can read the menu in, its own first. */
@@ -57,6 +59,14 @@ export function ReachHero({
   onAdd,
   onSelectLanguage,
 }: ReachHeroProps) {
+  const { t, i18n } = usePanelT();
+  const languageName = useLanguageName();
+  const locale = i18n.language;
+  const people = (value: number) => formatPeople(value, locale);
+  const percent = (value: number) =>
+    new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 0 }).format(
+      value,
+    );
   const [view, setView] = useState<MapView>('world');
   const [hovered, setHovered] = useState<string | null>(null);
 
@@ -97,7 +107,7 @@ export function ReachHero({
               color="text.secondary"
               sx={{ letterSpacing: 1 }}
             >
-              Twoje menu przeczyta
+              {t('reach.readBy')}
             </Typography>
             <Stack direction="row" spacing={1} sx={{ alignItems: 'baseline' }}>
               <Typography
@@ -110,15 +120,17 @@ export function ReachHero({
                   letterSpacing: '-0.02em',
                 }}
               >
-                {formatPeople(total)}
+                {people(total)}
               </Typography>
               <Typography variant="h6" component="span" color="text.secondary">
-                ludzi
+                {t('reach.people')}
               </Typography>
             </Stack>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75 }}>
-              ok. {percent(total / WORLD_POPULATION)} mieszkańców świata, w{' '}
-              {languages.length} {languages.length === 1 ? 'języku' : 'językach'}
+              {t('reach.worldShare', {
+                percent: percent(total / WORLD_POPULATION),
+                inLanguages: t('reach.inLanguages', { count: languages.length }),
+              })}
             </Typography>
           </Box>
 
@@ -137,19 +149,20 @@ export function ReachHero({
             {preview ? (
               <>
                 <Typography variant="subtitle2">
-                  + {getMenuLanguage(preview)?.name}: {formatPeople(previewGain)} nowych
-                  osób
+                  {t('reach.preview', {
+                    name: languageName(preview),
+                    people: people(previewGain),
+                  })}
                 </Typography>
                 <Typography variant="caption" color="text.secondary" component="p">
                   {previewGain < 5e6
-                    ? 'Niewiele — tamtejsi goście w większości przeczytają już Twoje menu.'
-                    : `Razem ${formatPeople(total + previewGain)}. Na mapie na żółto — tam przybędzie czytelników.`}
+                    ? t('reach.previewSmall')
+                    : t('reach.previewTotal', { total: people(total + previewGain) })}
                 </Typography>
               </>
             ) : (
               <Typography variant="caption" color="text.secondary" component="p">
-                Najedź na kraj, żeby zobaczyć, ilu gości dołączy. Kliknij, żeby dodać jego
-                język.
+                {t('reach.hint')}
               </Typography>
             )}
           </Box>
@@ -213,11 +226,19 @@ export function ReachHero({
                 }}
               >
                 <Typography variant="subtitle2" noWrap>
-                  {hoveredCountry.name}
+                  {countryName(
+                    hoveredCountry.key,
+                    t(`reach.country.${hoveredCountry.key}`, {
+                      defaultValue: hoveredCountry.name,
+                    }),
+                    locale,
+                  )}
                 </Typography>
                 <Typography variant="caption" color="text.secondary" component="p">
-                  {formatPeople(hoveredCountry.pop)} mieszkańców · menu przeczyta{' '}
-                  {percent(coverage(hoveredCountry.key, languages))}
+                  {t('reach.countryStats', {
+                    people: people(hoveredCountry.pop),
+                    percent: percent(coverage(hoveredCountry.key, languages)),
+                  })}
                 </Typography>
                 <Typography
                   variant="caption"
@@ -225,14 +246,17 @@ export function ReachHero({
                   sx={{ fontWeight: 600, mt: 0.25 }}
                 >
                   {hoveredCountry.key === home
-                    ? 'Tu jest Twój lokal.'
+                    ? t('reach.home')
                     : suggestion
-                      ? `Kliknij, by dodać: ${getMenuLanguage(suggestion.code)?.name} → ${percent(
-                          coverage(hoveredCountry.key, [...languages, suggestion.code]),
-                        )}`
+                      ? t('reach.clickToAdd', {
+                          name: languageName(suggestion.code),
+                          percent: percent(
+                            coverage(hoveredCountry.key, [...languages, suggestion.code]),
+                          ),
+                        })
                       : coverage(hoveredCountry.key, languages) >= 0.85
-                        ? 'Tu już czytają Twoje menu.'
-                        : 'Tutejszego języka nie ma jeszcze w katalogu.'}
+                        ? t('reach.alreadyRead')
+                        : t('reach.notInCatalogue')}
                 </Typography>
               </Paper>
             )}
@@ -242,7 +266,7 @@ export function ReachHero({
               exclusive
               value={view}
               onChange={(_event, value: MapView | null) => value && setView(value)}
-              aria-label="Widok mapy"
+              aria-label={t('reach.mapView')}
               sx={{
                 position: 'absolute',
                 top: 8,
@@ -253,10 +277,10 @@ export function ReachHero({
             >
               <ToggleButton value="world" sx={{ px: 1.5, py: 0.5 }}>
                 <PublicRoundedIcon fontSize="small" sx={{ mr: 0.75 }} />
-                Świat
+                {t('reach.world')}
               </ToggleButton>
               <ToggleButton value="europe" sx={{ px: 1.5, py: 0.5 }}>
-                Europa
+                {t('reach.europe')}
               </ToggleButton>
             </ToggleButtonGroup>
           </Box>
@@ -268,21 +292,26 @@ export function ReachHero({
             sx={{ mt: 1.5, flexWrap: 'wrap', alignItems: 'center' }}
           >
             <Typography variant="caption" color="text.secondary">
-              Czyta Twoje menu:
+              {t('reach.legendTitle')}
             </Typography>
-            {LEGEND.map((entry) => (
+            {LEGEND.map((step) => (
               <Stack
-                key={entry.label}
+                key={step}
                 direction="row"
                 spacing={0.75}
                 sx={{ alignItems: 'center' }}
               >
                 <Box
-                  sx={{ width: 12, height: 12, borderRadius: '4px', bgcolor: entry.fill }}
+                  sx={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: '4px',
+                    bgcolor: STEP_FILLS[step],
+                  }}
                   aria-hidden
                 />
                 <Typography variant="caption" color="text.secondary">
-                  {entry.label}
+                  {t(`reach.legend.${step}`)}
                 </Typography>
               </Stack>
             ))}

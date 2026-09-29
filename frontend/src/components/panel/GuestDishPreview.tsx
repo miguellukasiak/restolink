@@ -12,6 +12,8 @@ import { radii } from '../../theme';
 import { createRestaurantTheme } from '../public/RestaurantThemeProvider';
 import { PublicItemCard } from '../public/PublicItemCard';
 import { DishDetailBody } from '../public/ItemDetailModal';
+import { GuestPreviewLanguage } from './GuestPreviewLanguage';
+import { usePanelT } from '../../i18n/panel';
 
 interface GuestDishPreviewProps {
   /** The dish as currently typed, unsaved. */
@@ -50,6 +52,7 @@ export function GuestDishPreview({
   categoryName,
   menuTheme,
 }: GuestDishPreviewProps) {
+  const { t } = usePanelT();
   const restaurantTheme = useMemo(
     () =>
       createRestaurantTheme({
@@ -63,73 +66,75 @@ export function GuestDishPreview({
   // Hidden from assistive tech: it repeats, as pictures, exactly what the
   // form beside it already says, and a screen reader would read it twice.
   return (
-    <Stack spacing={2.5} aria-hidden>
-      <Box>
-        <PreviewLabel icon={<ViewModuleRoundedIcon sx={{ fontSize: 16 }} />}>
-          W MENU
-        </PreviewLabel>
-        <ThemeProvider theme={restaurantTheme}>
-          <Box
-            sx={{
-              bgcolor: 'background.default',
-              color: 'text.primary',
-              borderRadius: radii.lg,
-              p: 1.5,
-              boxShadow: '0 8px 24px rgba(22, 28, 37, 0.10)',
-            }}
-          >
-            <Typography
-              component="p"
-              sx={{ fontSize: 17, fontWeight: 700, letterSpacing: '-0.01em', mb: 1 }}
-              noWrap
-            >
-              {categoryName}
-            </Typography>
+    <GuestPreviewLanguage>
+      <Stack spacing={2.5} aria-hidden>
+        <Box>
+          <PreviewLabel icon={<ViewModuleRoundedIcon sx={{ fontSize: 16 }} />}>
+            {t('preview.inMenu')}
+          </PreviewLabel>
+          <ThemeProvider theme={restaurantTheme}>
             <Box
               sx={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-                gap: 1.5,
-                alignItems: 'stretch',
+                bgcolor: 'background.default',
+                color: 'text.primary',
+                borderRadius: radii.lg,
+                p: 1.5,
+                boxShadow: '0 8px 24px rgba(22, 28, 37, 0.10)',
               }}
             >
-              <PublicItemCard item={dish} />
-              {neighbour ? (
-                <Box sx={{ opacity: 0.45 }}>
-                  <PublicItemCard item={neighbour} />
-                </Box>
-              ) : (
-                <Box
-                  sx={{
-                    borderRadius: '16px',
-                    border: '1.5px dashed',
-                    borderColor: 'divider',
-                  }}
-                />
-              )}
+              <Typography
+                component="p"
+                sx={{ fontSize: 17, fontWeight: 700, letterSpacing: '-0.01em', mb: 1 }}
+                noWrap
+              >
+                {categoryName}
+              </Typography>
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                  gap: 1.5,
+                  alignItems: 'stretch',
+                }}
+              >
+                <PublicItemCard item={dish} />
+                {neighbour ? (
+                  <Box sx={{ opacity: 0.45 }}>
+                    <PublicItemCard item={neighbour} />
+                  </Box>
+                ) : (
+                  <Box
+                    sx={{
+                      borderRadius: '16px',
+                      border: '1.5px dashed',
+                      borderColor: 'divider',
+                    }}
+                  />
+                )}
+              </Box>
             </Box>
-          </Box>
-        </ThemeProvider>
-      </Box>
+          </ThemeProvider>
+        </Box>
 
-      <Box>
-        <PreviewLabel icon={<TouchAppRoundedIcon sx={{ fontSize: 16 }} />}>
-          PO KLIKNIĘCIU
-        </PreviewLabel>
-        <ThemeProvider theme={restaurantTheme}>
-          <Paper
-            elevation={0}
-            sx={{
-              borderRadius: radii.lg,
-              p: 2.5,
-              color: 'text.primary',
-              boxShadow: '0 8px 24px rgba(22, 28, 37, 0.10)',
-            }}
-          >
-            <DishDetailBody item={dish} idPrefix="dish-preview" />
-          </Paper>
-        </ThemeProvider>
-      </Box>
-    </Stack>
+        <Box>
+          <PreviewLabel icon={<TouchAppRoundedIcon sx={{ fontSize: 16 }} />}>
+            {t('preview.onTap')}
+          </PreviewLabel>
+          <ThemeProvider theme={restaurantTheme}>
+            <Paper
+              elevation={0}
+              sx={{
+                borderRadius: radii.lg,
+                p: 2.5,
+                color: 'text.primary',
+                boxShadow: '0 8px 24px rgba(22, 28, 37, 0.10)',
+              }}
+            >
+              <DishDetailBody item={dish} idPrefix="dish-preview" />
+            </Paper>
+          </ThemeProvider>
+        </Box>
+      </Stack>
+    </GuestPreviewLanguage>
   );
 }

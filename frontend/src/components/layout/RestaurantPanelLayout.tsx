@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -27,6 +27,15 @@ import { Wordmark } from '../brand/Wordmark';
 import { ImpersonationBanner } from '../panel/ImpersonationBanner';
 import { useSnackbar } from '../feedback/SnackbarProvider';
 import { resolveAccessState } from '../../constants/subscription';
+import { PanelLanguageSwitch } from '../panel/PanelLanguageSwitch';
+import {
+  PANEL_DEFAULT_LANGUAGE,
+  isPanelLanguage,
+  panelLanguage,
+  setPanelLanguage,
+  usePanelT,
+  type PanelLanguage,
+} from '../../i18n/panel';
 import {
   SubscriptionPaywall,
   SubscriptionPendingBanner,
@@ -45,6 +54,24 @@ export function RestaurantPanelLayout() {
   const restaurant = useRestaurantInfo(restaurantId);
   const { showInfo, showSuccess, showError } = useSnackbar();
   const checkout = useCheckout();
+  const { t } = usePanelT();
+
+  // English for everyone, plus the one language HQ gave this restaurant. A
+  // choice remembered on this device from another restaurant, or one HQ has
+  // since taken away, falls back to English.
+  const secondLanguage = restaurant.data?.panel_language;
+  const panelLanguages = useMemo(
+    () =>
+      isPanelLanguage(secondLanguage) && secondLanguage !== PANEL_DEFAULT_LANGUAGE
+        ? ([PANEL_DEFAULT_LANGUAGE, secondLanguage] as PanelLanguage[])
+        : [PANEL_DEFAULT_LANGUAGE],
+    [secondLanguage],
+  );
+  useEffect(() => {
+    if (!restaurant.data) return;
+    if (!panelLanguages.includes(panelLanguage()))
+      setPanelLanguage(PANEL_DEFAULT_LANGUAGE);
+  }, [restaurant.data, panelLanguages]);
 
   // Access is only enforced once the restaurant details have loaded.
   const access = restaurant.data
@@ -58,11 +85,11 @@ export function RestaurantPanelLayout() {
 
   useEffect(() => {
     if (outcome === 'success') {
-      showSuccess('Płatność przyjęta. Aktywujemy subskrypcję.');
+      showSuccess(t('billing.paid'));
     } else if (outcome === 'cancelled') {
-      showInfo('Płatność anulowana — nic nie zostało pobrane.');
+      showInfo(t('billing.cancelled'));
     }
-  }, [outcome, showSuccess, showInfo]);
+  }, [outcome, showSuccess, showInfo, t]);
 
   const handlePaymentCta = async () => {
     try {
@@ -78,13 +105,21 @@ export function RestaurantPanelLayout() {
   // Everything else is an extra and sits below the divider.
   const navGroups = [
     [
-      { label: 'Kreator menu', to: `${base}/menu`, icon: <MenuBookRoundedIcon /> },
-      { label: 'Wygląd menu', to: `${base}/settings`, icon: <PaletteRoundedIcon /> },
-      { label: 'Kody QR', to: `${base}/qr`, icon: <QrCode2RoundedIcon /> },
+      { label: t('nav.builder'), to: `${base}/menu`, icon: <MenuBookRoundedIcon /> },
+      {
+        label: t('nav.appearance'),
+        to: `${base}/settings`,
+        icon: <PaletteRoundedIcon />,
+      },
+      { label: t('nav.qr'), to: `${base}/qr`, icon: <QrCode2RoundedIcon /> },
     ],
     [
-      { label: 'Języki', to: `${base}/dictionary`, icon: <TranslateRoundedIcon /> },
-      { label: 'Opinie Google', to: `${base}/google`, icon: <StarRoundedIcon /> },
+      {
+        label: t('nav.languages'),
+        to: `${base}/dictionary`,
+        icon: <TranslateRoundedIcon />,
+      },
+      { label: t('nav.reviews'), to: `${base}/google`, icon: <StarRoundedIcon /> },
     ],
   ];
 
@@ -104,15 +139,18 @@ export function RestaurantPanelLayout() {
                 <Skeleton variant="text" width={160} height={24} />
               ) : (
                 <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
-                  {restaurant.data?.name ?? 'Panel restauratora'}
+                  {restaurant.data?.name ?? t('nav.ownerPanel')}
                 </Typography>
               )}
               <Typography variant="caption" color="text.secondary">
-                Zarządzaj swoją restauracją
+                {t('nav.tagline')}
               </Typography>
             </Box>
           </Stack>
           <Box sx={{ flexGrow: 1 }} />
+          <Box sx={{ mr: { xs: 1, sm: 2 } }}>
+            <PanelLanguageSwitch languages={panelLanguages} />
+          </Box>
           <Chip
             size="small"
             variant="outlined"

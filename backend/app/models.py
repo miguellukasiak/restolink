@@ -127,6 +127,10 @@ class Restaurant(TimestampSoftDeleteMixin, Base):
     menu_languages: Mapped[list[str] | None] = mapped_column(
         JSONB, nullable=True, default=lambda: list(DEFAULT_MENU_LANGUAGES)
     )
+    #: The owner panel's second language, beside English, chosen by HQ — or
+    #: NULL for English only. Also the language of this restaurant's emails.
+    #: See `panel_language.PANEL_LANGUAGES`.
+    panel_language: Mapped[str | None] = mapped_column(String(8), nullable=True)
 
     #: The restaurant's listing on Google Maps, pasted by the owner from
     #: Google's Place ID finder. NULL means the reviews dashboard has not been

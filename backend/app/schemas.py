@@ -23,6 +23,7 @@ from pydantic import (
 )
 
 from .cloudinary_service import with_delivery_transformation
+from .panel_language import DEFAULT_PANEL_LANGUAGE, PANEL_LANGUAGES
 from .menu_labels import (
     BUILT_IN_ALLERGENS,
     BUILT_IN_TAGS,
@@ -71,6 +72,24 @@ class RestaurantCreate(BaseModel):
     contact_email: str
     contact_phone: str
     package_id: uuid.UUID
+    #: The panel's second language beside English, or None for English only.
+    panel_language: str | None = None
+
+    @field_validator("panel_language")
+    @classmethod
+    def _panel_language(cls, value: str | None) -> str | None:
+        return _checked_panel_language(value)
+
+
+def _checked_panel_language(value: str | None) -> str | None:
+    """A known second language, or None. English is every panel's already."""
+    if value is None or value == "" or value == DEFAULT_PANEL_LANGUAGE:
+        return None
+    if value not in PANEL_LANGUAGES:
+        raise ValueError(
+            "Nieobsługiwany język panelu. Dostępne: " + ", ".join(PANEL_LANGUAGES)
+        )
+    return value
 
 
 class RestaurantListItem(BaseModel):
@@ -84,6 +103,7 @@ class RestaurantListItem(BaseModel):
     contact_phone: str
     status: RestaurantStatus
     subscription_valid_until: datetime | None
+    panel_language: str | None = None
     package: PackageResponse
 
 
@@ -134,6 +154,8 @@ class RestaurantPanelInfo(BaseModel):
     name: str
     status: RestaurantStatus
     subscription_valid_until: datetime | None
+    #: The panel's second language beside English; None means English only.
+    panel_language: str | None = None
 
 
 class RestaurantThemeUpdate(BaseModel):
@@ -616,6 +638,14 @@ class RestaurantUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=255)
     contact_email: EmailStr | None = None
     contact_phone: str | None = Field(default=None, min_length=1, max_length=50)
+    #: Unlike the fields above, an explicit null here means something: take
+    #: the second language away, leaving English only.
+    panel_language: str | None = None
+
+    @field_validator("panel_language")
+    @classmethod
+    def _panel_language(cls, value: str | None) -> str | None:
+        return _checked_panel_language(value)
 
 
 class ActivationLinkResponse(BaseModel):

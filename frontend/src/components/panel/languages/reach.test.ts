@@ -109,9 +109,15 @@ describe('the map helpers', () => {
   });
 
   it('writes numbers the way people say them', () => {
-    expect(formatPeople(1_612_000_000)).toBe('1,6 mld');
-    expect(formatPeople(41_300_000)).toBe('41 mln');
-    expect(formatPeople(2_340_000)).toBe('2,3 mln');
-    expect(formatPeople(850_000)).toBe('850 tys.');
+    // Intl keeps the number and its unit together with a no-break space.
+    const say = (value: number, locale?: string) =>
+      formatPeople(value, locale).replace(/\u00a0/g, ' ');
+    expect(say(1_612_000_000)).toBe('1,6 mld');
+    expect(say(41_300_000)).toBe('41 mln');
+    expect(say(2_340_000)).toBe('2,3 mln');
+    expect(say(850_000)).toBe('850 tys.');
+    expect(say(1_612_000_000, 'en')).toBe('1.6B');
+    expect(say(41_300_000, 'en')).toBe('41M');
+    expect(say(850_000, 'en')).toBe('850K');
   });
 });

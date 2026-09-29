@@ -19,6 +19,8 @@ import pacificoLatinExt from '@fontsource/pacifico/files/pacifico-latin-ext-400-
 import caveatLatin from '@fontsource/caveat/files/caveat-latin-700-normal.woff2?url';
 import caveatLatinExt from '@fontsource/caveat/files/caveat-latin-ext-700-normal.woff2?url';
 import type { SheetPlan } from './qrTemplates';
+import { escapeXml } from './qrArt';
+import { tp } from '../../../i18n/panel';
 
 /*
  * Getting the design out of the browser: PNG, SVG, a print sheet, and the
@@ -118,14 +120,14 @@ export async function rasterize(
     image.decoding = 'async';
     await new Promise<void>((resolve, reject) => {
       image.onload = () => resolve();
-      image.onerror = () => reject(new Error('Nie udało się narysować projektu.'));
+      image.onerror = () => reject(new Error(tp('qr.errors.draw')));
       image.src = url;
     });
     const canvas = document.createElement('canvas');
     canvas.width = Math.round(width);
     canvas.height = Math.round(height);
     const context = canvas.getContext('2d');
-    if (!context) throw new Error('Przeglądarka nie obsługuje rysowania obrazów.');
+    if (!context) throw new Error(tp('qr.errors.canvas'));
     context.drawImage(image, 0, 0, canvas.width, canvas.height);
     return canvas;
   } finally {
@@ -164,7 +166,7 @@ export async function downloadPng(
   const blob = await new Promise<Blob | null>((resolve) =>
     canvas.toBlob(resolve, 'image/png'),
   );
-  if (!blob) throw new Error('Nie udało się zapisać obrazu.');
+  if (!blob) throw new Error(tp('qr.errors.save'));
   saveBlob(blob, `${name}.png`);
 }
 
@@ -188,14 +190,14 @@ export async function printSheet(sheetSvg: string, plan: SheetPlan) {
   const view = frame.contentWindow;
   if (!doc || !view) {
     frame.remove();
-    throw new Error('Przeglądarka zablokowała drukowanie.');
+    throw new Error(tp('qr.errors.print'));
   }
   const [w, h] = [`${plan.width}mm`, `${plan.height}mm`];
   // `body>svg`, not `svg`: the codes are nested <svg> elements too, and a
   // page-sized rule on them blew each one up to the size of the sheet.
   doc.open();
   doc.write(
-    `<!doctype html><html><head><meta charset="utf-8"><title>RestoLink – kody QR</title>` +
+    `<!doctype html><html><head><meta charset="utf-8"><title>RestoLink – ${escapeXml(tp('qr.printTitle'))}</title>` +
       `<style>@page{size:${plan.page} ${plan.orientation};margin:0}html,body{margin:0;padding:0}` +
       `body>svg{display:block;width:${w};height:${h}}</style></head><body>${sheetSvg}</body></html>`,
   );

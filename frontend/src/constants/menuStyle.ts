@@ -5,7 +5,8 @@
  * A theme is only a starting point — four stored values (primary colour,
  * background colour, `font_family`, `menu_pattern`) that the owner can go on
  * to change one by one. Nothing here is stored except those values, so a
- * theme can be renamed or retuned without touching saved menus.
+ * theme can be renamed or retuned without touching saved menus. Names and
+ * descriptions are panel strings (src/i18n/panel), keyed by id.
  */
 
 /** One face of a pairing: a CSS family and the weight to set it in. */
@@ -23,7 +24,8 @@ export interface FontFace {
  */
 export interface FontPairing {
   value: string;
-  label: string;
+  /** Names it in the panel: `appearance.font.<id>`. */
+  id: string;
   heading: FontFace;
   body: FontFace;
   /** Some faces set small for their size (handwriting); headings scale up. */
@@ -55,61 +57,61 @@ export const FONT_PAIRINGS: readonly FontPairing[] = [
   {
     // The original default: Roboto text under classic serif headings.
     value: 'Roboto',
-    label: 'Klasyczna',
+    id: 'classic',
     heading: { family: 'Georgia', weight: 700 },
     body: { family: 'Roboto', weight: 400 },
   },
   {
     value: 'Montserrat',
-    label: 'Nowoczesna',
+    id: 'modern',
     heading: { family: 'Montserrat', weight: 700 },
     body: { family: 'Montserrat', weight: 400 },
   },
   {
     value: 'Playfair Display',
-    label: 'Elegancka',
+    id: 'elegant',
     heading: { family: 'Playfair Display', weight: 700 },
     body: { family: 'Playfair Display', weight: 400 },
   },
   {
     value: 'Lora',
-    label: 'Domowa',
+    id: 'homely',
     heading: { family: 'Lora', weight: 700 },
     body: { family: 'Lora', weight: 400 },
   },
   {
     value: 'Nunito',
-    label: 'Przyjazna',
+    id: 'friendly',
     heading: { family: 'Nunito', weight: 800 },
     body: { family: 'Nunito', weight: 400 },
   },
   {
     value: 'Josefin Sans',
-    label: 'Skandynawska',
+    id: 'scandi',
     heading: { family: 'Josefin Sans', weight: 700 },
     body: { family: 'Nunito', weight: 400 },
   },
   {
     value: 'Oswald',
-    label: 'Mocna',
+    id: 'bold',
     heading: { family: 'Oswald', weight: 600 },
     body: { family: 'Roboto', weight: 400 },
   },
   {
     value: 'DM Serif Display',
-    label: 'Szlachetna',
+    id: 'refined',
     heading: { family: 'DM Serif Display', weight: 400 },
     body: { family: 'DM Sans', weight: 400 },
   },
   {
     value: 'Pacifico',
-    label: 'Wakacyjna',
+    id: 'holiday',
     heading: { family: 'Pacifico', weight: 400 },
     body: { family: 'Nunito', weight: 400 },
   },
   {
     value: 'Caveat',
-    label: 'Odręczna',
+    id: 'handwritten',
     heading: { family: 'Caveat', weight: 700 },
     body: { family: 'Nunito', weight: 400 },
     headingScale: 1.3,
@@ -132,19 +134,19 @@ export function getFontStack(value?: string | null): string {
 
 export type VenueKind = 'restaurant' | 'cafe' | 'bar' | 'street' | 'world' | 'fine';
 
-export const VENUES: { id: VenueKind; label: string }[] = [
-  { id: 'restaurant', label: 'Restauracja' },
-  { id: 'cafe', label: 'Kawiarnia i cukiernia' },
-  { id: 'bar', label: 'Bar i pub' },
-  { id: 'street', label: 'Street food' },
-  { id: 'world', label: 'Kuchnie świata' },
-  { id: 'fine', label: 'Fine dining' },
+/** Named in the panel by `appearance.venue.<kind>`. */
+export const VENUES: readonly VenueKind[] = [
+  'restaurant',
+  'cafe',
+  'bar',
+  'street',
+  'world',
+  'fine',
 ];
 
+/** Named and described in the panel by `appearance.theme.<id>.{name,vibe}`. */
 export interface MenuTheme {
   id: string;
-  name: string;
-  vibe: string;
   venues: VenueKind[];
   primary_color: string;
   background_color: string;
@@ -160,8 +162,6 @@ export interface MenuTheme {
 export const MENU_THEMES: readonly MenuTheme[] = [
   {
     id: 'classic',
-    name: 'Czysta klasyka',
-    vibe: 'Biel i grafit — pasuje wszędzie',
     venues: ['restaurant', 'cafe', 'fine'],
     primary_color: '#1C1B1F',
     background_color: '#FFFFFF',
@@ -170,8 +170,6 @@ export const MENU_THEMES: readonly MenuTheme[] = [
   },
   {
     id: 'trattoria',
-    name: 'Włoska trattoria',
-    vibe: 'Pomidorowa czerwień i obrus w kratkę',
     venues: ['restaurant', 'world'],
     primary_color: '#B8322A',
     background_color: '#FBF3E4',
@@ -180,8 +178,6 @@ export const MENU_THEMES: readonly MenuTheme[] = [
   },
   {
     id: 'hawaii',
-    name: 'Hawajska plaża',
-    vibe: 'Koral, piasek i liście palm',
     venues: ['world', 'bar', 'street'],
     primary_color: '#E4572E',
     background_color: '#FFF4E0',
@@ -190,8 +186,6 @@ export const MENU_THEMES: readonly MenuTheme[] = [
   },
   {
     id: 'nordic',
-    name: 'Nordycki spokój',
-    vibe: 'Chłodny błękit, len i dużo oddechu',
     venues: ['cafe', 'restaurant'],
     primary_color: '#3D5A6C',
     background_color: '#F4F1EC',
@@ -200,8 +194,6 @@ export const MENU_THEMES: readonly MenuTheme[] = [
   },
   {
     id: 'pub',
-    name: 'Pub i piwiarnia',
-    vibe: 'Ciemne drewno i bursztynowe piwo',
     venues: ['bar'],
     primary_color: '#E3A42B',
     background_color: '#2A1E17',
@@ -210,8 +202,6 @@ export const MENU_THEMES: readonly MenuTheme[] = [
   },
   {
     id: 'japan',
-    name: 'Japoński minimalizm',
-    vibe: 'Papier ryżowy, cynober i fale',
     venues: ['world', 'fine'],
     primary_color: '#B7282E',
     background_color: '#F7F3EA',
@@ -220,8 +210,6 @@ export const MENU_THEMES: readonly MenuTheme[] = [
   },
   {
     id: 'cafe',
-    name: 'Kawiarnia',
-    vibe: 'Kawa z mlekiem i odręczne napisy',
     venues: ['cafe'],
     primary_color: '#6F4E37',
     background_color: '#F6EFE7',
@@ -230,8 +218,6 @@ export const MENU_THEMES: readonly MenuTheme[] = [
   },
   {
     id: 'street',
-    name: 'Street food',
-    vibe: 'Musztardowa żółć, czerń i energia',
     venues: ['street', 'bar'],
     primary_color: '#111111',
     background_color: '#FFD23F',
@@ -240,8 +226,6 @@ export const MENU_THEMES: readonly MenuTheme[] = [
   },
   {
     id: 'bistro',
-    name: 'Paryskie bistro',
-    vibe: 'Butelkowa zieleń i markiza w paski',
     venues: ['restaurant', 'cafe'],
     primary_color: '#1E4D2B',
     background_color: '#FAF6EC',
@@ -250,8 +234,6 @@ export const MENU_THEMES: readonly MenuTheme[] = [
   },
   {
     id: 'greek',
-    name: 'Grecka tawerna',
-    vibe: 'Biel Santorini i błękit morza',
     venues: ['world', 'restaurant'],
     primary_color: '#1F5FAD',
     background_color: '#F6F9FC',
@@ -260,8 +242,6 @@ export const MENU_THEMES: readonly MenuTheme[] = [
   },
   {
     id: 'cocktail',
-    name: 'Bar koktajlowy',
-    vibe: 'Granatowa noc i neonowy róż',
     venues: ['bar', 'fine'],
     primary_color: '#FF5C8A',
     background_color: '#141A33',
@@ -270,8 +250,6 @@ export const MENU_THEMES: readonly MenuTheme[] = [
   },
   {
     id: 'vegan',
-    name: 'Zielona kuchnia',
-    vibe: 'Świeże liście i len',
     venues: ['restaurant', 'cafe', 'street'],
     primary_color: '#2E7D32',
     background_color: '#F2F7EE',
@@ -280,8 +258,6 @@ export const MENU_THEMES: readonly MenuTheme[] = [
   },
   {
     id: 'mexican',
-    name: 'Meksykańska fiesta',
-    vibe: 'Papryka, limonka i pasiasty koc',
     venues: ['world', 'street'],
     primary_color: '#C2185B',
     background_color: '#FFF3D6',
@@ -290,8 +266,6 @@ export const MENU_THEMES: readonly MenuTheme[] = [
   },
   {
     id: 'karczma',
-    name: 'Polska karczma',
-    vibe: 'Ciepłe drewno, len i czerwień',
     venues: ['restaurant'],
     primary_color: '#9E2A2B',
     background_color: '#F3E9DC',
@@ -300,8 +274,6 @@ export const MENU_THEMES: readonly MenuTheme[] = [
   },
   {
     id: 'patisserie',
-    name: 'Cukiernia',
-    vibe: 'Pastelowy róż i kolorowa posypka',
     venues: ['cafe'],
     primary_color: '#D6336C',
     background_color: '#FFF0F5',
@@ -310,8 +282,6 @@ export const MENU_THEMES: readonly MenuTheme[] = [
   },
   {
     id: 'seafood',
-    name: 'Owoce morza',
-    vibe: 'Morska zieleń i piasek',
     venues: ['restaurant', 'world'],
     primary_color: '#0E7C86',
     background_color: '#F3F8F7',
@@ -320,8 +290,6 @@ export const MENU_THEMES: readonly MenuTheme[] = [
   },
   {
     id: 'steakhouse',
-    name: 'Steakhouse',
-    vibe: 'Grafit, miedź i ogień z grilla',
     venues: ['fine', 'restaurant'],
     primary_color: '#C8743A',
     background_color: '#1C1C1E',
@@ -330,8 +298,6 @@ export const MENU_THEMES: readonly MenuTheme[] = [
   },
   {
     id: 'dark-elegance',
-    name: 'Ciemna elegancja',
-    vibe: 'Głęboka czerń ze złotem',
     venues: ['fine', 'bar'],
     primary_color: '#D4AF37',
     background_color: '#1A1A1A',
@@ -340,8 +306,6 @@ export const MENU_THEMES: readonly MenuTheme[] = [
   },
   {
     id: 'vivid',
-    name: 'Wyrazisty fiolet',
-    vibe: 'Energetyczny fiolet na jasnym tle',
     venues: ['street', 'cafe'],
     primary_color: '#5B4CDB',
     background_color: '#F5F3FF',

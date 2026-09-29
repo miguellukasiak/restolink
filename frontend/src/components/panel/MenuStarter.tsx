@@ -9,6 +9,7 @@ import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded';
 import { STARTER_CATEGORIES } from '../../constants/menu';
 import { radii } from '../../theme';
+import { usePanelT } from '../../i18n/panel';
 
 interface MenuStarterProps {
   busy: boolean;
@@ -20,8 +21,13 @@ interface MenuStarterProps {
  * What an empty menu shows instead of a blank board: the typical skeleton,
  * created in one click, so the first thing a new owner does is fill in dishes
  * rather than decide how a menu is organised.
+ *
+ * The names are menu content, not panel text: they are created in the menu's
+ * own language (Polish, the base every translation starts from), whichever
+ * language the panel is in.
  */
 export function MenuStarter({ busy, onStart, onCustom }: MenuStarterProps) {
+  const { t } = usePanelT();
   return (
     <Paper
       elevation={1}
@@ -59,9 +65,9 @@ export function MenuStarter({ busy, onStart, onCustom }: MenuStarterProps) {
           <MenuBookRoundedIcon sx={{ fontSize: 44 }} />
         </Box>
         {[
-          { label: 'Przystawki', left: 0, top: 0, rotate: -8 },
-          { label: 'Desery', left: 128, top: 12, rotate: 7 },
-          { label: 'Napoje', left: 18, top: 78, rotate: 4 },
+          { label: STARTER_CATEGORIES[0], left: 0, top: 0, rotate: -8 },
+          { label: STARTER_CATEGORIES[2], left: 128, top: 12, rotate: 7 },
+          { label: STARTER_CATEGORIES[3], left: 18, top: 78, rotate: 4 },
         ].map((tab) => (
           <Box
             key={tab.label}
@@ -86,15 +92,14 @@ export function MenuStarter({ busy, onStart, onCustom }: MenuStarterProps) {
       </Box>
 
       <Typography variant="h5" component="h2">
-        Zacznijmy od kategorii
+        {t('starter.title')}
       </Typography>
       <Typography
         variant="body1"
         color="text.secondary"
         sx={{ mt: 1, maxWidth: 460, mx: 'auto' }}
       >
-        Kategorie to działy Twojego menu. Utwórz typowy układ jednym kliknięciem — nazwy
-        zmienisz w każdej chwili.
+        {t('starter.body')}
       </Typography>
 
       <Stack
@@ -115,10 +120,10 @@ export function MenuStarter({ busy, onStart, onCustom }: MenuStarterProps) {
             )
           }
         >
-          {busy ? 'Tworzę kategorie…' : 'Utwórz podstawowy układ'}
+          {busy ? t('starter.creating') : t('starter.create')}
         </Button>
         <Button size="large" onClick={onCustom} disabled={busy}>
-          Własna kategoria
+          {t('starter.custom')}
         </Button>
       </Stack>
       <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 2 }}>

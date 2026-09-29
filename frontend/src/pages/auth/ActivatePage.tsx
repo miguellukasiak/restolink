@@ -7,6 +7,7 @@ import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import { AuthLayout } from '../../components/auth/AuthLayout';
+import { usePanelT } from '../../i18n/panel';
 import { getApiErrorMessage } from '../../services/api';
 import { activateAccount } from '../../services/authService';
 
@@ -29,6 +30,7 @@ function byteLength(value: string): number {
  * type it again is a strange way to say welcome.
  */
 export function ActivatePage() {
+  const { t } = usePanelT();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token') ?? '';
@@ -68,18 +70,16 @@ export function ActivatePage() {
   if (!token) {
     return (
       <AuthLayout
-        title="Nieprawidłowy link"
-        subtitle="Ten adres nie zawiera tokenu aktywacyjnego."
+        title={t('auth.invalidLink')}
+        subtitle={t('activate.noTokenSubtitle')}
         footer={
           <Link component={RouterLink} to="/login" underline="hover" variant="body2">
-            Przejdź do logowania
+            {t('auth.goToLogin')}
           </Link>
         }
       >
         <Alert severity="warning" sx={{ borderRadius: '16px' }}>
-          Otwórz link dokładnie tak, jak przyszedł w wiadomości — razem z częścią
-          po znaku zapytania. Jeśli nie działa, napisz do nas: wyślemy nowy albo
-          przekażemy go inną drogą.
+          {t('activate.openExactly')}
         </Alert>
       </AuthLayout>
     );
@@ -87,11 +87,11 @@ export function ActivatePage() {
 
   return (
     <AuthLayout
-      title="Ustaw hasło i aktywuj konto"
-      subtitle="To ostatni krok. Potem od razu wejdziesz do panelu i zbudujesz swoje menu."
+      title={t('activate.title')}
+      subtitle={t('activate.subtitle')}
       footer={
         <Link component={RouterLink} to="/login" underline="hover" variant="body2">
-          Masz już hasło? Zaloguj się
+          {t('activate.haveAccount')}
         </Link>
       }
     >
@@ -104,7 +104,7 @@ export function ActivatePage() {
           ) : null}
 
           <TextField
-            label="Hasło"
+            label={t('auth.password')}
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -116,13 +116,13 @@ export function ActivatePage() {
             error={tooShort || tooLong}
             helperText={
               tooLong
-                ? `Hasło jest za długie (maks. ${MAX_PASSWORD_BYTES} bajtów).`
-                : `Minimum ${MIN_PASSWORD_LENGTH} znaków.`
+                ? t('auth.passwordTooLong', { max: MAX_PASSWORD_BYTES })
+                : t('auth.passwordMin', { min: MIN_PASSWORD_LENGTH })
             }
           />
 
           <TextField
-            label="Powtórz hasło"
+            label={t('activate.repeat')}
             type="password"
             value={confirmation}
             onChange={(e) => setConfirmation(e.target.value)}
@@ -131,7 +131,7 @@ export function ActivatePage() {
             fullWidth
             disabled={submitting}
             error={mismatch}
-            helperText={mismatch ? 'Hasła nie są takie same.' : ' '}
+            helperText={mismatch ? t('auth.passwordMismatch') : ' '}
           />
 
           <Button
@@ -145,7 +145,7 @@ export function ActivatePage() {
               submitting ? <CircularProgress size={18} color="inherit" /> : null
             }
           >
-            {submitting ? 'Aktywuję…' : 'Aktywuj konto'}
+            {submitting ? t('activate.submitting') : t('activate.submit')}
           </Button>
         </Stack>
       </form>

@@ -49,21 +49,18 @@ export const CENTER_SCALE: Record<CenterSize, number> = { S: 0.18, M: 0.22, L: 0
 export const INK = '#161C25';
 const WHITE = '#FFFFFF';
 
-export const DOT_OPTIONS: { value: DotStyle; label: string }[] = [
-  { value: 'square', label: 'Kwadraty' },
-  { value: 'fluid', label: 'Płynne' },
-  { value: 'dots', label: 'Kropki' },
-  { value: 'tiles', label: 'Kafelki' },
-  { value: 'lines', label: 'Linie' },
+/** Named in the panel by `qr.dots.<style>` and `qr.eyes.<style>`. */
+export const DOT_OPTIONS: readonly DotStyle[] = [
+  'square',
+  'fluid',
+  'dots',
+  'tiles',
+  'lines',
 ];
 
-export const EYE_OPTIONS: { value: EyeStyle; label: string }[] = [
-  { value: 'square', label: 'Kwadratowe' },
-  { value: 'rounded', label: 'Zaokrąglone' },
-  { value: 'circle', label: 'Okrągłe' },
-  { value: 'leaf', label: 'Listek' },
-];
+export const EYE_OPTIONS: readonly EyeStyle[] = ['square', 'rounded', 'circle', 'leaf'];
 
+/** Printed for guests, so in the menu's language whatever the panel's. */
 export const CTA_PRESETS = [
   'Zeskanuj, aby zobaczyć menu',
   'Zeskanuj menu',
@@ -73,14 +70,15 @@ export const CTA_PRESETS = [
 
 export const CTA_MAX_LENGTH = 40;
 
-/** Dark, print-safe colours: every one reads at 7:1 or better on white. */
-export const SAFE_SWATCHES: { color: string; label: string }[] = [
-  { color: INK, label: 'Grafit' },
-  { color: '#000000', label: 'Czarny' },
-  { color: '#1F3A5F', label: 'Granat' },
-  { color: '#1E4D2B', label: 'Butelkowa zieleń' },
-  { color: '#6E1F2A', label: 'Bordo' },
-  { color: '#5A3A22', label: 'Czekolada' },
+/** Dark, print-safe colours: every one reads at 7:1 or better on white.
+ *  Named in the panel by `qr.swatch.<id>`. */
+export const SAFE_SWATCHES: { color: string; id: string }[] = [
+  { color: INK, id: 'graphite' },
+  { color: '#000000', id: 'black' },
+  { color: '#1F3A5F', id: 'navy' },
+  { color: '#1E4D2B', id: 'bottleGreen' },
+  { color: '#6E1F2A', id: 'burgundy' },
+  { color: '#5A3A22', id: 'chocolate' },
 ];
 
 function toHex([r, g, b]: [number, number, number]): string {
@@ -107,9 +105,9 @@ export function readableOnWhite(color: string, min = 4.5): string {
   return INK;
 }
 
+/** Named in the panel by `qr.preset.<id>`. */
 export interface QrPreset {
   id: string;
-  name: string;
   look: QrLook;
 }
 
@@ -120,7 +118,6 @@ export function presetsFor(brandColor: string): QrPreset[] {
   return [
     {
       id: 'brand',
-      name: 'Twoja marka',
       look: {
         dots: 'fluid',
         eyes: 'rounded',
@@ -131,7 +128,6 @@ export function presetsFor(brandColor: string): QrPreset[] {
     },
     {
       id: 'classic',
-      name: 'Klasyczny',
       look: {
         dots: 'square',
         eyes: 'square',
@@ -142,7 +138,6 @@ export function presetsFor(brandColor: string): QrPreset[] {
     },
     {
       id: 'accent',
-      name: 'Akcent',
       look: {
         dots: 'dots',
         eyes: 'circle',
@@ -153,7 +148,6 @@ export function presetsFor(brandColor: string): QrPreset[] {
     },
     {
       id: 'soft',
-      name: 'Miękki',
       look: {
         dots: 'tiles',
         eyes: 'rounded',
@@ -164,7 +158,6 @@ export function presetsFor(brandColor: string): QrPreset[] {
     },
     {
       id: 'lines',
-      name: 'Linie',
       look: {
         dots: 'lines',
         eyes: 'leaf',
@@ -175,7 +168,6 @@ export function presetsFor(brandColor: string): QrPreset[] {
     },
     {
       id: 'elegant',
-      name: 'Elegancki',
       look: {
         dots: 'fluid',
         eyes: 'leaf',
@@ -207,15 +199,21 @@ export function defaultDesign(brandColor: string, hasLogo: boolean): QrDesign {
 
 export type Verdict = 'great' | 'ok' | 'weak' | 'bad';
 
+export type CheckId = 'scan' | 'contrast' | 'density' | 'print';
+
+/**
+ * One finding, as data: the panel words it (`qr.check.<id>.<detail>`), with
+ * `values` filled in — lengths in millimetres, for `formatLength`.
+ */
 export interface ReadabilityCheck {
+  id: CheckId;
   verdict: Verdict;
-  label: string;
   detail: string;
+  values: Record<string, number>;
 }
 
 export interface Readability {
   verdict: Verdict;
-  title: string;
   checks: ReadabilityCheck[];
 }
 
@@ -230,19 +228,23 @@ export function weakestContrast(look: QrLook): number {
 
 const RANK: Verdict[] = ['great', 'ok', 'weak', 'bad'];
 
-/** Scanning distance for a printed code width. Rule of thumb: a code reads
- *  from about ten times its own width. */
-function scanDistance(codeWidthMm: number): string {
-  const cm = Math.round(codeWidthMm / 10) * 10;
-  return cm >= 100 ? `${(cm / 100).toLocaleString('pl-PL')} m` : `${cm} cm`;
+/** Scanning distance for a printed code width, in millimetres rounded to
+ *  10 cm. Rule of thumb: a code reads from about ten times its own width. */
+function scanDistance(codeWidthMm: number): number {
+  return Math.round(codeWidthMm / 10) * 100;
+}
+
+/** A printed length as `locale` writes it: "4,2 cm", "1.5 m". */
+export function formatLength(mm: number, locale: string): string {
+  const number = (value: number) =>
+    value.toLocaleString(locale, { maximumFractionDigits: 2 });
+  return mm >= 1000 ? `${number(mm / 1000)} m` : `${number(Math.round(mm) / 10)} cm`;
 }
 
 /** Smallest printed module that phones read comfortably, and the floor below
  *  which even a steady hand at arm's length struggles, in millimetres. */
 const GOOD_MODULE = 0.5;
 const MIN_MODULE = 0.35;
-
-const cm = (mm: number) => `${(Math.round(mm) / 10).toLocaleString('pl-PL')} cm`;
 
 export function assessReadability({
   look,
@@ -261,52 +263,30 @@ export function assessReadability({
   decoded: boolean | null;
 }): Readability {
   const ratio = weakestContrast(look);
-  const contrast: ReadabilityCheck =
-    ratio >= 7
-      ? {
-          verdict: 'great',
-          label: 'Kontrast',
-          detail: `${ratio.toFixed(1)} : 1 — doskonały`,
-        }
-      : ratio >= 4.5
-        ? { verdict: 'ok', label: 'Kontrast', detail: `${ratio.toFixed(1)} : 1 — dobry` }
-        : ratio >= 3
-          ? {
-              verdict: 'weak',
-              label: 'Kontrast',
-              detail: `${ratio.toFixed(1)} : 1 — słaby, przy gorszym świetle kod może zawodzić`,
-            }
-          : {
-              verdict: 'bad',
-              label: 'Kontrast',
-              detail: `${ratio.toFixed(1)} : 1 — za jasny, wybierz ciemniejszy kolor`,
-            };
+  const contrastVerdict: Verdict =
+    ratio >= 7 ? 'great' : ratio >= 4.5 ? 'ok' : ratio >= 3 ? 'weak' : 'bad';
+  const contrast: ReadabilityCheck = {
+    id: 'contrast',
+    verdict: contrastVerdict,
+    detail: contrastVerdict,
+    values: { ratio },
+  };
 
   const scan: ReadabilityCheck =
     decoded === null
-      ? { verdict: 'ok', label: 'Test odczytu', detail: 'Sprawdzam…' }
+      ? { id: 'scan', verdict: 'ok', detail: 'pending', values: {} }
       : decoded
-        ? {
-            verdict: 'great',
-            label: 'Test odczytu',
-            detail: 'Kod odczytany poprawnie z obrazu',
-          }
-        : {
-            verdict: 'bad',
-            label: 'Test odczytu',
-            detail: 'Nie udało się odczytać — przyciemnij kolor lub zmniejsz logo',
-          };
+        ? { id: 'scan', verdict: 'great', detail: 'great', values: {} }
+        : { id: 'scan', verdict: 'bad', detail: 'bad', values: {} };
 
   const saved = Math.round(
     (1 - (modules * modules) / (plainModules * plainModules)) * 100,
   );
   const density: ReadabilityCheck = {
+    id: 'density',
     verdict: 'great',
-    label: 'Skrócony link',
-    detail:
-      saved > 0
-        ? `${modules} × ${modules} punktów zamiast ${plainModules} × ${plainModules} — o ${saved}% mniej`
-        : `${modules} × ${modules} punktów`,
+    detail: saved > 0 ? 'saved' : 'plain',
+    values: { modules, plain: plainModules, saved },
   };
 
   // Module size decides how small a print still scans; distance follows the
@@ -314,25 +294,15 @@ export function assessReadability({
   const codeWidth = printedCodeWidth(format, size);
   const moduleSize = codeWidth / modules;
   const share = FORMATS[format].codeWidth / FORMATS[format].width;
-  const comfortable = cm((GOOD_MODULE * modules) / share);
-  const distance: ReadabilityCheck =
-    moduleSize >= GOOD_MODULE
-      ? {
-          verdict: 'great',
-          label: 'Na wydruku',
-          detail: `kod ${cm(codeWidth)} — skanuje się z ok. ${scanDistance(codeWidth)}`,
-        }
-      : moduleSize >= MIN_MODULE
-        ? {
-            verdict: 'weak',
-            label: 'Na wydruku',
-            detail: `kod ${cm(codeWidth)} — mały, czyta się tylko z bliska; pewniej od rozmiaru ${comfortable}`,
-          }
-        : {
-            verdict: 'bad',
-            label: 'Na wydruku',
-            detail: `kod ${cm(codeWidth)} — za mały dla wielu telefonów; wybierz rozmiar od ${comfortable}`,
-          };
+  const comfortable = (GOOD_MODULE * modules) / share;
+  const printVerdict: Verdict =
+    moduleSize >= GOOD_MODULE ? 'great' : moduleSize >= MIN_MODULE ? 'weak' : 'bad';
+  const distance: ReadabilityCheck = {
+    id: 'print',
+    verdict: printVerdict,
+    detail: printVerdict,
+    values: { code: codeWidth, distance: scanDistance(codeWidth), comfortable },
+  };
 
   const checks = [scan, contrast, density, distance];
   const verdict = checks.reduce<Verdict>(
@@ -340,13 +310,5 @@ export function assessReadability({
       RANK.indexOf(check.verdict) > RANK.indexOf(worst) ? check.verdict : worst,
     'great',
   );
-  const title =
-    verdict === 'great'
-      ? 'Świetna czytelność'
-      : verdict === 'ok'
-        ? 'Dobra czytelność'
-        : verdict === 'weak'
-          ? 'Czytelność do poprawy'
-          : 'Ten kod może się nie skanować';
-  return { verdict, title, checks };
+  return { verdict, checks };
 }

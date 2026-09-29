@@ -14,6 +14,7 @@ import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import { radii } from '../../theme';
 import { useSnackbar } from '../feedback/SnackbarProvider';
 import { ImageCropperDialog } from './ImageCropperDialog';
+import { usePanelT } from '../../i18n/panel';
 
 /** What the file picker offers; every one is re-encoded to a JPEG by the crop. */
 const ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
@@ -38,6 +39,7 @@ export function DishPhotoField({
   onChange,
   disabled = false,
 }: DishPhotoFieldProps) {
+  const { t } = usePanelT();
   const { showError } = useSnackbar();
   const inputRef = useRef<HTMLInputElement>(null);
   const [cropperSrc, setCropperSrc] = useState<string | null>(null);
@@ -46,7 +48,7 @@ export function DishPhotoField({
   const openFile = (file: File | undefined) => {
     if (!file) return;
     if (!ACCEPTED_TYPES.includes(file.type)) {
-      showError('To nie jest zdjęcie — wybierz plik PNG, JPG lub WEBP.');
+      showError(t('photo.notImage'));
       return;
     }
     const reader = new FileReader();
@@ -89,7 +91,7 @@ export function DishPhotoField({
             <Box
               component="img"
               src={value}
-              alt="Zdjęcie dania"
+              alt={t('photo.alt')}
               decoding="async"
               sx={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }}
             />
@@ -116,12 +118,12 @@ export function DishPhotoField({
                   '&:hover': { bgcolor: '#FFFFFF' },
                 }}
               >
-                Zmień
+                {t('photo.change')}
               </Button>
-              <Tooltip title="Usuń zdjęcie" arrow>
+              <Tooltip title={t('photo.remove')} arrow>
                 <IconButton
                   size="small"
-                  aria-label="Usuń zdjęcie"
+                  aria-label={t('photo.remove')}
                   onClick={() => onChange(null)}
                   disabled={disabled}
                   sx={{
@@ -147,7 +149,7 @@ export function DishPhotoField({
                   color: '#FFFFFF',
                 }}
               >
-                <Typography variant="subtitle2">Upuść, aby podmienić</Typography>
+                <Typography variant="subtitle2">{t('photo.dropToReplace')}</Typography>
               </Stack>
             )}
           </>
@@ -155,7 +157,7 @@ export function DishPhotoField({
           <ButtonBase
             onClick={pick}
             disabled={disabled}
-            aria-label="Dodaj zdjęcie dania"
+            aria-label={t('photo.addAria')}
             sx={{
               position: 'absolute',
               inset: 0,
@@ -187,9 +189,9 @@ export function DishPhotoField({
             >
               <AddPhotoAlternateRoundedIcon />
             </Box>
-            <Typography variant="subtitle2">Dodaj zdjęcie</Typography>
+            <Typography variant="subtitle2">{t('photo.add')}</Typography>
             <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.3 }}>
-              {dragOver ? 'Upuść tutaj' : 'Przeciągnij plik lub kliknij'}
+              {dragOver ? t('photo.dropHere') : t('photo.dragOrClick')}
             </Typography>
           </ButtonBase>
         )}

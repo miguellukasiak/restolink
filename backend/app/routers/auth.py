@@ -14,7 +14,7 @@ are stored as SHA-256 digests and hard-deleted the moment they are spent.
 import logging
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import delete, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,7 +22,9 @@ from sqlalchemy.orm import noload
 
 from ..database import get_db
 from ..email_service import EmailSendError, send_password_reset
+from ..messages import localize
 from ..models import AdminUser, PasswordReset, Restaurant, RestaurantStatus
+from ..panel_language import request_language
 from ..schemas import (
     ActivateRequest,
     AdminLoginRequest,
@@ -60,6 +62,12 @@ _INVALID_CREDENTIALS = HTTPException(
 _RESET_SENT_MESSAGE = (
     "Jeśli konto o tym adresie istnieje, wysłaliśmy na nie link do zmiany hasła."
 )
+
+
+def _reset_sent(request: Request) -> str:
+    return localize(
+        _RESET_SENT_MESSAGE, request_language(request.headers.get("accept-language"))
+    )
 
 
 def _normalize_email(email: str) -> str:
@@ -121,7 +129,9 @@ async def login(
 
 @router.post("/forgot-password", response_model=MessageResponse)
 async def forgot_password(
-    payload: ForgotPasswordRequest, db: AsyncSession = Depends(get_db)
+    payload: ForgotPasswordRequest,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
 ) -> MessageResponse:
     """Start a password reset.
 
@@ -135,7 +145,7 @@ async def forgot_password(
 
     if restaurant is None:
         logger.info("Password reset requested for an unknown address.")
-        return MessageResponse(message=_RESET_SENT_MESSAGE)
+        return MessageResponse(message=_reset_sent(request))
 
     # Any earlier grant for this restaurant is void: requesting a new link
     # should invalidate the old one, so a forwarded or intercepted email stops
@@ -161,11 +171,12 @@ async def forgot_password(
             to_email=restaurant.email or email,
             restaurant_name=restaurant.name,
             raw_token=raw_token,
+            language=restaurant.panel_language,
         )
     except EmailSendError:
         logger.exception("Password reset email failed for restaurant %s", restaurant.id)
 
-    return MessageResponse(message=_RESET_SENT_MESSAGE)
+    return MessageResponse(message=_reset_sent(request))
 
 
 @router.post("/reset-password", response_model=MessageResponse)

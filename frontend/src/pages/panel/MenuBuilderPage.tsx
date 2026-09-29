@@ -46,6 +46,7 @@ import { LiveMenuPreview } from '../../components/panel/LiveMenuPreview';
 import { useFittedPhone } from '../../hooks/useFittedPhone';
 import { MenuReadiness, type DishFilter } from '../../components/panel/MenuReadiness';
 import { MenuStarter } from '../../components/panel/MenuStarter';
+import { usePanelT } from '../../i18n/panel';
 
 interface EditorState {
   open: boolean;
@@ -134,6 +135,7 @@ function BoardSkeleton() {
  * (`useReorderMenu`), so the order survives a refresh.
  */
 export function MenuBuilderPage() {
+  const { t } = usePanelT();
   const { restaurantId = '' } = useParams<{ restaurantId: string }>();
   const theme = useTheme();
   const wide = useMediaQuery(theme.breakpoints.up('lg'), { noSsr: true });
@@ -308,7 +310,7 @@ export function MenuBuilderPage() {
         {
           payload: {
             category_id: item.category_id,
-            name: `${item.name} (kopia)`,
+            name: `${item.name} ${t('builder.copySuffix')}`,
             price: item.price,
             description: item.description || undefined,
             ingredients: item.ingredients || undefined,
@@ -333,13 +335,13 @@ export function MenuBuilderPage() {
             persistOrder(next);
             highlight(copy.id);
             showInPreview(copy.category_id);
-            showSuccess(`Utworzono kopię „${item.name}". Zmień w niej, co trzeba.`);
+            showSuccess(t('builder.copied', { name: item.name }));
           },
           onError: (error) => showError(getApiErrorMessage(error)),
         },
       );
     },
-    [saveMenuItem, persistOrder, highlight, showInPreview, showSuccess, showError],
+    [saveMenuItem, persistOrder, highlight, showInPreview, showSuccess, showError, t],
   );
 
   /** Optimistically renames a category, then persists it. */
@@ -370,7 +372,7 @@ export function MenuBuilderPage() {
   const createCategory = (name: string) => {
     addCategory.mutate(name, {
       onSuccess: (created) => {
-        showSuccess(`Dodano kategorię „${created.name}".`);
+        showSuccess(t('builder.categoryAdded', { name: created.name }));
         setCategories((previous) =>
           previous.some((category) => category.id === created.id)
             ? previous
@@ -398,7 +400,7 @@ export function MenuBuilderPage() {
       for (const name of STARTER_CATEGORIES) {
         await addCategory.mutateAsync(name);
       }
-      showSuccess('Gotowe! Teraz dodaj pierwsze dania.');
+      showSuccess(t('builder.started'));
     } catch (error) {
       showError(getApiErrorMessage(error));
     } finally {
@@ -415,7 +417,8 @@ export function MenuBuilderPage() {
       const { category } = deleteTarget;
       setCategories((previous) => previous.filter((c) => c.id !== category.id));
       deleteCategory.mutate(category.id, {
-        onSuccess: () => showSuccess(`Usunięto kategorię „${category.name}".`),
+        onSuccess: () =>
+          showSuccess(t('builder.categoryDeleted', { name: category.name })),
         onError: (error) => {
           setCategories(snapshot);
           showError(getApiErrorMessage(error));
@@ -429,7 +432,7 @@ export function MenuBuilderPage() {
       if (editor.item?.id === item.id)
         setEditor((previous) => ({ ...previous, open: false }));
       deleteItem.mutate(item.id, {
-        onSuccess: () => showSuccess(`Usunięto „${item.name}".`),
+        onSuccess: () => showSuccess(t('builder.dishDeleted', { name: item.name })),
         onError: (error) => {
           setCategories(snapshot);
           showError(getApiErrorMessage(error));
@@ -554,10 +557,10 @@ export function MenuBuilderPage() {
                 when the column is narrower than that. */}
             <Box sx={{ minWidth: 0, flex: '1 1 520px' }}>
               <Typography variant="h4" component="h1">
-                Kreator menu
+                {t('nav.builder')}
               </Typography>
               <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
-                Przeciągaj, edytuj, dodawaj — a podgląd od razu pokaże, co zobaczy gość.
+                {t('builder.subtitle')}
               </Typography>
             </Box>
             {!isEmpty && (
@@ -572,7 +575,7 @@ export function MenuBuilderPage() {
               >
                 <TextField
                   size="small"
-                  placeholder="Szukaj dania"
+                  placeholder={t('builder.search')}
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   onKeyDown={(event) => {
@@ -583,7 +586,7 @@ export function MenuBuilderPage() {
                     '& .MuiOutlinedInput-root': { bgcolor: 'background.paper' },
                   }}
                   slotProps={{
-                    htmlInput: { 'aria-label': 'Szukaj dania' },
+                    htmlInput: { 'aria-label': t('builder.search') },
                     input: {
                       startAdornment: (
                         <InputAdornment position="start">
@@ -595,7 +598,7 @@ export function MenuBuilderPage() {
                           <IconButton
                             size="small"
                             edge="end"
-                            aria-label="Wyczyść wyszukiwanie"
+                            aria-label={t('builder.clearSearch')}
                             onClick={() => setQuery('')}
                           >
                             <CloseRoundedIcon fontSize="small" />
@@ -612,7 +615,7 @@ export function MenuBuilderPage() {
                     onClick={() => setPreviewOpen(true)}
                     sx={{ flexShrink: 0 }}
                   >
-                    Podgląd
+                    {t('builder.preview')}
                   </Button>
                 )}
                 <Button
@@ -621,7 +624,7 @@ export function MenuBuilderPage() {
                   onClick={() => setAddCategoryOpen(true)}
                   sx={{ flexShrink: 0, display: { xs: 'none', sm: 'inline-flex' } }}
                 >
-                  Nowa kategoria
+                  {t('builder.newCategory')}
                 </Button>
               </Stack>
             )}
@@ -633,7 +636,7 @@ export function MenuBuilderPage() {
               sx={{ mb: 2 }}
               action={
                 <Button color="inherit" size="small" onClick={() => void menu.refetch()}>
-                  Spróbuj ponownie
+                  {t('common.retry')}
                 </Button>
               }
             >
@@ -673,13 +676,11 @@ export function MenuBuilderPage() {
                         setFilter('all');
                       }}
                     >
-                      Pokaż wszystko
+                      {t('builder.showAll')}
                     </Button>
                   }
                 >
-                  {visible.length === 0
-                    ? 'Nic nie pasuje. Spróbuj innej nazwy.'
-                    : 'Pokazuję tylko pasujące dania. Przeciąganie wróci, gdy wyczyścisz filtr.'}
+                  {visible.length === 0 ? t('builder.noMatch') : t('builder.filtered')}
                 </Alert>
               )}
 
@@ -737,7 +738,7 @@ export function MenuBuilderPage() {
         <Dialog
           open={previewOpen}
           onClose={() => setPreviewOpen(false)}
-          aria-label="Podgląd menu"
+          aria-label={t('builder.previewDialog')}
           slotProps={{ paper: { sx: { p: 2.5, m: 1.5 } } }}
         >
           <LiveMenuPreview
@@ -780,15 +781,19 @@ export function MenuBuilderPage() {
 
       <ConfirmDialog
         open={deleteTarget !== null}
-        title={deleteTarget?.kind === 'item' ? 'Usunąć danie?' : 'Usunąć kategorię?'}
+        title={
+          deleteTarget?.kind === 'item'
+            ? t('builder.deleteDishTitle')
+            : t('builder.deleteCategoryTitle')
+        }
         description={
           deleteTarget?.kind === 'category'
-            ? `Kategoria „${deleteTarget.category.name}" i wszystkie jej dania zostaną trwale usunięte.`
+            ? t('builder.deleteCategoryBody', { name: deleteTarget.category.name })
             : deleteTarget?.kind === 'item'
-              ? `Danie „${deleteTarget.item.name}" zostanie usunięte z menu.`
+              ? t('builder.deleteDishBody', { name: deleteTarget.item.name })
               : ''
         }
-        confirmLabel="Usuń"
+        confirmLabel={t('common.delete')}
         onConfirm={handleConfirmDelete}
         onClose={() => setDeleteTarget(null)}
       />

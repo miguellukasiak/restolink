@@ -13,7 +13,13 @@ import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import ErrorRoundedIcon from '@mui/icons-material/ErrorRounded';
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
 import { radii } from '../../../theme';
-import type { Readability, Verdict } from './qrDesign';
+import {
+  formatLength,
+  type Readability,
+  type ReadabilityCheck,
+  type Verdict,
+} from './qrDesign';
+import { usePanelT } from '../../../i18n/panel';
 import { SvgView } from './QrStage';
 
 /** A titled group of controls in the design panel. */
@@ -144,6 +150,7 @@ export function SwatchRow({
   onChange: (color: string) => void;
   label: string;
 }) {
+  const { t } = usePanelT();
   const inputRef = useRef<HTMLInputElement>(null);
   const known = swatches.some(
     (swatch) => swatch.color.toLowerCase() === value.toLowerCase(),
@@ -180,10 +187,10 @@ export function SwatchRow({
           </Tooltip>
         );
       })}
-      <Tooltip title="Własny kolor" arrow>
+      <Tooltip title={t('qr.customColour')} arrow>
         <ButtonBase
           onClick={() => inputRef.current?.click()}
-          aria-label={`${label}: własny kolor`}
+          aria-label={`${label}: ${t('qr.customColour')}`}
           aria-pressed={!known}
           sx={{
             width: 34,
@@ -211,7 +218,7 @@ export function SwatchRow({
         type="color"
         value={value}
         onChange={(event) => onChange(event.target.value.toUpperCase())}
-        aria-label={`${label}: wybierz dowolny kolor`}
+        aria-label={`${label}: ${t('qr.anyColour')}`}
         style={{
           position: 'absolute',
           width: 1,
@@ -249,7 +256,24 @@ export function ReadabilityPanel({
   readability: Readability;
   testing: boolean;
 }) {
+  const { t, i18n } = usePanelT();
   const tone = VERDICT_COLOR[readability.verdict];
+  const locale = i18n.language;
+  const sentence = ({ id, detail, values }: ReadabilityCheck) =>
+    t(`qr.check.${id}.${detail}`, {
+      ...values,
+      ratio: values.ratio?.toLocaleString(locale, {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
+      }),
+      code: values.code === undefined ? undefined : formatLength(values.code, locale),
+      distance:
+        values.distance === undefined ? undefined : formatLength(values.distance, locale),
+      comfortable:
+        values.comfortable === undefined
+          ? undefined
+          : formatLength(values.comfortable, locale),
+    });
   return (
     <Box
       aria-live="polite"
@@ -264,13 +288,13 @@ export function ReadabilityPanel({
       <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 1 }}>
         <VerdictIcon verdict={readability.verdict} pending={testing} />
         <Typography variant="subtitle2">
-          {testing ? 'Sprawdzam czytelność…' : readability.title}
+          {testing ? t('qr.checking') : t(`qr.verdict.${readability.verdict}`)}
         </Typography>
       </Stack>
       <Stack spacing={0.75}>
         {readability.checks.map((check) => (
           <Stack
-            key={check.label}
+            key={check.id}
             direction="row"
             spacing={1}
             sx={{ alignItems: 'flex-start' }}
@@ -278,15 +302,15 @@ export function ReadabilityPanel({
             <Box sx={{ pt: '1px' }}>
               <VerdictIcon
                 verdict={check.verdict}
-                pending={testing && check.label === 'Test odczytu'}
+                pending={testing && check.id === 'scan'}
               />
             </Box>
             <Typography variant="body2" sx={{ lineHeight: 1.45 }}>
               <Box component="span" sx={{ fontWeight: 600 }}>
-                {check.label}:
+                {t(`qr.check.${check.id}.label`)}:
               </Box>{' '}
               <Box component="span" sx={{ color: 'text.secondary' }}>
-                {check.detail}
+                {sentence(check)}
               </Box>
             </Typography>
           </Stack>

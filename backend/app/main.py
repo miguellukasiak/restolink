@@ -4,10 +4,17 @@ import os
 from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.encoders import jsonable_encoder
+from fastapi.exception_handlers import http_exception_handler
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from .database import AsyncSessionLocal, engine
+from .messages import localize
+from .panel_language import request_language
 from .models import Base
 from .routers import (
     admin,
@@ -48,6 +55,42 @@ def extra_cors_origins() -> list[str]:
 
 
 app = FastAPI(title="RestoLink SaaS API", version="1.0.0", lifespan=lifespan)
+
+
+# Messages are written in Polish where they are raised; the owner panel asks
+# for English by default and gets each one swapped for its English version
+# (messages.py). Only the text changes — status codes and shapes stay as they
+# were, so no caller has to know this happens.
+
+
+@app.exception_handler(StarletteHTTPException)
+async def _localized_http_error(request: Request, exc: StarletteHTTPException):
+    if isinstance(exc.detail, str):
+        language = request_language(request.headers.get("accept-language"))
+        exc = StarletteHTTPException(
+            status_code=exc.status_code,
+            detail=localize(exc.detail, language),
+            headers=exc.headers,
+        )
+    return await http_exception_handler(request, exc)
+
+
+@app.exception_handler(RequestValidationError)
+async def _localized_validation_error(request: Request, exc: RequestValidationError):
+    """FastAPI's 422, with our own validators' messages localized.
+
+    Pydantic prefixes a validator's message with "Value error, "; that prefix
+    is dropped so the panel can show the sentence as it is.
+    """
+    language = request_language(request.headers.get("accept-language"))
+    errors = []
+    for error in exc.errors():
+        error = dict(error)
+        message = error.get("msg")
+        if isinstance(message, str) and message.startswith("Value error, "):
+            error["msg"] = localize(message.removeprefix("Value error, "), language)
+        errors.append(error)
+    return JSONResponse(status_code=422, content={"detail": jsonable_encoder(errors)})
 
 # CORS: explicit allow-list (local Vite dev + known Vercel domains + whatever
 # `CORS_ALLOWED_ORIGINS` adds) PLUS a regex that matches every Vercel

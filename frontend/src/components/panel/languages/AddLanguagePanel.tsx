@@ -15,6 +15,7 @@ import { radii } from '../../../theme';
 import worldMap from './worldCountries.json';
 import { formatPeople, gain } from './reach';
 import { PREVIEW_FILL } from './mapGeometry';
+import { useLanguageName, usePanelT } from '../../../i18n/panel';
 
 interface AddLanguagePanelProps {
   /** Read now, the menu's own language first. */
@@ -46,6 +47,8 @@ export function AddLanguagePanel({
   onAdd,
   onPreview,
 }: AddLanguagePanelProps) {
+  const { t } = usePanelT();
+  const languageName = useLanguageName();
   const [tab, setTab] = useState<Tab>('poland');
   const [query, setQuery] = useState('');
 
@@ -71,12 +74,12 @@ export function AddLanguagePanel({
       .filter(
         ({ language }) =>
           !needle ||
-          language.name.includes(needle) ||
+          languageName(language.code).toLowerCase().includes(needle) ||
           language.endonym.toLowerCase().includes(needle) ||
           language.code === needle,
       )
       .sort((a, b) => b.gain - a.gain);
-  }, [candidates, tab, query]);
+  }, [candidates, tab, query, languageName]);
 
   return (
     <Stack spacing={1.5}>
@@ -86,19 +89,19 @@ export function AddLanguagePanel({
         variant="fullWidth"
         sx={{ minHeight: 40, '& .MuiTab-root': { minHeight: 40, textTransform: 'none' } }}
       >
-        <Tab value="poland" label="Polecane w Polsce" />
-        <Tab value="all" label={`Wszystkie (${MENU_LANGUAGES.length})`} />
+        <Tab value="poland" label={t('addLanguage.recommended')} />
+        <Tab value="all" label={t('addLanguage.all', { count: MENU_LANGUAGES.length })} />
       </Tabs>
 
       {tab === 'all' && (
         <>
           <TextField
             size="small"
-            placeholder="Szukaj języka"
+            placeholder={t('addLanguage.search')}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             slotProps={{
-              htmlInput: { 'aria-label': 'Szukaj języka' },
+              htmlInput: { 'aria-label': t('addLanguage.search') },
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
@@ -109,8 +112,7 @@ export function AddLanguagePanel({
             }}
           />
           <Typography variant="caption" color="text.secondary">
-            Od największego zysku: ilu nowych ludzi przeczyta Twoje menu po dodaniu
-            języka.
+            {t('addLanguage.sortHint')}
           </Typography>
         </>
       )}
@@ -121,9 +123,7 @@ export function AddLanguagePanel({
       >
         {shown.length === 0 && (
           <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
-            {tab === 'poland'
-              ? 'Masz już wszystkie polecane języki. Inne znajdziesz w zakładce „Wszystkie”.'
-              : 'Nie ma takiego języka w katalogu.'}
+            {tab === 'poland' ? t('addLanguage.allRecommended') : t('addLanguage.noSuch')}
           </Typography>
         )}
         {shown.map(({ language, gain: people }) => (
@@ -163,6 +163,9 @@ function Candidate({
   onAdd: () => void;
   onHover: (on: boolean) => void;
 }) {
+  const { t, i18n } = usePanelT();
+  const languageName = useLanguageName();
+  const name = languageName(language.code);
   return (
     <Box
       onMouseEnter={() => onHover(true)}
@@ -194,35 +197,40 @@ function Candidate({
           sx={{ alignItems: 'baseline', flexWrap: 'wrap' }}
         >
           <Typography variant="subtitle2" sx={{ textTransform: 'capitalize' }}>
-            {language.name}
+            {name}
           </Typography>
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            lang={language.code}
-            dir="auto"
-          >
-            {language.endonym}
-          </Typography>
+          {/* Its own name, unless that is the name just shown ("English"). */}
+          {language.endonym.toLowerCase() !== name.toLowerCase() && (
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              lang={language.code}
+              dir="auto"
+            >
+              {language.endonym}
+            </Typography>
+          )}
         </Stack>
         {showReason && language.reason && (
           <Typography variant="caption" color="text.secondary" component="p">
-            {language.reason}
+            {t(`languages.reason.${language.code}`)}
           </Typography>
         )}
         {prepared > 0 && (
           <Typography variant="caption" color="success.main" component="p">
-            Masz już {Math.min(prepared, phrasesTotal)} z {phrasesTotal} tłumaczeń — wrócą
-            od razu.
+            {t('addLanguage.prepared', {
+              done: Math.min(prepared, phrasesTotal),
+              total: phrasesTotal,
+            })}
           </Typography>
         )}
       </Box>
       <Typography
         variant="caption"
         sx={{ fontWeight: 700, color: people >= 5e6 ? 'primary.main' : 'text.secondary' }}
-        title="Nowi czytelnicy menu po dodaniu tego języka"
+        title={t('addLanguage.gainTitle')}
       >
-        +{formatPeople(people)}
+        +{formatPeople(people, i18n.language)}
       </Typography>
       <Button
         size="small"
@@ -230,10 +238,10 @@ function Candidate({
         startIcon={<AddRoundedIcon />}
         disabled={busy}
         onClick={onAdd}
-        aria-label={`Dodaj język: ${language.name}`}
+        aria-label={t('addLanguage.addAria', { name: languageName(language.code) })}
         sx={{ flexShrink: 0 }}
       >
-        Dodaj
+        {t('common.add')}
       </Button>
     </Box>
   );

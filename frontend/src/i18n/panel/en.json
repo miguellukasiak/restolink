@@ -1,0 +1,746 @@
+{
+  "errors": {
+    "notFound": "Restaurant not found.",
+    "invalid": "Please check what you entered.",
+    "coldStart": "The server is waking up after a quiet spell — the first request can take up to 30 seconds. Wait a moment and try again.",
+    "offline": "No connection to the server. Check your internet connection and try again.",
+    "unexpected": "Something went wrong. Please try again."
+  },
+  "language": {
+    "switch": "Panel language"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "saveChanges": "Save changes",
+    "saving": "Saving…",
+    "close": "Close",
+    "delete": "Delete",
+    "add": "Add",
+    "edit": "Edit",
+    "confirm": "Confirm",
+    "retry": "Try again",
+    "loading": "Loading",
+    "open": "Open",
+    "phone": "Phone",
+    "computer": "Computer"
+  },
+  "nav": {
+    "builder": "Menu builder",
+    "appearance": "Menu design",
+    "qr": "QR codes",
+    "languages": "Languages",
+    "reviews": "Google reviews",
+    "ownerPanel": "Owner panel",
+    "tagline": "Manage your restaurant",
+    "logout": "Sign out"
+  },
+  "billing": {
+    "paid": "Payment received. We are activating your subscription.",
+    "cancelled": "Payment cancelled — nothing was charged."
+  },
+  "auth": {
+    "email": "Email address",
+    "password": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "backToLogin": "Back to sign in",
+    "goToLogin": "Go to sign in",
+    "invalidLink": "Invalid link",
+    "passwordTooLong": "The password is too long (max. {{max}} bytes).",
+    "passwordMin": "At least {{min}} characters.",
+    "passwordMismatch": "The passwords do not match."
+  },
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Enter the sign-in details for your restaurant's panel.",
+    "noAccount": "Don't have an account yet?",
+    "contactUs": "Contact us",
+    "submitting": "Signing in…",
+    "submit": "Sign in",
+    "forgot": "Forgot your password?"
+  },
+  "forgot": {
+    "sentTitle": "Check your inbox",
+    "sentSubtitle": "If the account exists, a link to reset the password is on its way.",
+    "validity": "The link is valid for 30 minutes and works only once. If the message has not arrived, check your spam folder.",
+    "otherAddress": "Use a different address",
+    "title": "Forgot your password?",
+    "subtitle": "Enter the email address linked to your account and we will send you a link to set a new password.",
+    "sending": "Sending…",
+    "send": "Send link"
+  },
+  "reset": {
+    "noTokenSubtitle": "This address does not contain a reset token.",
+    "openExactly": "Open the link exactly as it arrived in the email — including the part after the question mark.",
+    "requestNew": "Request a new link",
+    "doneTitle": "Password changed",
+    "doneSubtitle": "You can now sign in with your new password.",
+    "spent": "The link has been used and will not work again.",
+    "otherSessions": "For your security, every other session has been signed out — on other devices you will need to sign in again.",
+    "title": "Set a new password",
+    "subtitle": "Enter a new password for the panel. This one-time link expires once it is used.",
+    "newPassword": "New password",
+    "repeat": "Repeat the new password",
+    "submit": "Save new password"
+  },
+  "activate": {
+    "noTokenSubtitle": "This address does not contain an activation token.",
+    "openExactly": "Open the link exactly as it arrived in the message — including the part after the question mark. If it does not work, write to us: we will send a new one or pass it on another way.",
+    "title": "Set a password and activate your account",
+    "subtitle": "This is the last step. Then you go straight into your panel to build your menu.",
+    "haveAccount": "Already have a password? Sign in",
+    "repeat": "Repeat the password",
+    "submitting": "Activating…",
+    "submit": "Activate account"
+  },
+  "preview": {
+    "live": "Live preview",
+    "close": "Close preview",
+    "emptyMenu": "Your menu will appear here",
+    "clickToEdit": "Click a dish on the phone to edit it.",
+    "inMenu": "IN THE MENU",
+    "onTap": "WHEN TAPPED"
+  },
+  "appearance": {
+    "intro": "Pick a theme the way you pick a video-call background — your menu tries it on straight away. Save when you find the right one.",
+    "saved": "Menu design saved — guests can see it now.",
+    "themes": "Themes",
+    "themesHint": "Click one to try it on — the thumbnails show your own dishes.",
+    "surprise": "Surprise me",
+    "themeAria": "Theme {{name}}: {{vibe}}",
+    "details": "Fine-tune the details",
+    "detailsChosen": "Chosen theme: {{name}}. You can change any part of it.",
+    "detailsOwn": "Your own theme — change the colours, typeface and pattern as much as you like.",
+    "logo": "Logo",
+    "logoHint": "PNG or JPG, ideally square. It appears in the menu header and in your QR codes.",
+    "logoChange": "Change",
+    "logoAdd": "Add logo",
+    "logoRemove": "Remove logo",
+    "hexError": "Enter a colour as #RRGGBB",
+    "primary": "Main colour",
+    "background": "Background colour",
+    "pickPalette": "Pick from a palette",
+    "pickPaletteAria": "{{label}} — pick from a palette",
+    "paletteAria": "{{label}} — colour palette",
+    "typeface": "Typeface",
+    "fontSample": "Tomato soup",
+    "pattern": {
+      "title": "Background pattern",
+      "hint": "A subtle motif in the background — dishes then get their own cards, so everything stays readable.",
+      "none": "No pattern",
+      "dots": "Polka dots",
+      "grid": "Grid",
+      "gingham": "Tablecloth",
+      "stripes": "Stripes",
+      "waves": "Waves",
+      "seigaiha": "Seigaiha",
+      "palms": "Palms",
+      "leaves": "Leaves",
+      "terrazzo": "Sprinkles",
+      "wood": "Wood"
+    },
+    "unsaved": "You have unsaved changes",
+    "unsavedGuests": "— guests still see the previous design.",
+    "allSaved": "All changes saved",
+    "previewMode": "Preview mode",
+    "previewPhone": "Preview on a phone",
+    "previewComputer": "Preview on a computer",
+    "sample": {
+      "category": "Main courses",
+      "dish1": "Tomato soup",
+      "dish2": "Caesar salad",
+      "dish3": "Grilled chicken",
+      "dish4": "Cheesecake"
+    },
+    "font": {
+      "classic": "Classic",
+      "modern": "Modern",
+      "elegant": "Elegant",
+      "homely": "Homely",
+      "friendly": "Friendly",
+      "scandi": "Scandinavian",
+      "bold": "Bold",
+      "refined": "Refined",
+      "holiday": "Holiday",
+      "handwritten": "Handwritten"
+    },
+    "venue": {
+      "all": "All",
+      "restaurant": "Restaurant",
+      "cafe": "Café and patisserie",
+      "bar": "Bar and pub",
+      "street": "Street food",
+      "world": "World cuisines",
+      "fine": "Fine dining"
+    },
+    "theme": {
+      "classic": {
+        "name": "Pure classic",
+        "vibe": "White and graphite — fits anywhere"
+      },
+      "trattoria": {
+        "name": "Italian trattoria",
+        "vibe": "Tomato red and a checked tablecloth"
+      },
+      "hawaii": {
+        "name": "Hawaiian beach",
+        "vibe": "Coral, sand and palm leaves"
+      },
+      "nordic": {
+        "name": "Nordic calm",
+        "vibe": "Cool blue, linen and room to breathe"
+      },
+      "pub": {
+        "name": "Pub and alehouse",
+        "vibe": "Dark wood and amber beer"
+      },
+      "japan": {
+        "name": "Japanese minimalism",
+        "vibe": "Rice paper, vermilion and waves"
+      },
+      "cafe": {
+        "name": "Café",
+        "vibe": "Milky coffee and hand lettering"
+      },
+      "street": {
+        "name": "Street food",
+        "vibe": "Mustard yellow, black and energy"
+      },
+      "bistro": {
+        "name": "Parisian bistro",
+        "vibe": "Bottle green and a striped awning"
+      },
+      "greek": {
+        "name": "Greek taverna",
+        "vibe": "Santorini white and sea blue"
+      },
+      "cocktail": {
+        "name": "Cocktail bar",
+        "vibe": "Navy night and neon pink"
+      },
+      "vegan": {
+        "name": "Green kitchen",
+        "vibe": "Fresh leaves and linen"
+      },
+      "mexican": {
+        "name": "Mexican fiesta",
+        "vibe": "Chilli, lime and a striped blanket"
+      },
+      "karczma": {
+        "name": "Polish inn",
+        "vibe": "Warm wood, linen and red"
+      },
+      "patisserie": {
+        "name": "Patisserie",
+        "vibe": "Pastel pink and sprinkles"
+      },
+      "seafood": {
+        "name": "Seafood",
+        "vibe": "Sea green and sand"
+      },
+      "steakhouse": {
+        "name": "Steakhouse",
+        "vibe": "Graphite, copper and fire from the grill"
+      },
+      "dark-elegance": {
+        "name": "Dark elegance",
+        "vibe": "Deep black with gold"
+      },
+      "vivid": {
+        "name": "Vivid violet",
+        "vibe": "Energetic violet on a light background"
+      }
+    }
+  },
+  "builder": {
+    "subtitle": "Drag, edit, add — and the preview shows at once what a guest will see.",
+    "search": "Search dishes",
+    "clearSearch": "Clear search",
+    "preview": "Preview",
+    "previewDialog": "Menu preview",
+    "newCategory": "New category",
+    "showAll": "Show everything",
+    "noMatch": "Nothing matches. Try another name.",
+    "filtered": "Showing matching dishes only. Dragging comes back when you clear the filter.",
+    "copySuffix": "(copy)",
+    "copied": "Created a copy of “{{name}}”. Change whatever you need in it.",
+    "categoryAdded": "Added the category “{{name}}”.",
+    "started": "Done! Now add your first dishes.",
+    "categoryDeleted": "Deleted the category “{{name}}”.",
+    "dishDeleted": "Deleted “{{name}}”.",
+    "deleteDishTitle": "Delete this dish?",
+    "deleteCategoryTitle": "Delete this category?",
+    "deleteCategoryBody": "The category “{{name}}” and all its dishes will be permanently deleted.",
+    "deleteDishBody": "The dish “{{name}}” will be removed from the menu."
+  },
+  "count": {
+    "dishes_one": "{{count}} dish",
+    "dishes_other": "{{count}} dishes",
+    "allergens_one": "{{count}} allergen",
+    "allergens_other": "{{count}} allergens",
+    "languages_one": "{{count}} language",
+    "languages_other": "{{count}} languages",
+    "phrases_one": "{{count}} phrase",
+    "phrases_other": "{{count}} phrases"
+  },
+  "category": {
+    "drag": "Drag the category {{name}}",
+    "name": "Category name",
+    "saveName": "Save the category name",
+    "cancelRename": "Cancel renaming",
+    "addDish": "Add a dish",
+    "addDishTo": "Add a dish to {{name}}",
+    "more": "More actions: category {{name}}",
+    "rename": "Rename",
+    "delete": "Delete category",
+    "addFirstDish": "Add the first dish",
+    "dropHint": "…or drag a dish here from another category"
+  },
+  "labels": {
+    "allergenGluten": "Gluten",
+    "allergenLactose": "Lactose",
+    "allergenNuts": "Nuts",
+    "allergenEggs": "Eggs",
+    "allergenSoy": "Soy",
+    "allergenFish": "Fish",
+    "allergenCelery": "Celery",
+    "allergenMustard": "Mustard",
+    "tagVegan": "Vegan",
+    "tagVegetarian": "Vegetarian",
+    "tagBestseller": "Bestseller",
+    "tagSpicy": "Spicy",
+    "tagNew": "New"
+  },
+  "dish": {
+    "drag": "Drag the dish {{name}}",
+    "edit": "Edit the dish {{name}}",
+    "noDescription": "No description",
+    "unavailable": "Unavailable",
+    "allergensTooltip": "Allergens: {{list}}",
+    "availableHint": "Available — click to hide",
+    "availability": "Availability of {{name}}",
+    "more": "More actions: {{name}}",
+    "duplicate": "Duplicate"
+  },
+  "readiness": {
+    "photos_one": "{{count}} photo",
+    "photos_other": "{{count}} photos",
+    "descriptions_one": "{{count}} description",
+    "descriptions_other": "{{count}} descriptions",
+    "and": " and ",
+    "complete": "Your menu is polished to the last detail",
+    "ready": "Menu {{score}}% ready",
+    "readyLow": "Menu {{score}}% ready — let's polish it",
+    "completeHint": "Every dish has a photo and a description. This is what a menu people want to order from looks like.",
+    "missingHint": "Still missing: {{list}}. Dishes with a photo and a description tempt guests the most.",
+    "noPhoto": "No photo · {{count}}",
+    "noDescription": "No description · {{count}}",
+    "unavailable": "Unavailable · {{count}}"
+  },
+  "starter": {
+    "title": "Let's start with categories",
+    "body": "Categories are the sections of your menu. Create a typical layout in one click — you can rename them at any time.",
+    "creating": "Creating categories…",
+    "create": "Create a basic layout",
+    "custom": "Your own category"
+  },
+  "addCategory": {
+    "title": "Add a category",
+    "pickOrName": "Pick a popular one or name it your way.",
+    "nameNew": "Name a new section of your menu.",
+    "quickAdd": "Add the category {{name}}",
+    "customName": "Your own name…",
+    "nameMin": "The name needs at least 2 characters",
+    "created": "The category “{{name}}” has been created.",
+    "subtitle": "Add a section to your menu",
+    "placeholder": "e.g. Drinks",
+    "popular": "Popular:",
+    "creating": "Creating…",
+    "create": "Create category"
+  },
+  "chips": {
+    "selected": "Selected: {{count}}",
+    "tooLong": "At most {{max}} characters.",
+    "tooMany": "At most {{max}} per dish.",
+    "placeholder": "Type and press Enter",
+    "customHint": "Translate your own entries on the “Languages” tab — the built-in ones translate themselves."
+  },
+  "dishForm": {
+    "nameMin": "The name needs at least 2 characters",
+    "nameMax": "The name can have at most 150 characters",
+    "priceRequired": "Enter a price",
+    "priceFormat": "Enter a price, e.g. 24,90",
+    "pricePositive": "The price must be more than zero",
+    "priceTooHigh": "The price is too high",
+    "categoryRequired": "Choose a category",
+    "descriptionMax": "The description can have at most {{max}} characters",
+    "ingredientsMax": "The ingredients list can have at most {{max}} characters",
+    "name": "Dish name",
+    "namePlaceholder": "e.g. Tomato soup",
+    "price": "Price",
+    "category": "Category",
+    "description": "Description",
+    "descriptionPlaceholder": "What makes this dish worth ordering? E.g. “Hand-made, served with crispy onions”",
+    "descriptionHint": "Guests see it on the card and in the details.",
+    "ingredients": "Ingredients",
+    "ingredientsPlaceholder": "e.g. flour, potatoes, cottage cheese, onion",
+    "ingredientsHint": "Separate them with commas.",
+    "allergens": "Allergens",
+    "allergensHint": "Guests with allergies filter the menu by these — tick every one the dish contains.",
+    "customAllergen": "Your own allergen",
+    "tags": "Labels",
+    "tagsHint": "They make the dish stand out on the card.",
+    "customTag": "Your own label",
+    "available": "Available on the menu",
+    "availableOn": "Guests can choose it.",
+    "availableOff": "It stays on the menu, greyed out as unavailable — e.g. when it has run out.",
+    "addedNext": "Added “{{name}}”. On to the next dish!",
+    "savedChanges": "Saved the changes to “{{name}}”.",
+    "added": "“{{name}}” is on the menu now.",
+    "editTitle": "Edit: {{name}}",
+    "newTitle": "New dish",
+    "inCategory": "Category “{{name}}”",
+    "guestPreview": "Guest preview",
+    "guestsSee": "This is how guests will see it",
+    "previewHint": "The preview changes as you type — in your menu's colours.",
+    "shortcutSaves": "{{shortcut}} saves",
+    "saveAndNext": "Save and add another",
+    "addToMenu": "Add to menu",
+    "discardTitle": "Discard your changes?",
+    "discardBody": "You have unsaved changes to this dish. If you close the window, they will be lost.",
+    "discard": "Discard changes",
+    "keepEditing": "Back to editing"
+  },
+  "photo": {
+    "notImage": "That is not a photo — choose a PNG, JPG or WEBP file.",
+    "alt": "Dish photo",
+    "change": "Change",
+    "remove": "Remove photo",
+    "dropToReplace": "Drop to replace",
+    "addAria": "Add a photo of the dish",
+    "add": "Add a photo",
+    "dropHere": "Drop it here",
+    "dragOrClick": "Drag a file or click"
+  },
+  "crop": {
+    "failed": "The photo could not be cropped. Please try again.",
+    "title": "Crop the photo",
+    "subtitle": "Drag and zoom to fit a 1:1 frame",
+    "zoom": "Photo zoom",
+    "processing": "Processing…",
+    "apply": "Apply"
+  },
+  "subscription": {
+    "expired": "Your subscription has expired",
+    "expiredHint": "Pay what is due to unlock your menu.",
+    "opening": "Opening the payment…",
+    "pay": "Pay for the subscription",
+    "confirming": "We are confirming the payment with the provider — it will take a few seconds.",
+    "pending": "Your menu is not public yet. Pay for the subscription to activate your QR codes.",
+    "activate": "Activate subscription"
+  },
+  "qr": {
+    "format": {
+      "code": "Code only",
+      "tent": "Table card",
+      "sticker": "Sticker",
+      "poster": "Poster"
+    },
+    "unit": {
+      "code_one": "{{count}} code",
+      "code_other": "{{count}} codes",
+      "tent_one": "{{count}} card",
+      "tent_other": "{{count}} cards",
+      "sticker_one": "{{count}} sticker",
+      "sticker_other": "{{count}} stickers",
+      "poster_one": "{{count}} poster",
+      "poster_other": "{{count}} posters"
+    },
+    "fileSlug": {
+      "code": "code",
+      "tent": "table-card",
+      "sticker": "sticker",
+      "poster": "poster"
+    },
+    "centerSize": {
+      "S": "Small",
+      "M": "Medium",
+      "L": "Large"
+    },
+    "dots": {
+      "square": "Squares",
+      "fluid": "Fluid",
+      "dots": "Dots",
+      "tiles": "Tiles",
+      "lines": "Lines"
+    },
+    "eyes": {
+      "square": "Square",
+      "rounded": "Rounded",
+      "circle": "Round",
+      "leaf": "Leaf"
+    },
+    "swatch": {
+      "brand": "Brand colour",
+      "graphite": "Graphite",
+      "black": "Black",
+      "navy": "Navy",
+      "bottleGreen": "Bottle green",
+      "burgundy": "Burgundy",
+      "chocolate": "Chocolate"
+    },
+    "preset": {
+      "brand": "Your brand",
+      "classic": "Classic",
+      "accent": "Accent",
+      "soft": "Soft",
+      "lines": "Lines",
+      "elegant": "Elegant"
+    },
+    "customColour": "Custom colour",
+    "anyColour": "pick any colour",
+    "checking": "Checking readability…",
+    "verdict": {
+      "great": "Excellent readability",
+      "ok": "Good readability",
+      "weak": "Readability could be better",
+      "bad": "This code may not scan"
+    },
+    "check": {
+      "scan": {
+        "label": "Scan test",
+        "pending": "Checking…",
+        "great": "The code was read correctly from the image",
+        "bad": "It could not be read — darken the colour or shrink the logo"
+      },
+      "contrast": {
+        "label": "Contrast",
+        "great": "{{ratio}} : 1 — excellent",
+        "ok": "{{ratio}} : 1 — good",
+        "weak": "{{ratio}} : 1 — weak; in poorer light the code may fail",
+        "bad": "{{ratio}} : 1 — too light; choose a darker colour"
+      },
+      "density": {
+        "label": "Short link",
+        "saved": "{{modules}} × {{modules}} modules instead of {{plain}} × {{plain}} — {{saved}}% fewer",
+        "plain": "{{modules}} × {{modules}} modules"
+      },
+      "print": {
+        "label": "When printed",
+        "great": "code {{code}} — scans from about {{distance}}",
+        "weak": "code {{code}} — small, reads only up close; safer from {{comfortable}}",
+        "bad": "code {{code}} — too small for many phones; choose a size from {{comfortable}}"
+      }
+    },
+    "errors": {
+      "draw": "The design could not be drawn.",
+      "canvas": "This browser cannot draw images.",
+      "save": "The image could not be saved.",
+      "print": "The browser blocked printing.",
+      "file": "The file could not be prepared.",
+      "image": "The image could not be loaded."
+    },
+    "printTitle": "QR codes",
+    "posterSheet": "A {{size}} poster prints on a whole {{page}} page",
+    "posterA3": " — print on A3 or take the file to a print shop",
+    "perSheet": "{{copies}} on an A4 sheet",
+    "pngSaved": "Downloaded a print-quality PNG (300 dpi).",
+    "svgSaved": "Downloaded an SVG — a vector file for the print shop.",
+    "linkCopied": "Menu link copied.",
+    "linkCopyFailed": "The link could not be copied.",
+    "center": {
+      "logo": "Logo",
+      "icon": "Cutlery",
+      "upload": "Image",
+      "none": "None",
+      "addLogo": "Add a logo on the “Menu design” tab",
+      "logoFailed": "The logo could not be loaded — upload a file"
+    },
+    "subtitle": "Pick a design in your restaurant's colours, see it on the table and print it. We check every code before it goes to print.",
+    "formatTabs": "What you will print the code on",
+    "size": "Size",
+    "customSize": "Custom",
+    "customSizeAria": "Custom code size in centimetres",
+    "stageLabel": "Preview: {{format}} {{size}} with a QR code that opens the menu",
+    "download": "Download and print",
+    "downloadHint": "{{sheet}}. In the print window choose “Save as PDF” to get a file for the print shop.",
+    "print": "Print / PDF",
+    "menuLink": "Menu link",
+    "copyLink": "Copy link",
+    "copyLinkAria": "Copy the menu link",
+    "openMenu": "Open menu",
+    "neverChanges": "This code never changes. Edit dishes, prices and photos — guests see the new menu at once, with no reprinting.",
+    "presets": "Ready-made designs",
+    "presetsHint": "In your restaurant's colours.",
+    "presetsHintDarkened": "In your restaurant's colours — the brand colour slightly darkened so the code scans reliably.",
+    "centerTitle": "Centre of the code",
+    "centerHint": "With a logo the code gets stronger error correction — it still reads without trouble.",
+    "changeImage": "Change image",
+    "centerSizeAria": "Size of the centre",
+    "wording": "Text",
+    "wordingHint": "Printed for guests, in your menu's language.",
+    "customText": "Your own text",
+    "restaurantName": "Restaurant name",
+    "showName": "Show the restaurant name",
+    "background": "Background",
+    "surface": {
+      "brand": "Brand colour",
+      "light": "Light background"
+    },
+    "tune": "Adjust shapes and colours",
+    "dotsTitle": "Dots",
+    "eyesTitle": "Corners",
+    "codeColour": "Code colour",
+    "eyeColour": "Corner colour",
+    "gradient": "Colour gradient",
+    "gradientSecond": "Second gradient colour",
+    "darken": "Darken",
+    "tooLight": "The colour is too light for the code to read reliably."
+  },
+  "languages": {
+    "reason": {
+      "en": "Most foreign guests read it — the place to start.",
+      "de": "Germans are the largest group of foreign tourists in Poland.",
+      "uk": "A great many Ukrainians live and work in Poland.",
+      "fr": "The French love visiting Kraków and Warsaw.",
+      "es": "Spaniards like visiting Polish cities, and half of the Americas reads Spanish.",
+      "it": "Italians visit Kraków, Warsaw and Gdańsk in large numbers.",
+      "cs": "Czechs are frequent guests, especially in the south of Poland.",
+      "sk": "Slovaks like coming to the Tatras and Lesser Poland.",
+      "ru": "Many guests from Ukraine, Belarus and the Baltic states understand it.",
+      "lt": "Lithuanians are frequent guests in Podlasie and Warsaw.",
+      "sv": "Swedes often come by ferry to Pomerania.",
+      "he": "Israelis visit Kraków and Warsaw in large numbers.",
+      "ar": "Tourists from the Gulf states like visiting Zakopane."
+    },
+    "subtitle": "Show guests the menu in their own language. The map shows where it can already be read — add languages where your guests come from.",
+    "addedReady": "Added: {{name}}. The translations are ready — guests can see it now.",
+    "addedTranslate": "Added: {{name}}. Guests can see it now — translate the menu below.",
+    "added": "Added: {{name}}.",
+    "hidden": "Hidden: {{name}}. The translations stay — you can bring it back at any time.",
+    "yours": "Your languages",
+    "yoursHint": "Guests see these languages in the menu's switcher.",
+    "add": "Add a language",
+    "addHint": "Hover over a language and the map shows where new readers appear.",
+    "translations": "Translations",
+    "translationsHint": "The machine suggests — you have the final word. Nothing reaches guests before you save.",
+    "addFirst": "Add a language and translate the menu into it here.",
+    "discardTitle": "Discard unsaved translations?",
+    "discardBody": "You have unsaved changes in this language. If you switch to another, they will be lost.",
+    "manyTitle": "Language number {{count}}?",
+    "addAnyway": "Add anyway",
+    "manyBody": "Every new dish will need translating into {{languages}}, and the current menu is {{phrases}} in each of them. Most foreign guests will read the menu in English — add {{name}} only if guests who need it really come.",
+    "thisLanguage": "this language"
+  },
+  "reach": {
+    "readBy": "Your menu can be read by",
+    "people": "people",
+    "inLanguages_one": "in {{count}} language",
+    "inLanguages_other": "in {{count}} languages",
+    "worldShare": "about {{percent}} of the world's population, {{inLanguages}}",
+    "preview": "+ {{name}}: {{people}} new readers",
+    "previewSmall": "Not many — most guests from there can already read your menu.",
+    "previewTotal": "{{total}} in all. In yellow on the map — that is where new readers appear.",
+    "hint": "Hover over a country to see how many guests would join. Click to add its language.",
+    "countryStats": "population {{people}} · {{percent}} can read the menu",
+    "home": "Your restaurant is here.",
+    "clickToAdd": "Click to add {{name}} → {{percent}}",
+    "alreadyRead": "People here can already read your menu.",
+    "notInCatalogue": "The local language is not in the catalogue yet.",
+    "mapView": "Map view",
+    "world": "World",
+    "europe": "Europe",
+    "legendTitle": "Can read your menu:",
+    "legend": {
+      "3": "almost everyone",
+      "2": "most",
+      "1": "some",
+      "0": "hardly anyone"
+    },
+    "mapAria": "World map: countries where guests can read your menu",
+    "country": {
+      "CYN": "Northern Cyprus",
+      "SOL": "Somaliland"
+    }
+  },
+  "offered": {
+    "fallback": {
+      "polish": "in Polish",
+      "english": "in English",
+      "englishOrPolish": "in English or Polish"
+    },
+    "baseSubtitle": "the menu's language — what you write in the Menu builder",
+    "onlyPolish": "Guests see the menu in Polish only. Start with English — most foreign guests read it.",
+    "done": "Done — guests read the whole menu in this language.",
+    "untranslated": "Not translated — guests see the menu {{fallback}}.",
+    "partial": "{{percent}} done — guests see the rest {{fallback}}.",
+    "only": "thanks to it alone: {{people}}",
+    "revise": "Revise",
+    "translate": "Translate",
+    "hideTooltip": "Hide from guests (the translations stay)",
+    "hideAria": "Hide {{name}}",
+    "workTitle": "How much work",
+    "work": "Every new dish means up to {{translations}} translations — name, description and ingredients {{inLanguages}}.",
+    "waiting": " Still to translate: {{phrases}}.",
+    "allDone": " Everything is ready now.",
+    "many": "That is {{languages}} already. Each one more adds work to every menu change, and an unfinished one shows guests a half-and-half menu. Only add the ones your guests really need."
+  },
+  "addLanguage": {
+    "recommended": "Recommended in Poland",
+    "all": "All ({{count}})",
+    "search": "Search languages",
+    "sortHint": "Biggest gain first: how many new people can read your menu once the language is added.",
+    "allRecommended": "You already have every recommended language. You will find others on the “All” tab.",
+    "noSuch": "There is no such language in the catalogue.",
+    "prepared": "You already have {{done}} of {{total}} translations — they come back straight away.",
+    "gainTitle": "New menu readers once this language is added",
+    "addAria": "Add a language: {{name}}"
+  },
+  "editor": {
+    "suggestions_one": "{{count}} suggestion",
+    "suggestions_other": "{{count}} suggestions",
+    "partialFail": "Translated {{drafted}} of {{total}}. The rest could not be fetched — fill it in by hand.",
+    "inserted": "Inserted {{suggestions}}. Check them and save.",
+    "insertedThenError": "Inserted {{suggestions}}, then an error occurred: {{error}}",
+    "saved": "{{name}}: translations saved — guests can see them now.",
+    "nothing": "This menu has no text to translate yet. Add categories and dishes in the Menu builder and they will appear here.",
+    "progress": "Translated {{filled}} of {{total}} phrases",
+    "translating": "Translating…",
+    "suggestMissing": "Suggest the missing ones ({{count}})",
+    "fetching": "Fetching suggestions from DeepL. Nothing is saved until you check them and click “Save”.",
+    "unsaved": "You have unsaved changes — guests still see the previous version.",
+    "onlyMissing": "Show untranslated only",
+    "original": "Original ({{code}})",
+    "allDone": "Everything is translated. 🎉",
+    "changed": "changed",
+    "placeholder": "Translation ({{code}})",
+    "phraseAria": "Translation of: {{phrase}}",
+    "fallbackNote": "Guests see phrases without a translation in English, or in Polish if that is missing too."
+  },
+  "google": {
+    "placeIdHelper": "The listing's identifier, not a URL from Google Maps.",
+    "connectTitle": "Connect your Google reviews",
+    "connectBody": "Enter your listing's Place ID and you will see its rating and the latest guest reviews here — without leaving the panel.",
+    "step1": "Open the Place ID Finder.",
+    "step2": "Type your restaurant's name and address.",
+    "step3": "Copy the identifier from the bubble above the pin.",
+    "connecting": "Connecting…",
+    "connect": "Connect listing",
+    "noComment": "A rating without a comment.",
+    "connected": "Google listing connected.",
+    "disconnected": "Google listing disconnected.",
+    "subtitle": "The rating and latest reviews from your Google Maps listing.",
+    "disconnect": "Disconnect listing",
+    "noRatings": "No ratings",
+    "noRatingsBody": "This listing has no ratings yet.",
+    "basedOn_one": "based on {{total}} rating",
+    "basedOn_other": "based on {{total}} ratings",
+    "listing": "Google listing",
+    "viewInMaps": "View in Google Maps",
+    "changePlaceId": "Change Place ID",
+    "latest": "Latest reviews",
+    "noText": "Google does not share any written reviews for this listing yet.",
+    "synced": "Synced: {{at}} · the data refreshes once a day"
+  }
+}

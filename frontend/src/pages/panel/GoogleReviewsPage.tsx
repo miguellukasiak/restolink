@@ -25,6 +25,7 @@ import { useSnackbar } from '../../components/feedback/SnackbarProvider';
 import { useGoogleReviews, useSaveGooglePlaceId } from '../../hooks/useGoogleReviews';
 import { getApiErrorMessage } from '../../services/api';
 import type { GoogleReview } from '../../services/googleMapsService';
+import { usePanelT } from '../../i18n/panel';
 
 /** Google's own star gold. Borrowed deliberately: a review widget that uses
  *  the app's purple reads as our opinion of the restaurant, not Google's. */
@@ -37,15 +38,38 @@ const PLACE_ID_FINDER =
 const mapsLink = (placeId: string) =>
   `https://www.google.com/maps/place/?q=place_id:${encodeURIComponent(placeId)}`;
 
-const SYNC_FORMAT = new Intl.DateTimeFormat('pl-PL', {
-  dateStyle: 'long',
-  timeStyle: 'short',
-});
-
-function formatSync(iso: string | null): string | null {
+function formatSync(iso: string | null, locale: string): string | null {
   if (!iso) return null;
   const parsed = new Date(iso);
-  return Number.isNaN(parsed.getTime()) ? null : SYNC_FORMAT.format(parsed);
+  return Number.isNaN(parsed.getTime())
+    ? null
+    : new Intl.DateTimeFormat(locale, { dateStyle: 'long', timeStyle: 'short' }).format(
+        parsed,
+      );
+}
+
+const AGE_UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
+  ['year', 365 * 86_400],
+  ['month', 30 * 86_400],
+  ['week', 7 * 86_400],
+  ['day', 86_400],
+  ['hour', 3_600],
+  ['minute', 60],
+];
+
+/**
+ * "3 weeks ago" in the panel's language. Google's own wording comes in the
+ * language the listing was fetched in, so it is only the fallback for a
+ * review with no date.
+ */
+function reviewAge(epochSeconds: number, now: number, locale: string): string | null {
+  if (!epochSeconds) return null;
+  const seconds = epochSeconds - now / 1000;
+  const format = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+  for (const [unit, size] of AGE_UNITS) {
+    if (Math.abs(seconds) >= size) return format.format(Math.round(seconds / size), unit);
+  }
+  return format.format(0, 'minute');
 }
 
 /**
@@ -83,6 +107,7 @@ function PlaceIdField({
   onChange: (next: string) => void;
   disabled: boolean;
 }) {
+  const { t } = usePanelT();
   return (
     <TextField
       label="Google Place ID"
@@ -92,7 +117,7 @@ function PlaceIdField({
       fullWidth
       disabled={disabled}
       slotProps={{ htmlInput: { spellCheck: false, autoCapitalize: 'none' } }}
-      helperText="Identyfikator wizytówki, nie adres URL z Google Maps."
+      helperText={t('google.placeIdHelper')}
     />
   );
 }
@@ -109,6 +134,7 @@ function SetupScreen({
   onSubmit: () => void;
   pending: boolean;
 }) {
+  const { t } = usePanelT();
   return (
     <Card sx={{ maxWidth: 620, mx: 'auto' }}>
       <CardContent sx={{ p: { xs: 3, sm: 5 } }}>
@@ -126,11 +152,10 @@ function SetupScreen({
             </Avatar>
             <Box>
               <Typography variant="h5" component="h2" sx={{ mb: 1 }}>
-                Połącz opinie z Google
+                {t('google.connectTitle')}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Podaj Place ID swojej wizytówki, a zobaczysz tutaj ocenę i
-                najnowsze opinie gości — bez wychodzenia z panelu.
+                {t('google.connectBody')}
               </Typography>
             </Box>
           </Stack>
@@ -145,9 +170,9 @@ function SetupScreen({
               '& li': { mb: 0.75 },
             }}
           >
-            <li>Otwórz wyszukiwarkę Place ID Finder.</li>
-            <li>Wpisz nazwę i adres swojej restauracji.</li>
-            <li>Skopiuj identyfikator z dymka nad pinezką.</li>
+            <li>{t('google.step1')}</li>
+            <li>{t('google.step2')}</li>
+            <li>{t('google.step3')}</li>
           </Box>
 
           <PlaceIdField value={value} onChange={onChange} disabled={pending} />
@@ -181,7 +206,7 @@ function SetupScreen({
                 )
               }
             >
-              {pending ? 'Łączę…' : 'Połącz wizytówkę'}
+              {pending ? t('google.connecting') : t('google.connect')}
             </Button>
           </Stack>
         </Stack>
@@ -191,7 +216,8 @@ function SetupScreen({
 }
 
 /** One review. */
-function ReviewCard({ review }: { review: GoogleReview }) {
+function ReviewCard({ review, now }: { review: GoogleReview; now: number }) {
+  const { t, i18n } = usePanelT();
   return (
     <Card sx={{ height: '100%', boxShadow: 'none' }}>
       <CardContent sx={{ p: 3 }}>
@@ -210,7 +236,8 @@ function ReviewCard({ review }: { review: GoogleReview }) {
             <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
               <Stars value={review.rating} size={16} />
               <Typography variant="caption" color="text.secondary">
-                {review.relative_time_description}
+                {reviewAge(review.time, now, i18n.language) ??
+                  review.relative_time_description}
               </Typography>
             </Stack>
           </Box>
@@ -226,7 +253,7 @@ function ReviewCard({ review }: { review: GoogleReview }) {
           </Typography>
         ) : (
           <Typography variant="body2" color="text.disabled" sx={{ fontStyle: 'italic' }}>
-            Ocena bez komentarza.
+            {t('google.noComment')}
           </Typography>
         )}
       </CardContent>
@@ -245,6 +272,8 @@ function ReviewCard({ review }: { review: GoogleReview }) {
  * cache exists to prevent.
  */
 export function GoogleReviewsPage() {
+  const { t, i18n } = usePanelT();
+  const locale = i18n.language;
   const { restaurantId = '' } = useParams<{ restaurantId: string }>();
   const { showSuccess, showError } = useSnackbar();
 
@@ -255,8 +284,11 @@ export function GoogleReviewsPage() {
   const [placeId, setPlaceId] = useState('');
 
   const data = reviews.data;
+  // When this answer arrived: the reviews' ages are counted from it, so a
+  // render does not read the clock.
+  const fetchedAt = reviews.dataUpdatedAt;
   const connected = Boolean(data?.configured);
-  const syncedAt = formatSync(data?.synced_at ?? null);
+  const syncedAt = formatSync(data?.synced_at ?? null, locale);
 
   async function submit(value: string) {
     try {
@@ -265,8 +297,8 @@ export function GoogleReviewsPage() {
       setPlaceId('');
       showSuccess(
         result.configured
-          ? 'Wizytówka Google połączona.'
-          : 'Wizytówka Google odłączona.',
+          ? t('google.connected')
+          : t('google.disconnected'),
       );
     } catch (error) {
       showError(getApiErrorMessage(error));
@@ -281,10 +313,10 @@ export function GoogleReviewsPage() {
   const header = (
     <Box sx={{ mb: 3 }}>
       <Typography variant="h5" component="h1" sx={{ mb: 0.5 }}>
-        Opinie Google
+        {t('nav.reviews')}
       </Typography>
       <Typography variant="body2" color="text.secondary">
-        Ocena i najnowsze opinie z Twojej wizytówki w Google Maps.
+        {t('google.subtitle')}
       </Typography>
     </Box>
   );
@@ -353,7 +385,7 @@ export function GoogleReviewsPage() {
               disabled={save.isPending}
               sx={{ color: 'text.secondary' }}
             >
-              Anuluj
+              {t('common.cancel')}
             </Button>
             <Button
               color="error"
@@ -361,7 +393,7 @@ export function GoogleReviewsPage() {
               onClick={() => void submit('')}
               disabled={save.isPending}
             >
-              Odłącz wizytówkę
+              {t('google.disconnect')}
             </Button>
           </Stack>
         )}
@@ -402,10 +434,10 @@ export function GoogleReviewsPage() {
             {rating === null ? (
               <Box>
                 <Typography variant="h5" sx={{ mb: 0.5 }}>
-                  Brak ocen
+                  {t('google.noRatings')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Ta wizytówka nie ma jeszcze żadnych ocen.
+                  {t('google.noRatingsBody')}
                 </Typography>
               </Box>
             ) : (
@@ -419,16 +451,20 @@ export function GoogleReviewsPage() {
                     letterSpacing: '-0.04em',
                   }}
                 >
-                  {rating.toFixed(1).replace('.', ',')}
+                  {rating.toLocaleString(locale, {
+                    minimumFractionDigits: 1,
+                    maximumFractionDigits: 1,
+                  })}
                 </Typography>
                 <Stars value={rating} size={24} />
                 <Typography variant="body2" color="text.secondary">
-                  {/* "na podstawie" takes the genitive, where Polish splits
-                      only between one and many: 1 oceny, 2 ocen, 1342 ocen.
-                      A restaurant with a single review would otherwise be
-                      told "na podstawie 1 ocen". */}
-                  na podstawie {data?.total_ratings.toLocaleString('pl-PL')}{' '}
-                  {data?.total_ratings === 1 ? 'oceny' : 'ocen'}
+                  {/* In Polish "na podstawie" takes the genitive, which
+                      splits only between one and many: 1 oceny, 2 ocen,
+                      1342 ocen — the plural forms in the panel files. */}
+                  {t('google.basedOn', {
+                    count: data?.total_ratings ?? 0,
+                    total: (data?.total_ratings ?? 0).toLocaleString(locale),
+                  })}
                 </Typography>
               </Stack>
             )}
@@ -441,7 +477,7 @@ export function GoogleReviewsPage() {
 
             <Stack spacing={1.5} sx={{ alignItems: 'flex-start' }}>
               <Typography variant="overline" color="text.secondary">
-                Wizytówka Google
+                {t('google.listing')}
               </Typography>
               <Typography
                 variant="body2"
@@ -459,7 +495,7 @@ export function GoogleReviewsPage() {
                   variant="outlined"
                   endIcon={<OpenInNewRoundedIcon />}
                 >
-                  Zobacz w Google Maps
+                  {t('google.viewInMaps')}
                 </Button>
                 <Button
                   size="small"
@@ -468,7 +504,7 @@ export function GoogleReviewsPage() {
                   onClick={openEditor}
                   sx={{ color: 'text.secondary' }}
                 >
-                  Zmień Place ID
+                  {t('google.changePlaceId')}
                 </Button>
               </Stack>
             </Stack>
@@ -477,13 +513,12 @@ export function GoogleReviewsPage() {
       </Card>
 
       <Typography variant="h6" component="h2" sx={{ mb: 2 }}>
-        Najnowsze opinie
+        {t('google.latest')}
       </Typography>
 
       {list.length === 0 ? (
         <Alert severity="info">
-          Google nie udostępnia jeszcze żadnych opinii tekstowych dla tej
-          wizytówki.
+          {t('google.noText')}
         </Alert>
       ) : (
         <Box
@@ -498,6 +533,7 @@ export function GoogleReviewsPage() {
             <ReviewCard
               key={`${review.author_name}-${review.time}`}
               review={review}
+              now={fetchedAt}
             />
           ))}
         </Box>
@@ -512,7 +548,7 @@ export function GoogleReviewsPage() {
           color="text.disabled"
           sx={{ display: 'block', mt: 3, textAlign: 'center' }}
         >
-          Zsynchronizowano: {syncedAt} · dane odświeżają się raz na dobę
+          {t('google.synced', { at: syncedAt })}
         </Typography>
       )}
     </Box>

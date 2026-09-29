@@ -8,6 +8,7 @@ import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import PlaylistAddRoundedIcon from '@mui/icons-material/PlaylistAddRounded';
 import { radii } from '../../theme';
 import { TonalIcon } from './TonalIcon';
+import { usePanelT } from '../../i18n/panel';
 
 interface AddCategoryCardProps {
   /** Names worth offering — the caller leaves out the ones already used. */
@@ -27,6 +28,7 @@ export function AddCategoryCard({
   onQuickAdd,
   onCustom,
 }: AddCategoryCardProps) {
+  const { t } = usePanelT();
   return (
     <Box
       sx={{
@@ -42,12 +44,12 @@ export function AddCategoryCard({
         </TonalIcon>
         <Box sx={{ minWidth: 0 }}>
           <Typography variant="subtitle1" component="h2" sx={{ fontWeight: 700 }}>
-            Dodaj kategorię
+            {t('addCategory.title')}
           </Typography>
           <Typography variant="body2" color="text.secondary">
             {suggestions.length > 0
-              ? 'Wybierz jedną z popularnych albo nazwij po swojemu.'
-              : 'Nazwij nowy dział swojego menu.'}
+              ? t('addCategory.pickOrName')
+              : t('addCategory.nameNew')}
           </Typography>
         </Box>
       </Stack>
@@ -62,7 +64,7 @@ export function AddCategoryCard({
             clickable
             disabled={busy}
             onClick={() => onQuickAdd(name)}
-            aria-label={`Dodaj kategorię ${name}`}
+            aria-label={t('addCategory.quickAdd', { name })}
             sx={{
               height: 36,
               px: 0.5,
@@ -77,7 +79,7 @@ export function AddCategoryCard({
           disabled={busy}
           sx={{ height: 36, px: 2 }}
         >
-          Własna nazwa…
+          {t('addCategory.customName')}
         </Button>
       </Box>
     </Box>

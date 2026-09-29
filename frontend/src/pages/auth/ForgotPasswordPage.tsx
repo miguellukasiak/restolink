@@ -7,10 +7,12 @@ import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import { AuthLayout } from '../../components/auth/AuthLayout';
+import { usePanelT } from '../../i18n/panel';
 import { getApiErrorMessage } from '../../services/api';
 import { requestPasswordReset } from '../../services/authService';
 
 export function ForgotPasswordPage() {
+  const { t } = usePanelT();
   const [email, setEmail] = useState('');
   const [sentMessage, setSentMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -37,11 +39,11 @@ export function ForgotPasswordPage() {
   if (sentMessage) {
     return (
       <AuthLayout
-        title="Sprawdź skrzynkę"
-        subtitle="Jeśli konto istnieje, link do zmiany hasła jest już w drodze."
+        title={t('forgot.sentTitle')}
+        subtitle={t('forgot.sentSubtitle')}
         footer={
           <Link component={RouterLink} to="/login" underline="hover" variant="body2">
-            Wróć do logowania
+            {t('auth.backToLogin')}
           </Link>
         }
       >
@@ -50,15 +52,14 @@ export function ForgotPasswordPage() {
             {sentMessage}
           </Alert>
           <Alert severity="info" sx={{ borderRadius: '16px' }}>
-            Link jest ważny przez 30 minut i zadziała tylko raz. Jeśli wiadomość
-            nie dotarła, sprawdź folder ze spamem.
+            {t('forgot.validity')}
           </Alert>
           <Button
             variant="text"
             onClick={() => setSentMessage(null)}
             sx={{ borderRadius: '999px' }}
           >
-            Wpisz inny adres
+            {t('forgot.otherAddress')}
           </Button>
         </Stack>
       </AuthLayout>
@@ -67,11 +68,11 @@ export function ForgotPasswordPage() {
 
   return (
     <AuthLayout
-      title="Nie pamiętasz hasła?"
-      subtitle="Podaj adres e-mail powiązany z kontem, a wyślemy link do ustawienia nowego hasła."
+      title={t('forgot.title')}
+      subtitle={t('forgot.subtitle')}
       footer={
         <Link component={RouterLink} to="/login" underline="hover" variant="body2">
-          Wróć do logowania
+          {t('auth.backToLogin')}
         </Link>
       }
     >
@@ -84,7 +85,7 @@ export function ForgotPasswordPage() {
           ) : null}
 
           <TextField
-            label="Adres e-mail"
+            label={t('auth.email')}
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -106,7 +107,7 @@ export function ForgotPasswordPage() {
               submitting ? <CircularProgress size={18} color="inherit" /> : null
             }
           >
-            {submitting ? 'Wysyłanie…' : 'Wyślij link'}
+            {submitting ? t('forgot.sending') : t('forgot.send')}
           </Button>
         </Stack>
       </form>
