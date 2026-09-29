@@ -135,6 +135,9 @@ class RestaurantThemeUpdate(BaseModel):
     primary_color: str | None = None
     background_color: str | None = None
     font_family: str | None = None
+    # A name, not markup: the frontend owns the artwork, so anything beyond a
+    # short slug is refused rather than stored and later interpolated.
+    menu_pattern: str | None = Field(default=None, pattern=r"^[a-z0-9-]{1,32}$")
 
 
 class ThemeSettings(BaseModel):
@@ -146,6 +149,7 @@ class ThemeSettings(BaseModel):
     primary_color: str
     background_color: str
     font_family: str
+    menu_pattern: str | None = None
 
 
 # --------------------------------------------------------------------------- #

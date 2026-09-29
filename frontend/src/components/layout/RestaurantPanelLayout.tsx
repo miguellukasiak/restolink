@@ -15,7 +15,7 @@ import Skeleton from '@mui/material/Skeleton';
 import { alpha } from '@mui/material/styles';
 import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded';
 import QrCode2RoundedIcon from '@mui/icons-material/QrCode2Rounded';
-import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
+import PaletteRoundedIcon from '@mui/icons-material/PaletteRounded';
 import TranslateRoundedIcon from '@mui/icons-material/TranslateRounded';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import { NavLink, Outlet, useLocation, useParams } from 'react-router-dom';
@@ -48,10 +48,7 @@ export function RestaurantPanelLayout() {
 
   // Access is only enforced once the restaurant details have loaded.
   const access = restaurant.data
-    ? resolveAccessState(
-        restaurant.data.status,
-        restaurant.data.subscription_valid_until,
-      )
+    ? resolveAccessState(restaurant.data.status, restaurant.data.subscription_valid_until)
     : null;
 
   // Returning from Stripe: re-read the restaurant so the banner reflects the
@@ -77,12 +74,18 @@ export function RestaurantPanelLayout() {
   };
 
   const base = `/panel/${restaurantId}`;
-  const navItems = [
-    { label: 'Kreator menu', to: `${base}/menu`, icon: <MenuBookRoundedIcon /> },
-    { label: 'Kody QR', to: `${base}/qr`, icon: <QrCode2RoundedIcon /> },
-    { label: 'Słownik', to: `${base}/dictionary`, icon: <TranslateRoundedIcon /> },
-    { label: 'Opinie Google', to: `${base}/google`, icon: <StarRoundedIcon /> },
-    { label: 'Wygląd menu', to: `${base}/settings`, icon: <SettingsRoundedIcon /> },
+  // In the order an owner sets up: write the menu, dress it, print its codes.
+  // Everything else is an extra and sits below the divider.
+  const navGroups = [
+    [
+      { label: 'Kreator menu', to: `${base}/menu`, icon: <MenuBookRoundedIcon /> },
+      { label: 'Wygląd menu', to: `${base}/settings`, icon: <PaletteRoundedIcon /> },
+      { label: 'Kody QR', to: `${base}/qr`, icon: <QrCode2RoundedIcon /> },
+    ],
+    [
+      { label: 'Języki', to: `${base}/dictionary`, icon: <TranslateRoundedIcon /> },
+      { label: 'Opinie Google', to: `${base}/google`, icon: <StarRoundedIcon /> },
+    ],
   ];
 
   return (
@@ -139,38 +142,46 @@ export function RestaurantPanelLayout() {
         }}
       >
         <Toolbar />
-        <List sx={{ pt: 2 }}>
-          {navItems.map((item) => {
-            const selected = location.pathname.startsWith(item.to);
-            return (
-              <ListItemButton
-                key={item.to}
-                component={NavLink}
-                to={item.to}
-                selected={selected}
-                sx={{
-                  borderRadius: 999,
-                  mb: 0.5,
-                  '&.Mui-selected': {
-                    bgcolor: (t) => alpha(t.palette.secondary.main, 0.14),
-                    color: 'secondary.dark',
-                    '&:hover': { bgcolor: (t) => alpha(t.palette.secondary.main, 0.22) },
-                    '& .MuiListItemIcon-root': { color: 'secondary.dark' },
-                  },
-                }}
-              >
-                <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
-                <ListItemText
-                  primary={item.label}
-                  slotProps={{ primary: { sx: { fontWeight: 600 } } }}
-                />
-              </ListItemButton>
-            );
-          })}
-        </List>
+        {navGroups.map((items, groupIndex) => (
+          <List key={groupIndex} sx={{ pt: groupIndex === 0 ? 2 : 1 }}>
+            {groupIndex > 0 && <Divider sx={{ mx: 2, mb: 1.5 }} />}
+            {items.map((item) => {
+              const selected = location.pathname.startsWith(item.to);
+              return (
+                <ListItemButton
+                  key={item.to}
+                  component={NavLink}
+                  to={item.to}
+                  selected={selected}
+                  sx={{
+                    borderRadius: 999,
+                    mb: 0.5,
+                    '&.Mui-selected': {
+                      bgcolor: (t) => alpha(t.palette.secondary.main, 0.14),
+                      color: 'secondary.dark',
+                      '&:hover': {
+                        bgcolor: (t) => alpha(t.palette.secondary.main, 0.22),
+                      },
+                      '& .MuiListItemIcon-root': { color: 'secondary.dark' },
+                    },
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
+                  <ListItemText
+                    primary={item.label}
+                    slotProps={{ primary: { sx: { fontWeight: 600 } } }}
+                  />
+                </ListItemButton>
+              );
+            })}
+          </List>
+        ))}
       </Drawer>
 
-      <Box component="main" sx={{ flexGrow: 1, minWidth: 0, px: { xs: 2, md: 4 }, pb: 6 }}>
+      <Box
+        component="main"
+        sx={{ flexGrow: 1, minWidth: 0, px: { xs: 2, md: 4 }, pb: 6 }}
+      >
         <Toolbar />
         {/* Above the subscription gate on purpose: an admin looking at a
             blocked restaurant still needs to know whose panel this is. */}

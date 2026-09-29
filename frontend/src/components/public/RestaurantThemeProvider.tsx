@@ -2,12 +2,36 @@ import { useEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { ThemeProvider, createTheme, alpha } from '@mui/material/styles';
+import { ThemeProvider, createTheme, alpha, lighten } from '@mui/material/styles';
 import { usePublicMenu } from '../../hooks/usePublicMenu';
-import { getFontStack } from '../../constants/menu';
+import { fontStack, getFontPairing } from '../../constants/menuStyle';
 import { getContrastingTextColor, isDarkColor } from '../../utils/colors';
 import { recallMenuTheme, rememberMenuTheme } from '../../utils/menuThemeMemory';
 import type { RestaurantThemeUpdate } from '../../types';
+import { patternCss } from './menuPatterns';
+
+/**
+ * Menu-only extras carried on the restaurant theme, so every surface that
+ * renders a menu (the guest page, the panel's previews) reads them the same
+ * way instead of each being handed the settings separately.
+ */
+export interface MenuDecor {
+  /** Background pattern as CSS, or null for a plain background. */
+  pattern: { backgroundImage: string; backgroundSize: string } | null;
+  /** Dish cards on a solid surface — always, when a pattern is behind them. */
+  cards: boolean;
+  /** Multiplier for category-heading sizes (see FontPairing.headingScale). */
+  headingScale: number;
+}
+
+declare module '@mui/material/styles' {
+  interface Theme {
+    menuDecor: MenuDecor;
+  }
+  interface ThemeOptions {
+    menuDecor?: MenuDecor;
+  }
+}
 
 /**
  * Builds the public-menu theme from injectable brand settings — primary color,
@@ -15,11 +39,12 @@ import type { RestaurantThemeUpdate } from '../../types';
  * configuration (or the settings-page live preview).
  */
 export function createRestaurantTheme(settings: RestaurantThemeUpdate = {}) {
-  const fontStack = getFontStack(settings.font_family ?? undefined);
-  const headingStack =
-    settings.font_family && settings.font_family !== 'Roboto'
-      ? fontStack
-      : 'Georgia, "Times New Roman", serif';
+  // A display face for headings, a readable one for everything else (see
+  // FONT_PAIRINGS). "Roboto", the original default, keeps its serif headings.
+  const pairing = getFontPairing(settings.font_family);
+  const bodyStack = fontStack(pairing.body.family);
+  const headingStack = fontStack(pairing.heading.family);
+  const heading = { fontFamily: headingStack, fontWeight: pairing.heading.weight };
 
   // Readability guardrail: derive every on-background color from the chosen
   // background's luminance, so a dark background automatically flips text (and
@@ -32,14 +57,20 @@ export function createRestaurantTheme(settings: RestaurantThemeUpdate = {}) {
     dark: '#211A1B',
   });
 
+  const primaryColor = settings.primary_color ?? '#8C1D18';
+  const pattern = patternCss(settings.menu_pattern, primaryColor, dark);
+
   return createTheme({
+    menuDecor: { pattern, cards: pattern !== null, headingScale: pairing.headingScale ?? 1 },
     palette: {
       mode: dark ? 'dark' : 'light',
-      primary: { main: settings.primary_color ?? '#8C1D18' },
+      primary: { main: primaryColor },
       secondary: { main: dark ? '#CBB9A6' : '#6D5E4F' },
       background: {
         default: backgroundColor,
-        paper: dark ? '#242424' : '#FFFFFF',
+        // A step lighter than a dark background, in its own hue — a fixed
+        // grey card looked out of place on warm dark wood.
+        paper: dark ? lighten(backgroundColor, 0.07) : '#FFFFFF',
       },
       text: {
         primary: onBackground,
@@ -49,9 +80,9 @@ export function createRestaurantTheme(settings: RestaurantThemeUpdate = {}) {
     },
     shape: { borderRadius: 16 },
     typography: {
-      fontFamily: fontStack,
-      h4: { fontFamily: headingStack, fontWeight: 700 },
-      h5: { fontFamily: headingStack, fontWeight: 700 },
+      fontFamily: bodyStack,
+      h4: heading,
+      h5: heading,
       h6: { fontWeight: 700, letterSpacing: '-0.01em' },
       subtitle2: { fontWeight: 600 },
       button: { textTransform: 'none', fontWeight: 600 },

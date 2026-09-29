@@ -40,7 +40,7 @@ import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import { usePublicMenu } from '../../hooks/usePublicMenu';
 import { useSnackbar } from '../../components/feedback/SnackbarProvider';
-import { FONT_OPTIONS } from '../../constants/menu';
+import { getFontPairing } from '../../constants/menuStyle';
 import { radii } from '../../theme';
 import { qrMenuPayload, shortMenuUrl } from '../../utils/menuLink';
 import { plCount } from '../../utils/plural';
@@ -239,7 +239,13 @@ export function QrGeneratorPage() {
     if (!publicMenu.data) {
       // Without the saved theme the studio still works, in RestoLink's colours.
       return publicMenu.isError
-        ? { name: '', primary: '#0F8256', background: '#FFFFFF', fontFamily: 'Roboto' }
+        ? {
+            name: '',
+            primary: '#0F8256',
+            background: '#FFFFFF',
+            fontFamily: 'Georgia',
+            fontWeight: 700,
+          }
         : null;
     }
     const { restaurant } = publicMenu.data;
@@ -247,9 +253,9 @@ export function QrGeneratorPage() {
       name: restaurant.name,
       primary: safeHex(restaurant.theme.primary_color, '#0F8256'),
       background: safeHex(restaurant.theme.background_color, '#FFFFFF'),
-      fontFamily: FONT_OPTIONS.some((font) => font.value === restaurant.theme.font_family)
-        ? restaurant.theme.font_family
-        : 'Roboto',
+      // The menu's heading face, so the name reads as it does on the menu.
+      fontFamily: getFontPairing(restaurant.theme.font_family).heading.family,
+      fontWeight: getFontPairing(restaurant.theme.font_family).heading.weight,
     };
   }, [publicMenu.data, publicMenu.isError]);
 

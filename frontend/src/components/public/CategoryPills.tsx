@@ -37,16 +37,25 @@ interface CategoryPillsProps {
 export function CategoryPills({ categories, activeId, onSelect }: CategoryPillsProps) {
   const { t } = useTranslation();
   const chipRefs = useRef(new Map<string, HTMLElement>());
+  const stripRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if (!activeId) return;
     const chip = chipRefs.current.get(activeId);
-    if (!chip) return;
+    const strip = stripRef.current;
+    if (!chip || !strip) return;
 
-    // `inline: 'center'` slides the strip horizontally; `block: 'nearest'` is
-    // what stops it from also scrolling the *page* vertically to reach the
-    // chip — which would fight the very scroll that selected it.
-    chip.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    // Scrolls the strip itself, never `scrollIntoView`: that also scrolls
+    // every ancestor, so a menu shown below the fold — the panel's live
+    // previews on a phone — dragged the owner's whole page down to it, and
+    // each category the spy then passed dragged it further.
+    const stripBox = strip.getBoundingClientRect();
+    const chipBox = chip.getBoundingClientRect();
+    // Rects are in screen pixels; a scaled-down preview needs layout pixels.
+    const scale = stripBox.width / strip.offsetWidth || 1;
+    const offset =
+      (chipBox.left - stripBox.left - (stripBox.width - chipBox.width) / 2) / scale;
+    strip.scrollTo({ left: strip.scrollLeft + offset, behavior: 'smooth' });
   }, [activeId]);
 
   const scrollTo = (categoryId: string) => {
@@ -60,6 +69,7 @@ export function CategoryPills({ categories, activeId, onSelect }: CategoryPillsP
 
   return (
     <Box
+      ref={stripRef}
       component="nav"
       aria-label={t('categoriesNav')}
       sx={{

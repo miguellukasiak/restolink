@@ -5,7 +5,7 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import { alpha } from '@mui/material/styles';
+import { alpha, useTheme } from '@mui/material/styles';
 import { visuallyHidden } from '@mui/utils';
 import SearchOffRoundedIcon from '@mui/icons-material/SearchOffRounded';
 import HealthAndSafetyRoundedIcon from '@mui/icons-material/HealthAndSafetyRounded';
@@ -56,6 +56,7 @@ export function PublicMenuView({
   onOpenAllergyFilter,
 }: PublicMenuViewProps) {
   const { t } = useTranslation();
+  const theme = useTheme();
   const [query, setQuery] = useState('');
 
   const filteredCategories = useMemo(() => {
@@ -107,6 +108,8 @@ export function PublicMenuView({
       sx={{
         minHeight: '100%',
         bgcolor: 'background.default',
+        // The theme's background pattern, if it has one (see menuPatterns).
+        ...(theme.menuDecor?.pattern ?? {}),
         // Anchor inherited text to the themed on-background color so headings
         // (and any Typography without an explicit color) stay readable when the
         // background is dark — otherwise they'd inherit the outer page's color.
@@ -207,9 +210,12 @@ export function PublicMenuView({
                   // Was `variant="h5"` in the heading serif — handsome, but it
                   // ate close to 40px per category on a phone. Kept clearly
                   // dominant over the 14px dish names without the bulk.
-                  fontSize: 17,
-                  [WIDE]: { fontSize: 20 },
-                  fontWeight: 700,
+                  fontSize: 17 * (theme.menuDecor?.headingScale ?? 1),
+                  [WIDE]: { fontSize: 20 * (theme.menuDecor?.headingScale ?? 1) },
+                  // The theme's heading face: this is where a menu's
+                  // character shows, while dish names stay in the text face.
+                  fontFamily: theme.typography.h5.fontFamily,
+                  fontWeight: theme.typography.h5.fontWeight,
                   letterSpacing: '-0.01em',
                   mb: 1,
                 }}

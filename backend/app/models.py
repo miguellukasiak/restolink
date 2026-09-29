@@ -157,6 +157,9 @@ class Restaurant(TimestampSoftDeleteMixin, Base):
     font_family: Mapped[str] = mapped_column(
         String(100), default="Roboto", nullable=False
     )
+    # A decorative background pattern for the public menu, by name (the
+    # frontend owns the artwork). NULL means a plain background.
+    menu_pattern: Mapped[str | None] = mapped_column(String(32), nullable=True)
     logo_url: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     package: Mapped[SubscriptionPackage] = relationship(lazy="selectin")

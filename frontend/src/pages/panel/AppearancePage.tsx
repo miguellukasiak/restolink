@@ -1,57 +1,193 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import { useParams } from 'react-router-dom';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import { ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider, alpha } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
 import ButtonBase from '@mui/material/ButtonBase';
+import Chip from '@mui/material/Chip';
 import TextField from '@mui/material/TextField';
-import MenuItem from '@mui/material/MenuItem';
 import CircularProgress from '@mui/material/CircularProgress';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
-import { alpha } from '@mui/material/styles';
+import Avatar from '@mui/material/Avatar';
 import AddPhotoAlternateRoundedIcon from '@mui/icons-material/AddPhotoAlternateRounded';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import SmartphoneRoundedIcon from '@mui/icons-material/SmartphoneRounded';
 import DesktopWindowsRoundedIcon from '@mui/icons-material/DesktopWindowsRounded';
 import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
 import ColorizeRoundedIcon from '@mui/icons-material/ColorizeRounded';
+import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
+import CasinoRoundedIcon from '@mui/icons-material/CasinoRounded';
+import BlockRoundedIcon from '@mui/icons-material/BlockRounded';
 import {
-  BACKGROUND_COLOR_PRESETS,
-  FONT_OPTIONS,
-  PRIMARY_COLOR_PRESETS,
-  THEME_PRESETS,
-} from '../../constants/menu';
-import type { ThemePreset } from '../../constants/menu';
+  FONT_PAIRINGS,
+  MENU_THEMES,
+  VENUES,
+  fontStack,
+  type MenuTheme,
+  type VenueKind,
+} from '../../constants/menuStyle';
 import { usePublicMenu } from '../../hooks/usePublicMenu';
 import { useUpdateTheme } from '../../hooks/useUpdateTheme';
 import { useSnackbar } from '../../components/feedback/SnackbarProvider';
 import { getApiErrorMessage } from '../../services/api';
+import { radii } from '../../theme';
 import { createRestaurantTheme } from '../../components/public/RestaurantThemeProvider';
+import { MENU_PATTERNS, patternCss } from '../../components/public/menuPatterns';
 import { PublicMenuView } from '../../components/public/PublicMenuView';
 import { MenuSkeleton } from '../../components/public/MenuSkeleton';
 import { PhoneFrame } from '../../components/panel/PhoneFrame';
+import { ThemeThumb, type ThumbDish } from '../../components/panel/ThemeThumb';
 import { useMeasuredHeight } from '../../hooks/useMeasuredHeight';
-import { radii } from '../../theme';
 
 const HEX_PATTERN = /^#[0-9a-fA-F]{6}$/;
+
+/** The desktop preview is laid out at this width and scaled into the column. */
+const DESKTOP_WIDTH = 1024;
+/** The preview column less the frame's 1px borders. */
+const DESKTOP_SCALE = 358 / DESKTOP_WIDTH;
 
 interface ThemeFormValues {
   logo_url: string | null;
   primary_color: string;
   background_color: string;
   font_family: string;
+  menu_pattern: string | null;
 }
 
 /** Guards live-preview values: mid-typing hex like "#8C1" must not reach createTheme. */
 const safeHex = (value: string | undefined, fallback: string) =>
   value && HEX_PATTERN.test(value) ? value : fallback;
+
+/**
+ * Swatches offered for each colour: a spread taken from the themes, one per
+ * hue family, so a single row covers most of what an owner reaches for.
+ */
+const PRIMARY_SWATCHES = [
+  '#1C1B1F',
+  '#B8322A',
+  '#E4572E',
+  '#E3A42B',
+  '#2E7D32',
+  '#0E7C86',
+  '#1F5FAD',
+  '#D6336C',
+];
+const BACKGROUND_SWATCHES = [
+  '#FFFFFF',
+  '#FBF3E4',
+  '#F4F1EC',
+  '#F2F7EE',
+  '#FFF0F5',
+  '#FFD23F',
+  '#2A1E17',
+  '#141A33',
+];
+
+/** What the thumbnails show when the menu has no dishes yet. */
+const SAMPLE_DISHES: ThumbDish[] = [
+  { name: 'Pierogi ruskie', price: 29, image_url: null },
+  { name: 'Żurek', price: 22, image_url: null },
+  { name: 'Schabowy', price: 39, image_url: null },
+  { name: 'Sernik', price: 18, image_url: null },
+];
+
+const sameColor = (a?: string | null, b?: string | null) =>
+  (a ?? '').toLowerCase() === (b ?? '').toLowerCase();
+
+function matchesTheme(theme: MenuTheme, values: Partial<ThemeFormValues>) {
+  return (
+    sameColor(theme.primary_color, values.primary_color) &&
+    sameColor(theme.background_color, values.background_color) &&
+    theme.font_family === values.font_family &&
+    (theme.menu_pattern ?? null) === (values.menu_pattern ?? null)
+  );
+}
+
+function Section({
+  title,
+  hint,
+  action,
+  children,
+}: {
+  title: string;
+  hint?: string;
+  action?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <Paper elevation={1} sx={{ borderRadius: radii.lg, p: { xs: 2, sm: 3 } }}>
+      <Stack direction="row" spacing={2} sx={{ alignItems: 'flex-start', mb: 2 }}>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="h6" component="h2">
+            {title}
+          </Typography>
+          {hint && (
+            <Typography variant="body2" color="text.secondary">
+              {hint}
+            </Typography>
+          )}
+        </Box>
+        {action}
+      </Stack>
+      {children}
+    </Paper>
+  );
+}
+
+/** A choice tile: selected state drawn the same way everywhere on the page. */
+function ChoiceTile({
+  selected,
+  onClick,
+  label,
+  children,
+}: {
+  selected: boolean;
+  onClick: () => void;
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <ButtonBase
+      onClick={onClick}
+      aria-pressed={selected}
+      aria-label={label}
+      sx={{
+        flexDirection: 'column',
+        alignItems: 'stretch',
+        gap: 0.75,
+        p: 0.75,
+        borderRadius: radii.md,
+        border: '2px solid',
+        borderColor: selected ? 'primary.main' : 'transparent',
+        bgcolor: (t) => alpha(t.palette.primary.main, selected ? 0.08 : 0),
+        transition: 'border-color 0.15s ease, background-color 0.15s ease',
+        '&:hover': {
+          bgcolor: (t) => alpha(t.palette.primary.main, selected ? 0.1 : 0.05),
+        },
+      }}
+    >
+      {children}
+      <Typography
+        variant="caption"
+        noWrap
+        sx={{
+          fontWeight: selected ? 700 : 600,
+          color: selected ? 'primary.dark' : 'text.primary',
+        }}
+      >
+        {label}
+      </Typography>
+    </ButtonBase>
+  );
+}
 
 interface ColorFieldProps {
   label: string;
@@ -61,41 +197,36 @@ interface ColorFieldProps {
   error?: string;
 }
 
-/** Preset swatches + hex input + native color picker for one color setting. */
+/** Preset swatches + hex input + native colour picker for one colour setting. */
 function ColorField({ label, value, onChange, presets, error }: ColorFieldProps) {
   const nativeInputRef = useRef<HTMLInputElement>(null);
-
   return (
     <Box>
       <Typography variant="subtitle2" component="h3" sx={{ mb: 1 }}>
         {label}
       </Typography>
-      <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 1.5 }}>
-        {presets.map((preset) => (
-          <ButtonBase
-            key={preset}
-            onClick={() => onChange(preset)}
-            aria-label={`${label}: ${preset}`}
-            aria-pressed={value.toLowerCase() === preset.toLowerCase()}
-            sx={{
-              width: 32,
-              height: 32,
-              borderRadius: '50%',
-              bgcolor: preset,
-              border: '1px solid',
-              borderColor: 'divider',
-              outline:
-                value.toLowerCase() === preset.toLowerCase()
-                  ? '3px solid'
-                  : '3px solid transparent',
-              outlineColor:
-                value.toLowerCase() === preset.toLowerCase()
-                  ? (t) => alpha(t.palette.secondary.main, 0.9)
-                  : 'transparent',
-              outlineOffset: 2,
-            }}
-          />
-        ))}
+      <Stack direction="row" useFlexGap spacing={1} sx={{ flexWrap: 'wrap', mb: 1.5 }}>
+        {presets.map((preset) => {
+          const selected = sameColor(value, preset);
+          return (
+            <ButtonBase
+              key={preset}
+              onClick={() => onChange(preset)}
+              aria-label={`${label}: ${preset}`}
+              aria-pressed={selected}
+              sx={{
+                width: 30,
+                height: 30,
+                borderRadius: '50%',
+                bgcolor: preset,
+                boxShadow: (t) =>
+                  selected
+                    ? `0 0 0 2px ${t.palette.background.paper}, 0 0 0 4px ${t.palette.primary.main}`
+                    : `inset 0 0 0 1px ${alpha('#000', 0.14)}`,
+              }}
+            />
+          );
+        })}
       </Stack>
       <TextField
         size="small"
@@ -139,18 +270,29 @@ function ColorField({ label, value, onChange, presets, error }: ColorFieldProps)
         ref={nativeInputRef}
         type="color"
         value={HEX_PATTERN.test(value) ? value : '#000000'}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={(event) => onChange(event.target.value.toUpperCase())}
         aria-label={`${label} — paleta kolorów`}
-        style={{ position: 'absolute', width: 1, height: 1, opacity: 0, pointerEvents: 'none' }}
+        style={{
+          position: 'absolute',
+          width: 1,
+          height: 1,
+          opacity: 0,
+          pointerEvents: 'none',
+        }}
       />
     </Box>
   );
 }
 
 /**
- * "Wygląd menu" — Linktree-style visual configuration. Left: form (react-hook-form,
- * useWatch). Right: sticky device preview rendering the real PublicMenuView with
- * the *unsaved* watched values applied through the restaurant theme factory.
+ * "Wygląd menu" — pick a look the way you pick a video-call background.
+ *
+ * The page opens on a gallery of themes, each shown as a thumbnail of the
+ * restaurant's *own* menu (its first dishes and photos) in that look; one tap
+ * tries it on the full-size preview. The individual settings — logo, colours,
+ * typeface, background pattern — sit underneath for anyone who wants to
+ * adjust a theme rather than build one from scratch. Nothing is saved until
+ * "Zapisz zmiany".
  */
 export function AppearancePage() {
   const { restaurantId = '' } = useParams<{ restaurantId: string }>();
@@ -159,6 +301,7 @@ export function AppearancePage() {
   const updateTheme = useUpdateTheme(restaurantId);
 
   const [device, setDevice] = useState<'mobile' | 'desktop'>('mobile');
+  const [venue, setVenue] = useState<VenueKind | 'all'>('all');
   const logoInputRef = useRef<HTMLInputElement>(null);
   const hydratedRef = useRef(false);
 
@@ -180,6 +323,7 @@ export function AppearancePage() {
       primary_color: '#8C1D18',
       background_color: '#FCF4F6',
       font_family: 'Roboto',
+      menu_pattern: null,
     },
   });
 
@@ -187,20 +331,65 @@ export function AppearancePage() {
   useEffect(() => {
     if (menu.data && !hydratedRef.current) {
       hydratedRef.current = true;
-      reset(menu.data.restaurant.theme);
+      const saved = menu.data.restaurant.theme;
+      reset({ ...saved, menu_pattern: saved.menu_pattern ?? null });
     }
   }, [menu.data, reset]);
 
   const watched = useWatch({ control });
+  const primary = safeHex(watched.primary_color, '#8C1D18');
+  const background = safeHex(watched.background_color, '#FCF4F6');
 
-  const previewTheme = createRestaurantTheme({
-    primary_color: safeHex(watched.primary_color, '#8C1D18'),
-    background_color: safeHex(watched.background_color, '#FCF4F6'),
-    font_family: watched.font_family,
-  });
+  const previewTheme = useMemo(
+    () =>
+      createRestaurantTheme({
+        primary_color: primary,
+        background_color: background,
+        font_family: watched.font_family,
+        menu_pattern: watched.menu_pattern ?? null,
+      }),
+    [primary, background, watched.font_family, watched.menu_pattern],
+  );
+
+  // The thumbnails show the restaurant's own dishes, photographed ones first.
+  const { thumbCategory, thumbDishes } = useMemo(() => {
+    const categories = menu.data?.categories ?? [];
+    const dishes = categories.flatMap((category) => category.items);
+    const withPhotos = dishes.filter((dish) => dish.image_url);
+    const chosen = [...withPhotos, ...dishes.filter((dish) => !dish.image_url)].slice(
+      0,
+      4,
+    );
+    return {
+      thumbCategory:
+        categories.find((category) => category.items.length > 0)?.name ?? 'Dania główne',
+      thumbDishes: chosen.length > 0 ? chosen : SAMPLE_DISHES,
+    };
+  }, [menu.data]);
+
+  const visibleThemes =
+    venue === 'all'
+      ? MENU_THEMES
+      : MENU_THEMES.filter((theme) => theme.venues.includes(venue));
+  const activeTheme = MENU_THEMES.find((theme) => matchesTheme(theme, watched));
+
+  const applyTheme = (theme: MenuTheme) => {
+    const options = { shouldDirty: true, shouldValidate: true };
+    setValue('primary_color', theme.primary_color, options);
+    setValue('background_color', theme.background_color, options);
+    setValue('font_family', theme.font_family, options);
+    setValue('menu_pattern', theme.menu_pattern, options);
+  };
+
+  const surpriseMe = () => {
+    const pool = visibleThemes.filter((theme) => theme.id !== activeTheme?.id);
+    const pick = pool[Math.floor(Math.random() * pool.length)];
+    if (pick) applyTheme(pick);
+  };
 
   const handleLogoFile = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    event.target.value = '';
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () =>
@@ -208,26 +397,10 @@ export function AppearancePage() {
     reader.readAsDataURL(file);
   };
 
-  // One-tap preset: overwrite the three visual fields with a curated,
-  // contrast-safe combination and mark the form dirty so it can be saved.
-  const applyPreset = (preset: ThemePreset) => {
-    const options = { shouldDirty: true, shouldValidate: true };
-    setValue('primary_color', preset.primary_color, options);
-    setValue('background_color', preset.background_color, options);
-    setValue('font_family', preset.font_family, options);
-  };
-
-  const activePresetId = THEME_PRESETS.find(
-    (preset) =>
-      preset.primary_color.toLowerCase() === watched.primary_color?.toLowerCase() &&
-      preset.background_color.toLowerCase() === watched.background_color?.toLowerCase() &&
-      preset.font_family === watched.font_family,
-  )?.id;
-
   const onSubmit = handleSubmit((values) => {
     updateTheme.mutate(values, {
       onSuccess: () => {
-        showSuccess('Ustawienia wyglądu zostały zapisane.');
+        showSuccess('Wygląd menu zapisany — goście już go widzą.');
         reset(values);
       },
       onError: (error) => showError(getApiErrorMessage(error)),
@@ -255,12 +428,14 @@ export function AppearancePage() {
     );
 
   return (
-    <Box sx={{ maxWidth: 1300, mx: 'auto', pt: 4 }}>
+    <Box sx={{ maxWidth: 1360, mx: 'auto', pt: 4 }}>
       <Stack spacing={0.5} sx={{ mb: 3 }}>
-        <Typography variant="h4">Wygląd menu</Typography>
+        <Typography variant="h4" component="h1">
+          Wygląd menu
+        </Typography>
         <Typography variant="body1" color="text.secondary">
-          Dostosuj wygląd swojego cyfrowego menu. Podgląd po prawej reaguje na
-          zmiany natychmiast — zapisz, gdy będziesz zadowolony z efektu.
+          Wybierz motyw jak tło przed wideorozmową — Twoje menu od razu go przymierzy.
+          Zapisz, gdy trafisz na ten właściwy.
         </Typography>
       </Stack>
 
@@ -268,155 +443,200 @@ export function AppearancePage() {
         component="form"
         onSubmit={onSubmit}
         sx={{
-          display: 'flex',
+          display: 'grid',
+          gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'minmax(0, 1fr) 360px' },
           gap: 4,
-          alignItems: 'flex-start',
-          flexDirection: { xs: 'column', lg: 'row' },
+          alignItems: 'start',
         }}
       >
-        {/* Left: scrollable configuration form */}
-        <Box sx={{ flex: 1, minWidth: 0, width: '100%' }}>
-          <Stack spacing={3}>
-            <Paper elevation={1} sx={{ borderRadius: '24px', p: 3 }}>
-              <Typography variant="h6" component="h2" sx={{ mb: 0.5 }}>
-                Gotowe motywy
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Zacznij od gotowej, czytelnej kombinacji — dopracujesz szczegóły niżej.
-              </Typography>
-              <Box
-                sx={{
-                  display: 'grid',
-                  gridTemplateColumns: {
-                    xs: '1fr',
-                    sm: 'repeat(3, 1fr)',
-                  },
-                  gap: 1.5,
-                }}
+        <Stack spacing={3} sx={{ minWidth: 0 }}>
+          <Section
+            title="Motywy"
+            hint="Kliknij, żeby przymierzyć — na miniaturach widać Twoje własne dania."
+            action={
+              <Button
+                onClick={surpriseMe}
+                startIcon={<CasinoRoundedIcon />}
+                sx={{ flexShrink: 0 }}
               >
-                {THEME_PRESETS.map((preset) => {
-                  const isActive = preset.id === activePresetId;
-                  return (
-                    <ButtonBase
-                      key={preset.id}
-                      onClick={() => applyPreset(preset)}
-                      aria-label={`Zastosuj motyw: ${preset.label}`}
-                      aria-pressed={isActive}
-                      sx={{
-                        display: 'block',
-                        textAlign: 'left',
-                        borderRadius: '18px',
-                        p: 1.5,
-                        border: '2px solid',
-                        borderColor: isActive ? 'secondary.main' : 'transparent',
+                Zaskocz mnie
+              </Button>
+            }
+          >
+            <Stack
+              direction="row"
+              useFlexGap
+              spacing={0.75}
+              sx={{ flexWrap: 'wrap', mb: 2 }}
+            >
+              {[{ id: 'all' as const, label: 'Wszystkie' }, ...VENUES].map((option) => (
+                <Chip
+                  size="small"
+                  key={option.id}
+                  label={option.label}
+                  clickable
+                  onClick={() => setVenue(option.id)}
+                  variant={venue === option.id ? 'filled' : 'outlined'}
+                  color={venue === option.id ? 'primary' : 'default'}
+                  aria-pressed={venue === option.id}
+                />
+              ))}
+            </Stack>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+                gap: 1.5,
+              }}
+            >
+              {visibleThemes.map((theme) => {
+                const selected = activeTheme?.id === theme.id;
+                return (
+                  <ButtonBase
+                    key={theme.id}
+                    onClick={() => applyTheme(theme)}
+                    aria-pressed={selected}
+                    aria-label={`Motyw ${theme.name}: ${theme.vibe}`}
+                    sx={{
+                      position: 'relative',
+                      flexDirection: 'column',
+                      alignItems: 'stretch',
+                      textAlign: 'left',
+                      p: 0.75,
+                      borderRadius: radii.md,
+                      border: '2px solid',
+                      borderColor: selected ? 'primary.main' : 'transparent',
+                      bgcolor: (t) => alpha(t.palette.primary.main, selected ? 0.08 : 0),
+                      transition: 'border-color 0.15s ease, background-color 0.15s ease',
+                      '&:hover': {
                         bgcolor: (t) =>
-                          alpha(t.palette.secondary.main, isActive ? 0.12 : 0.06),
-                        transition: 'background-color 0.2s ease, border-color 0.2s ease',
-                        '&:hover': {
-                          bgcolor: (t) => alpha(t.palette.secondary.main, 0.14),
-                        },
+                          alpha(t.palette.primary.main, selected ? 0.1 : 0.05),
+                      },
+                      '&:hover .theme-thumb': { transform: 'translateY(-2px)' },
+                    }}
+                  >
+                    <Box
+                      className="theme-thumb"
+                      sx={{
+                        aspectRatio: '3 / 4',
+                        borderRadius: radii.sm,
+                        overflow: 'hidden',
+                        boxShadow: `0 6px 18px ${alpha('#161C25', 0.14)}, inset 0 0 0 1px ${alpha('#161C25', 0.06)}`,
+                        transition: 'transform 0.2s ease',
                       }}
                     >
-                      {/* Mini swatch: background surface with a primary accent bar. */}
-                      <Box
-                        aria-hidden
-                        sx={{
-                          height: 56,
-                          borderRadius: '12px',
-                          bgcolor: preset.background_color,
-                          border: '1px solid',
-                          borderColor: 'divider',
-                          display: 'flex',
-                          alignItems: 'flex-end',
-                          p: 1,
-                          mb: 1,
-                        }}
+                      <ThemeThumb
+                        theme={theme}
+                        categoryName={thumbCategory}
+                        dishes={thumbDishes}
+                        logoUrl={watched.logo_url}
+                      />
+                    </Box>
+                    <Box sx={{ px: 0.5, pt: 1, pb: 0.25, minWidth: 0 }}>
+                      <Typography
+                        variant="subtitle2"
+                        noWrap
+                        sx={{ color: selected ? 'primary.dark' : 'text.primary' }}
                       >
-                        <Box
-                          sx={{
-                            height: 8,
-                            width: '60%',
-                            borderRadius: 999,
-                            bgcolor: preset.primary_color,
-                          }}
-                        />
-                      </Box>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                        {preset.label}
+                        {theme.name}
                       </Typography>
                       <Typography
                         variant="caption"
                         color="text.secondary"
-                        component="div"
-                        sx={{ lineHeight: 1.3 }}
+                        component="p"
+                        sx={{
+                          lineHeight: 1.3,
+                          display: '-webkit-box',
+                          WebkitBoxOrient: 'vertical',
+                          WebkitLineClamp: 2,
+                          overflow: 'hidden',
+                        }}
                       >
-                        {preset.description}
+                        {theme.vibe}
                       </Typography>
-                    </ButtonBase>
-                  );
-                })}
-              </Box>
-            </Paper>
+                    </Box>
+                    {selected && (
+                      <CheckCircleRoundedIcon
+                        color="primary"
+                        sx={{
+                          position: 'absolute',
+                          top: 12,
+                          right: 12,
+                          bgcolor: 'background.paper',
+                          borderRadius: '50%',
+                        }}
+                      />
+                    )}
+                  </ButtonBase>
+                );
+              })}
+            </Box>
+          </Section>
 
-            <Paper elevation={1} sx={{ borderRadius: '24px', p: 3 }}>
-              <Typography variant="h6" component="h2" sx={{ mb: 2 }}>
-                Logo Restauracji
-              </Typography>
+          <Section
+            title="Dopasuj szczegóły"
+            hint={
+              activeTheme
+                ? `Wybrany motyw: ${activeTheme.name}. Każdą rzecz możesz zmienić po swojemu.`
+                : 'Twój własny motyw — zmieniaj kolory, czcionkę i wzór, ile chcesz.'
+            }
+          >
+            <Stack spacing={3.5}>
+              {/* Logo */}
               <Controller
                 name="logo_url"
                 control={control}
                 render={({ field }) => (
-                  <Box>
-                    <ButtonBase
-                      onClick={() => logoInputRef.current?.click()}
-                      aria-label="Dodaj logo restauracji"
+                  <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
+                    <Avatar
+                      src={field.value ?? undefined}
+                      variant="rounded"
                       sx={{
-                        width: '100%',
-                        height: 120,
+                        width: 64,
+                        height: 64,
                         borderRadius: radii.md,
-                        border: '2px dashed',
-                        borderColor: field.value ? 'secondary.main' : 'divider',
-                        overflow: 'hidden',
-                        bgcolor: (t) => alpha(t.palette.secondary.main, 0.04),
-                        '&:hover': { borderColor: 'secondary.main' },
+                        bgcolor: (t) => alpha(t.palette.primary.main, 0.08),
+                        color: 'primary.main',
+                        border: '1px solid',
+                        borderColor: 'divider',
                       }}
                     >
-                      {field.value ? (
-                        <Box
-                          component="img"
-                          src={field.value}
-                          alt="Podgląd logo restauracji"
-                          sx={{ height: 96, maxWidth: '80%', objectFit: 'contain' }}
-                        />
-                      ) : (
-                        <Stack
-                          spacing={0.5}
-                          sx={{ alignItems: 'center', color: 'text.secondary' }}
-                        >
-                          <AddPhotoAlternateRoundedIcon sx={{ opacity: 0.6 }} />
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                            Dodaj logo
-                          </Typography>
-                          <Typography variant="caption">
-                            PNG lub JPG, najlepiej kwadratowe
-                          </Typography>
-                        </Stack>
-                      )}
-                    </ButtonBase>
-                    {field.value && (
-                      <Button
-                        size="small"
-                        color="inherit"
-                        startIcon={<DeleteOutlineRoundedIcon />}
-                        onClick={() =>
-                          setValue('logo_url', null, { shouldDirty: true })
-                        }
-                        sx={{ mt: 1 }}
+                      <AddPhotoAlternateRoundedIcon />
+                    </Avatar>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography variant="subtitle2" component="h3">
+                        Logo
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        component="p"
+                        sx={{ display: { xs: 'none', sm: 'block' } }}
                       >
-                        Usuń logo
-                      </Button>
+                        PNG lub JPG, najlepiej kwadratowe. Pojawi się w nagłówku menu i w
+                        kodach QR.
+                      </Typography>
+                    </Box>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => logoInputRef.current?.click()}
+                    >
+                      {field.value ? 'Zmień' : 'Dodaj logo'}
+                    </Button>
+                    {field.value && (
+                      <Tooltip title="Usuń logo" arrow>
+                        <IconButton
+                          aria-label="Usuń logo"
+                          onClick={() =>
+                            setValue('logo_url', null, { shouldDirty: true })
+                          }
+                        >
+                          <DeleteOutlineRoundedIcon />
+                        </IconButton>
+                      </Tooltip>
                     )}
-                  </Box>
+                  </Stack>
                 )}
               />
               <input
@@ -426,13 +646,15 @@ export function AppearancePage() {
                 hidden
                 onChange={handleLogoFile}
               />
-            </Paper>
 
-            <Paper elevation={1} sx={{ borderRadius: '24px', p: 3 }}>
-              <Typography variant="h6" component="h2" sx={{ mb: 2 }}>
-                Kolorystyka
-              </Typography>
-              <Stack spacing={2.5}>
+              {/* Colours */}
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+                  gap: 3,
+                }}
+              >
                 <Controller
                   name="primary_color"
                   control={control}
@@ -447,7 +669,7 @@ export function AppearancePage() {
                       label="Kolor główny"
                       value={field.value}
                       onChange={field.onChange}
-                      presets={PRIMARY_COLOR_PRESETS}
+                      presets={PRIMARY_SWATCHES}
                       error={errors.primary_color?.message}
                     />
                   )}
@@ -466,54 +688,159 @@ export function AppearancePage() {
                       label="Kolor tła"
                       value={field.value}
                       onChange={field.onChange}
-                      presets={BACKGROUND_COLOR_PRESETS}
+                      presets={BACKGROUND_SWATCHES}
                       error={errors.background_color?.message}
                     />
                   )}
                 />
-              </Stack>
-            </Paper>
+              </Box>
 
-            <Paper elevation={1} sx={{ borderRadius: '24px', p: 3 }}>
-              <Typography variant="h6" component="h2" sx={{ mb: 2 }}>
-                Typografia
-              </Typography>
-              <Controller
-                name="font_family"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    select
-                    fullWidth
-                    label="Krój pisma"
-                    slotProps={{
-                      htmlInput: { 'aria-label': 'Krój pisma menu' },
-                    }}
-                  >
-                    {FONT_OPTIONS.map((option) => (
-                      <MenuItem
-                        key={option.value}
-                        value={option.value}
-                        sx={{ fontFamily: option.stack, fontSize: 18 }}
+              {/* Typeface */}
+              <Box>
+                <Typography variant="subtitle2" component="h3" sx={{ mb: 1 }}>
+                  Czcionka
+                </Typography>
+                <Controller
+                  name="font_family"
+                  control={control}
+                  render={({ field }) => (
+                    <Box
+                      sx={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(104px, 1fr))',
+                        gap: 1,
+                      }}
+                    >
+                      {FONT_PAIRINGS.map((pairing) => (
+                        <ChoiceTile
+                          key={pairing.value}
+                          label={pairing.label}
+                          selected={field.value === pairing.value}
+                          onClick={() => field.onChange(pairing.value)}
+                        >
+                          <Box
+                            sx={{
+                              height: 64,
+                              borderRadius: radii.sm,
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              bgcolor: background,
+                              color: previewTheme.palette.text.primary,
+                              boxShadow: `inset 0 0 0 1px ${alpha('#161C25', 0.08)}`,
+                            }}
+                          >
+                            <Box
+                              component="span"
+                              sx={{
+                                fontFamily: fontStack(pairing.heading.family),
+                                fontWeight: pairing.heading.weight,
+                                fontSize: 24 * (pairing.headingScale ?? 1),
+                                lineHeight: 1.1,
+                              }}
+                            >
+                              Aa
+                            </Box>
+                            <Box
+                              component="span"
+                              sx={{
+                                fontFamily: fontStack(pairing.body.family),
+                                fontSize: 10,
+                                opacity: 0.75,
+                              }}
+                            >
+                              Pierogi ruskie
+                            </Box>
+                          </Box>
+                        </ChoiceTile>
+                      ))}
+                    </Box>
+                  )}
+                />
+              </Box>
+
+              {/* Pattern */}
+              <Box>
+                <Typography variant="subtitle2" component="h3">
+                  Wzór tła
+                </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  component="p"
+                  sx={{ mb: 1 }}
+                >
+                  Delikatny motyw w tle — dania dostają wtedy własne karty, żeby wszystko
+                  było czytelne.
+                </Typography>
+                <Controller
+                  name="menu_pattern"
+                  control={control}
+                  render={({ field }) => (
+                    <Box
+                      sx={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(84px, 1fr))',
+                        gap: 1,
+                      }}
+                    >
+                      <ChoiceTile
+                        label="Bez wzoru"
+                        selected={!field.value}
+                        onClick={() => field.onChange(null)}
                       >
-                        {option.value}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-              />
-            </Paper>
-          </Stack>
+                        <Box
+                          sx={{
+                            height: 56,
+                            borderRadius: radii.sm,
+                            bgcolor: background,
+                            boxShadow: `inset 0 0 0 1px ${alpha('#161C25', 0.08)}`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: previewTheme.palette.text.secondary,
+                          }}
+                        >
+                          <BlockRoundedIcon fontSize="small" />
+                        </Box>
+                      </ChoiceTile>
+                      {MENU_PATTERNS.map((pattern) => (
+                        <ChoiceTile
+                          key={pattern.id}
+                          label={pattern.label}
+                          selected={field.value === pattern.id}
+                          onClick={() => field.onChange(pattern.id)}
+                        >
+                          <Box
+                            sx={{
+                              height: 56,
+                              borderRadius: radii.sm,
+                              bgcolor: background,
+                              boxShadow: `inset 0 0 0 1px ${alpha('#161C25', 0.08)}`,
+                              // Drawn at the stronger, dark-background
+                              // opacity so the shape reads at this size.
+                              ...(patternCss(pattern.id, primary, true) ?? {}),
+                            }}
+                          />
+                        </ChoiceTile>
+                      ))}
+                    </Box>
+                  )}
+                />
+              </Box>
+            </Stack>
+          </Section>
 
           {/* Sticky save bar */}
-          <Box sx={{ position: 'sticky', bottom: 16, mt: 3, zIndex: 2 }}>
+          <Box sx={{ position: 'sticky', bottom: 16, zIndex: 2 }}>
             <Paper
               elevation={4}
               sx={{
-                borderRadius: 999,
-                px: 3,
-                py: 1.5,
+                borderRadius: radii.pill,
+                pl: 3,
+                pr: 1,
+                py: 1,
                 display: 'flex',
                 alignItems: 'center',
                 gap: 2,
@@ -526,12 +853,21 @@ export function AppearancePage() {
                 sx={{ flex: 1, minWidth: 0 }}
                 aria-live="polite"
               >
-                {isDirty ? 'Masz niezapisane zmiany' : 'Wszystkie zmiany zapisane'}
+                {isDirty ? (
+                  <>
+                    Masz niezapisane zmiany
+                    <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                      {' '}
+                      — goście widzą jeszcze poprzedni wygląd.
+                    </Box>
+                  </>
+                ) : (
+                  'Wszystkie zmiany zapisane'
+                )}
               </Typography>
               <Button
                 type="submit"
                 variant="contained"
-                color="secondary"
                 disabled={!isDirty || isSaving}
                 startIcon={
                   isSaving ? (
@@ -545,21 +881,10 @@ export function AppearancePage() {
               </Button>
             </Paper>
           </Box>
-        </Box>
+        </Stack>
 
-        {/* Right: sticky live preview. The device-type toggle sits above the
-            mockup, so on desktop we nudge the whole column up a touch to keep the
-            phone visually aligned with the top of the form column on the left
-            (the form already top-aligns both via alignItems: flex-start). */}
-        <Box
-          sx={{
-            width: { xs: '100%', lg: 470 },
-            flexShrink: 0,
-            position: { lg: 'sticky' },
-            top: { lg: 88 },
-            mt: { lg: -3 },
-          }}
-        >
+        {/* Live preview */}
+        <Box sx={{ position: { lg: 'sticky' }, top: { lg: 88 } }}>
           <Stack spacing={2} sx={{ alignItems: 'center' }}>
             <ToggleButtonGroup
               value={device}
@@ -570,13 +895,13 @@ export function AppearancePage() {
               size="small"
               aria-label="Tryb podglądu"
             >
-              <ToggleButton value="mobile" aria-label="Podgląd mobilny">
+              <ToggleButton value="mobile" aria-label="Podgląd na telefonie">
                 <SmartphoneRoundedIcon fontSize="small" sx={{ mr: 1 }} />
-                Mobile
+                Telefon
               </ToggleButton>
               <ToggleButton value="desktop" aria-label="Podgląd na komputerze">
                 <DesktopWindowsRoundedIcon fontSize="small" sx={{ mr: 1 }} />
-                Desktop
+                Komputer
               </ToggleButton>
             </ToggleButtonGroup>
 
@@ -584,15 +909,16 @@ export function AppearancePage() {
               <PhoneFrame
                 address={`restolink.app/menu/${restaurantId.slice(0, 8)}…`}
                 measureKey={menu.isLoading}
+                // Fits under the device toggle without scrolling the page.
+                screenHeight="min(620px, calc(100vh - 330px))"
               >
                 {preview}
               </PhoneFrame>
             ) : (
-              /* Browser window frame */
               <Box
                 sx={{
                   width: '100%',
-                  borderRadius: '20px',
+                  borderRadius: radii.lg,
                   border: '1px solid',
                   borderColor: 'divider',
                   boxShadow: '0 16px 48px rgba(28, 27, 34, 0.16)',
@@ -625,7 +951,7 @@ export function AppearancePage() {
                       ml: 1,
                       px: 1.5,
                       py: 0.4,
-                      borderRadius: 999,
+                      borderRadius: radii.pill,
                       bgcolor: 'background.paper',
                       border: '1px solid',
                       borderColor: 'divider',
@@ -645,9 +971,9 @@ export function AppearancePage() {
                     '&::-webkit-scrollbar': { display: 'none' },
                   }}
                 >
-                  {/* See the mobile frame's comment above: measured height + standard
-                      `transform: scale` (not `zoom`) so sticky content is reliably
-                      clipped and there's no dead scroll space. */}
+                  {/* Same technique as PhoneFrame: a measured height plus a
+                      standard transform, so sticky content is clipped and
+                      there is no dead scroll space. */}
                   <Box
                     sx={{
                       position: 'relative',
@@ -655,13 +981,17 @@ export function AppearancePage() {
                       overflow: 'hidden',
                       height:
                         desktopContent.height !== null
-                          ? desktopContent.height * 0.4375
+                          ? desktopContent.height * DESKTOP_SCALE
                           : 'auto',
                     }}
                   >
                     <Box
                       ref={desktopContent.ref}
-                      sx={{ width: 1024, transform: 'scale(0.4375)', transformOrigin: 'top left' }}
+                      sx={{
+                        width: DESKTOP_WIDTH,
+                        transform: `scale(${DESKTOP_SCALE})`,
+                        transformOrigin: 'top left',
+                      }}
                     >
                       {preview}
                     </Box>

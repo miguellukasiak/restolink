@@ -4,6 +4,20 @@ import playfairLatin from '@fontsource/playfair-display/files/playfair-display-l
 import playfairLatinExt from '@fontsource/playfair-display/files/playfair-display-latin-ext-700-normal.woff2?url';
 import robotoLatin from '@fontsource/roboto/files/roboto-latin-700-normal.woff2?url';
 import robotoLatinExt from '@fontsource/roboto/files/roboto-latin-ext-700-normal.woff2?url';
+import loraLatin from '@fontsource/lora/files/lora-latin-700-normal.woff2?url';
+import loraLatinExt from '@fontsource/lora/files/lora-latin-ext-700-normal.woff2?url';
+import nunitoLatin from '@fontsource/nunito/files/nunito-latin-800-normal.woff2?url';
+import nunitoLatinExt from '@fontsource/nunito/files/nunito-latin-ext-800-normal.woff2?url';
+import josefinLatin from '@fontsource/josefin-sans/files/josefin-sans-latin-700-normal.woff2?url';
+import josefinLatinExt from '@fontsource/josefin-sans/files/josefin-sans-latin-ext-700-normal.woff2?url';
+import oswaldLatin from '@fontsource/oswald/files/oswald-latin-600-normal.woff2?url';
+import oswaldLatinExt from '@fontsource/oswald/files/oswald-latin-ext-600-normal.woff2?url';
+import dmSerifLatin from '@fontsource/dm-serif-display/files/dm-serif-display-latin-400-normal.woff2?url';
+import dmSerifLatinExt from '@fontsource/dm-serif-display/files/dm-serif-display-latin-ext-400-normal.woff2?url';
+import pacificoLatin from '@fontsource/pacifico/files/pacifico-latin-400-normal.woff2?url';
+import pacificoLatinExt from '@fontsource/pacifico/files/pacifico-latin-ext-400-normal.woff2?url';
+import caveatLatin from '@fontsource/caveat/files/caveat-latin-700-normal.woff2?url';
+import caveatLatinExt from '@fontsource/caveat/files/caveat-latin-ext-700-normal.woff2?url';
 import type { SheetPlan } from './qrTemplates';
 
 /*
@@ -22,10 +36,20 @@ const LATIN =
 const LATIN_EXT =
   'U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF';
 
-const FONT_FILES: Record<string, [string, string]> = {
-  Montserrat: [montserratLatin, montserratLatinExt],
-  'Playfair Display': [playfairLatin, playfairLatinExt],
-  Roboto: [robotoLatin, robotoLatinExt],
+/** The one weight of each face the templates set, as [latin, latin-ext].
+ *  Montserrat is the call to action; the rest are menu heading faces used
+ *  for the restaurant's name. Georgia is a system font and is not bundled. */
+const FONT_FILES: Record<string, { weight: number; files: [string, string] }> = {
+  Montserrat: { weight: 700, files: [montserratLatin, montserratLatinExt] },
+  'Playfair Display': { weight: 700, files: [playfairLatin, playfairLatinExt] },
+  Roboto: { weight: 700, files: [robotoLatin, robotoLatinExt] },
+  Lora: { weight: 700, files: [loraLatin, loraLatinExt] },
+  Nunito: { weight: 800, files: [nunitoLatin, nunitoLatinExt] },
+  'Josefin Sans': { weight: 700, files: [josefinLatin, josefinLatinExt] },
+  Oswald: { weight: 600, files: [oswaldLatin, oswaldLatinExt] },
+  'DM Serif Display': { weight: 400, files: [dmSerifLatin, dmSerifLatinExt] },
+  Pacifico: { weight: 400, files: [pacificoLatin, pacificoLatinExt] },
+  Caveat: { weight: 700, files: [caveatLatin, caveatLatinExt] },
 };
 
 const dataUriCache = new Map<string, Promise<string>>();
@@ -64,13 +88,13 @@ export function toDataUri(url: string): Promise<string> {
 export async function embeddedFontCss(families: string[]): Promise<string> {
   const rules = await Promise.all(
     [...new Set(families)].flatMap((family) => {
-      const files = FONT_FILES[family];
-      if (!files) return [];
-      return files.map((url, index) =>
+      const font = FONT_FILES[family];
+      if (!font) return [];
+      return font.files.map((url, index) =>
         toDataUri(url)
           .then(
             (uri) =>
-              `@font-face{font-family:'${family}';font-weight:700;font-style:normal;` +
+              `@font-face{font-family:'${family}';font-weight:${font.weight};font-style:normal;` +
               `src:url(${uri}) format('woff2');unicode-range:${index === 0 ? LATIN : LATIN_EXT}}`,
           )
           .catch(() => ''),

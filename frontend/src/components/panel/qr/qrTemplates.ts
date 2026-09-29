@@ -1,4 +1,4 @@
-import { getFontStack } from '../../../constants/menu';
+import { fontStack } from '../../../constants/menuStyle';
 import {
   contrastRatio,
   getContrastingTextColor,
@@ -22,7 +22,9 @@ export interface QrBrand {
   primary: string;
   /** The menu's background colour, used for the light surface. */
   background: string;
+  /** The menu's heading face, for the restaurant's name. */
   fontFamily: string;
+  fontWeight: number;
 }
 
 export interface QrWording {
@@ -174,7 +176,7 @@ const CTA_FONT = 'Montserrat';
 let measureContext: CanvasRenderingContext2D | null | undefined;
 
 /** Width of `text` in millimetres when set at `size` mm. */
-function textWidth(text: string, family: string, size: number): number {
+function textWidth(text: string, family: string, size: number, weight = 700): number {
   if (measureContext === undefined) {
     measureContext =
       typeof document === 'undefined'
@@ -182,7 +184,7 @@ function textWidth(text: string, family: string, size: number): number {
         : document.createElement('canvas').getContext('2d');
   }
   if (!measureContext) return text.length * size * 0.58;
-  measureContext.font = `700 100px ${getFontStack(family)}`;
+  measureContext.font = `${weight} 100px ${fontStack(family)}`;
   return (measureContext.measureText(text).width / 100) * size;
 }
 
@@ -197,8 +199,9 @@ function fitText(
   maxWidth: number,
   maxSize: number,
   minSize: number,
+  weight = 700,
 ): { lines: string[]; size: number } {
-  const oneLine = Math.min(maxSize, maxWidth / textWidth(text, family, 1));
+  const oneLine = Math.min(maxSize, maxWidth / textWidth(text, family, 1, weight));
   const words = text.split(' ');
   if (oneLine >= minSize || words.length < 2) return { lines: [text], size: oneLine };
 
@@ -206,14 +209,14 @@ function fitText(
   // and it has no place at the start or end of a line.
   const halves = text.split(' · ');
   if (halves.length === 2) {
-    const widest = Math.max(...halves.map((half) => textWidth(half, family, 1)));
+    const widest = Math.max(...halves.map((half) => textWidth(half, family, 1, weight)));
     return { lines: halves, size: Math.min(maxSize, maxWidth / widest) };
   }
 
   let best = { lines: [text], widest: Infinity };
   for (let cut = 1; cut < words.length; cut += 1) {
     const lines = [words.slice(0, cut).join(' '), words.slice(cut).join(' ')];
-    const widest = Math.max(...lines.map((line) => textWidth(line, family, 1)));
+    const widest = Math.max(...lines.map((line) => textWidth(line, family, 1, weight)));
     if (widest < best.widest) best = { lines, widest };
   }
   return { lines: best.lines, size: Math.min(maxSize, maxWidth / best.widest) };
@@ -229,11 +232,12 @@ function textTag(
     fill: string;
     spacing?: number;
     opacity?: number;
+    weight?: number;
   },
 ): string {
   return (
     `<text x="${x}" y="${y.toFixed(2)}" text-anchor="middle" ` +
-    `font-family="${escapeXml(getFontStack(attrs.family))}" font-weight="700" ` +
+    `font-family="${escapeXml(fontStack(attrs.family))}" font-weight="${attrs.weight ?? 700}" ` +
     `font-size="${attrs.size.toFixed(2)}" fill="${attrs.fill}"` +
     (attrs.spacing ? ` letter-spacing="${attrs.spacing}"` : '') +
     (attrs.opacity !== undefined ? ` fill-opacity="${attrs.opacity}"` : '') +
@@ -319,10 +323,11 @@ function tent(art: QrArtwork, brand: QrBrand, wording: QrWording, H: number): st
   const colors = palette(brand, wording.surface);
   let body = `<rect width="${W}" height="${H}" fill="${colors.surface}"/>`;
   if (wording.showName && brand.name) {
-    const name = fitText(brand.name, brand.fontFamily, 84, 6.5, 6.5);
+    const name = fitText(brand.name, brand.fontFamily, 84, 6.5, 6.5, brand.fontWeight);
     body += textTag(W / 2, 19, name.lines[0], {
       size: name.size,
       family: brand.fontFamily,
+      weight: brand.fontWeight,
       fill: colors.accent,
     });
   }
@@ -371,7 +376,7 @@ function sticker(art: QrArtwork, brand: QrBrand, wording: QrWording, id: string)
       : `M${R - radius} ${R}A${radius} ${radius} 0 0 1 ${R + radius} ${R}`;
     return (
       `<path id="${pathId}" d="${d}" fill="none"/>` +
-      `<text font-family="${escapeXml(getFontStack(CTA_FONT))}" font-weight="700" ` +
+      `<text font-family="${escapeXml(fontStack(CTA_FONT))}" font-weight="700" ` +
       `font-size="${size.toFixed(2)}" letter-spacing="${spacing}" fill="${colors.accent}" ` +
       `text-anchor="middle"><textPath href="#${pathId}" xlink:href="#${pathId}" ` +
       `startOffset="50%">${escapeXml(letters)}</textPath></text>`
@@ -391,10 +396,11 @@ function poster(art: QrArtwork, brand: QrBrand, wording: QrWording, H: number): 
   const colors = palette(brand, wording.surface);
   let body = `<rect width="${W}" height="${H}" fill="${colors.surface}"/>`;
   if (wording.showName && brand.name) {
-    const name = fitText(brand.name, brand.fontFamily, 170, 12, 12);
+    const name = fitText(brand.name, brand.fontFamily, 170, 12, 12, brand.fontWeight);
     body += textTag(W / 2, 38, name.lines[0], {
       size: name.size,
       family: brand.fontFamily,
+      weight: brand.fontWeight,
       fill: colors.accent,
     });
   }

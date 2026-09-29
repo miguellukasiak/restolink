@@ -12,6 +12,24 @@ import '@fontsource/montserrat/600.css';
 import '@fontsource/montserrat/700.css';
 import '@fontsource/playfair-display/400.css';
 import '@fontsource/playfair-display/700.css';
+// Menu theme faces (constants/menuStyle.ts). Declaring them costs only CSS: a
+// browser downloads a font file the first time something is set in it.
+import '@fontsource/lora/400.css';
+import '@fontsource/lora/700.css';
+import '@fontsource/nunito/400.css';
+import '@fontsource/nunito/600.css';
+import '@fontsource/nunito/700.css';
+import '@fontsource/nunito/800.css';
+import '@fontsource/josefin-sans/400.css';
+import '@fontsource/josefin-sans/700.css';
+import '@fontsource/oswald/500.css';
+import '@fontsource/oswald/600.css';
+import '@fontsource/pacifico/400.css';
+import '@fontsource/caveat/700.css';
+import '@fontsource/dm-serif-display/400.css';
+import '@fontsource/dm-sans/400.css';
+import '@fontsource/dm-sans/600.css';
+import '@fontsource/dm-sans/700.css';
 import App from './App';
 import './i18n';
 import { theme } from './theme';

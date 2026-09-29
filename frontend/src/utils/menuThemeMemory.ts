@@ -23,7 +23,7 @@ const KEY_PREFIX = 'restolink:theme:';
 /** The fields worth remembering: everything the theme is built from. */
 type RememberedTheme = Pick<
   RestaurantThemeUpdate,
-  'primary_color' | 'background_color' | 'font_family'
+  'primary_color' | 'background_color' | 'font_family' | 'menu_pattern'
 >;
 
 function key(restaurantId: string): string {
@@ -58,6 +58,7 @@ export function rememberMenuTheme(
         primary_color: theme.primary_color,
         background_color: theme.background_color,
         font_family: theme.font_family,
+        menu_pattern: theme.menu_pattern ?? null,
       } satisfies RememberedTheme),
     );
   } catch {

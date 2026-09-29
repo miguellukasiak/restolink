@@ -83,6 +83,7 @@ baseline revision against a production database whose schema it never authored.
 | `007_admin_users_rbac.sql`        | `admin_user`                                        | optional (table only) |
 | `008_audit_log.sql`               | `audit_log`                                         | optional (table only) |
 | `009_stripe_billing.sql`          | `restaurant.stripe_customer_id` + unique index on `payment_history.external_transaction_id` | **required** |
+| `010_add_menu_pattern.sql`        | `restaurant.menu_pattern`                           | **required** |
 
 ### 2.2 Configuration comes only from the environment
 
@@ -387,6 +388,23 @@ the restaurant's own background luminance. This is a guardrail: an unreadable
 menu must be impossible whatever colours an owner picks. Any new surface on the
 public menu must go through it.
 
+**Menu themes.** "Wygląd menu" opens on a gallery of ready themes
+(`MENU_THEMES` in `constants/menuStyle.ts`, filtered by venue kind), each
+thumbnailed as the restaurant's *own* dishes in that look (`ThemeThumb`). A
+theme is only four stored values — `primary_color`, `background_color`,
+`font_family`, `menu_pattern` — so themes can be renamed or retuned without
+touching saved menus. `font_family` stores a **pairing** key (`FONT_PAIRINGS`):
+a heading face with character plus a plain body face, because dish text must
+stay readable at 12–14px; old values (`Roboto`, `Montserrat`, `Playfair
+Display`) are still valid keys. `menu_pattern` is a slug (validated
+`^[a-z0-9-]{1,32}$`) naming SVG artwork owned by the frontend
+(`components/public/menuPatterns.ts`), drawn in the primary colour at low
+opacity. Whenever a pattern is on, `theme.menuDecor.cards` gives every dish a
+solid card, so no name or price is read off a busy background. A new face needs
+its `@fontsource` import in `main.tsx` **and** its woff2 in `qrExport.ts`
+`FONT_FILES`, because the QR studio sets the restaurant name in the heading face
+and embeds it in exports.
+
 **Translation dictionary.** Machine translation was removed twice — free
 endpoints refuse Render's shared IPs, and a menu is the one text you cannot get
 wrong ("Smażony ser" came back as *boiled* cheese). Owners now maintain
@@ -507,6 +525,8 @@ In the print document, style `body>svg`, never `svg` — the codes are nested
   dark `#0C6544`, light `#16A06A`. The wordmark is the `Wordmark` component in
   **Dela Gothic One** — one weight, display only, deliberately not in the body
   font stack. There is no letter-tile logo any more.
+- Owner nav order is the setup order: **Kreator menu → Wygląd menu → Kody QR**,
+  then the extras (Języki, Opinie Google) below a divider.
 - Route guards (`RequireAuth.tsx`) are a **convenience, not the boundary** —
   every protected endpoint is enforced server-side.
 - **Corner radii come from `radii` in `theme.ts`** (`xs` 8 … `xl` 28, px
@@ -578,6 +598,12 @@ Each of these cost real debugging time in this repo. They are not hypothetical.
     failed for over an hour, because the variable existed only on the other
     Vercel project. Whenever a change adds a required build variable, name the
     exact Vercel project it must be set on before the change reaches `main`.
+14. **`scrollIntoView` scrolls every ancestor, the page included** — `block:
+    'nearest'` only limits how far. The public menu is also rendered inside the
+    panel's live previews, which sit below the form on a phone; the category
+    strip's `scrollIntoView` dragged the whole Appearance page down to the
+    preview, and each category the spy then passed dragged it further.
+    `CategoryPills` now sets its own `scrollLeft`. Scroll the container you mean.
 14. **`borderRadius: 3` in `sx` is 42px, not 3px.** A bare number multiplies
     `theme.shape.borderRadius` (14 in the panel, 16 in the menu theme). It
     turned the builder's dish cards into pills around two lines of text and its
@@ -648,6 +674,8 @@ Deployment prerequisites, carried across several sessions:
 
 - [x] **Migrations `005`, `006`, `009`** — required columns. Applied to
       production (confirmed by the owner, 2026-09-28).
+- [ ] **Migration `010`** (`restaurant.menu_pattern`) — required column; apply
+      to production **before** the menu-themes change reaches `main`.
 - [ ] `007` and `008` are table-only and optional (`create_all` covers them).
 - [ ] **Bootstrap the first HQ account** (`scripts/promote_admin.py`, or the
       equivalent SQL insert). Until it exists nobody can reach `/hq-access`.

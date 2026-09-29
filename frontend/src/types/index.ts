@@ -123,6 +123,8 @@ export interface RestaurantThemeSettings {
   primary_color: string;
   background_color: string;
   font_family: string;
+  /** Background pattern by name (components/public/menuPatterns.ts), or null. */
+  menu_pattern?: string | null;
 }
 
 /** Schema: RestaurantThemeUpdate — PUT /restaurants/{id}/theme body. */

@@ -60,11 +60,13 @@ function PublicItemCardComponent({ item, onOpen }: PublicItemCardProps) {
     <Card
       component="article"
       elevation={0}
-      sx={{
-        bgcolor: 'transparent',
+      sx={(theme) => ({
+        // Over a background pattern the text needs a surface of its own.
+        bgcolor: theme.menuDecor?.cards ? 'background.paper' : 'transparent',
+        boxShadow: theme.menuDecor?.cards ? '0 2px 12px rgba(0, 0, 0, 0.08)' : 'none',
         borderRadius: CARD_RADIUS,
         height: '100%',
-      }}
+      })}
     >
       <CardActionArea
         onClick={interactive ? () => onOpen?.(item) : undefined}
