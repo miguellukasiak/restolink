@@ -35,7 +35,8 @@ SQLAlchemy 2.0 async with `asyncpg`, Pydantic v2. Postgres is hosted on **Neon**
 Design 3) with emotion, `@mui/x-data-grid` for tables, TanStack Query v5 for all
 server state, `react-router-dom` v7, `react-hook-form` + `zod`, `react-i18next`,
 `@hello-pangea/dnd`, `react-scroll`, `date-fns`, `qrcode-generator` + `jsqr` (QR
-studio).
+studio). `vitest` for unit tests (`npm test`); `d3-geo` is a dev dependency used
+only by `scripts/build-world-map.mjs`.
 
 **Landing page** — Vite vanilla TS + **Tailwind v4** (`@tailwindcss/vite`, tokens
 declared in `@theme` inside `src/style.css`; there is deliberately **no**
@@ -84,6 +85,7 @@ baseline revision against a production database whose schema it never authored.
 | `008_audit_log.sql`               | `audit_log`                                         | optional (table only) |
 | `009_stripe_billing.sql`          | `restaurant.stripe_customer_id` + unique index on `payment_history.external_transaction_id` | **required** |
 | `010_add_menu_pattern.sql`        | `restaurant.menu_pattern`                           | **required** |
+| `011_add_menu_languages.sql`      | `restaurant.menu_languages`                         | **required** |
 
 ### 2.2 Configuration comes only from the environment
 
@@ -412,6 +414,36 @@ wrong ("Smażony ser" came back as *boiled* cheese). Owners now maintain
 reviews and saves. Fallback chain per phrase: requested language → English →
 original.
 
+**Menu languages ("Języki", `/panel/:id/dictionary`).** A catalogue of 34
+languages, `MENU_LANGUAGES` in `backend/app/menu_languages.py` — mirrored by
+`constants/menuLanguages.ts` and backed by one guest-interface locale per code
+in `src/i18n/locales`; `tests/test_languages.py` fails if the three disagree,
+or if a code has no DeepL target. `restaurant.menu_languages` holds what the
+owner offers, in order: **NULL means a restaurant from before the choice
+existed and keeps the old four (en, de, fr, es)**; new rows start with `["en"]`.
+Always read it through `offered_languages()`. The public menu carries
+`restaurant.languages` (base first) and the guest switcher lists only those; a
+guest whose browser asks for another is moved to English if offered, else
+Polish. Locales other than pl/en are **lazy-loaded** (a tiny i18next backend
+over `import.meta.glob`), so the app root has a `Suspense` boundary. Right-to-
+left text needs no layout flip: the menu theme sets `unicode-bidi: plaintext`
+on every Typography, so each paragraph takes its direction from its own text
+(verified in Chromium — Arabic aligns right, Polish stays left).
+
+The screen opens on a world map (`components/panel/languages/`): **reach** is
+computed per country as `1 − Π(1 − share)` over the offered languages
+(`reach.ts`), so a person is counted once however many languages they read,
+and adding Swedish after English honestly adds ~2 M, not Sweden. Shares are
+rounded estimates written in `COUNTRY_SHARES`; populations and shapes come from
+Natural Earth 1:110m v5.1.2 (public domain), pre-projected by
+`scripts/build-world-map.mjs` into `worldCountries.json` — regenerate, never
+hand-edit. The map uses four coverage steps rather than a gradient (a gradient
+tinted half the world at 5–8 % English). Guidance is deliberate: "Polecane w
+Polsce" (tiered, one-line reasons with no invented statistics) comes before
+world reach, each candidate shows the *new* readers it adds, the upkeep is
+spelled out per new dish, the page warns from `MANY_LANGUAGES` (6) and asks
+for confirmation past `CONFIRM_LANGUAGES_OVER` (10).
+
 **Google reviews.** `GET /api/v1/panel/{id}/google-reviews`, backed by a
 24-hour `google_review_cache`. Uses **Places API (New)**
 (`places.googleapis.com/v1`) with the key in `X-Goog-Api-Key` and a
@@ -427,7 +459,7 @@ maps each stored value to a stable i18n key (`allergenFish`, `tagSpicy`, …) vi
 `getAllergenI18nKey` / `getTagI18nKey`; a value outside the vocabulary is shown
 as stored. **Filtering, matching and icons always use the stored value** — only
 what the guest reads is translated. A new option needs a key in the map and in
-all five locale files.
+every locale file (one per catalogue language, plus Polish).
 
 **Contact form (landing page).** `POST /api/v1/public/contact`
 (`routers/contact.py`) emails an inquiry via Resend to `CONTACT_INBOX_EMAIL`,
@@ -661,6 +693,10 @@ pytest
 # frontend
 cd frontend && npm install && npm run dev
 npx tsc --noEmit -p tsconfig.app.json    # run before committing
+npm test                                 # vitest: reach model invariants
+
+# the languages map (only when changing its source or projection)
+node scripts/build-world-map.mjs
 ```
 
 `backend/tests/conftest.py` teaches SQLite the two Postgres-only column types
@@ -682,7 +718,13 @@ Deployment prerequisites, carried across several sessions:
       production (confirmed by the owner, 2026-09-28).
 - [x] **Migration `010`** (`restaurant.menu_pattern`) — required column.
       Applied to production (confirmed by the owner, 2026-09-29).
+- [ ] **Migration `011`** (`restaurant.menu_languages`) — required column; apply
+      to production **before** the languages change reaches `main`.
 - [ ] `007` and `008` are table-only and optional (`create_all` covers them).
+- [ ] **DeepL quota is shared by every restaurant.** Drafting a whole menu into
+      one language costs its character count; with 34 languages on offer, a
+      free-tier key (500k characters/month) can run dry. Watch usage; the
+      endpoint already answers an exhausted quota with a clear message.
 - [ ] **Bootstrap the first HQ account** (`scripts/promote_admin.py`, or the
       equivalent SQL insert). Until it exists nobody can reach `/hq-access`.
 - [ ] **Remove `SUPERADMIN_PASSWORD`** from the Render environment once a real
@@ -713,10 +755,8 @@ Known product gaps, not bugs:
 - The public menu's blocked-status screen ("Menu chwilowo niedostępne.") is
   hardcoded Polish.
 - The landing page promises **unlimited languages** (hero chip and pricing),
-  and deliberately names no number. The product today translates a menu from
-  Polish into en/de/fr/es only (`DICTIONARY_LANGUAGES` in
-  `translation_service.py`, `SUPPORTED_LANGUAGES` in the frontend's
-  `i18n/index.ts`, plus a UI locale per language). Extending that is planned;
-  do not "fix" the landing copy back to a count.
+  and deliberately names no number. The catalogue is 34 languages
+  (`menu_languages.py`), each with a hand-written guest interface; do not "fix"
+  the landing copy back to a count.
 - Scroll-spy tuning (`SPY_ROOT_MARGIN` in `useCategoryScrollSpy.ts`) has never
   been verified against real scrolling — the preview pane cannot scroll.

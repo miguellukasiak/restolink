@@ -250,6 +250,9 @@ class PublicRestaurant(BaseModel):
     theme: ThemeSettings
     status: RestaurantStatus
     subscription_valid_until: datetime | None
+    #: The languages the guest can switch to: the menu's own first, then the
+    #: ones the owner offers, in their order.
+    languages: list[str] = Field(default_factory=list)
 
 
 class TranslationStatus(BaseModel):
@@ -316,6 +319,34 @@ class AutoTranslateResponse(BaseModel):
     #: Phrases the translator could not produce a draft for; the owner writes
     #: those by hand.
     failed: list[str] = Field(default_factory=list)
+
+
+class LanguageProgress(BaseModel):
+    code: str
+    #: Phrases of the current menu translated into `code`.
+    translated: int
+
+
+class MenuLanguagesResponse(BaseModel):
+    """What the "Języki" screen needs in one request."""
+
+    base_language: str
+    #: Offered to guests besides the base language, in the owner's order.
+    languages: list[str]
+    #: The whole catalogue the owner can pick from.
+    available: list[str]
+    #: Distinct phrases on the menu right now — what each language needs.
+    phrases_total: int
+    #: One entry per catalogue language with anything translated, plus every
+    #: offered language; a removed language keeps its translations, and the
+    #: screen shows that it would come back ready.
+    progress: list[LanguageProgress]
+
+
+class MenuLanguagesUpdate(BaseModel):
+    #: Bounded by the catalogue: anything longer has a duplicate or a code the
+    #: handler would refuse anyway.
+    languages: list[str] = Field(max_length=40)
 
 
 # --------------------------------------------------------------------------- #

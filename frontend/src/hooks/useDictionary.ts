@@ -36,8 +36,10 @@ export function useSaveDictionary(restaurantId: string, targetLang: string) {
         dictionaryQueryKeys.forLanguage(restaurantId, targetLang),
         data,
       );
-      // The public menu in this language now reads differently.
+      // The public menu in this language now reads differently, and the
+      // languages screen counts translated phrases.
       void queryClient.invalidateQueries({ queryKey: ['public-menu', restaurantId] });
+      void queryClient.invalidateQueries({ queryKey: ['menu-languages', restaurantId] });
     },
   });
 }
@@ -49,7 +51,6 @@ export function useSaveDictionary(restaurantId: string, targetLang: string) {
  */
 export function useAutoTranslate(restaurantId: string, targetLang: string) {
   return useMutation({
-    mutationFn: (texts: string[]) =>
-      autoTranslate(restaurantId, targetLang, texts),
+    mutationFn: (texts: string[]) => autoTranslate(restaurantId, targetLang, texts),
   });
 }

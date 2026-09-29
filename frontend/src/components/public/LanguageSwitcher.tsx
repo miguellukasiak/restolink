@@ -6,7 +6,12 @@ import MenuItem from '@mui/material/MenuItem';
 import ListItemText from '@mui/material/ListItemText';
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import LanguageRoundedIcon from '@mui/icons-material/LanguageRounded';
-import { LANGUAGE_LABELS, SUPPORTED_LANGUAGES } from '../../i18n';
+import { LANGUAGE_LABELS } from '../../i18n';
+
+interface LanguageSwitcherProps {
+  /** What this restaurant offers: its own language first, then the owner's picks. */
+  languages: readonly string[];
+}
 
 /**
  * Language control for the public menu.
@@ -14,7 +19,8 @@ import { LANGUAGE_LABELS, SUPPORTED_LANGUAGES } from '../../i18n';
  * Small on purpose: detection usually gets this right, and the switcher only
  * exists for the guest it got wrong. It shows the active code ("DE") next to a
  * globe rather than spelling the language out, so it stays a header-sized
- * control rather than a banner.
+ * control rather than a banner. A menu offered in one language has nothing to
+ * switch to, and shows no switcher at all.
  *
  * Changing the language does two things at once, both implicit: react-i18next
  * re-renders the static interface, and `usePublicMenu` keys its query by
@@ -24,11 +30,13 @@ import { LANGUAGE_LABELS, SUPPORTED_LANGUAGES } from '../../i18n';
  * Options are labelled with endonyms — "Deutsch", not "German" — because a
  * switcher written in a language you cannot read is no use to you.
  */
-export function LanguageSwitcher() {
+export function LanguageSwitcher({ languages }: LanguageSwitcherProps) {
   const { t, i18n } = useTranslation();
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
 
   const active = (i18n.resolvedLanguage ?? i18n.language ?? 'pl').split('-')[0];
+
+  if (languages.length < 2) return null;
 
   const open = (event: MouseEvent<HTMLElement>) => setAnchor(event.currentTarget);
   const close = () => setAnchor(null);
@@ -57,18 +65,23 @@ export function LanguageSwitcher() {
         anchorEl={anchor}
         open={Boolean(anchor)}
         onClose={close}
-        slotProps={{ paper: { sx: { borderRadius: '16px', minWidth: 180 } } }}
+        slotProps={{
+          // A restaurant may offer many languages; the list scrolls rather
+          // than running off a phone screen.
+          paper: { sx: { borderRadius: '16px', minWidth: 180, maxHeight: '60vh' } },
+        }}
       >
-        {SUPPORTED_LANGUAGES.map((code) => (
+        {languages.map((code) => (
           <MenuItem
             key={code}
             selected={code === active}
             onClick={() => choose(code)}
             lang={code}
+            dir="auto"
             sx={{ gap: 1.5 }}
           >
             <ListItemText
-              primary={LANGUAGE_LABELS[code]}
+              primary={LANGUAGE_LABELS[code] ?? code.toUpperCase()}
               slotProps={{ primary: { sx: { fontWeight: code === active ? 700 : 500 } } }}
             />
             {code === active && (

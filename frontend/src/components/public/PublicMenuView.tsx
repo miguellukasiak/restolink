@@ -17,6 +17,7 @@ import { PublicItemCard } from './PublicItemCard';
 
 /** Stable empty default so the filter memo isn't invalidated every render. */
 const NO_ALLERGENS: string[] = [];
+const NO_LANGUAGES: readonly string[] = [];
 
 /*
  * Container queries against `<main>`'s content box, which is the viewport
@@ -39,6 +40,8 @@ interface PublicMenuViewProps {
   canFilterAllergens?: boolean;
   /** Open the allergy filter sheet (omit to hide the header button). */
   onOpenAllergyFilter?: () => void;
+  /** Languages the restaurant offers, its own first. One or none hides the switcher. */
+  languages?: readonly string[];
 }
 
 /**
@@ -53,6 +56,7 @@ export function PublicMenuView({
   onOpenItem,
   selectedAllergens = NO_ALLERGENS,
   canFilterAllergens = false,
+  languages = NO_LANGUAGES,
   onOpenAllergyFilter,
 }: PublicMenuViewProps) {
   const { t } = useTranslation();
@@ -138,6 +142,7 @@ export function PublicMenuView({
             selectedAllergens={selectedAllergens}
             canFilterAllergens={canFilterAllergens}
             onOpenAllergyFilter={onOpenAllergyFilter}
+            languages={languages}
           />
 
           {filteredCategories.length > 0 && (
@@ -178,7 +183,10 @@ export function PublicMenuView({
 
         {/* Everything hidden purely by the allergy filter — offer a way back. */}
         {!query.trim() && resultsCount === 0 && selectedAllergens.length > 0 && (
-          <Stack spacing={2} sx={{ mt: 5, alignItems: 'center', color: 'text.secondary' }}>
+          <Stack
+            spacing={2}
+            sx={{ mt: 5, alignItems: 'center', color: 'text.secondary' }}
+          >
             <HealthAndSafetyRoundedIcon sx={{ fontSize: 44, opacity: 0.4 }} />
             <Typography variant="subtitle1" sx={{ fontWeight: 600, textAlign: 'center' }}>
               {t('noDishesForAllergens')}

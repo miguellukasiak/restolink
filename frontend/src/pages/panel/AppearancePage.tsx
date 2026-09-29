@@ -426,6 +426,7 @@ export function AppearancePage() {
           <PublicMenuView
             restaurantName={menu.data.restaurant.name}
             logoUrl={watched.logo_url}
+            languages={menu.data.restaurant.languages}
             categories={menu.data.categories}
           />
         </Box>

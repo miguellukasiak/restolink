@@ -9,7 +9,17 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .database import AsyncSessionLocal, engine
 from .models import Base
-from .routers import admin, auth, billing, contact, dictionary, google_maps, panel, public
+from .routers import (
+    admin,
+    auth,
+    billing,
+    contact,
+    dictionary,
+    google_maps,
+    languages,
+    panel,
+    public,
+)
 from .seed import seed_if_empty
 
 
@@ -64,6 +74,7 @@ app.include_router(auth.router)
 app.include_router(admin.router)
 app.include_router(panel.router)
 app.include_router(dictionary.router)
+app.include_router(languages.router)
 app.include_router(google_maps.router)
 app.include_router(billing.router)
 # Unauthenticated by necessity: Stripe holds no token of ours, so the

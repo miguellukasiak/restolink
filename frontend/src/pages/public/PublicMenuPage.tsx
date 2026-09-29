@@ -17,10 +17,7 @@ import { getApiErrorMessage } from '../../services/api';
 import { resolveAccessState } from '../../constants/subscription';
 import { PublicMenuView } from '../../components/public/PublicMenuView';
 import { CinematicLoader } from '../../components/public/CinematicLoader';
-import {
-  REVEAL_FOCUS_PULL_MS,
-  revealFocusPullSx,
-} from '../../components/public/reveal';
+import { REVEAL_FOCUS_PULL_MS, revealFocusPullSx } from '../../components/public/reveal';
 import { useAnimationWindow } from '../../hooks/useAnimationWindow';
 import { useSplashPhase } from '../../hooks/useSplashPhase';
 import { ItemDetailModal } from '../../components/public/ItemDetailModal';
@@ -45,7 +42,9 @@ function readAllergyPrefs(restaurantId: string): AllergyPrefs {
     const parsed = JSON.parse(raw) as Partial<AllergyPrefs>;
     return {
       answered: Boolean(parsed.answered),
-      selected: Array.isArray(parsed.selected) ? parsed.selected.filter((a) => typeof a === 'string') : [],
+      selected: Array.isArray(parsed.selected)
+        ? parsed.selected.filter((a) => typeof a === 'string')
+        : [],
     };
   } catch {
     return emptyPrefs;
@@ -104,7 +103,7 @@ function StatusScreen({
  */
 export function PublicMenuPage() {
   const { restaurantId = '' } = useParams<{ restaurantId: string }>();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const menu = usePublicMenu(restaurantId);
 
   // The splash outlives the fetch by design: it holds briefly, then plays its
@@ -116,10 +115,7 @@ export function PublicMenuPage() {
   // The focus pull is applied for its own duration and then removed. A
   // paused animation holds its first frame, which for this one is an
   // invisible, blurred page — see `useAnimationWindow`.
-  const focusPulling = useAnimationWindow(
-    REVEAL_FOCUS_PULL_MS,
-    Boolean(menu.data),
-  );
+  const focusPulling = useAnimationWindow(REVEAL_FOCUS_PULL_MS, Boolean(menu.data));
 
   const [selectedItem, setSelectedItem] = useState<PublicMenuItem | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -135,10 +131,23 @@ export function PublicMenuPage() {
   const autoOpenedRef = useRef(false);
 
   const restaurantName = menu.data?.restaurant.name ?? '';
+  const languages = menu.data?.restaurant.languages;
 
   useEffect(() => {
     if (restaurantName) document.title = `${restaurantName} — Menu`;
   }, [restaurantName]);
+
+  // The guest's browser (or an earlier visit elsewhere) may have picked a
+  // language this restaurant does not offer. Settle on one it does: English
+  // when offered — what a foreign guest most likely reads — else the menu's
+  // own. Without this the buttons would be in Japanese around a menu the
+  // owner never translated into it.
+  useEffect(() => {
+    if (!languages || languages.length === 0) return;
+    const active = (i18n.resolvedLanguage ?? i18n.language ?? '').split('-')[0];
+    if (languages.includes(active)) return;
+    void i18n.changeLanguage(languages.includes('en') ? 'en' : languages[0]);
+  }, [languages, i18n]);
 
   // Stable identity so React.memo on PublicItemCard isn't defeated by a fresh
   // callback prop every time the allergy filter / search state changes.
@@ -266,6 +275,7 @@ export function PublicMenuPage() {
             selectedAllergens={selectedAllergens}
             canFilterAllergens={availableAllergens.length > 0}
             onOpenAllergyFilter={() => setGateOpen(true)}
+            languages={languages}
           />
           <ItemDetailModal
             item={selectedItem}

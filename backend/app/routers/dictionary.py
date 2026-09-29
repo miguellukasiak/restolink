@@ -11,14 +11,14 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.concurrency import run_in_threadpool
-from sqlalchemy import delete, select
+from sqlalchemy import delete
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import noload, selectinload
+from sqlalchemy.orm import noload
 
 from ..database import get_db
 from ..dependencies import verify_restaurant_access
-from ..models import MenuCategory, Restaurant, TranslationDictionary
+from ..models import Restaurant, TranslationDictionary
 from ..schemas import (
     AutoTranslateRequest,
     AutoTranslateResponse,
@@ -30,6 +30,7 @@ from ..translation_service import (
     DICTIONARY_LANGUAGES,
     collect_sources,
     load_dictionary,
+    menu_phrases,
     normalize_language,
     source_hash,
     translatable,
@@ -43,14 +44,16 @@ router = APIRouter(
     dependencies=[Depends(verify_restaurant_access)],
 )
 
-#: DeepL wants uppercase targets, and refuses a bare "EN" — it insists on a
-#: regional variant so the caller, not the engine, decides which English. British
-#: English, because the guests this exists for are travellers in Europe.
+#: Where DeepL's target code is not simply ours in upper case. It refuses a
+#: bare "EN" and "PT" — the caller, not the engine, decides which variant — so:
+#: British English and European Portuguese, because the guests this exists for
+#: are travellers in Europe; Chinese in simplified characters, what visitors
+#: from mainland China read; Norwegian as Bokmål, the written standard.
+_DEEPL_VARIANTS = {"en": "EN-GB", "pt": "PT-PT", "zh": "ZH-HANS", "nb": "NB"}
+
+#: Every catalogue language's DeepL target.
 _DEEPL_TARGET = {
-    "en": "EN-GB",
-    "de": "DE",
-    "fr": "FR",
-    "es": "ES",
+    code: _DEEPL_VARIANTS.get(code, code.upper()) for code in DICTIONARY_LANGUAGES
 }
 
 #: Source codes have no regional variants, so this is just an uppercase pass —
@@ -70,32 +73,6 @@ def _require_language(raw: str) -> str:
             ),
         )
     return language
-
-
-async def _menu_phrases(db: AsyncSession, restaurant_id: uuid.UUID) -> list[str]:
-    """Every distinct phrase in the menu, in menu order.
-
-    Category names come before their dishes so the dictionary screen reads like
-    the menu it describes, rather than like a database dump.
-    """
-    categories = (
-        await db.scalars(
-            select(MenuCategory)
-            .options(selectinload(MenuCategory.items))
-            .where(
-                MenuCategory.restaurant_id == restaurant_id,
-                MenuCategory.deleted_at.is_(None),
-            )
-            .order_by(MenuCategory.sort_order.asc())
-        )
-    ).all()
-
-    texts: list[str] = []
-    for category in categories:
-        texts.append(category.name)
-        for item in category.items:
-            texts.extend((item.name, item.description, item.ingredients))
-    return collect_sources(texts)
 
 
 @router.get("", response_model=DictionaryResponse)
@@ -119,7 +96,7 @@ async def get_dictionary(
     if restaurant is None or restaurant.deleted_at is not None:
         raise HTTPException(status_code=404, detail="Nie znaleziono restauracji.")
 
-    phrases = await _menu_phrases(db, restaurant_id)
+    phrases = await menu_phrases(db, restaurant_id)
     existing = await load_dictionary(db, restaurant_id, language)
 
     return DictionaryResponse(
@@ -370,6 +347,19 @@ def _translation_failure(exc: Exception) -> HTTPException:
         return HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="DeepL chwilowo odrzuca żądania. Spróbuj ponownie za chwilę.",
+        )
+
+    # DeepL's language list grows and its plans differ; a target our key cannot
+    # use is a 400 naming `target_lang`. The owner can still type translations,
+    # so say that rather than a generic failure.
+    if isinstance(exc, deepl.DeepLException) and "target_lang" in str(exc):
+        logger.warning("DeepL refused the target language: %s", exc)
+        return HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=(
+                "DeepL nie podpowiada jeszcze tłumaczeń w tym języku. "
+                "Tłumaczenia można wpisać ręcznie."
+            ),
         )
 
     logger.exception("DeepL translation failed")

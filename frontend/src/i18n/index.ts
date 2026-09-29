@@ -1,48 +1,73 @@
 import i18n from 'i18next';
+import type { BackendModule, ResourceKey } from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
-import de from './locales/de.json';
+import { BASE_LANGUAGE, MENU_LANGUAGES } from '../constants/menuLanguages';
 import en from './locales/en.json';
-import es from './locales/es.json';
-import fr from './locales/fr.json';
 import pl from './locales/pl.json';
 
 /**
  * Public-menu translations.
  *
  * This covers the *static* interface only — labels, aria text, empty states.
- * The menu's own content (category names, dish names, descriptions) is
- * translated server-side and cached in Postgres, because it lives in the
- * restaurant's database and cannot be shipped in a dictionary. The two halves
- * meet in `usePublicMenu`, which sends the language resolved here to the API.
+ * The menu's own content (category names, dish names, descriptions) comes
+ * translated from the API, out of the owner's dictionary. The two halves meet
+ * in `usePublicMenu`, which sends the language resolved here to the API.
+ *
+ * There is a locale for every language in the catalogue
+ * (constants/menuLanguages.ts). Which of them a guest is offered is the
+ * restaurant's choice, carried on the menu itself — see LanguageSwitcher.
  */
 
-/** Order here is the order shown in the menu's language switcher. */
-export const SUPPORTED_LANGUAGES = ['pl', 'en', 'de', 'fr', 'es'] as const;
-
-export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
+/** Every language the guest interface can speak: the menus' own, then the catalogue. */
+export const SUPPORTED_LANGUAGES: readonly string[] = [
+  BASE_LANGUAGE.code,
+  ...MENU_LANGUAGES.map((language) => language.code),
+];
 
 /** Endonyms: a switcher that renames itself is useless to whoever cannot read
  *  the language currently active. */
-export const LANGUAGE_LABELS: Record<SupportedLanguage, string> = {
-  pl: 'Polski',
-  en: 'English',
-  de: 'Deutsch',
-  fr: 'Français',
-  es: 'Español',
+export const LANGUAGE_LABELS: Record<string, string> = Object.fromEntries(
+  [BASE_LANGUAGE, ...MENU_LANGUAGES].map((language) => [language.code, language.endonym]),
+);
+
+// Polish and English ship with the page: the menus are written in one and
+// nearly every restaurant offers the other. The rest are fetched the first
+// time a guest needs them, so a menu does not carry thirty languages to show
+// one.
+const loaders = import.meta.glob<{ default: ResourceKey }>([
+  './locales/*.json',
+  '!./locales/pl.json',
+  '!./locales/en.json',
+]);
+
+const lazyLocales: BackendModule = {
+  type: 'backend',
+  init() {},
+  read(language, _namespace, callback) {
+    const load = loaders[`./locales/${language}.json`];
+    if (!load) {
+      callback(null, {});
+      return;
+    }
+    load().then(
+      (module) => callback(null, module.default),
+      (error: Error) => callback(error, null),
+    );
+  },
 };
 
 void i18n
+  .use(lazyLocales)
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources: {
       pl: { translation: pl },
       en: { translation: en },
-      de: { translation: de },
-      fr: { translation: fr },
-      es: { translation: es },
     },
+    // The bundled two above, plus the backend for everything else.
+    partialBundledLanguages: true,
     supportedLngs: SUPPORTED_LANGUAGES,
     // Polish, because that is the language the menus are written in: a guest
     // whose browser we cannot place still sees exactly what the restaurant

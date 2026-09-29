@@ -61,7 +61,11 @@ export function createRestaurantTheme(settings: RestaurantThemeUpdate = {}) {
   const pattern = patternCss(settings.menu_pattern, primaryColor, dark);
 
   return createTheme({
-    menuDecor: { pattern, cards: pattern !== null, headingScale: pairing.headingScale ?? 1 },
+    menuDecor: {
+      pattern,
+      cards: pattern !== null,
+      headingScale: pairing.headingScale ?? 1,
+    },
     palette: {
       mode: dark ? 'dark' : 'light',
       primary: { main: primaryColor },
@@ -88,6 +92,15 @@ export function createRestaurantTheme(settings: RestaurantThemeUpdate = {}) {
       button: { textTransform: 'none', fontWeight: 600 },
     },
     components: {
+      MuiTypography: {
+        styleOverrides: {
+          // Each paragraph takes its direction from its own text, so a dish
+          // in Arabic or Hebrew reads and aligns right to left while the
+          // layout around it — and every Polish or English line — stays as
+          // it is. Covers dialogs too, which render outside the page.
+          root: { unicodeBidi: 'plaintext' },
+        },
+      },
       MuiCard: {
         styleOverrides: {
           root: {

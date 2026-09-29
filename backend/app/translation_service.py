@@ -25,16 +25,18 @@ from collections.abc import Iterable
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
-from .models import TranslationDictionary
+from .menu_languages import MENU_LANGUAGES
+from .models import MenuCategory, TranslationDictionary
 
 #: Languages the public menu will serve. A `?lang=` outside this set is ignored
 #: rather than looked up.
-SUPPORTED_LANGUAGES = frozenset({"en", "de", "fr", "es", "it", "uk", "cs", "pl"})
+SUPPORTED_LANGUAGES = frozenset({*MENU_LANGUAGES, "pl"})
 
-#: Languages an owner can maintain a dictionary for, in the order the panel
-#: lists them.
-DICTIONARY_LANGUAGES = ("en", "de", "fr", "es")
+#: Languages an owner can maintain a dictionary for: the whole catalogue, so a
+#: language can be prepared before it is switched on for guests.
+DICTIONARY_LANGUAGES = MENU_LANGUAGES
 
 #: Tried when the requested language has no entry for a phrase. English is the
 #: language a tourist in Poland is most likely to read, so a German guest
@@ -84,6 +86,55 @@ def collect_sources(texts: Iterable[str]) -> list[str]:
         if text and translatable(text) and text not in seen:
             seen[text] = None
     return list(seen)
+
+
+async def menu_phrases(db: AsyncSession, restaurant_id: uuid.UUID) -> list[str]:
+    """Every distinct phrase in the menu, in menu order.
+
+    Category names come before their dishes so the dictionary screen reads like
+    the menu it describes, rather than like a database dump.
+    """
+    categories = (
+        await db.scalars(
+            select(MenuCategory)
+            .options(selectinload(MenuCategory.items))
+            .where(
+                MenuCategory.restaurant_id == restaurant_id,
+                MenuCategory.deleted_at.is_(None),
+            )
+            .order_by(MenuCategory.sort_order.asc())
+        )
+    ).all()
+
+    texts: list[str] = []
+    for category in categories:
+        texts.append(category.name)
+        for item in category.items:
+            texts.extend((item.name, item.description, item.ingredients))
+    return collect_sources(texts)
+
+
+async def translated_counts(
+    db: AsyncSession, restaurant_id: uuid.UUID, phrases: list[str]
+) -> dict[str, int]:
+    """How many of `phrases` each language has a translation for.
+
+    One query for every language at once. Rows for phrases no longer on the
+    menu are ignored, so a renamed dish does not count as translated.
+    """
+    wanted = set(phrases)
+    rows = await db.execute(
+        select(
+            TranslationDictionary.target_lang,
+            TranslationDictionary.original_text,
+            TranslationDictionary.translated_text,
+        ).where(TranslationDictionary.restaurant_id == restaurant_id)
+    )
+    counts: dict[str, int] = {}
+    for language, original, translated in rows.all():
+        if original in wanted and translated and translated.strip():
+            counts[language] = counts.get(language, 0) + 1
+    return counts
 
 
 async def load_dictionary(

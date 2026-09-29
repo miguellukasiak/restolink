@@ -127,6 +127,7 @@ export function LiveMenuPreview({
               <PublicMenuView
                 restaurantName={publicMenu.restaurant.name}
                 logoUrl={publicMenu.restaurant.theme.logo_url}
+                languages={publicMenu.restaurant.languages}
                 categories={categories}
                 onOpenItem={(dish) => onOpenItem(dish.id)}
               />

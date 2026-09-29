@@ -32,6 +32,8 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
+from .menu_languages import DEFAULT_MENU_LANGUAGES
+
 
 class Base(DeclarativeBase):
     pass
@@ -117,6 +119,13 @@ class Restaurant(TimestampSoftDeleteMixin, Base):
     #: the public menu for this language translates nothing.
     base_language: Mapped[str] = mapped_column(
         String(8), default="pl", server_default="pl", nullable=False
+    )
+    #: Languages the guest menu offers besides `base_language`, in the order the
+    #: owner added them. NULL is a restaurant from before this was a choice: it
+    #: keeps offering the four languages the menu always listed. Read it only
+    #: through `menu_languages.offered_languages`.
+    menu_languages: Mapped[list[str] | None] = mapped_column(
+        JSONB, nullable=True, default=lambda: list(DEFAULT_MENU_LANGUAGES)
     )
 
     #: The restaurant's listing on Google Maps, pasted by the owner from

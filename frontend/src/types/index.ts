@@ -137,6 +137,8 @@ export interface PublicMenuResponse {
     theme: RestaurantThemeSettings;
     status: RestaurantStatus;
     subscription_valid_until: string | null;
+    /** What the guest can switch to: the menu's own language first. */
+    languages?: string[];
   };
   categories: PublicMenuCategory[];
   /**

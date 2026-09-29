@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import noload, selectinload
 
 from ..database import get_db
+from ..menu_languages import offered_languages
 from ..models import MenuCategory, Restaurant
 from ..translation_service import (
     collect_sources,
@@ -77,6 +78,10 @@ async def get_public_menu(
             theme=ThemeSettings.model_validate(restaurant),
             status=restaurant.status,
             subscription_valid_until=restaurant.subscription_valid_until,
+            languages=[
+                restaurant.base_language,
+                *offered_languages(restaurant.menu_languages, restaurant.base_language),
+            ],
         ),
         categories=[MenuCategoryResponse.model_validate(c) for c in categories],
     )

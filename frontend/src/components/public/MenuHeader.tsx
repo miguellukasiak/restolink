@@ -23,6 +23,8 @@ interface MenuHeaderProps {
   selectedAllergens: string[];
   canFilterAllergens: boolean;
   onOpenAllergyFilter?: () => void;
+  /** Languages the restaurant offers, its own first. */
+  languages: readonly string[];
 }
 
 /**
@@ -42,6 +44,7 @@ export function MenuHeader({
   selectedAllergens,
   canFilterAllergens,
   onOpenAllergyFilter,
+  languages,
 }: MenuHeaderProps) {
   const { t } = useTranslation();
   const [searchOpen, setSearchOpen] = useState(false);
@@ -181,7 +184,7 @@ export function MenuHeader({
         </Tooltip>
       )}
 
-      <LanguageSwitcher />
+      <LanguageSwitcher languages={languages} />
     </Stack>
   );
 }
