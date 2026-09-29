@@ -78,7 +78,8 @@
       "soy": "Soja",
       "description": "Beschreibung",
       "ingredients": "Zutaten und Allergene",
-      "salmonLong": "Gegrilltes Lachsfilet mit Zitronensauce und Ofengemüse.",
+      "salmonLong": "Saftiges Lachsfilet, auf der Haut gegrillt, mit samtiger Zitronen-Butter-Sauce, Ofengemüse der Saison und frischem Dill. Leicht und trotzdem sättigend.",
+      "salmonIngredients": "Lachs, Butter, Zitrone, Dill, Zucchini, Paprika, Karotte",
       "bestseller": "Bestseller"
     }
   },

@@ -78,7 +78,8 @@
       "soy": "Soja",
       "description": "Description",
       "ingredients": "Ingrédients et allergènes",
-      "salmonLong": "Pavé de saumon grillé, sauce au citron et légumes rôtis.",
+      "salmonLong": "Un pavé de saumon juteux grillé côté peau, servi avec une sauce onctueuse au beurre citronné, des légumes de saison rôtis et de l'aneth frais. Léger, mais rassasiant.",
+      "salmonIngredients": "saumon, beurre, citron, aneth, courgette, poivron, carotte",
       "bestseller": "Best-seller"
     }
   },

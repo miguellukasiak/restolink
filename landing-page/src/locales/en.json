@@ -78,7 +78,8 @@
       "soy": "Soy",
       "description": "Description",
       "ingredients": "Ingredients and allergens",
-      "salmonLong": "Grilled salmon fillet with lemon sauce and roasted vegetables.",
+      "salmonLong": "A juicy salmon fillet grilled skin-side down, served with a silky lemon butter sauce, roasted seasonal vegetables and fresh dill. Light, yet filling.",
+      "salmonIngredients": "salmon, butter, lemon, dill, courgette, pepper, carrot",
       "bestseller": "Bestseller"
     }
   },

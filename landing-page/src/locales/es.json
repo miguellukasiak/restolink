@@ -78,7 +78,8 @@
       "soy": "Soja",
       "description": "Descripción",
       "ingredients": "Ingredientes y alérgenos",
-      "salmonLong": "Filete de salmón a la parrilla con salsa de limón y verduras asadas.",
+      "salmonLong": "Un jugoso filete de salmón a la parrilla por el lado de la piel, con una sedosa salsa de mantequilla y limón, verduras de temporada asadas y eneldo fresco. Ligero, pero saciante.",
+      "salmonIngredients": "salmón, mantequilla, limón, eneldo, calabacín, pimiento, zanahoria",
       "bestseller": "Más vendido"
     }
   },

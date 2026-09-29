@@ -78,7 +78,8 @@
       "soy": "Soja",
       "description": "Opis",
       "ingredients": "Składniki i alergeny",
-      "salmonLong": "Filet z łososia z grilla z sosem cytrynowym i pieczonymi warzywami.",
+      "salmonLong": "Soczysty filet z łososia grillowany na skórze, podany z aksamitnym sosem cytrynowo-maślanym, pieczonymi warzywami sezonowymi i świeżym koperkiem. Lekkie, a zarazem sycące danie.",
+      "salmonIngredients": "łosoś, masło, cytryna, koperek, cukinia, papryka, marchew",
       "bestseller": "Bestseller"
     }
   },
