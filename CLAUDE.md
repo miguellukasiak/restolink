@@ -776,8 +776,8 @@ Deployment prerequisites, carried across several sessions:
       Applied to production (confirmed by the owner, 2026-09-29).
 - [x] **Migration `011`** (`restaurant.menu_languages`) — required column.
       Applied to production (confirmed by the owner, 2026-09-29).
-- [ ] **Migration `012`** (`restaurant.panel_language`) — required column.
-      Must be applied on Neon **before** this change reaches `main`.
+- [x] **Migration `012`** (`restaurant.panel_language`) — required column.
+      Applied to production (confirmed by the owner, 2026-09-29).
 - [ ] `007` and `008` are table-only and optional (`create_all` covers them).
 - [ ] **DeepL quota is shared by every restaurant.** Drafting a whole menu into
       one language costs its character count; with 34 languages on offer, a
