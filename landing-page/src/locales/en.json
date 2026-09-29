@@ -16,9 +16,6 @@
     "contact": "Contact",
     "login": "Log in"
   },
-  "common": {
-    "imagePlaceholder": "Image placeholder"
-  },
   "hero": {
     "badge": "No app, no download",
     "title": "Menus, reinvented.",
@@ -69,26 +66,44 @@
   },
   "features": {
     "title": "Everything under control.",
+    "subtitle": "From the first dish to a QR code on the table, in three steps.",
     "b1": {
-      "title": "Full control",
-      "body": "Drag and drop to reorder, toggle a dish's availability with one click. No developer, no waiting.",
-      "point1": "Linktree-style editor",
-      "point2": "Sold out in one tap",
-      "caption": "Menu builder · 4:3"
+      "title": "Menu builder",
+      "body": "Add categories and dishes with a photo, description, price and allergens. Drag to change the order, and hide a sold-out dish with one switch.",
+      "point1": "Drag and drop",
+      "point2": "Sold out in one tap"
     },
     "b2": {
-      "title": "Google Maps & reviews",
-      "body": "A happy guest lands on your listing before they get up from the table.",
-      "point1": "Traffic routed to reviews",
-      "point2": "Listing always current",
-      "caption": "Listing and reviews · 4:3"
+      "title": "Menu design",
+      "body": "Pick a ready-made theme or your own colours, typeface and logo. The preview beside it shows the menu the way a guest will see it, and text colour adapts to the background by itself, so the menu always stays readable.",
+      "point1": "Ready-made themes in one click",
+      "point2": "Preview on phone and computer"
     },
     "b3": {
-      "title": "Accessibility (WCAG)",
-      "body": "Screen readers, contrast computed from background luminance, and a menu in five languages.",
-      "point1": "Screen reader support",
-      "point2": "Menu in 5 languages (i18n)",
-      "caption": "Accessibility settings · 4:3"
+      "title": "QR code",
+      "body": "Match the code to your venue: module shape, a colour or gradient, and your logo in the middle. Download it as PNG, or as SVG that stays sharp at any size — from a sticker to a poster.",
+      "point1": "Your own shapes, colours and logo",
+      "point2": "Export to PNG and SVG"
+    },
+    "mock": {
+      "rye": "Sour rye soup",
+      "broth": "Chicken broth",
+      "soldOut": "Sold out",
+      "addDish": "Add dish",
+      "theme": "Theme",
+      "themeLight": "Light minimal",
+      "themeDark": "Dark elegance",
+      "themeVivid": "Vivid colour",
+      "primary": "Main colour",
+      "background": "Background",
+      "logoUpload": "Restaurant logo",
+      "font": "Typeface",
+      "shape": "Shape",
+      "color": "Colour",
+      "logo": "Logo in the middle",
+      "download": "Download QR code",
+      "png": "PNG · for print",
+      "svg": "SVG · vector"
     }
   },
   "pricing": {

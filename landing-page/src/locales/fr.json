@@ -16,9 +16,6 @@
     "contact": "Contact",
     "login": "Connexion"
   },
-  "common": {
-    "imagePlaceholder": "Emplacement pour capture d'écran"
-  },
   "hero": {
     "badge": "Sans application, sans téléchargement",
     "title": "La carte, réinventée.",
@@ -69,26 +66,44 @@
   },
   "features": {
     "title": "Tout sous contrôle.",
+    "subtitle": "Du premier plat au QR code sur la table, en trois étapes.",
     "b1": {
-      "title": "Contrôle total",
-      "body": "Glissez-déposez pour réordonner, basculez la disponibilité d'un plat en un clic. Sans développeur et sans attendre.",
-      "point1": "Éditeur façon Linktree",
-      "point2": "Épuisé en une pression",
-      "caption": "Éditeur de carte · 4:3"
+      "title": "Éditeur de carte",
+      "body": "Ajoutez catégories et plats avec photo, description, prix et allergènes. Glissez pour changer l'ordre, et masquez un plat épuisé d'un seul interrupteur.",
+      "point1": "Glisser-déposer",
+      "point2": "Épuisé en une pression"
     },
     "b2": {
-      "title": "Google Maps et avis",
-      "body": "Un client satisfait arrive sur votre fiche avant même de quitter la table.",
-      "point1": "Trafic orienté vers les avis",
-      "point2": "Fiche toujours à jour",
-      "caption": "Fiche et avis · 4:3"
+      "title": "Apparence de la carte",
+      "body": "Choisissez un thème prêt à l'emploi ou vos propres couleurs, police et logo. L'aperçu à côté montre la carte telle que vos clients la verront, et la couleur du texte s'adapte d'elle-même au fond : la carte reste toujours lisible.",
+      "point1": "Thèmes prêts en un clic",
+      "point2": "Aperçu sur téléphone et ordinateur"
     },
     "b3": {
-      "title": "Accessibilité (WCAG)",
-      "body": "Lecteurs d'écran, contraste calculé à partir de la luminance du fond et carte en cinq langues.",
-      "point1": "Prise en charge des lecteurs d'écran",
-      "point2": "Carte en 5 langues (i18n)",
-      "caption": "Réglages d'accessibilité · 4:3"
+      "title": "QR code",
+      "body": "Adaptez le code à votre établissement : forme des modules, couleur ou dégradé, et votre logo au centre. Téléchargez-le en PNG, ou en SVG qui reste net à toutes les tailles — de l'autocollant à l'affiche.",
+      "point1": "Formes, couleurs et logo sur mesure",
+      "point2": "Export en PNG et SVG"
+    },
+    "mock": {
+      "rye": "Soupe de seigle aigre",
+      "broth": "Bouillon de poule",
+      "soldOut": "Épuisé",
+      "addDish": "Ajouter un plat",
+      "theme": "Thème",
+      "themeLight": "Clair minimal",
+      "themeDark": "Élégance sombre",
+      "themeVivid": "Couleur vive",
+      "primary": "Couleur principale",
+      "background": "Fond",
+      "logoUpload": "Logo du restaurant",
+      "font": "Police",
+      "shape": "Forme",
+      "color": "Couleur",
+      "logo": "Logo au centre",
+      "download": "Télécharger le QR code",
+      "png": "PNG · pour l'impression",
+      "svg": "SVG · vectoriel"
     }
   },
   "pricing": {

@@ -16,9 +16,6 @@
     "contact": "Kontakt",
     "login": "Zaloguj się"
   },
-  "common": {
-    "imagePlaceholder": "Miejsce na zrzut ekranu"
-  },
   "hero": {
     "badge": "Bez aplikacji, bez pobierania",
     "title": "Menu, wymyślone na nowo.",
@@ -69,26 +66,44 @@
   },
   "features": {
     "title": "Wszystko pod kontrolą.",
+    "subtitle": "Od pierwszego dania do kodu QR na stoliku — w trzech krokach.",
     "b1": {
-      "title": "Pełna kontrola",
-      "body": "Przeciągnij i upuść, żeby zmienić kolejność, a dostępność dania przełącz jednym kliknięciem. Bez programisty i bez czekania.",
-      "point1": "Edytor w stylu Linktree",
-      "point2": "Wyprzedane jednym dotknięciem",
-      "caption": "Kreator menu · 4:3"
+      "title": "Kreator menu",
+      "body": "Dodaj kategorie i dania ze zdjęciem, opisem, ceną i alergenami. Kolejność zmieniasz, przeciągając, a wyprzedane danie ukrywasz jednym przełącznikiem.",
+      "point1": "Przeciągnij i upuść",
+      "point2": "Wyprzedane jednym dotknięciem"
     },
     "b2": {
-      "title": "Google Maps i opinie",
-      "body": "Zadowolony gość trafia na Twoją wizytówkę, zanim wstanie od stolika.",
-      "point1": "Kierowanie ruchu na opinie",
-      "point2": "Wizytówka zawsze aktualna",
-      "caption": "Wizytówka i opinie · 4:3"
+      "title": "Wygląd menu",
+      "body": "Wybierz gotowy motyw albo własne kolory, krój pisma i logo. Podgląd obok pokazuje menu tak, jak zobaczy je gość, a kolor tekstu sam dopasowuje się do tła, więc menu zawsze jest czytelne.",
+      "point1": "Gotowe motywy jednym kliknięciem",
+      "point2": "Podgląd na telefonie i komputerze"
     },
     "b3": {
-      "title": "Dostępność (WCAG)",
-      "body": "Czytniki ekranu, kontrast liczony z luminancji tła i menu w pięciu językach.",
-      "point1": "Obsługa czytników ekranu",
-      "point2": "Menu w 5 językach (i18n)",
-      "caption": "Ustawienia dostępności · 4:3"
+      "title": "Kod QR",
+      "body": "Dopasuj kod do lokalu: kształt modułów, kolor lub gradient i logo w środku. Gotowy kod pobierasz jako PNG albo SVG, który zachowuje ostrość w każdym rozmiarze — od naklejki po plakat.",
+      "point1": "Własne kształty, kolory i logo",
+      "point2": "Eksport do PNG i SVG"
+    },
+    "mock": {
+      "rye": "Żurek",
+      "broth": "Rosół",
+      "soldOut": "Wyprzedane",
+      "addDish": "Dodaj danie",
+      "theme": "Motyw",
+      "themeLight": "Jasny minimalizm",
+      "themeDark": "Ciemna elegancja",
+      "themeVivid": "Wyrazisty kolor",
+      "primary": "Kolor główny",
+      "background": "Kolor tła",
+      "logoUpload": "Logo restauracji",
+      "font": "Krój pisma",
+      "shape": "Kształt",
+      "color": "Kolor",
+      "logo": "Logo w środku",
+      "download": "Pobierz kod QR",
+      "png": "PNG · do druku",
+      "svg": "SVG · wektor"
     }
   },
   "pricing": {

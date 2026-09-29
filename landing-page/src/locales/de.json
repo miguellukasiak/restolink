@@ -16,9 +16,6 @@
     "contact": "Kontakt",
     "login": "Anmelden"
   },
-  "common": {
-    "imagePlaceholder": "Platz für Screenshot"
-  },
   "hero": {
     "badge": "Keine App, kein Download",
     "title": "Speisekarten, neu gedacht.",
@@ -69,26 +66,44 @@
   },
   "features": {
     "title": "Alles unter Kontrolle.",
+    "subtitle": "Vom ersten Gericht bis zum QR-Code auf dem Tisch – in drei Schritten.",
     "b1": {
-      "title": "Volle Kontrolle",
-      "body": "Per Drag-and-drop umsortieren, die Verfügbarkeit eines Gerichts mit einem Klick umschalten. Ohne Entwickler, ohne Warten.",
-      "point1": "Editor im Linktree-Stil",
-      "point2": "Ausverkauft mit einem Tipp",
-      "caption": "Karten-Editor · 4:3"
+      "title": "Karten-Editor",
+      "body": "Legen Sie Kategorien und Gerichte mit Foto, Beschreibung, Preis und Allergenen an. Die Reihenfolge ändern Sie per Ziehen, ein ausverkauftes Gericht blenden Sie mit einem Schalter aus.",
+      "point1": "Drag-and-drop",
+      "point2": "Ausverkauft mit einem Tipp"
     },
     "b2": {
-      "title": "Google Maps und Bewertungen",
-      "body": "Ein zufriedener Gast landet auf Ihrem Eintrag, noch bevor er vom Tisch aufsteht.",
-      "point1": "Besucher zu Bewertungen lenken",
-      "point2": "Eintrag immer aktuell",
-      "caption": "Eintrag und Bewertungen · 4:3"
+      "title": "Design der Karte",
+      "body": "Wählen Sie ein fertiges Design oder eigene Farben, Schrift und Logo. Die Vorschau daneben zeigt die Karte so, wie Gäste sie sehen, und die Textfarbe passt sich dem Hintergrund von selbst an – die Karte bleibt immer lesbar.",
+      "point1": "Fertige Designs mit einem Klick",
+      "point2": "Vorschau auf Smartphone und Computer"
     },
     "b3": {
-      "title": "Barrierefreiheit (WCAG)",
-      "body": "Screenreader, aus der Hintergrundhelligkeit berechneter Kontrast und eine Karte in fünf Sprachen.",
-      "point1": "Screenreader-Unterstützung",
-      "point2": "Karte in 5 Sprachen (i18n)",
-      "caption": "Einstellungen zur Barrierefreiheit · 4:3"
+      "title": "QR-Code",
+      "body": "Passen Sie den Code an Ihr Lokal an: Form der Module, Farbe oder Verlauf und Ihr Logo in der Mitte. Laden Sie ihn als PNG herunter oder als SVG, das in jeder Größe scharf bleibt – vom Aufkleber bis zum Plakat.",
+      "point1": "Eigene Formen, Farben und Logo",
+      "point2": "Export als PNG und SVG"
+    },
+    "mock": {
+      "rye": "Saure Mehlsuppe",
+      "broth": "Hühnerbrühe",
+      "soldOut": "Ausverkauft",
+      "addDish": "Gericht hinzufügen",
+      "theme": "Design",
+      "themeLight": "Hell & minimal",
+      "themeDark": "Dunkle Eleganz",
+      "themeVivid": "Kräftige Farbe",
+      "primary": "Hauptfarbe",
+      "background": "Hintergrund",
+      "logoUpload": "Logo des Restaurants",
+      "font": "Schrift",
+      "shape": "Form",
+      "color": "Farbe",
+      "logo": "Logo in der Mitte",
+      "download": "QR-Code herunterladen",
+      "png": "PNG · für den Druck",
+      "svg": "SVG · Vektor"
     }
   },
   "pricing": {

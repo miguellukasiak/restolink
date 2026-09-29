@@ -790,44 +790,37 @@
             >
               Everything under control.
             </h2>
+            <p
+              data-i18n="features.subtitle"
+              class="mx-auto mt-6 max-w-xl text-lg text-pretty text-ink-500"
+            >
+              From the first dish to a QR code on the table, in three steps.
+            </p>
           </div>
 
-          <div class="mt-20 space-y-24 sm:mt-28 sm:space-y-36">
-            <!-- Block 1 — text left, visual right -->
-            <div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-20">
+          <ol role="list" class="mt-20 space-y-24 sm:mt-28 sm:space-y-36">
+            <!-- Step 1 — text left, visual right -->
+            <li class="grid items-center gap-10 lg:grid-cols-2 lg:gap-20">
               <div class="reveal">
                 <span
-                  class="grid size-14 place-items-center rounded-2xl bg-pastel-green text-pop-green"
+                  class="grid size-14 place-items-center rounded-2xl bg-pastel-green text-2xl font-extrabold text-pop-green"
                   aria-hidden="true"
                 >
-                  <svg
-                    class="size-7"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.75"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    focusable="false"
-                  >
-                    <path d="M4 7h5M15 7h5M4 12h11M20 12h0M4 17h3M13 17h7" />
-                    <circle cx="12" cy="7" r="2.25" />
-                    <circle cx="17.5" cy="12" r="2.25" />
-                    <circle cx="10" cy="17" r="2.25" />
-                  </svg>
+                  1
                 </span>
                 <h3
                   data-i18n="features.b1.title"
                   class="mt-7 text-3xl font-bold tracking-tighter text-balance text-ink-900 sm:text-5xl"
                 >
-                  Full control
+                  Menu builder
                 </h3>
                 <p
                   data-i18n="features.b1.body"
                   class="mt-5 max-w-lg text-lg text-pretty text-ink-500"
                 >
-                  Drag and drop to reorder, toggle a dish's availability with
-                  one click. No developer, no waiting.
+                  Add categories and dishes with a photo, description, price and
+                  allergens. Drag to change the order, and hide a sold-out dish
+                  with one switch.
                 </p>
                 <ul role="list" class="mt-7 space-y-3">
                   <li class="flex items-center gap-3 text-ink-700">
@@ -844,9 +837,7 @@
                     >
                       <path d="m5 13 4 4L19 7" />
                     </svg>
-                    <span data-i18n="features.b1.point1">
-                      Linktree-style editor
-                    </span>
+                    <span data-i18n="features.b1.point1">Drag and drop</span>
                   </li>
                   <li class="flex items-center gap-3 text-ink-700">
                     <svg
@@ -862,85 +853,89 @@
                     >
                       <path d="m5 13 4 4L19 7" />
                     </svg>
-                    <span data-i18n="features.b1.point2">
-                      Sold out in one tap
-                    </span>
+                    <span data-i18n="features.b1.point2">Sold out in one tap</span>
                   </li>
                 </ul>
               </div>
-
               <div class="reveal reveal-delay-1">
                 <div
-                  class="grid aspect-4/3 place-items-center rounded-[2.5rem] bg-pastel-green p-8 sm:rounded-[3rem]"
+                  class="mock-device relative aspect-4/3 overflow-hidden rounded-[2.5rem] bg-pastel-green sm:rounded-[3rem]"
+                  aria-hidden="true"
                 >
-                  <div
-                    class="grid w-full max-w-md place-items-center rounded-[1.75rem] border-2 border-dashed border-pop-green/30 bg-white/60 px-6 py-14 text-center"
-                  >
-                    <svg
-                      class="size-9 text-pop-green/70"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                      focusable="false"
-                    >
-                      <rect x="3" y="3" width="18" height="18" rx="3" />
-                      <circle cx="8.5" cy="8.5" r="1.5" />
-                      <path d="m21 15-5-5L5 21" />
-                    </svg>
-                    <p
-                      data-i18n="common.imagePlaceholder"
-                      class="mt-3 text-sm font-medium text-ink-700"
-                    >
-                      Image placeholder
-                    </p>
-                    <p
-                      data-i18n="features.b1.caption"
-                      class="mt-1 text-xs text-ink-500"
-                    >
-                      Menu builder · 4:3
-                    </p>
+                  <div class="pm">
+                    <div class="absolute top-[9%] right-[8%] left-[8%] grid gap-[0.9em]">
+                    <div class="pm-card p-[1.3em]">
+                      <div class="flex items-center gap-[0.6em]">
+                        <svg class="pm-icon pm-grip" viewBox="0 0 24 24" fill="currentColor" focusable="false"><circle cx="9" cy="6" r="1.6" /><circle cx="15" cy="6" r="1.6" /><circle cx="9" cy="12" r="1.6" /><circle cx="15" cy="12" r="1.6" /><circle cx="9" cy="18" r="1.6" /><circle cx="15" cy="18" r="1.6" /></svg>
+                        <span data-i18n="experience.mock.soups" class="pm-title">Soups</span>
+                        <span class="pm-count">3</span>
+                        <svg class="pm-icon ml-auto text-ink-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M4 20h4L19 9l-4-4L4 16z" /><path d="m13.5 6.5 4 4" /></svg>
+                      </div>
+                      <div class="mt-[1em] grid gap-[0.6em]">
+                      <div class="pm-row ">
+                        <svg class="pm-icon pm-grip" viewBox="0 0 24 24" fill="currentColor" focusable="false"><circle cx="9" cy="6" r="1.6" /><circle cx="15" cy="6" r="1.6" /><circle cx="9" cy="12" r="1.6" /><circle cx="15" cy="12" r="1.6" /><circle cx="9" cy="18" r="1.6" /><circle cx="15" cy="18" r="1.6" /></svg>
+                        <span class="mock-img mock-food-tomato mock-table-rose"></span>
+                        <span data-i18n="experience.mock.dish1" class="pm-name">Cream of tomato soup</span>
+                        <span class="pm-price">19,00 zł</span>
+                        <span class="pm-switch"></span>
+                      </div>
+                        <!-- Mid-drag: lifted off the list, the cursor still holding it. -->
+                        <div class="pm-row is-lifted relative">
+                          <svg class="pm-icon pm-grip" viewBox="0 0 24 24" fill="currentColor" focusable="false"><circle cx="9" cy="6" r="1.6" /><circle cx="15" cy="6" r="1.6" /><circle cx="9" cy="12" r="1.6" /><circle cx="15" cy="12" r="1.6" /><circle cx="9" cy="18" r="1.6" /><circle cx="15" cy="18" r="1.6" /></svg>
+                          <span class="mock-img mock-food-rye mock-table-sage"></span>
+                          <span data-i18n="features.mock.rye" class="pm-name">Sour rye soup</span>
+                          <span class="pm-price">24,00 zł</span>
+                          <span class="pm-switch"></span>
+                          <svg class="absolute -bottom-[1.1em] left-[0.9em] w-[1.6em] drop-shadow" viewBox="0 0 24 24" focusable="false"><path d="M5 3l14 7.2-6.2 1.7L10.2 18z" fill="#fff" stroke="#161c25" stroke-width="1.6" stroke-linejoin="round" /></svg>
+                        </div>
+                      <div class="pm-row is-off">
+                        <svg class="pm-icon pm-grip" viewBox="0 0 24 24" fill="currentColor" focusable="false"><circle cx="9" cy="6" r="1.6" /><circle cx="15" cy="6" r="1.6" /><circle cx="9" cy="12" r="1.6" /><circle cx="15" cy="12" r="1.6" /><circle cx="9" cy="18" r="1.6" /><circle cx="15" cy="18" r="1.6" /></svg>
+                        <span class="mock-img mock-food-broth mock-table-sky"></span>
+                        <span data-i18n="features.mock.broth" class="pm-name">Chicken broth</span>
+                        <span data-i18n="features.mock.soldOut" class="pm-chip">Sold out</span><span class="pm-price">16,00 zł</span>
+                        <span class="pm-switch is-off"></span>
+                      </div>
+                        <div class="pm-add">
+                          <svg class="pm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" focusable="false"><path d="M12 5v14M5 12h14" /></svg>
+                          <span data-i18n="features.mock.addDish">Add dish</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="pm-card flex items-center gap-[0.6em] p-[1.1em_1.3em]">
+                      <svg class="pm-icon pm-grip" viewBox="0 0 24 24" fill="currentColor" focusable="false"><circle cx="9" cy="6" r="1.6" /><circle cx="15" cy="6" r="1.6" /><circle cx="9" cy="12" r="1.6" /><circle cx="15" cy="12" r="1.6" /><circle cx="9" cy="18" r="1.6" /><circle cx="15" cy="18" r="1.6" /></svg>
+                      <span data-i18n="experience.mock.desserts" class="pm-title">Desserts</span>
+                      <span class="pm-count">4</span>
+                      <svg class="pm-icon ml-auto text-ink-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="m6 9 6 6 6-6" /></svg>
+                    </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </li>
 
-            <!-- Block 2 — visual left, text right -->
-            <div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-20">
+            <!-- Step 2 — visual left, text right -->
+            <li class="grid items-center gap-10 lg:grid-cols-2 lg:gap-20">
               <div class="reveal lg:order-2">
                 <span
-                  class="grid size-14 place-items-center rounded-2xl bg-pastel-blue text-pop-blue"
+                  class="grid size-14 place-items-center rounded-2xl bg-pastel-blue text-2xl font-extrabold text-pop-blue"
                   aria-hidden="true"
                 >
-                  <svg
-                    class="size-7"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.75"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    focusable="false"
-                  >
-                    <path d="M12 21s6.5-5.9 6.5-10.5a6.5 6.5 0 1 0-13 0C5.5 15.1 12 21 12 21Z" />
-                    <circle cx="12" cy="10.5" r="2.5" />
-                  </svg>
+                  2
                 </span>
                 <h3
                   data-i18n="features.b2.title"
                   class="mt-7 text-3xl font-bold tracking-tighter text-balance text-ink-900 sm:text-5xl"
                 >
-                  Google Maps &amp; reviews
+                  Menu design
                 </h3>
                 <p
                   data-i18n="features.b2.body"
                   class="mt-5 max-w-lg text-lg text-pretty text-ink-500"
                 >
-                  A happy guest lands on your listing before they get up from
-                  the table.
+                  Pick a ready-made theme or your own colours, typeface and logo.
+                  The preview beside it shows the menu the way a guest will see
+                  it, and text colour adapts to the background by itself, so the
+                  menu always stays readable.
                 </p>
                 <ul role="list" class="mt-7 space-y-3">
                   <li class="flex items-center gap-3 text-ink-700">
@@ -957,9 +952,7 @@
                     >
                       <path d="m5 13 4 4L19 7" />
                     </svg>
-                    <span data-i18n="features.b2.point1">
-                      Traffic routed to reviews
-                    </span>
+                    <span data-i18n="features.b2.point1">Ready-made themes in one click</span>
                   </li>
                   <li class="flex items-center gap-3 text-ink-700">
                     <svg
@@ -975,87 +968,122 @@
                     >
                       <path d="m5 13 4 4L19 7" />
                     </svg>
-                    <span data-i18n="features.b2.point2">
-                      Listing always current
-                    </span>
+                    <span data-i18n="features.b2.point2">Preview on phone and computer</span>
                   </li>
                 </ul>
               </div>
-
               <div class="reveal reveal-delay-1 lg:order-1">
                 <div
-                  class="grid aspect-4/3 place-items-center rounded-[2.5rem] bg-pastel-blue p-8 sm:rounded-[3rem]"
+                  class="mock-device relative aspect-4/3 overflow-hidden rounded-[2.5rem] bg-pastel-blue sm:rounded-[3rem]"
+                  aria-hidden="true"
                 >
-                  <div
-                    class="grid w-full max-w-md place-items-center rounded-[1.75rem] border-2 border-dashed border-pop-blue/30 bg-white/60 px-6 py-14 text-center"
-                  >
-                    <svg
-                      class="size-9 text-pop-blue/70"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                      focusable="false"
-                    >
-                      <rect x="3" y="3" width="18" height="18" rx="3" />
-                      <circle cx="8.5" cy="8.5" r="1.5" />
-                      <path d="m21 15-5-5L5 21" />
-                    </svg>
-                    <p
-                      data-i18n="common.imagePlaceholder"
-                      class="mt-3 text-sm font-medium text-ink-700"
-                    >
-                      Image placeholder
-                    </p>
-                    <p
-                      data-i18n="features.b2.caption"
-                      class="mt-1 text-xs text-ink-500"
-                    >
-                      Listing and reviews · 4:3
-                    </p>
+                  <div class="pm">
+                    <div class="pm-card absolute top-[11%] left-[6%] w-[55%] p-[1.3em]">
+                      <p data-i18n="features.mock.theme" class="pm-label">Theme</p>
+                      <div class="mt-[0.6em] grid grid-cols-3 gap-[0.5em]">
+                        <div class="pm-preset">
+                          <span class="pm-preset-art" style="--art-bg: #ffffff; --art-ink: rgb(28 27 31 / 0.18); --art-accent: #1c1b1f"><span></span><span></span><span></span></span>
+                          <span data-i18n="features.mock.themeLight">Light minimal</span>
+                        </div>
+                        <div class="pm-preset is-selected">
+                          <span class="pm-preset-art" style="--art-bg: #1a1a1a; --art-ink: rgb(245 241 230 / 0.3); --art-accent: #d4af37"><span></span><span></span><span></span></span>
+                          <span data-i18n="features.mock.themeDark">Dark elegance</span>
+                        </div>
+                        <div class="pm-preset">
+                          <span class="pm-preset-art" style="--art-bg: #f5f3ff; --art-ink: rgb(91 76 219 / 0.25); --art-accent: #5b4cdb"><span></span><span></span><span></span></span>
+                          <span data-i18n="features.mock.themeVivid">Vivid colour</span>
+                        </div>
+                      </div>
+                      <div class="mt-[1em] grid gap-[0.55em]">
+                        <div class="pm-field">
+                          <span class="pm-swatch" style="background-color: #d4af37"></span>
+                          <span data-i18n="features.mock.primary" class="flex-1">Main colour</span>
+                          <span class="font-mono text-ink-400">#D4AF37</span>
+                        </div>
+                        <div class="pm-field">
+                          <span class="pm-swatch" style="background-color: #1a1a1a"></span>
+                          <span data-i18n="features.mock.background" class="flex-1">Background</span>
+                          <span class="font-mono text-ink-400">#1A1A1A</span>
+                        </div>
+                        <div class="pm-field">
+                          <span class="mock-logo bg-[#d4af37]! text-[#1a1a1a]! text-[0.75em]!">BL</span>
+                          <span data-i18n="features.mock.logoUpload" class="flex-1">Restaurant logo</span>
+                          <svg class="pm-icon text-ink-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M12 16V4M7 9l5-5 5 5M5 20h14" /></svg>
+                        </div>
+                        <div class="pm-field">
+                          <span data-i18n="features.mock.font" class="flex-1">Typeface</span>
+                          <span class="font-bold text-ink-900" style="font-family: Georgia, 'Times New Roman', serif">Playfair Display</span>
+                          <svg class="pm-icon text-ink-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="m6 9 6 6 6-6" /></svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- The live preview: the same menu, in the theme chosen. -->
+                    <div class="mock-device mock-phone absolute top-[16%] right-[7%] w-[31%]">
+                      <div class="mock-phone-body">
+                        <div class="mock-screen mock-theme-dark">
+                          <div class="mock-top">
+                            <span class="mock-logo">BL</span>
+                            <span class="mock-name">Bistro Lipa</span>
+                          </div>
+                          <div class="mock-pills">
+                            <span data-i18n="experience.mock.recommended" class="mock-pill is-active">Recommended</span>
+                            <span data-i18n="experience.mock.soups" class="mock-pill">Soups</span>
+                          </div>
+                          <p data-i18n="experience.mock.recommended" class="mock-heading">Recommended</p>
+                          <div class="mt-[0.7em] grid gap-[0.6em]">
+                            <div class="mock-row">
+                              <span class="mock-img mock-food-tomato"></span>
+                              <div class="grid gap-[0.25em]">
+                                <span data-i18n="experience.mock.dish1" class="mock-dish">Cream of tomato soup</span>
+                                <span class="mock-price">19,00 zł</span>
+                              </div>
+                            </div>
+                            <div class="mock-row">
+                              <span class="mock-img mock-food-salmon"></span>
+                              <div class="grid gap-[0.25em]">
+                                <span data-i18n="experience.mock.dish2" class="mock-dish">Grilled salmon</span>
+                                <span class="mock-price">42,00 zł</span>
+                              </div>
+                            </div>
+                            <div class="mock-row">
+                              <span class="mock-img mock-food-beet"></span>
+                              <div class="grid gap-[0.25em]">
+                                <span data-i18n="experience.mock.dish3" class="mock-dish">Beetroot salad</span>
+                                <span class="mock-price">26,00 zł</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </li>
 
-            <!-- Block 3 — text left, visual right -->
-            <div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-20">
+            <!-- Step 3 — text left, visual right -->
+            <li class="grid items-center gap-10 lg:grid-cols-2 lg:gap-20">
               <div class="reveal">
                 <span
-                  class="grid size-14 place-items-center rounded-2xl bg-pastel-purple text-pop-purple"
+                  class="grid size-14 place-items-center rounded-2xl bg-pastel-purple text-2xl font-extrabold text-pop-purple"
                   aria-hidden="true"
                 >
-                  <svg
-                    class="size-7"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.75"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    focusable="false"
-                  >
-                    <circle cx="12" cy="4.5" r="2" />
-                    <path d="M12 8v5.5" />
-                    <path d="m12 13.5-2.5 6.5M12 13.5l2.5 6.5" />
-                    <path d="m6 9.5 6 1.5 6-1.5" />
-                  </svg>
+                  3
                 </span>
                 <h3
                   data-i18n="features.b3.title"
                   class="mt-7 text-3xl font-bold tracking-tighter text-balance text-ink-900 sm:text-5xl"
                 >
-                  Accessibility (WCAG)
+                  QR code
                 </h3>
                 <p
                   data-i18n="features.b3.body"
                   class="mt-5 max-w-lg text-lg text-pretty text-ink-500"
                 >
-                  Screen readers, contrast computed from background luminance,
-                  and a menu in two languages.
+                  Match the code to your venue: module shape, a colour or gradient,
+                  and your logo in the middle. Download it as PNG, or as SVG that
+                  stays sharp at any size — from a sticker to a poster.
                 </p>
                 <ul role="list" class="mt-7 space-y-3">
                   <li class="flex items-center gap-3 text-ink-700">
@@ -1072,9 +1100,7 @@
                     >
                       <path d="m5 13 4 4L19 7" />
                     </svg>
-                    <span data-i18n="features.b3.point1">
-                      Screen reader support
-                    </span>
+                    <span data-i18n="features.b3.point1">Your own shapes, colours and logo</span>
                   </li>
                   <li class="flex items-center gap-3 text-ink-700">
                     <svg
@@ -1090,52 +1116,73 @@
                     >
                       <path d="m5 13 4 4L19 7" />
                     </svg>
-                    <span data-i18n="features.b3.point2">
-                      Bilingual menu (i18n)
-                    </span>
+                    <span data-i18n="features.b3.point2">Export to PNG and SVG</span>
                   </li>
                 </ul>
               </div>
-
               <div class="reveal reveal-delay-1">
                 <div
-                  class="grid aspect-4/3 place-items-center rounded-[2.5rem] bg-pastel-purple p-8 sm:rounded-[3rem]"
+                  class="mock-device relative aspect-4/3 overflow-hidden rounded-[2.5rem] bg-pastel-purple sm:rounded-[3rem]"
+                  aria-hidden="true"
                 >
-                  <div
-                    class="grid w-full max-w-md place-items-center rounded-[1.75rem] border-2 border-dashed border-pop-purple/30 bg-white/60 px-6 py-14 text-center"
-                  >
-                    <svg
-                      class="size-9 text-pop-purple/70"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                      focusable="false"
-                    >
-                      <rect x="3" y="3" width="18" height="18" rx="3" />
-                      <circle cx="8.5" cy="8.5" r="1.5" />
-                      <path d="m21 15-5-5L5 21" />
-                    </svg>
-                    <p
-                      data-i18n="common.imagePlaceholder"
-                      class="mt-3 text-sm font-medium text-ink-700"
-                    >
-                      Image placeholder
-                    </p>
-                    <p
-                      data-i18n="features.b3.caption"
-                      class="mt-1 text-xs text-ink-500"
-                    >
-                      Accessibility settings · 4:3
-                    </p>
+                  <div class="pm">
+                    <div class="pm-card absolute top-[11%] left-[6%] w-[42%] p-[1.3em]">
+                      <p data-i18n="features.mock.shape" class="pm-label">Shape</p>
+                      <div class="mt-[0.6em] grid grid-cols-3 gap-[0.5em]">
+                        <span class="pm-shape"><svg class="w-[55%]" viewBox="0 0 22 22" fill="currentColor" focusable="false"><rect x="0" y="0" width="6" height="6" /><rect x="0" y="8" width="6" height="6" /><rect x="0" y="16" width="6" height="6" /><rect x="8" y="0" width="6" height="6" /><rect x="8" y="8" width="6" height="6" /><rect x="8" y="16" width="6" height="6" /><rect x="16" y="0" width="6" height="6" /><rect x="16" y="8" width="6" height="6" /><rect x="16" y="16" width="6" height="6" /></svg></span>
+                        <span class="pm-shape is-selected"><svg class="w-[55%]" viewBox="0 0 22 22" fill="currentColor" focusable="false"><circle cx="3" cy="3" r="3" /><circle cx="3" cy="11" r="3" /><circle cx="3" cy="19" r="3" /><circle cx="11" cy="3" r="3" /><circle cx="11" cy="11" r="3" /><circle cx="11" cy="19" r="3" /><circle cx="19" cy="3" r="3" /><circle cx="19" cy="11" r="3" /><circle cx="19" cy="19" r="3" /></svg></span>
+                        <span class="pm-shape"><svg class="w-[55%]" viewBox="0 0 22 22" fill="currentColor" focusable="false"><rect x="0" y="0" width="6" height="6" rx="2" /><rect x="0" y="8" width="6" height="6" rx="2" /><rect x="0" y="16" width="6" height="6" rx="2" /><rect x="8" y="0" width="6" height="6" rx="2" /><rect x="8" y="8" width="6" height="6" rx="2" /><rect x="8" y="16" width="6" height="6" rx="2" /><rect x="16" y="0" width="6" height="6" rx="2" /><rect x="16" y="8" width="6" height="6" rx="2" /><rect x="16" y="16" width="6" height="6" rx="2" /></svg></span>
+                      </div>
+                      <p data-i18n="features.mock.color" class="pm-label mt-[1.1em]">Colour</p>
+                      <div class="mt-[0.6em] flex flex-wrap gap-[0.55em]">
+                        <span class="pm-swatch" style="background-color: #1c1b22"></span>
+                        <span class="pm-swatch" style="background-color: #c62828"></span>
+                        <span class="pm-swatch" style="background-color: #2e7d32"></span>
+                        <span class="pm-swatch" style="background-color: #00696d"></span>
+                        <span class="pm-swatch is-selected" style="background-image: linear-gradient(135deg, #8430ce, #1a73e8)"></span>
+                      </div>
+                      <div class="pm-field mt-[1.1em]">
+                        <span data-i18n="features.mock.logo" class="flex-1">Logo in the middle</span>
+                        <span class="pm-switch"></span>
+                      </div>
+                    </div>
+
+                    <div class="pm-card absolute top-[8%] right-[6%] w-[42%] p-[1.1em]">
+                      <svg class="block w-full" viewBox="-6 -6 180 180" focusable="false">
+                        <defs>
+                          <linearGradient id="qr-export-gradient" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="168" y2="168">
+                            <stop offset="0" stop-color="#8430ce" />
+                            <stop offset="1" stop-color="#1a73e8" />
+                          </linearGradient>
+                        </defs>
+                        <g fill="url(#qr-export-gradient)" stroke="url(#qr-export-gradient)"><g transform="translate(0 0)"><rect x="4" y="4" width="48" height="48" rx="14" fill="none" stroke-width="8" /><rect x="16" y="16" width="24" height="24" rx="8" stroke="none" /></g><g transform="translate(112 0)"><rect x="4" y="4" width="48" height="48" rx="14" fill="none" stroke-width="8" /><rect x="16" y="16" width="24" height="24" rx="8" stroke="none" /></g><g transform="translate(0 112)"><rect x="4" y="4" width="48" height="48" rx="14" fill="none" stroke-width="8" /><rect x="16" y="16" width="24" height="24" rx="8" stroke="none" /></g></g>
+                        <path d="M68 4h0M92 4h0M76 12h0M68 20h0M76 20h0M84 20h0M68 28h0M68 36h0M76 36h0M92 36h0M100 36h0M68 44h0M76 44h0M84 44h0M92 44h0M68 52h0M84 52h0M100 52h0M20 68h0M36 68h0M44 68h0M52 68h0M148 68h0M156 68h0M164 68h0M4 76h0M20 76h0M36 76h0M124 76h0M132 76h0M148 76h0M164 76h0M4 84h0M28 84h0M36 84h0M44 84h0M52 84h0M132 84h0M140 84h0M148 84h0M156 84h0M4 92h0M20 92h0M28 92h0M44 92h0M124 92h0M132 92h0M140 92h0M148 92h0M4 100h0M20 100h0M28 100h0M52 100h0M116 100h0M132 100h0M140 100h0M156 100h0M164 100h0M116 108h0M124 108h0M140 108h0M156 108h0M164 108h0M76 116h0M100 116h0M108 116h0M132 116h0M140 116h0M164 116h0M92 124h0M100 124h0M108 124h0M124 124h0M140 124h0M164 124h0M68 132h0M84 132h0M92 132h0M124 132h0M140 132h0M148 132h0M156 132h0M164 132h0M68 140h0M76 140h0M84 140h0M100 140h0M108 140h0M156 140h0M164 140h0M68 148h0M100 148h0M116 148h0M132 148h0M148 148h0M108 156h0M140 156h0M76 164h0M100 164h0M140 164h0M164 164h0" fill="none" stroke="url(#qr-export-gradient)" stroke-width="6.4" stroke-linecap="round" />
+                        <circle cx="84" cy="84" r="25" fill="#fff" />
+                        <circle cx="84" cy="84" r="20" fill="#161c25" />
+                        <text x="84" y="89.5" text-anchor="middle" font-family="Outfit, ui-sans-serif, sans-serif" font-size="15" font-weight="700" fill="#fff">BL</text>
+                      </svg>
+                      <div class="mt-[0.9em] flex items-center justify-center gap-[0.5em] rounded-full bg-ink-900 px-[0.8em] py-[0.6em] text-[0.8em] font-bold text-white">
+                        <svg class="pm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" /></svg>
+                        <span data-i18n="features.mock.download">Download QR code</span>
+                      </div>
+                    </div>
+
+                    <!-- The download menu, open: the two formats the panel exports. -->
+                    <div class="pm-card absolute top-[73%] right-[16%] w-[36%] p-[0.4em]">
+                      <div class="pm-menu-item is-hover">
+                        <svg class="pm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><rect x="4" y="4" width="16" height="16" rx="3" /><circle cx="9.5" cy="9.5" r="1.5" /><path d="m20 15-4-4-8 9" /></svg>
+                        <span data-i18n="features.mock.png">PNG · for print</span>
+                      </div>
+                      <div class="pm-menu-item">
+                        <svg class="pm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M4 18 12 6l8 12" /><circle cx="12" cy="6" r="2" /><circle cx="4" cy="18" r="2" /><circle cx="20" cy="18" r="2" /></svg>
+                        <span data-i18n="features.mock.svg">SVG · vector</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </li>
+          </ol>
         </div>
       </section>
 

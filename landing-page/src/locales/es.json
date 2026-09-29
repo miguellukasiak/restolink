@@ -16,9 +16,6 @@
     "contact": "Contacto",
     "login": "Iniciar sesión"
   },
-  "common": {
-    "imagePlaceholder": "Espacio para captura de pantalla"
-  },
   "hero": {
     "badge": "Sin aplicación, sin descargas",
     "title": "La carta, reinventada.",
@@ -69,26 +66,44 @@
   },
   "features": {
     "title": "Todo bajo control.",
+    "subtitle": "Del primer plato al código QR en la mesa, en tres pasos.",
     "b1": {
-      "title": "Control total",
-      "body": "Arrastra y suelta para reordenar y cambia la disponibilidad de un plato con un clic. Sin programador y sin esperas.",
-      "point1": "Editor estilo Linktree",
-      "point2": "Agotado con un toque",
-      "caption": "Editor de la carta · 4:3"
+      "title": "Editor de carta",
+      "body": "Añade categorías y platos con foto, descripción, precio y alérgenos. Arrastra para cambiar el orden y oculta un plato agotado con un solo interruptor.",
+      "point1": "Arrastrar y soltar",
+      "point2": "Agotado con un toque"
     },
     "b2": {
-      "title": "Google Maps y reseñas",
-      "body": "Un cliente satisfecho llega a tu ficha antes de levantarse de la mesa.",
-      "point1": "Tráfico dirigido a las reseñas",
-      "point2": "Ficha siempre actualizada",
-      "caption": "Ficha y reseñas · 4:3"
+      "title": "Diseño de la carta",
+      "body": "Elige un tema listo o tus propios colores, tipografía y logotipo. La vista previa muestra la carta tal como la verá el cliente, y el color del texto se ajusta solo al fondo, así que la carta siempre se lee bien.",
+      "point1": "Temas listos con un clic",
+      "point2": "Vista previa en móvil y ordenador"
     },
     "b3": {
-      "title": "Accesibilidad (WCAG)",
-      "body": "Lectores de pantalla, contraste calculado a partir de la luminancia del fondo y carta en cinco idiomas.",
-      "point1": "Compatible con lectores de pantalla",
-      "point2": "Carta en 5 idiomas (i18n)",
-      "caption": "Ajustes de accesibilidad · 4:3"
+      "title": "Código QR",
+      "body": "Adapta el código a tu local: forma de los módulos, color o degradado y tu logotipo en el centro. Descárgalo en PNG, o en SVG, que se mantiene nítido a cualquier tamaño, de una pegatina a un póster.",
+      "point1": "Formas, colores y logotipo propios",
+      "point2": "Exportación a PNG y SVG"
+    },
+    "mock": {
+      "rye": "Sopa de centeno agria",
+      "broth": "Caldo de pollo",
+      "soldOut": "Agotado",
+      "addDish": "Añadir plato",
+      "theme": "Tema",
+      "themeLight": "Claro minimal",
+      "themeDark": "Elegancia oscura",
+      "themeVivid": "Color vivo",
+      "primary": "Color principal",
+      "background": "Fondo",
+      "logoUpload": "Logotipo del restaurante",
+      "font": "Tipografía",
+      "shape": "Forma",
+      "color": "Color",
+      "logo": "Logotipo en el centro",
+      "download": "Descargar código QR",
+      "png": "PNG · para imprimir",
+      "svg": "SVG · vectorial"
     }
   },
   "pricing": {
