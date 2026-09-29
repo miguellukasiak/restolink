@@ -23,8 +23,8 @@ interface LiveMenuPreviewProps {
   publicMenu: PublicMenuResponse | undefined;
   onOpenItem: (itemId: string) => void;
   scrollRef?: Ref<HTMLDivElement>;
-  /** Screen height of the phone, as any CSS length. */
-  screenHeight?: number | string;
+  /** The phone's size, fitted to the space around it (useFittedPhone). */
+  phone: { width: number; screenHeight: number };
   /** Shown as a close button in the header, when the preview is a dialog. */
   onClose?: () => void;
 }
@@ -45,7 +45,7 @@ export function LiveMenuPreview({
   publicMenu,
   onOpenItem,
   scrollRef,
-  screenHeight = 'min(620px, calc(100vh - 290px))',
+  phone,
   onClose,
 }: LiveMenuPreviewProps) {
   const theme = publicMenu?.restaurant.theme;
@@ -55,8 +55,14 @@ export function LiveMenuPreview({
         primary_color: theme?.primary_color,
         background_color: theme?.background_color,
         font_family: theme?.font_family,
+        menu_pattern: theme?.menu_pattern,
       }),
-    [theme?.primary_color, theme?.background_color, theme?.font_family],
+    [
+      theme?.primary_color,
+      theme?.background_color,
+      theme?.font_family,
+      theme?.menu_pattern,
+    ],
   );
 
   return (
@@ -104,8 +110,8 @@ export function LiveMenuPreview({
 
       <PhoneFrame
         address={`restolink.app/menu/${restaurantId.slice(0, 8)}…`}
-        width={300}
-        screenHeight={screenHeight}
+        width={phone.width}
+        screenHeight={phone.screenHeight}
         scrollRef={scrollRef}
         measureKey={Boolean(publicMenu)}
       >

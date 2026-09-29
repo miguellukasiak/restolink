@@ -9,7 +9,15 @@ import { useMeasuredHeight } from '../../hooks/useMeasuredHeight';
 export const PHONE_VIEWPORT_WIDTH = 390;
 
 /** Bezel thickness on each side, in px. */
-const BEZEL = 10;
+export const PHONE_BEZEL = 10;
+const BEZEL = PHONE_BEZEL;
+
+/**
+ * Outer height ÷ width of a current phone (an iPhone 15 is 147.6 × 71.6 mm).
+ * Keeping to it is what makes the mockup read as a phone at any size; a frame
+ * whose height is squeezed on its own looks like a toy.
+ */
+export const PHONE_ASPECT = 2.06;
 
 interface PhoneFrameProps {
   /** Laid out at `PHONE_VIEWPORT_WIDTH` and scaled down to fit the screen. */
@@ -18,7 +26,10 @@ interface PhoneFrameProps {
   address: string;
   /** Outer width of the device, in px. */
   width?: number;
-  /** Height of the screen (below the bezel), as any CSS length. */
+  /**
+   * Height of the screen (inside the bezel), as any CSS length. Defaults to a
+   * real phone's proportions for `width` — see useFittedPhone.
+   */
   screenHeight?: number | string;
   /** The element that scrolls — for callers that scroll the preview. */
   scrollRef?: Ref<HTMLDivElement>;
@@ -36,7 +47,7 @@ export function PhoneFrame({
   children,
   address,
   width = 320,
-  screenHeight = 600,
+  screenHeight = Math.round(width * PHONE_ASPECT) - BEZEL * 2,
   scrollRef,
   measureKey,
 }: PhoneFrameProps) {

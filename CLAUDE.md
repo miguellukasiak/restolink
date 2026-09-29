@@ -529,6 +529,12 @@ In the print document, style `body>svg`, never `svg` — the codes are nested
   then the extras (Języki, Opinie Google) below a divider.
 - Route guards (`RequireAuth.tsx`) are a **convenience, not the boundary** —
   every protected endpoint is enforced server-side.
+- **Phone previews keep a real phone's proportions.** `PhoneFrame` defaults
+  its screen to `PHONE_ASPECT` for its width, and `useFittedPhone` sizes the
+  whole device from the window height (browser zoom included). Never squeeze
+  the screen height on its own: a fixed 300px frame over `calc(100vh − …)`
+  came out stubby at 100% zoom on a laptop. A page with a side preview puts
+  its heading in the left column so the preview starts at the top.
 - **Corner radii come from `radii` in `theme.ts`** (`xs` 8 … `xl` 28, px
   strings). Never a bare number in `sx` — see §11, trap 14. Nested surfaces
   follow outer − padding so the curves stay concentric.

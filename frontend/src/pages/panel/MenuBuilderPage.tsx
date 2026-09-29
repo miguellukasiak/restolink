@@ -43,6 +43,7 @@ import { AddCategoryCard } from '../../components/panel/AddCategoryCard';
 import { AddCategoryDialog } from '../../components/panel/AddCategoryDialog';
 import { ConfirmDialog } from '../../components/panel/ConfirmDialog';
 import { LiveMenuPreview } from '../../components/panel/LiveMenuPreview';
+import { useFittedPhone } from '../../hooks/useFittedPhone';
 import { MenuReadiness, type DishFilter } from '../../components/panel/MenuReadiness';
 import { MenuStarter } from '../../components/panel/MenuStarter';
 
@@ -136,6 +137,14 @@ export function MenuBuilderPage() {
   const { restaurantId = '' } = useParams<{ restaurantId: string }>();
   const theme = useTheme();
   const wide = useMediaQuery(theme.breakpoints.up('lg'), { noSsr: true });
+  // Beside the board the phone starts level with the page title and stays in
+  // view while the board scrolls. Around it: the app bar and page padding
+  // (96px), its "Podgląd na żywo" row and caption with their gaps (~75px) and
+  // a little air below.
+  const sidePhone = useFittedPhone({ reserveY: 190 });
+  // In the dialog: its margins (32px each side on a tablet) and padding plus
+  // the same row and caption.
+  const dialogPhone = useFittedPhone({ reserveY: 200, reserveX: 72 });
   const menu = useMenu(restaurantId);
   const publicMenu = usePublicMenu(restaurantId);
   const saveMenuItem = useSaveMenuItem(restaurantId);
@@ -513,107 +522,125 @@ export function MenuBuilderPage() {
       publicMenu={publicMenu.data}
       onOpenItem={openEditById}
       scrollRef={previewScrollRef}
+      phone={sidePhone}
     />
   );
 
   return (
     <Box sx={{ maxWidth: 1400, mx: 'auto', pt: 4 }}>
-      {/* Heading + tools */}
-      <Stack
-        direction={{ xs: 'column', lg: 'row' }}
-        spacing={2}
-        sx={{ mb: 3, alignItems: { lg: 'flex-end' }, justifyContent: 'space-between' }}
-      >
-        <Box sx={{ minWidth: 0 }}>
-          <Typography variant="h4" component="h1">
-            Kreator menu
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
-            Przeciągaj, edytuj, dodawaj — a podgląd od razu pokaże, co zobaczy gość.
-          </Typography>
-        </Box>
-        {!isEmpty && (
-          <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexShrink: 0 }}>
-            <TextField
-              size="small"
-              placeholder="Szukaj dania"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Escape') setQuery('');
-              }}
-              sx={{
-                width: { xs: '100%', sm: 220 },
-                '& .MuiOutlinedInput-root': { bgcolor: 'background.paper' },
-              }}
-              slotProps={{
-                htmlInput: { 'aria-label': 'Szukaj dania' },
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchRoundedIcon fontSize="small" />
-                    </InputAdornment>
-                  ),
-                  endAdornment: query ? (
-                    <InputAdornment position="end">
-                      <IconButton
-                        size="small"
-                        edge="end"
-                        aria-label="Wyczyść wyszukiwanie"
-                        onClick={() => setQuery('')}
-                      >
-                        <CloseRoundedIcon fontSize="small" />
-                      </IconButton>
-                    </InputAdornment>
-                  ) : undefined,
-                },
-              }}
-            />
-            {!wide && (
-              <Button
-                variant="outlined"
-                startIcon={<SmartphoneRoundedIcon />}
-                onClick={() => setPreviewOpen(true)}
-                sx={{ flexShrink: 0 }}
-              >
-                Podgląd
-              </Button>
-            )}
-            <Button
-              variant="contained"
-              startIcon={<AddRoundedIcon />}
-              onClick={() => setAddCategoryOpen(true)}
-              sx={{ flexShrink: 0, display: { xs: 'none', sm: 'inline-flex' } }}
-            >
-              Nowa kategoria
-            </Button>
-          </Stack>
-        )}
-      </Stack>
-
-      {menu.isError && (
-        <Alert
-          severity="error"
-          sx={{ mb: 2 }}
-          action={
-            <Button color="inherit" size="small" onClick={() => void menu.refetch()}>
-              Spróbuj ponownie
-            </Button>
-          }
-        >
-          {getApiErrorMessage(menu.error)}
-        </Alert>
-      )}
-
       <Box
         sx={{
           display: 'grid',
-          gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'minmax(0, 1fr) 300px' },
+          // The preview column is as wide as the fitted phone.
+          gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'minmax(0, 1fr) auto' },
           columnGap: 5,
           alignItems: 'start',
         }}
       >
         <Box sx={{ minWidth: 0 }}>
+          {/* Heading + tools */}
+          <Stack
+            direction="row"
+            useFlexGap
+            spacing={2}
+            sx={{
+              mb: 3,
+              flexWrap: 'wrap',
+              alignItems: 'flex-end',
+              justifyContent: 'space-between',
+            }}
+          >
+            {/* Wide enough for the subtitle on one line; the tools wrap under it
+                when the column is narrower than that. */}
+            <Box sx={{ minWidth: 0, flex: '1 1 520px' }}>
+              <Typography variant="h4" component="h1">
+                Kreator menu
+              </Typography>
+              <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
+                Przeciągaj, edytuj, dodawaj — a podgląd od razu pokaże, co zobaczy gość.
+              </Typography>
+            </Box>
+            {!isEmpty && (
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{
+                  alignItems: 'center',
+                  flexShrink: 0,
+                  width: { xs: '100%', sm: 'auto' },
+                }}
+              >
+                <TextField
+                  size="small"
+                  placeholder="Szukaj dania"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Escape') setQuery('');
+                  }}
+                  sx={{
+                    width: { xs: '100%', sm: 220 },
+                    '& .MuiOutlinedInput-root': { bgcolor: 'background.paper' },
+                  }}
+                  slotProps={{
+                    htmlInput: { 'aria-label': 'Szukaj dania' },
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchRoundedIcon fontSize="small" />
+                        </InputAdornment>
+                      ),
+                      endAdornment: query ? (
+                        <InputAdornment position="end">
+                          <IconButton
+                            size="small"
+                            edge="end"
+                            aria-label="Wyczyść wyszukiwanie"
+                            onClick={() => setQuery('')}
+                          >
+                            <CloseRoundedIcon fontSize="small" />
+                          </IconButton>
+                        </InputAdornment>
+                      ) : undefined,
+                    },
+                  }}
+                />
+                {!wide && (
+                  <Button
+                    variant="outlined"
+                    startIcon={<SmartphoneRoundedIcon />}
+                    onClick={() => setPreviewOpen(true)}
+                    sx={{ flexShrink: 0 }}
+                  >
+                    Podgląd
+                  </Button>
+                )}
+                <Button
+                  variant="contained"
+                  startIcon={<AddRoundedIcon />}
+                  onClick={() => setAddCategoryOpen(true)}
+                  sx={{ flexShrink: 0, display: { xs: 'none', sm: 'inline-flex' } }}
+                >
+                  Nowa kategoria
+                </Button>
+              </Stack>
+            )}
+          </Stack>
+
+          {menu.isError && (
+            <Alert
+              severity="error"
+              sx={{ mb: 2 }}
+              action={
+                <Button color="inherit" size="small" onClick={() => void menu.refetch()}>
+                  Spróbuj ponownie
+                </Button>
+              }
+            >
+              {getApiErrorMessage(menu.error)}
+            </Alert>
+          )}
+
           {menu.isLoading ? (
             <BoardSkeleton />
           ) : isEmpty ? (
@@ -718,7 +745,7 @@ export function MenuBuilderPage() {
             categories={categories}
             publicMenu={publicMenu.data}
             onOpenItem={openEditById}
-            screenHeight="min(600px, calc(100dvh - 200px))"
+            phone={dialogPhone}
             onClose={() => setPreviewOpen(false)}
           />
         </Dialog>

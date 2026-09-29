@@ -46,6 +46,7 @@ import { MenuSkeleton } from '../../components/public/MenuSkeleton';
 import { PhoneFrame } from '../../components/panel/PhoneFrame';
 import { ThemeThumb, type ThumbDish } from '../../components/panel/ThemeThumb';
 import { useMeasuredHeight } from '../../hooks/useMeasuredHeight';
+import { useFittedPhone } from '../../hooks/useFittedPhone';
 
 const HEX_PATTERN = /^#[0-9a-fA-F]{6}$/;
 
@@ -309,6 +310,10 @@ export function AppearancePage() {
   // useMeasuredHeight for why its wrapper is sized from a measurement. (The
   // phone preview does the same inside PhoneFrame.)
   const desktopContent = useMeasuredHeight(`${device}-${menu.isLoading}`);
+  // The preview column starts level with the page title. Around the phone: the
+  // app bar and page padding (96px), the device toggle and its gap (~54px) and
+  // a little air below.
+  const phone = useFittedPhone({ reserveY: 170 });
 
   const {
     control,
@@ -429,16 +434,6 @@ export function AppearancePage() {
 
   return (
     <Box sx={{ maxWidth: 1360, mx: 'auto', pt: 4 }}>
-      <Stack spacing={0.5} sx={{ mb: 3 }}>
-        <Typography variant="h4" component="h1">
-          Wygląd menu
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Wybierz motyw jak tło przed wideorozmową — Twoje menu od razu go przymierzy.
-          Zapisz, gdy trafisz na ten właściwy.
-        </Typography>
-      </Stack>
-
       <Box
         component="form"
         onSubmit={onSubmit}
@@ -450,6 +445,18 @@ export function AppearancePage() {
         }}
       >
         <Stack spacing={3} sx={{ minWidth: 0 }}>
+          {/* The heading sits in this column so the preview beside it can
+              start at the top of the page and have the height it needs. */}
+          <Stack spacing={0.5}>
+            <Typography variant="h4" component="h1">
+              Wygląd menu
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Wybierz motyw jak tło przed wideorozmową — Twoje menu od razu go przymierzy.
+              Zapisz, gdy trafisz na ten właściwy.
+            </Typography>
+          </Stack>
+
           <Section
             title="Motywy"
             hint="Kliknij, żeby przymierzyć — na miniaturach widać Twoje własne dania."
@@ -909,8 +916,8 @@ export function AppearancePage() {
               <PhoneFrame
                 address={`restolink.app/menu/${restaurantId.slice(0, 8)}…`}
                 measureKey={menu.isLoading}
-                // Fits under the device toggle without scrolling the page.
-                screenHeight="min(620px, calc(100vh - 330px))"
+                width={phone.width}
+                screenHeight={phone.screenHeight}
               >
                 {preview}
               </PhoneFrame>
@@ -964,7 +971,9 @@ export function AppearancePage() {
                 </Stack>
                 <Box
                   sx={{
-                    height: 420,
+                    // As tall as the phone's screen, so switching devices
+                    // does not make the column jump.
+                    height: phone.screenHeight - 20,
                     overflowY: 'auto',
                     overflowX: 'hidden',
                     scrollbarWidth: 'none',
