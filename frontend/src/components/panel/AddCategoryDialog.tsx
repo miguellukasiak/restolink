@@ -12,13 +12,15 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import Avatar from '@mui/material/Avatar';
+import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
-import CategoryRoundedIcon from '@mui/icons-material/CategoryRounded';
+import PlaylistAddRoundedIcon from '@mui/icons-material/PlaylistAddRounded';
+import type { MenuCategory } from '../../types';
 import { useAddCategory } from '../../hooks/useAddCategory';
 import { useSnackbar } from '../feedback/SnackbarProvider';
 import { getApiErrorMessage } from '../../services/api';
+import { TonalIcon } from './TonalIcon';
 
 const addCategorySchema = z.object({
   name: z.string().trim().min(2, 'Nazwa musi mieć co najmniej 2 znaki'),
@@ -29,11 +31,20 @@ type AddCategoryFormValues = z.infer<typeof addCategorySchema>;
 interface AddCategoryDialogProps {
   open: boolean;
   restaurantId: string;
+  /** Common names not yet on the menu, offered as one-tap fills. */
+  suggestions?: string[];
   onClose: () => void;
+  onCreated?: (category: MenuCategory) => void;
 }
 
 /** Small modal that creates a new menu category. */
-export function AddCategoryDialog({ open, restaurantId, onClose }: AddCategoryDialogProps) {
+export function AddCategoryDialog({
+  open,
+  restaurantId,
+  suggestions = [],
+  onClose,
+  onCreated,
+}: AddCategoryDialogProps) {
   const { showSuccess, showError } = useSnackbar();
   const addCategory = useAddCategory(restaurantId);
 
@@ -41,6 +52,7 @@ export function AddCategoryDialog({ open, restaurantId, onClose }: AddCategoryDi
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<AddCategoryFormValues>({
     resolver: zodResolver(addCategorySchema),
@@ -59,6 +71,7 @@ export function AddCategoryDialog({ open, restaurantId, onClose }: AddCategoryDi
     addCategory.mutate(values.name.trim(), {
       onSuccess: (created) => {
         showSuccess(`Kategoria „${created.name}" została utworzona.`);
+        onCreated?.(created);
         onClose();
       },
       onError: (error) => {
@@ -79,9 +92,9 @@ export function AddCategoryDialog({ open, restaurantId, onClose }: AddCategoryDi
     >
       <DialogTitle sx={{ pb: 1 }}>
         <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
-          <Avatar sx={{ bgcolor: 'secondary.main', width: 44, height: 44 }}>
-            <CategoryRoundedIcon />
-          </Avatar>
+          <TonalIcon>
+            <PlaylistAddRoundedIcon />
+          </TonalIcon>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography variant="h6" component="div">
               Nowa kategoria
@@ -113,6 +126,27 @@ export function AddCategoryDialog({ open, restaurantId, onClose }: AddCategoryDi
           disabled={isSubmitting}
           {...register('name')}
         />
+        {suggestions.length > 0 && (
+          <>
+            <Typography variant="caption" color="text.secondary" component="p">
+              Popularne:
+            </Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+              {suggestions.map((name) => (
+                <Chip
+                  key={name}
+                  label={name}
+                  variant="outlined"
+                  clickable
+                  disabled={isSubmitting}
+                  onClick={() =>
+                    setValue('name', name, { shouldValidate: true, shouldDirty: true })
+                  }
+                />
+              ))}
+            </Box>
+          </>
+        )}
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 3 }}>
@@ -122,7 +156,6 @@ export function AddCategoryDialog({ open, restaurantId, onClose }: AddCategoryDi
         <Button
           type="submit"
           variant="contained"
-          color="secondary"
           disabled={isSubmitting}
           startIcon={
             isSubmitting ? <CircularProgress size={18} color="inherit" /> : undefined

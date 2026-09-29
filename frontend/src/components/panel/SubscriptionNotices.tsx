@@ -9,6 +9,7 @@ import LockRoundedIcon from '@mui/icons-material/LockRounded';
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
 import CreditCardRoundedIcon from '@mui/icons-material/CreditCardRounded';
 import CircularProgress from '@mui/material/CircularProgress';
+import { radii } from '../../theme';
 
 /**
  * Full-content paywall shown in place of the dashboard when the restaurant's
@@ -102,7 +103,7 @@ export function SubscriptionPendingBanner({
       role="status"
       sx={{
         mb: 3,
-        borderRadius: 3,
+        borderRadius: radii.md,
         p: 2,
         bgcolor: (t) => alpha(t.palette.warning.main, 0.12),
         border: '1px solid',

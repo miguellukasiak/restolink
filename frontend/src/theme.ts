@@ -33,6 +33,32 @@ const INK_MUTED = '#4B5563';
 export const BRAND_FONT_FAMILY =
   "'Dela Gothic One', 'Roboto', 'Segoe UI', sans-serif";
 
+/**
+ * Corner radii, as px strings.
+ *
+ * Strings on purpose: a bare number in `sx` (`borderRadius: 3`) is a
+ * *multiplier* of `shape.borderRadius`, so 3 meant 42px — which is how the
+ * menu builder's dish cards ended up as pills around two lines of text, and
+ * why its checkbox cards had 56px corners. Reach for these instead.
+ *
+ * Nested surfaces follow outer − padding: a 24px section with 8px of padding
+ * holds 16px rows, and a 16px row with 8px of padding holds 8px thumbnails,
+ * so the curves stay concentric instead of fighting each other.
+ */
+export const radii = {
+  /** Chips, thumbnails inside rows, small badges. */
+  xs: '8px',
+  /** Inputs, alerts, small tiles. */
+  sm: '12px',
+  /** Rows, photo tiles, cards nested inside a section. */
+  md: '16px',
+  /** Sections and standalone cards. */
+  lg: '24px',
+  /** Dialogs. */
+  xl: '28px',
+  pill: '999px',
+} as const;
+
 export const theme = createTheme({
   palette: {
     mode: 'light',
@@ -77,7 +103,7 @@ export const theme = createTheme({
     MuiDialog: {
       styleOverrides: {
         paper: {
-          borderRadius: 24,
+          borderRadius: radii.xl,
           boxShadow: `0 24px 64px ${alpha(INK, 0.18)}`,
         },
       },

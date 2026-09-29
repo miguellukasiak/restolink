@@ -9,7 +9,6 @@ import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
 import CircularProgress from '@mui/material/CircularProgress';
 import Slider from '@mui/material/Slider';
@@ -17,7 +16,9 @@ import ZoomInRoundedIcon from '@mui/icons-material/ZoomInRounded';
 import CropRoundedIcon from '@mui/icons-material/CropRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import { getCroppedImg, blobToDataUrl } from '../../utils/getCroppedImg';
+import { radii } from '../../theme';
 import { useSnackbar } from '../feedback/SnackbarProvider';
+import { TonalIcon } from './TonalIcon';
 
 interface ImageCropperDialogProps {
   open: boolean;
@@ -29,7 +30,7 @@ interface ImageCropperDialogProps {
 
 /**
  * M3 dialog that forces every dish photo into a uniform 1:1 square before it
- * ever reaches the drawer's preview — pan/zoom on the source, crop happens on
+ * ever reaches the dish editor — pan/zoom on the source, crop happens on
  * "Zastosuj" via an offscreen canvas (see utils/getCroppedImg.ts).
  */
 export function ImageCropperDialog({
@@ -76,13 +77,12 @@ export function ImageCropperDialog({
       onClose={isProcessing ? undefined : onCancel}
       maxWidth="xs"
       fullWidth
-      slotProps={{ paper: { sx: { borderRadius: '28px' } } }}
     >
       <DialogTitle sx={{ pb: 1 }}>
         <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
-          <Avatar sx={{ bgcolor: 'secondary.main', width: 44, height: 44 }}>
+          <TonalIcon>
             <CropRoundedIcon />
-          </Avatar>
+          </TonalIcon>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography variant="h6" component="div">
               Przytnij zdjęcie
@@ -108,7 +108,7 @@ export function ImageCropperDialog({
             position: 'relative',
             width: '100%',
             height: 320,
-            borderRadius: 3,
+            borderRadius: radii.md,
             overflow: 'hidden',
             bgcolor: '#1C1B22',
           }}
@@ -137,7 +137,6 @@ export function ImageCropperDialog({
             max={3}
             step={0.05}
             aria-label="Przybliżenie zdjęcia"
-            color="secondary"
           />
         </Stack>
       </DialogContent>
@@ -149,7 +148,6 @@ export function ImageCropperDialog({
         <Button
           onClick={() => void handleApply()}
           variant="contained"
-          color="secondary"
           disabled={isProcessing || !croppedAreaPixels}
           startIcon={
             isProcessing ? <CircularProgress size={18} color="inherit" /> : undefined

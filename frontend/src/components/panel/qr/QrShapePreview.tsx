@@ -11,6 +11,7 @@ import {
   type QrCornerSquareType,
   type QrDotType,
 } from '../../../constants/qrPresets';
+import { radii } from '../../../theme';
 
 /** Tiny 3x3 grid hinting at how a dot shape will read across the whole code. */
 export function DotPatternPreview({ type }: { type: QrDotType }) {
@@ -92,7 +93,7 @@ export function ShapeOptionTile({
       aria-label={label}
       sx={{
         width: 72,
-        borderRadius: 3,
+        borderRadius: radii.sm,
         py: 1,
         gap: 0.5,
         display: 'flex',

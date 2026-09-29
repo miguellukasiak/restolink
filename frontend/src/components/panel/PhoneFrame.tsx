@@ -1,0 +1,181 @@
+import type { ReactNode, Ref } from 'react';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import LockRoundedIcon from '@mui/icons-material/LockRounded';
+import { useMeasuredHeight } from '../../hooks/useMeasuredHeight';
+
+/** The width the content is laid out at: a common phone's CSS viewport. */
+export const PHONE_VIEWPORT_WIDTH = 390;
+
+/** Bezel thickness on each side, in px. */
+const BEZEL = 10;
+
+interface PhoneFrameProps {
+  /** Laid out at `PHONE_VIEWPORT_WIDTH` and scaled down to fit the screen. */
+  children: ReactNode;
+  /** Shown in the faux address bar. */
+  address: string;
+  /** Outer width of the device, in px. */
+  width?: number;
+  /** Height of the screen (below the bezel), as any CSS length. */
+  screenHeight?: number | string;
+  /** The element that scrolls — for callers that scroll the preview. */
+  scrollRef?: Ref<HTMLDivElement>;
+  /** Changes whenever the content may have been swapped without resizing. */
+  measureKey?: string | number | boolean;
+}
+
+/**
+ * A phone showing a real page, used by the owner panel's live previews.
+ *
+ * The content is laid out at a phone's real width and scaled down, so what
+ * the owner sees is the guest's layout rather than a squeezed desktop one.
+ */
+export function PhoneFrame({
+  children,
+  address,
+  width = 320,
+  screenHeight = 600,
+  scrollRef,
+  measureKey,
+}: PhoneFrameProps) {
+  const scale = (width - BEZEL * 2) / PHONE_VIEWPORT_WIDTH;
+
+  const content = useMeasuredHeight(measureKey);
+
+  return (
+    <Box
+      sx={{
+        width,
+        flexShrink: 0,
+        borderRadius: '44px',
+        p: `${BEZEL}px`,
+        background: 'linear-gradient(155deg, #3a3a42 0%, #1C1B22 45%, #000000 100%)',
+        boxShadow:
+          '0 24px 64px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255,255,255,0.08)',
+        position: 'relative',
+      }}
+    >
+      {/* Volume + power buttons */}
+      {[
+        { side: 'left', top: 108, height: 28 },
+        { side: 'left', top: 144, height: 46 },
+        { side: 'right', top: 130, height: 58 },
+      ].map((button) => (
+        <Box
+          key={`${button.side}-${button.top}`}
+          aria-hidden
+          sx={{
+            position: 'absolute',
+            [button.side]: -2,
+            top: button.top,
+            width: 3,
+            height: button.height,
+            bgcolor: '#000',
+            borderRadius: button.side === 'left' ? '2px 0 0 2px' : '0 2px 2px 0',
+          }}
+        />
+      ))}
+
+      {/* Screen — fixed browser chrome on top, scrolling page below. */}
+      <Box
+        sx={{
+          height: screenHeight,
+          borderRadius: '34px',
+          overflow: 'hidden',
+          position: 'relative',
+          bgcolor: '#FFFFFF',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        {/* Dynamic-island notch */}
+        <Box
+          aria-hidden
+          sx={{
+            position: 'absolute',
+            top: 8,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 90,
+            height: 24,
+            bgcolor: '#000',
+            borderRadius: '999px',
+            zIndex: 3,
+          }}
+        />
+
+        {/* Faux mobile browser chrome. Deliberately neutral: it is the phone's
+            UI, not the restaurant's, so it stays the same over a dark menu. */}
+        <Box
+          sx={{
+            flexShrink: 0,
+            pt: '40px',
+            px: 1.5,
+            pb: 1.25,
+            bgcolor: '#F2F2F7',
+            borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
+          }}
+        >
+          <Stack
+            direction="row"
+            spacing={0.5}
+            sx={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              px: 1.5,
+              py: 0.5,
+              borderRadius: 999,
+              bgcolor: '#FFFFFF',
+              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.06)',
+            }}
+          >
+            <LockRoundedIcon sx={{ fontSize: 11, color: 'rgba(0, 0, 0, 0.45)' }} />
+            <Typography
+              sx={{ fontSize: 11, fontWeight: 500, color: 'rgba(0, 0, 0, 0.6)' }}
+              noWrap
+            >
+              {address}
+            </Typography>
+          </Stack>
+        </Box>
+
+        <Box
+          ref={scrollRef}
+          sx={{
+            flex: 1,
+            minHeight: 0,
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            scrollbarWidth: 'none',
+            '&::-webkit-scrollbar': { display: 'none' },
+          }}
+        >
+          {/* An isolating stacking context plus the measured height (see
+              useMeasuredHeight), so the scaled, sticky content can never
+              escape the screen's clip or leave dead scroll space. */}
+          <Box
+            sx={{
+              position: 'relative',
+              zIndex: 1,
+              overflow: 'hidden',
+              height: content.height !== null ? content.height * scale : 'auto',
+            }}
+          >
+            <Box
+              ref={content.ref}
+              sx={{
+                width: PHONE_VIEWPORT_WIDTH,
+                transform: `scale(${scale})`,
+                transformOrigin: 'top left',
+              }}
+            >
+              {children}
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
+  );
+}

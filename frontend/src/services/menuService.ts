@@ -1,6 +1,7 @@
 import { api } from './api';
 import type {
   MenuCategory,
+  MenuItem,
   MenuItemRequest,
   RestaurantPanelInfo,
   RestaurantThemeUpdate,
@@ -78,15 +79,38 @@ export async function deleteMenuItem(
 /**
  * POST /api/v1/restaurants/{restaurantId}/menu/items — saves a dish.
  * Passing `itemId` includes it in the body so the backend can upsert an
- * existing dish; omitted for brand-new dishes (contract: 201).
+ * existing dish; omitted for brand-new dishes. Resolves to the saved dish, so
+ * a new one's id is known without waiting for the menu to be re-read.
  */
 export async function saveMenuItem(
   restaurantId: string,
   payload: MenuItemRequest,
   itemId?: string,
+): Promise<MenuItem> {
+  const { data } = await api.post<MenuItem>(
+    `/api/v1/restaurants/${restaurantId}/menu/items`,
+    {
+      ...payload,
+      ...(itemId ? { id: itemId } : {}),
+    },
+  );
+  return data;
+}
+
+/**
+ * PUT /api/v1/restaurants/{restaurantId}/menu/order (204) — saves the board
+ * after a drag: category order, dish order, and dishes moved between
+ * categories. Sends the whole layout rather than the single move, so a late
+ * or repeated request still leaves the order the owner last saw.
+ */
+export async function reorderMenu(
+  restaurantId: string,
+  categories: MenuCategory[],
 ): Promise<void> {
-  await api.post(`/api/v1/restaurants/${restaurantId}/menu/items`, {
-    ...payload,
-    ...(itemId ? { id: itemId } : {}),
+  await api.put(`/api/v1/restaurants/${restaurantId}/menu/order`, {
+    categories: categories.map((category) => ({
+      id: category.id,
+      item_ids: category.items.map((item) => item.id),
+    })),
   });
 }

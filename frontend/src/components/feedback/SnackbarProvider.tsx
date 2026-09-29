@@ -54,7 +54,10 @@ export function SnackbarProvider({ children }: { children: ReactNode }) {
         open={state.open}
         autoHideDuration={5000}
         onClose={handleClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        // Bottom-left, not centred: a centred toast landed on top of dialog
+        // footers — the dish editor's buttons included, in the one flow
+        // ("Zapisz i dodaj kolejne") where the dialog stays open after it.
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       >
         <Alert
           onClose={handleClose}

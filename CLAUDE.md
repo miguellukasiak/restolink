@@ -423,6 +423,21 @@ naming the variable, a Resend failure a 502, and both write the whole inquiry to
 the log so it can be recovered. Every visitor-typed value is HTML-escaped in the
 email. The landing page's own origin must be listed in `CORS_ALLOWED_ORIGINS`.
 
+**Menu builder ("Kreator menu").** One vertical section per category, with
+the guest menu on a phone beside it (`LiveMenuPreview`, `lg` and up; a
+"Podgląd" dialog below that). The phone renders the real `PublicMenuView`
+under the restaurant's theme but is fed the **board's local state**, so a drag
+or a switch shows on it before the server answers; clicking a dish in it opens
+the editor. Dishes are edited in a centred two-pane dialog
+(`MenuItemEditorDialog`) whose right pane is the dish as guests will see it.
+Order is saved by `PUT /api/v1/restaurants/{id}/menu/order`, which takes the
+**whole board** (not one move) so a late or repeated request still lands on the
+layout the owner last saw; ids that are not this restaurant's answer 404, and
+live rows the body leaves out keep their order after the listed ones. The dish
+upsert likewise proves a body-supplied dish id belongs to the restaurant —
+dish ids are public on every guest menu, and without that check one owner
+could pull another's dish into their menu.
+
 ---
 
 ## 10. Frontend conventions
@@ -446,6 +461,9 @@ email. The landing page's own origin must be listed in `CORS_ALLOWED_ORIGINS`.
   font stack. There is no letter-tile logo any more.
 - Route guards (`RequireAuth.tsx`) are a **convenience, not the boundary** —
   every protected endpoint is enforced server-side.
+- **Corner radii come from `radii` in `theme.ts`** (`xs` 8 … `xl` 28, px
+  strings). Never a bare number in `sx` — see §11, trap 14. Nested surfaces
+  follow outer − padding so the curves stay concentric.
 
 ### Routes
 
@@ -511,6 +529,16 @@ Each of these cost real debugging time in this repo. They are not hypothetical.
     failed for over an hour, because the variable existed only on the other
     Vercel project. Whenever a change adds a required build variable, name the
     exact Vercel project it must be set on before the change reaches `main`.
+14. **`borderRadius: 3` in `sx` is 42px, not 3px.** A bare number multiplies
+    `theme.shape.borderRadius` (14 in the panel, 16 in the menu theme). It
+    turned the builder's dish cards into pills around two lines of text and its
+    checkbox cards into 56px curves, and the same bug sat in the QR page, the
+    logo upload and the subscription banner. Use `radii`.
+15. **Viewport breakpoints lie inside a scaled preview.** `{ xs, sm, lg }` in
+    `sx` answer to the *window*, so a menu laid out at 390px inside a phone
+    mockup on a desktop screen got the four-column desktop grid. The guest
+    menu's grid uses container queries on `<main>` for this reason; anything
+    rendered inside `PhoneFrame` must size itself from its container too.
 
 ---
 

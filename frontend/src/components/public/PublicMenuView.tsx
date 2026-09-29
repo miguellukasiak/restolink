@@ -18,6 +18,15 @@ import { PublicItemCard } from './PublicItemCard';
 /** Stable empty default so the filter memo isn't invalidated every render. */
 const NO_ALLERGENS: string[] = [];
 
+/*
+ * Container queries against `<main>`'s content box, which is the viewport
+ * minus 24px of padding and at most 1176px. The thresholds sit where the old
+ * viewport breakpoints (sm 600, lg 1200) put them for a guest on a real
+ * device, so the live menu lays out as before.
+ */
+const WIDE = '@container (min-width: 576px)';
+const WIDEST = '@container (min-width: 1176px)';
+
 interface PublicMenuViewProps {
   restaurantName: string;
   logoUrl?: string | null;
@@ -143,7 +152,15 @@ export function PublicMenuView({
         {query.trim() ? t('resultsFound', { count: resultsCount }) : ''}
       </Box>
 
-      <Box component="main" sx={{ maxWidth: 1200, mx: 'auto', px: 1.5, pb: 6 }}>
+      {/* A size container: the dish grid below answers to the width it is
+          given, not to the window's. On the live page those are the same
+          thing; in the owner panel's previews the menu is laid out at a
+          phone's width inside a desktop window, and viewport breakpoints
+          gave the phone mockup a four-column desktop grid. */}
+      <Box
+        component="main"
+        sx={{ maxWidth: 1200, mx: 'auto', px: 1.5, pb: 6, containerType: 'inline-size' }}
+      >
         {query.trim() && resultsCount === 0 && (
           <Stack
             spacing={1.5}
@@ -190,7 +207,8 @@ export function PublicMenuView({
                   // Was `variant="h5"` in the heading serif — handsome, but it
                   // ate close to 40px per category on a phone. Kept clearly
                   // dominant over the 14px dish names without the bulk.
-                  fontSize: { xs: 17, sm: 20 },
+                  fontSize: 17,
+                  [WIDE]: { fontSize: 20 },
                   fontWeight: 700,
                   letterSpacing: '-0.01em',
                   mb: 1,
@@ -205,11 +223,9 @@ export function PublicMenuView({
                   // old rule could drop to a single column on a narrow phone,
                   // which is exactly the low-density layout being replaced.
                   // Two-up is guaranteed at every width.
-                  gridTemplateColumns: {
-                    xs: 'repeat(2, minmax(0, 1fr))',
-                    sm: 'repeat(3, minmax(0, 1fr))',
-                    lg: 'repeat(4, minmax(0, 1fr))',
-                  },
+                  gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                  [WIDE]: { gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' },
+                  [WIDEST]: { gridTemplateColumns: 'repeat(4, minmax(0, 1fr))' },
                   gap: 1.5,
                   alignItems: 'stretch',
                 }}

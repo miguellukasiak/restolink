@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { ThemeProvider } from '@mui/material/styles';
@@ -22,7 +22,6 @@ import SmartphoneRoundedIcon from '@mui/icons-material/SmartphoneRounded';
 import DesktopWindowsRoundedIcon from '@mui/icons-material/DesktopWindowsRounded';
 import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
 import ColorizeRoundedIcon from '@mui/icons-material/ColorizeRounded';
-import LockRoundedIcon from '@mui/icons-material/LockRounded';
 import {
   BACKGROUND_COLOR_PRESETS,
   FONT_OPTIONS,
@@ -37,6 +36,9 @@ import { getApiErrorMessage } from '../../services/api';
 import { createRestaurantTheme } from '../../components/public/RestaurantThemeProvider';
 import { PublicMenuView } from '../../components/public/PublicMenuView';
 import { MenuSkeleton } from '../../components/public/MenuSkeleton';
+import { PhoneFrame } from '../../components/panel/PhoneFrame';
+import { useMeasuredHeight } from '../../hooks/useMeasuredHeight';
+import { radii } from '../../theme';
 
 const HEX_PATTERN = /^#[0-9a-fA-F]{6}$/;
 
@@ -160,39 +162,10 @@ export function AppearancePage() {
   const logoInputRef = useRef<HTMLInputElement>(null);
   const hydratedRef = useRef(false);
 
-  // Measures the natural (unscaled) height of the preview content so the
-  // scaled wrapper below can be given an *explicit* CSS height instead of
-  // relying on `zoom`. `zoom` (unlike standard `transform: scale`) does not
-  // reliably respect an ancestor's `overflow: hidden` clip for `position:
-  // sticky` descendants in every engine — PublicMenuView's sticky header
-  // could bleed past the phone bezel even though the stacking context was
-  // otherwise correctly isolated. `transform: scale` is the well-supported,
-  // spec-compliant mechanism for this, so we're switching back to it and
-  // fixing the *original* dead-scroll-space bug the proper way: give the
-  // wrapper a real, measured height (content height × scale) instead of
-  // letting the (unscaled) content size leak into the scroll container.
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [contentHeight, setContentHeight] = useState<number | null>(null);
-
-  useLayoutEffect(() => {
-    const el = contentRef.current;
-    if (!el) return;
-    // `offsetHeight` ignores this element's own `transform: scale(...)` and
-    // reports its true pre-transform layout height — getBoundingClientRect()
-    // would return the already-scaled visual size and double-scale the wrapper.
-    const measure = () => setContentHeight(el.offsetHeight);
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(el);
-    // Images inside the preview decode async and grow the layout after this
-    // effect's first measurement — re-measure a few times on a plain JS timer
-    // (not rAF) so the wrapper's height always catches up to the true content.
-    const timeouts = [50, 150, 300, 600, 1200].map((delay) => setTimeout(measure, delay));
-    return () => {
-      observer.disconnect();
-      timeouts.forEach(clearTimeout);
-    };
-  }, [device, menu.isLoading]);
+  // The desktop preview lays the menu out at 1024px and scales it down; see
+  // useMeasuredHeight for why its wrapper is sized from a measurement. (The
+  // phone preview does the same inside PhoneFrame.)
+  const desktopContent = useMeasuredHeight(`${device}-${menu.isLoading}`);
 
   const {
     control,
@@ -400,7 +373,7 @@ export function AppearancePage() {
                       sx={{
                         width: '100%',
                         height: 120,
-                        borderRadius: 4,
+                        borderRadius: radii.md,
                         border: '2px dashed',
                         borderColor: field.value ? 'secondary.main' : 'divider',
                         overflow: 'hidden',
@@ -608,161 +581,12 @@ export function AppearancePage() {
             </ToggleButtonGroup>
 
             {device === 'mobile' ? (
-              /* Smartphone frame: brushed-metal gradient bezel + floating
-                 dynamic-island notch + side buttons for a realistic device feel. */
-              <Box
-                sx={{
-                  width: 320,
-                  borderRadius: '44px',
-                  p: '10px',
-                  background:
-                    'linear-gradient(155deg, #3a3a42 0%, #1C1B22 45%, #000000 100%)',
-                  boxShadow:
-                    '0 24px 64px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255,255,255,0.08)',
-                  position: 'relative',
-                }}
+              <PhoneFrame
+                address={`restolink.app/menu/${restaurantId.slice(0, 8)}…`}
+                measureKey={menu.isLoading}
               >
-                {/* Volume + power buttons */}
-                <Box
-                  aria-hidden
-                  sx={{
-                    position: 'absolute',
-                    left: -2,
-                    top: 108,
-                    width: 3,
-                    height: 28,
-                    bgcolor: '#000',
-                    borderRadius: '2px 0 0 2px',
-                  }}
-                />
-                <Box
-                  aria-hidden
-                  sx={{
-                    position: 'absolute',
-                    left: -2,
-                    top: 144,
-                    width: 3,
-                    height: 46,
-                    bgcolor: '#000',
-                    borderRadius: '2px 0 0 2px',
-                  }}
-                />
-                <Box
-                  aria-hidden
-                  sx={{
-                    position: 'absolute',
-                    right: -2,
-                    top: 130,
-                    width: 3,
-                    height: 58,
-                    bgcolor: '#000',
-                    borderRadius: '0 2px 2px 0',
-                  }}
-                />
-
-                {/* Screen — a vertical column: (fixed) browser chrome on top,
-                    (scrolling) site content below. */}
-                <Box
-                  sx={{
-                    height: 600,
-                    borderRadius: '34px',
-                    overflow: 'hidden',
-                    position: 'relative',
-                    bgcolor: '#FFFFFF',
-                    display: 'flex',
-                    flexDirection: 'column',
-                  }}
-                >
-                  {/* Floating dynamic-island style notch */}
-                  <Box
-                    aria-hidden
-                    sx={{
-                      position: 'absolute',
-                      top: 8,
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      width: 90,
-                      height: 24,
-                      bgcolor: '#000',
-                      borderRadius: '999px',
-                      zIndex: 3,
-                    }}
-                  />
-
-                  {/* Faux mobile browser chrome (iOS Safari-style): a fixed address
-                      bar sitting below the island and above the scrolling site
-                      content. Deliberately neutral/light — it represents the phone's
-                      browser UI, so it stays constant regardless of the (possibly
-                      dark) menu theme being previewed. Its top padding clears the
-                      dynamic island so the URL never overlaps the notch. */}
-                  <Box
-                    sx={{
-                      flexShrink: 0,
-                      pt: '40px',
-                      px: 1.5,
-                      pb: 1.25,
-                      bgcolor: '#F2F2F7',
-                      borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
-                    }}
-                  >
-                    <Stack
-                      direction="row"
-                      spacing={0.5}
-                      sx={{
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        px: 1.5,
-                        py: 0.5,
-                        borderRadius: 999,
-                        bgcolor: '#FFFFFF',
-                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.06)',
-                      }}
-                    >
-                      <LockRoundedIcon sx={{ fontSize: 11, color: 'rgba(0, 0, 0, 0.45)' }} />
-                      <Typography
-                        sx={{ fontSize: 11, fontWeight: 500, color: 'rgba(0, 0, 0, 0.6)' }}
-                        noWrap
-                      >
-                        restolink.app/menu/{restaurantId.slice(0, 8)}…
-                      </Typography>
-                    </Stack>
-                  </Box>
-
-                  {/* Scrollable site content */}
-                  <Box
-                    sx={{
-                      flex: 1,
-                      minHeight: 0,
-                      overflowY: 'auto',
-                      overflowX: 'hidden',
-                      scrollbarWidth: 'none',
-                      '&::-webkit-scrollbar': { display: 'none' },
-                    }}
-                  >
-                    {/* Strict screen boundary: an isolating stacking context (position +
-                        explicit z-index) PLUS an explicit, measured height (content ×
-                        scale) so the scaled+sticky content below can never escape this
-                        box's `overflow: hidden` clip — and no dead scroll space either.
-                        The screen's own overflow:hidden + radius rounds the outer
-                        corners, so this wrapper needs no border-radius of its own. */}
-                    <Box
-                      sx={{
-                        position: 'relative',
-                        zIndex: 1,
-                        overflow: 'hidden',
-                        height: contentHeight !== null ? contentHeight * 0.769 : 'auto',
-                      }}
-                    >
-                      <Box
-                        ref={contentRef}
-                        sx={{ width: 390, transform: 'scale(0.769)', transformOrigin: 'top left' }}
-                      >
-                        {preview}
-                      </Box>
-                    </Box>
-                  </Box>
-                </Box>
-              </Box>
+                {preview}
+              </PhoneFrame>
             ) : (
               /* Browser window frame */
               <Box
@@ -829,11 +653,14 @@ export function AppearancePage() {
                       position: 'relative',
                       zIndex: 1,
                       overflow: 'hidden',
-                      height: contentHeight !== null ? contentHeight * 0.4375 : 'auto',
+                      height:
+                        desktopContent.height !== null
+                          ? desktopContent.height * 0.4375
+                          : 'auto',
                     }}
                   >
                     <Box
-                      ref={contentRef}
+                      ref={desktopContent.ref}
                       sx={{ width: 1024, transform: 'scale(0.4375)', transformOrigin: 'top left' }}
                     >
                       {preview}

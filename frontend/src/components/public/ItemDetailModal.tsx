@@ -73,8 +73,18 @@ function DishImage({ name, imageUrl }: { name: string; imageUrl: string | null }
   );
 }
 
-/** Detail content shared by the desktop and mobile layouts. */
-function DetailBody({ item }: { item: PublicMenuItem }) {
+/**
+ * Detail content shared by the desktop and mobile layouts — and by the owner
+ * panel's dish editor, which previews it. `idPrefix` keeps the heading ids
+ * unique when it is rendered somewhere other than this modal.
+ */
+export function DishDetailBody({
+  item,
+  idPrefix = 'dish-detail',
+}: {
+  item: PublicMenuItem;
+  idPrefix?: string;
+}) {
   const { t } = useTranslation();
   const { allergenLabel, tagLabel } = useMenuLabels();
 
@@ -100,7 +110,7 @@ function DetailBody({ item }: { item: PublicMenuItem }) {
           spacing={2}
           sx={{ alignItems: 'flex-start', justifyContent: 'space-between' }}
         >
-          <Typography variant="h5" component="h2" id="dish-detail-title">
+          <Typography variant="h5" component="h2" id={`${idPrefix}-title`}>
             {item.name}
           </Typography>
           <Typography
@@ -113,7 +123,7 @@ function DetailBody({ item }: { item: PublicMenuItem }) {
           </Typography>
         </Stack>
         {/* Read immediately after the title: name, price, then allergens. */}
-        <Typography component="p" id="dish-detail-summary" sx={visuallyHidden}>
+        <Typography component="p" id={`${idPrefix}-summary`} sx={visuallyHidden}>
           {`${item.name}. ${t('price')}: ${formatPln(item.price)}. ${t(
             'allergens',
           )}: ${allergensText}.`}
@@ -121,8 +131,13 @@ function DetailBody({ item }: { item: PublicMenuItem }) {
       </Box>
 
       {item.description && (
-        <Box component="section" aria-labelledby="dish-detail-description">
-          <Typography variant="h6" component="h3" id="dish-detail-description" gutterBottom>
+        <Box component="section" aria-labelledby={`${idPrefix}-description`}>
+          <Typography
+            variant="h6"
+            component="h3"
+            id={`${idPrefix}-description`}
+            gutterBottom
+          >
             {t('description')}
           </Typography>
           <Typography variant="body2" color="text.secondary">
@@ -132,8 +147,13 @@ function DetailBody({ item }: { item: PublicMenuItem }) {
       )}
 
       {(item.ingredients || item.allergens.length > 0) && (
-        <Box component="section" aria-labelledby="dish-detail-ingredients">
-          <Typography variant="h6" component="h3" id="dish-detail-ingredients" gutterBottom>
+        <Box component="section" aria-labelledby={`${idPrefix}-ingredients`}>
+          <Typography
+            variant="h6"
+            component="h3"
+            id={`${idPrefix}-ingredients`}
+            gutterBottom
+          >
             {t('ingredientsAndAllergens')}
           </Typography>
           {item.ingredients && (
@@ -191,8 +211,13 @@ function DetailBody({ item }: { item: PublicMenuItem }) {
       )}
 
       {nutritionTiles.length > 0 && (
-        <Box component="section" aria-labelledby="dish-detail-nutrition">
-          <Typography variant="h6" component="h3" id="dish-detail-nutrition" gutterBottom>
+        <Box component="section" aria-labelledby={`${idPrefix}-nutrition`}>
+          <Typography
+            variant="h6"
+            component="h3"
+            id={`${idPrefix}-nutrition`}
+            gutterBottom
+          >
             {t('nutrition')}
           </Typography>
           <Box
@@ -207,7 +232,9 @@ function DetailBody({ item }: { item: PublicMenuItem }) {
                 key={tile.label}
                 elevation={0}
                 sx={{
-                  borderRadius: 3,
+                  // px, not a multiplier: 3 × the menu theme's 16px made
+                  // these small tiles into pills.
+                  borderRadius: '12px',
                   py: 1.5,
                   textAlign: 'center',
                   bgcolor: (theme) => alpha(theme.palette.text.primary, 0.045),
@@ -337,7 +364,7 @@ export function ItemDetailModal({ item, open, onClose }: ItemDetailModalProps) {
               boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.12)',
             }}
           >
-            <DetailBody item={item} />
+            <DishDetailBody item={item} />
           </Box>
         </Box>
       </Dialog>
@@ -372,7 +399,7 @@ export function ItemDetailModal({ item, open, onClose }: ItemDetailModalProps) {
             boxShadow: '0 16px 48px rgba(33, 26, 27, 0.18)',
           }}
         >
-          <DetailBody item={item} />
+          <DishDetailBody item={item} />
         </Card>
       </Box>
     </Dialog>

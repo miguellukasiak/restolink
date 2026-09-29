@@ -19,6 +19,23 @@ export const TAG_OPTIONS = [
   'Nowość',
 ] as const;
 
+/** One-tap names offered when adding a category: the sections most menus have. */
+export const CATEGORY_SUGGESTIONS = [
+  'Przystawki',
+  'Zupy',
+  'Sałatki',
+  'Dania główne',
+  'Makarony',
+  'Pizza',
+  'Burgery',
+  'Desery',
+  'Napoje',
+  'Kawa i herbata',
+] as const;
+
+/** The skeleton an empty menu can be started from in one click. */
+export const STARTER_CATEGORIES = ['Przystawki', 'Dania główne', 'Desery', 'Napoje'] as const;
+
 export type MenuAllergen = (typeof ALLERGEN_OPTIONS)[number];
 export type MenuTag = (typeof TAG_OPTIONS)[number];
 

@@ -44,7 +44,7 @@ export function ConfirmDialog({
       onClose={loading ? undefined : onClose}
       maxWidth="xs"
       fullWidth
-      slotProps={{ paper: { sx: { borderRadius: '28px', p: 1 } } }}
+      slotProps={{ paper: { sx: { p: 1 } } }}
     >
       <DialogTitle sx={{ pb: 1 }}>
         <Stack spacing={1.5} sx={{ alignItems: 'center', textAlign: 'center' }}>

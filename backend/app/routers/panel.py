@@ -18,12 +18,13 @@ from ..schemas import (
     MenuCategoryUpdate,
     MenuItemRequest,
     MenuItemResponse,
+    MenuOrderUpdate,
     RestaurantPanelInfo,
     RestaurantThemeUpdate,
 )
 
 # Every route below is addressed as `/{restaurant_id}/…`, so the guard is
-# applied once here rather than repeated eight times. It both authenticates the
+# applied once here rather than repeated on every route. It both authenticates the
 # bearer token and checks that the token's restaurant matches the one in the
 # path — a router-level dependency means a future endpoint cannot be added
 # unprotected by forgetting to decorate it.
@@ -253,20 +254,36 @@ async def upsert_menu_item(
     item: MenuItem | None = None
     if payload.id is not None:
         existing = await db.get(MenuItem, payload.id)
-        if existing is not None and existing.deleted_at is None:
+        if existing is not None:
+            # The id comes from the body, so it has to be proved to be ours
+            # like the category was. Dish ids are public — every guest menu
+            # carries them — and without this check any owner could name
+            # another restaurant's dish here and pull it into their own menu.
+            owner = await db.get(MenuCategory, existing.category_id)
+            if (
+                existing.deleted_at is not None
+                or owner is None
+                or owner.restaurant_id != restaurant_id
+            ):
+                raise HTTPException(status_code=404, detail="Nie znaleziono dania.")
             item = existing
 
-    if item is None:
+    # A new dish, or one moved to another category from the editor, goes to the
+    # end of its category — keeping the old position number would drop it at a
+    # random place among dishes it was never ordered against.
+    if item is None or item.category_id != payload.category_id:
         max_order = await db.scalar(
             select(func.max(MenuItem.sort_order)).where(
                 MenuItem.category_id == payload.category_id,
                 MenuItem.deleted_at.is_(None),
             )
         )
-        item = MenuItem(sort_order=(max_order or 0) + 1)
-        if payload.id is not None:
-            item.id = payload.id
-        db.add(item)
+        if item is None:
+            item = MenuItem()
+            if payload.id is not None:
+                item.id = payload.id
+            db.add(item)
+        item.sort_order = (max_order or 0) + 1
 
     item.category_id = payload.category_id
     item.name = payload.name
@@ -283,3 +300,77 @@ async def upsert_menu_item(
     await db.flush()
     await db.refresh(item)
     return item
+
+
+@router.put("/{restaurant_id}/menu/order", status_code=204)
+async def reorder_menu(
+    restaurant_id: uuid.UUID,
+    payload: MenuOrderUpdate,
+    db: AsyncSession = Depends(get_db),
+) -> None:
+    """Persist the board after a drag: category order, dish order, dish moves.
+
+    Every id must belong to this restaurant. One that does not answers 404
+    without saying whether it exists elsewhere, like the rest of the panel.
+    Live rows the body leaves out — a dish added from another tab while this
+    one was dragging — keep their relative order after the listed ones rather
+    than being lost or failing the whole request.
+    """
+    await _require_restaurant(db, restaurant_id)
+
+    categories = list(
+        await db.scalars(
+            select(MenuCategory)
+            .where(
+                MenuCategory.restaurant_id == restaurant_id,
+                MenuCategory.deleted_at.is_(None),
+            )
+            .order_by(MenuCategory.sort_order, MenuCategory.created_at)
+        )
+    )
+    categories_by_id = {category.id: category for category in categories}
+    if any(entry.id not in categories_by_id for entry in payload.categories):
+        raise HTTPException(status_code=404, detail="Nie znaleziono kategorii.")
+
+    items = list(
+        await db.scalars(
+            select(MenuItem)
+            .where(
+                MenuItem.category_id.in_(categories_by_id),
+                MenuItem.deleted_at.is_(None),
+            )
+            .order_by(MenuItem.sort_order, MenuItem.created_at)
+        )
+    )
+    items_by_id = {item.id: item for item in items}
+    listed_item_ids = {
+        item_id for entry in payload.categories for item_id in entry.item_ids
+    }
+    if not listed_item_ids <= items_by_id.keys():
+        raise HTTPException(status_code=404, detail="Nie znaleziono dania.")
+
+    listed_category_ids = {entry.id for entry in payload.categories}
+    ordered_categories = [categories_by_id[entry.id] for entry in payload.categories]
+    ordered_categories += [
+        category for category in categories if category.id not in listed_category_ids
+    ]
+    for position, category in enumerate(ordered_categories, start=1):
+        category.sort_order = position
+
+    columns: dict[uuid.UUID, list[MenuItem]] = {
+        category.id: [] for category in categories
+    }
+    for entry in payload.categories:
+        for item_id in entry.item_ids:
+            item = items_by_id[item_id]
+            item.category_id = entry.id
+            columns[entry.id].append(item)
+    # `items` is already in the old order, so the leftovers keep theirs.
+    for item in items:
+        if item.id not in listed_item_ids:
+            columns[item.category_id].append(item)
+    for dishes in columns.values():
+        for position, item in enumerate(dishes, start=1):
+            item.sort_order = position
+
+    await db.flush()

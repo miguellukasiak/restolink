@@ -58,6 +58,7 @@ import {
   FinderPatternPreview,
   ShapeOptionTile,
 } from '../../components/panel/qr/QrShapePreview';
+import { radii } from '../../theme';
 
 const PREVIEW_SIZE = 260;
 /** qr-code-styling renders a vector; a large internal size keeps PNG exports crisp. */
@@ -82,7 +83,7 @@ function ColorPickerDot({
         sx={{
           width: '100%',
           height: 40,
-          borderRadius: 2,
+          borderRadius: radii.sm,
           bgcolor: value,
           border: '1px solid',
           borderColor: 'divider',
@@ -259,7 +260,7 @@ export function QrGeneratorPage() {
                   flex: '1 1 220px',
                   maxWidth: 300,
                   textAlign: 'left',
-                  borderRadius: 4,
+                  borderRadius: radii.md,
                   p: 2,
                   border: '2px solid',
                   borderColor: selected ? 'secondary.main' : 'divider',
@@ -279,7 +280,7 @@ export function QrGeneratorPage() {
                     sx={{
                       width: 44,
                       height: 44,
-                      borderRadius: 3,
+                      borderRadius: radii.sm,
                       flexShrink: 0,
                       background,
                       display: 'flex',
@@ -645,7 +646,7 @@ export function QrGeneratorPage() {
                     sx={{
                       width: '100%',
                       height: 96,
-                      borderRadius: 3,
+                      borderRadius: radii.md,
                       border: '2px dashed',
                       borderColor: logoSrc ? 'secondary.main' : 'divider',
                       overflow: 'hidden',
@@ -766,7 +767,7 @@ export function QrGeneratorPage() {
             onClose={() => setDownloadAnchor(null)}
             anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
             transformOrigin={{ vertical: 'top', horizontal: 'center' }}
-            slotProps={{ paper: { sx: { borderRadius: 4, minWidth: 264, mt: 1 } } }}
+            slotProps={{ paper: { sx: { borderRadius: radii.md, minWidth: 264, mt: 1 } } }}
           >
             <MenuItem onClick={() => void handleDownload('png')} sx={{ py: 1.25 }}>
               <ListItemIcon>

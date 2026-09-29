@@ -12,7 +12,14 @@ import uuid
 from datetime import datetime
 from typing import Annotated, Any
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, PlainSerializer
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    Field,
+    PlainSerializer,
+    model_validator,
+)
 
 from .cloudinary_service import with_delivery_transformation
 from .models import RestaurantStatus
@@ -196,6 +203,37 @@ class MenuCategoryResponse(BaseModel):
     name: str
     order: int = Field(validation_alias="sort_order", serialization_alias="order")
     items: list[MenuItemResponse] = Field(default_factory=list)
+
+
+class MenuOrderCategory(BaseModel):
+    """One category's place on the board, with its dishes in display order."""
+
+    id: uuid.UUID
+    item_ids: list[uuid.UUID] = Field(default_factory=list, max_length=1000)
+
+
+class MenuOrderUpdate(BaseModel):
+    """Body for PUT /restaurants/{id}/menu/order: the board, top to bottom.
+
+    Carries the whole layout rather than a single move, so a request that
+    arrives late or twice still leaves the menu in the order the owner last
+    saw, instead of replaying a relative move against a board that has since
+    changed.
+    """
+
+    categories: list[MenuOrderCategory] = Field(max_length=200)
+
+    @model_validator(mode="after")
+    def _each_id_once(self) -> "MenuOrderUpdate":
+        category_ids = [category.id for category in self.categories]
+        if len(set(category_ids)) != len(category_ids):
+            raise ValueError("Kategoria występuje w układzie więcej niż raz.")
+        item_ids = [
+            item_id for category in self.categories for item_id in category.item_ids
+        ]
+        if len(set(item_ids)) != len(item_ids):
+            raise ValueError("Danie występuje w układzie więcej niż raz.")
+        return self
 
 
 # --------------------------------------------------------------------------- #
