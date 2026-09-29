@@ -718,8 +718,8 @@ Deployment prerequisites, carried across several sessions:
       production (confirmed by the owner, 2026-09-28).
 - [x] **Migration `010`** (`restaurant.menu_pattern`) — required column.
       Applied to production (confirmed by the owner, 2026-09-29).
-- [ ] **Migration `011`** (`restaurant.menu_languages`) — required column; apply
-      to production **before** the languages change reaches `main`.
+- [x] **Migration `011`** (`restaurant.menu_languages`) — required column.
+      Applied to production (confirmed by the owner, 2026-09-29).
 - [ ] `007` and `008` are table-only and optional (`create_all` covers them).
 - [ ] **DeepL quota is shared by every restaurant.** Drafting a whole menu into
       one language costs its character count; with 34 languages on offer, a
