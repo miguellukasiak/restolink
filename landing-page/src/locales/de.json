@@ -48,7 +48,6 @@
     "mock": {
       "openMenu": "Karte öffnen",
       "code": "DE",
-      "filterActive": "Gerichte mit Gluten ausgeblendet",
       "recommended": "Empfohlen",
       "soups": "Suppen",
       "desserts": "Desserts",
@@ -61,7 +60,26 @@
       "lactose": "Laktose",
       "celery": "Sellerie",
       "fish": "Fisch",
-      "nuts": "Nüsse"
+      "nuts": "Nüsse",
+      "mains": "Hauptgerichte",
+      "cheese": "Gebackener Käse mit Pommes",
+      "cheeseDesc": "Goldbraun paniert, Sauce Tatar",
+      "burger": "Rindfleischburger mit Pommes",
+      "burgerDesc": "Cheddar, Salat, Haussauce",
+      "goulash": "Gulasch mit Knödeln",
+      "goulashDesc": "Rind, Zwiebeln, Paprika",
+      "new": "Neu",
+      "filterTitle": "Allergene filtern",
+      "filterHint": "Wählen Sie die Allergene, deren Gerichte in der Karte ausgeblendet werden sollen.",
+      "clear": "Zurücksetzen",
+      "apply": "Filter anwenden",
+      "mustard": "Senf",
+      "eggs": "Eier",
+      "soy": "Soja",
+      "description": "Beschreibung",
+      "ingredients": "Zutaten und Allergene",
+      "salmonLong": "Gegrilltes Lachsfilet mit Zitronensauce und Ofengemüse.",
+      "bestseller": "Bestseller"
     }
   },
   "features": {

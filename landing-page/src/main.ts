@@ -353,6 +353,163 @@ function setupContactForm(): void {
   });
 }
 
+/**
+ * Changes a grid's layout and glides the items that stay into their new
+ * places ("FLIP"): measure, mutate, then start each moved item from where it
+ * was and let its CSS transition carry it home.
+ */
+function flip(container: HTMLElement, mutate: () => void): void {
+  const items = Array.from(container.children) as HTMLElement[];
+  const before = new Map(items.map((item) => [item, item.getBoundingClientRect()]));
+  mutate();
+  for (const item of items) {
+    const first = before.get(item);
+    if (item.hidden || !first) {
+      continue;
+    }
+    const last = item.getBoundingClientRect();
+    const dx = first.left - last.left;
+    const dy = first.top - last.top;
+    if (dx === 0 && dy === 0) {
+      continue;
+    }
+    item.style.transition = 'none';
+    item.style.transform = `translate(${dx}px, ${dy}px)`;
+    void item.offsetWidth;
+    item.style.transition = '';
+    item.style.transform = '';
+  }
+}
+
+/**
+ * Step 3's phone plays the product on a loop: open the allergy filter, pick
+ * gluten, apply — those dishes leave and the rest close ranks — then open a
+ * dish to show its description and allergens.
+ *
+ * It runs only while step 3 is the current one and the phone is actually
+ * displayed (the scene is desktop-only), and it is timer-driven: every step is
+ * a state class with a CSS transition, so a throttled or hidden tab can only
+ * ever show a real state. Under reduced motion it shows the end state — the
+ * filter applied — and never moves.
+ */
+function setupFilterDemo(): void {
+  const panel = document.querySelector<HTMLElement>('[data-filter-demo]');
+  const screen = panel?.querySelector<HTMLElement>('.fm-screen');
+  const grid = screen?.querySelector<HTMLElement>('.fm-grid');
+  const tap = screen?.querySelector<HTMLElement>('.fm-tap');
+  if (!panel || !screen || !grid || !tap) {
+    return;
+  }
+
+  const glutenDishes = Array.from(grid.querySelectorAll<HTMLElement>('[data-gluten]'));
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    screen.classList.add('is-filtered');
+    glutenDishes.forEach((dish) => {
+      dish.hidden = true;
+    });
+    return;
+  }
+
+  let timers: number[] = [];
+  let running = false;
+
+  const at = (ms: number, step: () => void): void => {
+    timers.push(window.setTimeout(step, ms));
+  };
+
+  /** A fingertip on the named element, then gone again on a timer. */
+  const tapOn = (name: string): void => {
+    const target = screen.querySelector<HTMLElement>(`[data-fm="${name}"]`);
+    if (!target) {
+      return;
+    }
+    const frame = screen.getBoundingClientRect();
+    const box = target.getBoundingClientRect();
+    tap.style.left = `${box.left - frame.left + box.width / 2}px`;
+    tap.style.top = `${box.top - frame.top + box.height / 2}px`;
+    tap.classList.remove('is-tapping');
+    void tap.offsetWidth;
+    tap.classList.add('is-tapping');
+    at(700, () => tap.classList.remove('is-tapping'));
+  };
+
+  const reset = (): void => {
+    screen.classList.remove('is-sheet-open', 'is-gluten', 'is-filtered', 'is-detail-open');
+    tap.classList.remove('is-tapping');
+    glutenDishes.forEach((dish) => {
+      dish.hidden = false;
+      dish.classList.remove('is-leaving');
+    });
+  };
+
+  const play = (): void => {
+    timers = [];
+    at(900, () => tapOn('shield'));
+    at(1150, () => screen.classList.add('is-sheet-open'));
+    at(2300, () => tapOn('gluten'));
+    at(2450, () => screen.classList.add('is-gluten'));
+    at(3300, () => tapOn('apply'));
+    at(3550, () => screen.classList.remove('is-sheet-open'));
+    at(3950, () => {
+      screen.classList.add('is-filtered');
+      glutenDishes.forEach((dish) => dish.classList.add('is-leaving'));
+    });
+    at(4350, () =>
+      flip(grid, () =>
+        glutenDishes.forEach((dish) => {
+          dish.hidden = true;
+        }),
+      ),
+    );
+    at(5700, () => tapOn('salmon'));
+    at(5950, () => screen.classList.add('is-detail-open'));
+    at(8900, () => tapOn('close'));
+    at(9100, () => screen.classList.remove('is-detail-open'));
+    // Fade out, rewind unseen, fade back in, go again.
+    at(10300, () => screen.classList.add('is-resetting'));
+    at(10750, reset);
+    at(10800, () => screen.classList.remove('is-resetting'));
+    at(11300, play);
+  };
+
+  const start = (): void => {
+    if (running) {
+      return;
+    }
+    running = true;
+    reset();
+    play();
+  };
+
+  const stop = (): void => {
+    if (!running) {
+      return;
+    }
+    running = false;
+    timers.forEach((timer) => window.clearTimeout(timer));
+    timers = [];
+    screen.classList.remove('is-resetting');
+    reset();
+  };
+
+  // The scene marks the current step's panel `.is-visible`; `getClientRects`
+  // is empty while the scene itself is hidden (below the lg breakpoint).
+  const sync = (): void => {
+    if (panel.classList.contains('is-visible') && panel.getClientRects().length > 0) {
+      start();
+    } else {
+      stop();
+    }
+  };
+
+  new MutationObserver(sync).observe(panel, {
+    attributes: true,
+    attributeFilter: ['class'],
+  });
+  sync();
+}
+
 /** Languages the hero's browser mockup cycles through. Polish is already on
  *  the phone beside it. */
 const DEMO_LANGUAGES = ['en', 'de', 'fr', 'es'] as const;
@@ -532,6 +689,7 @@ async function bootstrap(): Promise<void> {
   setupLanguageSwitcher();
   setupScrollReveal();
   setupScrollScene();
+  setupFilterDemo();
   setupHeroDemo();
   setupContactForm();
 }

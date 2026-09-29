@@ -48,7 +48,6 @@
     "mock": {
       "openMenu": "Abrir la carta",
       "code": "ES",
-      "filterActive": "Platos con gluten ocultos",
       "recommended": "Recomendados",
       "soups": "Sopas",
       "desserts": "Postres",
@@ -61,7 +60,26 @@
       "lactose": "Lactosa",
       "celery": "Apio",
       "fish": "Pescado",
-      "nuts": "Frutos secos"
+      "nuts": "Frutos secos",
+      "mains": "Principales",
+      "cheese": "Queso frito con patatas",
+      "cheeseDesc": "Queso rebozado dorado, salsa tártara",
+      "burger": "Hamburguesa de ternera con patatas",
+      "burgerDesc": "Cheddar, lechuga, salsa de la casa",
+      "goulash": "Gulash con knödel",
+      "goulashDesc": "Ternera, cebolla, pimentón",
+      "new": "Novedad",
+      "filterTitle": "Filtrar alérgenos",
+      "filterHint": "Marca los alérgenos cuyos platos quieres ocultar de la carta.",
+      "clear": "Borrar",
+      "apply": "Aplicar filtros",
+      "mustard": "Mostaza",
+      "eggs": "Huevos",
+      "soy": "Soja",
+      "description": "Descripción",
+      "ingredients": "Ingredientes y alérgenos",
+      "salmonLong": "Filete de salmón a la parrilla con salsa de limón y verduras asadas.",
+      "bestseller": "Más vendido"
     }
   },
   "features": {

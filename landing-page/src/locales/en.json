@@ -48,7 +48,6 @@
     "mock": {
       "openMenu": "Open menu",
       "code": "EN",
-      "filterActive": "Hiding dishes with gluten",
       "recommended": "Recommended",
       "soups": "Soups",
       "desserts": "Desserts",
@@ -61,7 +60,26 @@
       "lactose": "Lactose",
       "celery": "Celery",
       "fish": "Fish",
-      "nuts": "Nuts"
+      "nuts": "Nuts",
+      "mains": "Mains",
+      "cheese": "Fried cheese with fries",
+      "cheeseDesc": "Golden breaded cheese, tartare sauce",
+      "burger": "Beef burger with fries",
+      "burgerDesc": "Cheddar, lettuce, house sauce",
+      "goulash": "Goulash with dumplings",
+      "goulashDesc": "Beef, onion, paprika",
+      "new": "New",
+      "filterTitle": "Filter allergens",
+      "filterHint": "Select the allergens whose dishes should be hidden from the menu.",
+      "clear": "Clear",
+      "apply": "Apply filters",
+      "mustard": "Mustard",
+      "eggs": "Eggs",
+      "soy": "Soy",
+      "description": "Description",
+      "ingredients": "Ingredients and allergens",
+      "salmonLong": "Grilled salmon fillet with lemon sauce and roasted vegetables.",
+      "bestseller": "Bestseller"
     }
   },
   "features": {

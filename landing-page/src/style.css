@@ -555,57 +555,8 @@
 }
 
 /* ------------------------------------------------------------------------- *
- * Scene phone screens (steps 2 and 3), built from the same kit. The panel is
- * the size container; its screen scales with the phone.
+ * Dishes used by more than one mockup.
  * ------------------------------------------------------------------------- */
-.scene-mock .mock-screen {
-  font-size: 4.4cqw;
-  padding-top: 1.6em;
-}
-
-.mock-desc {
-  color: var(--mock-muted);
-  font-size: 0.72em;
-}
-
-/* "Dishes with gluten are hidden" — the filter's one-tap result, stated. */
-.mock-filter {
-  display: flex;
-  align-items: center;
-  gap: 0.45em;
-  margin-top: 0.9em;
-  padding: 0.5em 0.85em;
-  border-radius: 999px;
-  background-color: color-mix(in srgb, var(--mock-accent) 10%, transparent);
-  color: var(--mock-accent);
-  font-size: 0.75em;
-  font-weight: 600;
-}
-
-.mock-filter span {
-  flex: 1;
-}
-
-.mock-badge-wrap {
-  position: relative;
-  display: inline-flex;
-}
-
-.mock-badge {
-  position: absolute;
-  top: -0.45em;
-  right: -0.55em;
-  display: grid;
-  place-items: center;
-  min-width: 1.3em;
-  height: 1.3em;
-  border-radius: 999px;
-  background-color: var(--mock-accent);
-  color: var(--mock-accent-ink);
-  font-size: 0.6em;
-  font-weight: 700;
-}
-
 .mock-food-salmon {
   --food: #f08a6c;
 }
@@ -630,6 +581,455 @@
   }
   to {
     transform: translateY(150px);
+  }
+}
+
+/* ------------------------------------------------------------------------- *
+ * Step 3: the guest menu in the dark "elegance" theme, filtering itself.
+ * Modelled on the product's own screens; `setupFilterDemo` in main.ts plays
+ * it by toggling state classes on `.fm-screen`. Every state is a transition,
+ * never an entrance animation, so a hidden tab can only ever hold a real
+ * state. The panel is the size container; sizes inside are in `em`.
+ * ------------------------------------------------------------------------- */
+.fm {
+  container-type: inline-size;
+}
+
+.fm-screen {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  padding: 1.7em 0.95em 0;
+  background-color: #1c1c1c;
+  color: #f4efe2;
+  font-size: 4.1cqw;
+  line-height: 1.25;
+}
+
+.fm-content {
+  transition: opacity 0.4s ease;
+}
+
+.fm-screen.is-resetting .fm-content {
+  opacity: 0;
+}
+
+.fm-top {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+}
+
+.fm-logo {
+  display: grid;
+  place-items: center;
+  width: 2.6em;
+  height: 2.6em;
+  margin-right: auto;
+  border: 1.5px solid rgb(212 175 55 / 0.55);
+  border-radius: 999px;
+  background-color: rgb(212 175 55 / 0.1);
+  color: #d4af37;
+  font-size: 0.8em;
+  font-weight: 800;
+}
+
+.fm-icon {
+  width: 1.25em;
+  height: 1.25em;
+  flex: none;
+}
+
+.fm-shield {
+  position: relative;
+  display: inline-flex;
+  color: #cfc8b6;
+  transition: color 0.3s ease;
+}
+
+.fm-badge {
+  position: absolute;
+  top: -0.55em;
+  right: -0.65em;
+  display: grid;
+  place-items: center;
+  min-width: 1.4em;
+  height: 1.4em;
+  border-radius: 999px;
+  background-color: #d4af37;
+  color: #1c1c1c;
+  font-size: 0.62em;
+  font-weight: 800;
+  transform: scale(0);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.fm-screen.is-filtered .fm-shield {
+  color: #d4af37;
+}
+
+.fm-screen.is-filtered .fm-badge {
+  transform: scale(1);
+}
+
+.fm-lang {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  font-size: 0.8em;
+  font-weight: 700;
+}
+
+.fm-pills {
+  display: flex;
+  gap: 0.45em;
+  margin-top: 1em;
+  padding-bottom: 0.8em;
+  border-bottom: 1px solid rgb(244 239 226 / 0.08);
+  white-space: nowrap;
+}
+
+.fm-pill {
+  padding: 0.45em 0.9em;
+  border-radius: 999px;
+  background-color: #2b2b2b;
+  font-size: 0.78em;
+  font-weight: 600;
+}
+
+.fm-pill.is-active {
+  background-color: #d4af37;
+  color: #1c1c1c;
+}
+
+.fm-title {
+  margin-top: 0.9em;
+  color: #e7e1d3;
+  font-size: 1.15em;
+  font-weight: 700;
+}
+
+.fm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9em 0.65em;
+  margin-top: 0.7em;
+}
+
+.fm-card {
+  position: relative;
+  min-width: 0;
+  transition:
+    opacity 0.35s ease,
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.fm-card.is-leaving {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.fm-img {
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 6 / 5;
+  border-radius: 0.8em;
+}
+
+.fm-img svg,
+.fm-detail-img svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.fm-new {
+  position: absolute;
+  top: 0.5em;
+  right: 0.5em;
+  padding: 0.25em 0.55em;
+  border-radius: 999px;
+  background-color: #d4af37;
+  color: #1c1c1c;
+  font-size: 0.55em;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.fm-name,
+.fm-desc {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.fm-name {
+  margin-top: 0.5em;
+  font-size: 0.8em;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.fm-desc {
+  margin-top: 0.25em;
+  color: #a79f8c;
+  font-size: 0.66em;
+}
+
+.fm-price {
+  display: block;
+  margin-top: 0.3em;
+  font-size: 0.78em;
+  font-weight: 700;
+}
+
+.fm-scrim {
+  position: absolute;
+  inset: 0;
+  background-color: rgb(0 0 0 / 0.55);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.fm-screen.is-sheet-open .fm-scrim,
+.fm-screen.is-detail-open .fm-scrim {
+  opacity: 1;
+}
+
+.fm-sheet,
+.fm-detail {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  transform: translateY(105%);
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.fm-sheet {
+  padding: 1.3em 1.1em 1.5em;
+  border-radius: 1.6em 1.6em 0 0;
+  background-color: #3b3b3b;
+}
+
+.fm-screen.is-sheet-open .fm-sheet,
+.fm-screen.is-detail-open .fm-detail {
+  transform: none;
+}
+
+.fm-sheet-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7em;
+}
+
+.fm-sheet-icon {
+  display: grid;
+  place-items: center;
+  width: 2.5em;
+  height: 2.5em;
+  flex: none;
+  border-radius: 999px;
+  background-color: rgb(212 175 55 / 0.18);
+  color: #d4af37;
+}
+
+.fm-sheet-title {
+  font-size: 1.05em;
+  font-weight: 700;
+}
+
+.fm-sheet-sub {
+  margin-top: 0.25em;
+  color: #cfc8b6;
+  font-size: 0.7em;
+}
+
+.fm-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4em;
+  margin-top: 1em;
+}
+
+.fm-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  padding: 0.4em 0.75em;
+  border: 1px solid rgb(244 239 226 / 0.25);
+  border-radius: 999px;
+  font-size: 0.72em;
+  font-weight: 600;
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease;
+}
+
+.fm-chip svg {
+  display: none;
+  width: 1em;
+  height: 1em;
+}
+
+.fm-screen.is-gluten .fm-chip-gluten {
+  border-color: #d4af37;
+  background-color: #d4af37;
+  color: #1c1c1c;
+}
+
+.fm-screen.is-gluten .fm-chip-gluten svg {
+  display: block;
+}
+
+.fm-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1.2em;
+}
+
+.fm-clear {
+  padding-left: 0.6em;
+  color: #8e877a;
+  font-size: 0.8em;
+  font-weight: 700;
+}
+
+.fm-apply {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.65em 1.1em;
+  border-radius: 999px;
+  background-color: #d4af37;
+  color: #1c1c1c;
+  font-size: 0.8em;
+  font-weight: 700;
+}
+
+.fm-detail {
+  top: 6%;
+  overflow: hidden;
+  border-radius: 1.6em 1.6em 0 0;
+  background-color: #262626;
+}
+
+.fm-detail-img {
+  display: block;
+  aspect-ratio: 1 / 0.92;
+}
+
+.fm-close {
+  position: absolute;
+  top: 0.8em;
+  left: 0.8em;
+  display: grid;
+  place-items: center;
+  width: 2.1em;
+  height: 2.1em;
+  border-radius: 999px;
+  background-color: rgb(0 0 0 / 0.45);
+  color: #fff;
+}
+
+.fm-detail-body {
+  position: relative;
+  margin-top: -1.2em;
+  padding: 1.1em 1.1em 1.4em;
+  border-radius: 1.4em 1.4em 0 0;
+  background-color: #262626;
+}
+
+.fm-detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.6em;
+}
+
+.fm-detail-name {
+  font-size: 1.15em;
+  font-weight: 700;
+}
+
+.fm-detail-price {
+  color: #d4af37;
+  font-size: 1.05em;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.fm-h {
+  margin-top: 0.9em;
+  font-size: 0.85em;
+  font-weight: 700;
+}
+
+.fm-detail-text {
+  margin-top: 0.3em;
+  color: #cfc8b6;
+  font-size: 0.72em;
+  line-height: 1.45;
+}
+
+.fm-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4em;
+  margin-top: 0.55em;
+}
+
+.fm-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0.35em 0.75em;
+  border: 1px solid rgb(232 140 60 / 0.5);
+  border-radius: 999px;
+  background-color: rgb(232 140 60 / 0.12);
+  font-size: 0.7em;
+  font-weight: 600;
+}
+
+.fm-tag.is-good {
+  border-color: rgb(106 168 79 / 0.55);
+  background-color: rgb(106 168 79 / 0.14);
+}
+
+/* A fingertip: where the demo "taps". Invisible at rest; the class that
+   plays it is removed on a timer, so it never lingers. */
+.fm-tap {
+  position: absolute;
+  z-index: 5;
+  width: 2.6em;
+  height: 2.6em;
+  margin: -1.3em 0 0 -1.3em;
+  border-radius: 999px;
+  background-color: rgb(255 255 255 / 0.55);
+  box-shadow: 0 0 0 0.4em rgb(255 255 255 / 0.18);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.fm-tap.is-tapping {
+  animation: fm-tap 0.65s ease-out;
+}
+
+@keyframes fm-tap {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  25% {
+    opacity: 1;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.3);
   }
 }
 

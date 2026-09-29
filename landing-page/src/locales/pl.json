@@ -48,7 +48,6 @@
     "mock": {
       "openMenu": "Otwórz menu",
       "code": "PL",
-      "filterActive": "Ukryto dania z glutenem",
       "recommended": "Polecane",
       "soups": "Zupy",
       "desserts": "Desery",
@@ -61,7 +60,26 @@
       "lactose": "Laktoza",
       "celery": "Seler",
       "fish": "Ryby",
-      "nuts": "Orzechy"
+      "nuts": "Orzechy",
+      "mains": "Dania główne",
+      "cheese": "Smażony ser z frytkami",
+      "cheeseDesc": "Złocisty ser w panierce, sos tatarski",
+      "burger": "Burger wołowy z frytkami",
+      "burgerDesc": "Cheddar, sałata, sos domowy",
+      "goulash": "Gulasz z knedlikami",
+      "goulashDesc": "Wołowina, cebula, papryka",
+      "new": "Nowość",
+      "filterTitle": "Filtruj alergeny",
+      "filterHint": "Zaznacz alergeny, których dania mają być ukryte w menu.",
+      "clear": "Wyczyść",
+      "apply": "Zastosuj filtry",
+      "mustard": "Gorczyca",
+      "eggs": "Jaja",
+      "soy": "Soja",
+      "description": "Opis",
+      "ingredients": "Składniki i alergeny",
+      "salmonLong": "Filet z łososia z grilla z sosem cytrynowym i pieczonymi warzywami.",
+      "bestseller": "Bestseller"
     }
   },
   "features": {

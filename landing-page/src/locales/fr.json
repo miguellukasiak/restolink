@@ -48,7 +48,6 @@
     "mock": {
       "openMenu": "Ouvrir la carte",
       "code": "FR",
-      "filterActive": "Plats avec gluten masqués",
       "recommended": "Suggestions",
       "soups": "Soupes",
       "desserts": "Desserts",
@@ -61,7 +60,26 @@
       "lactose": "Lactose",
       "celery": "Céleri",
       "fish": "Poisson",
-      "nuts": "Fruits à coque"
+      "nuts": "Fruits à coque",
+      "mains": "Plats",
+      "cheese": "Fromage frit et frites",
+      "cheeseDesc": "Fromage pané doré, sauce tartare",
+      "burger": "Burger de bœuf et frites",
+      "burgerDesc": "Cheddar, salade, sauce maison",
+      "goulash": "Goulash et knödels",
+      "goulashDesc": "Bœuf, oignon, paprika",
+      "new": "Nouveau",
+      "filterTitle": "Filtrer les allergènes",
+      "filterHint": "Sélectionnez les allergènes dont les plats doivent être masqués de la carte.",
+      "clear": "Effacer",
+      "apply": "Appliquer les filtres",
+      "mustard": "Moutarde",
+      "eggs": "Œufs",
+      "soy": "Soja",
+      "description": "Description",
+      "ingredients": "Ingrédients et allergènes",
+      "salmonLong": "Pavé de saumon grillé, sauce au citron et légumes rôtis.",
+      "bestseller": "Best-seller"
     }
   },
   "features": {

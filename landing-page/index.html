@@ -626,64 +626,117 @@
                         </div>
                       </div>
 
-                      <!-- Step 3: the menu with photos, descriptions and
-                           allergens, and the gluten filter already applied —
-                           every dish left on the list is gluten-free. -->
+                      <!-- Step 3: the guest menu in the dark theme, playing the
+                           allergy filter end to end (setupFilterDemo in
+                           main.ts): open it, pick gluten, apply — those
+                           dishes leave and the rest close ranks — then open
+                           a dish. Static English copy is the no-script view. -->
                       <div
                         data-panel
-                        class="scene-panel scene-mock mock-device absolute inset-0"
+                        data-filter-demo
+                        class="scene-panel fm absolute inset-0"
                         aria-hidden="true"
                       >
-                        <div class="mock-screen">
-                          <div class="mock-top">
-                            <span class="mock-logo">BL</span>
-                            <span class="mock-name">Bistro Lipa</span>
-                            <span class="mock-badge-wrap">
-                              <svg class="mock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6z" /><path d="M9 12h6M12 9v6" /></svg>
-                              <span class="mock-badge">1</span>
+                        <div class="fm-screen">
+                          <div class="fm-content">
+                          <div class="fm-top">
+                            <span class="fm-logo">BL</span>
+                            <svg class="fm-icon text-[#cfc8b6]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" focusable="false"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+                            <span class="fm-shield" data-fm="shield">
+                              <svg class="fm-icon" viewBox="0 0 24 24" fill="currentColor" stroke="#1c1c1c" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6z" /><path d="M9 12h6M12 9v6" /></svg>
+                              <span class="fm-badge">1</span>
                             </span>
-                            <span data-i18n="experience.mock.code" class="mock-lang">EN</span>
+                            <span class="fm-lang">
+                              <svg class="fm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" focusable="false"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18" /></svg>
+                              <span data-i18n="experience.mock.code">EN</span>
+                            </span>
                           </div>
-                          <div class="mock-filter">
-                            <svg class="mock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="m5 13 4 4L19 7" /></svg>
-                            <span data-i18n="experience.mock.filterActive">Hiding dishes with gluten</span>
-                            <svg class="mock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" focusable="false"><path d="M6 6l12 12M18 6 6 18" /></svg>
+                          <div class="fm-pills">
+                            <span data-i18n="experience.mock.mains" class="fm-pill is-active">Mains</span>
+                            <span data-i18n="experience.mock.soups" class="fm-pill">Soups</span>
+                            <span data-i18n="experience.mock.desserts" class="fm-pill">Desserts</span>
                           </div>
-                          <div class="mock-pills">
-                            <span data-i18n="experience.mock.recommended" class="mock-pill is-active">Recommended</span>
-                            <span data-i18n="experience.mock.soups" class="mock-pill">Soups</span>
-                            <span data-i18n="experience.mock.desserts" class="mock-pill">Desserts</span>
+                          <p data-i18n="experience.mock.mains" class="fm-title">Mains</p>
+                          <div class="fm-grid">
+                            <div class="fm-card" data-gluten>
+                              <span class="fm-img"><svg viewBox="0 0 120 100" preserveAspectRatio="xMidYMid slice" focusable="false"><g id="fm-food-cheese"><rect width="120" height="100" fill="#efe9df" /><ellipse cx="60" cy="55" rx="54" ry="42" fill="#fff" /><ellipse cx="60" cy="55" rx="47" ry="36" fill="none" stroke="#ece6da" stroke-width="1.5" /><path d="M18 40c2-10 14-14 22-8 6-6 18-2 16 8-6 8-30 10-38 0z" fill="#7cb342" /><path d="M26 38c4-4 10-4 14 0" stroke="#558b2f" stroke-width="1.5" fill="none" /><circle cx="34" cy="36" r="3.2" fill="#e53935" /><circle cx="44" cy="39" r="2.6" fill="#e53935" /><g fill="#f6c453" stroke="#dea22f" stroke-width=".7"><rect x="16" y="56" width="34" height="5.5" rx="2" transform="rotate(-14 33 59)" /><rect x="18" y="64" width="34" height="5.5" rx="2" transform="rotate(6 35 67)" /><rect x="22" y="71" width="30" height="5.5" rx="2" transform="rotate(-4 37 74)" /><rect x="28" y="49" width="26" height="5.5" rx="2" transform="rotate(24 41 52)" /></g><g transform="rotate(-10 78 62)"><rect x="56" y="48" width="44" height="28" rx="7" fill="#d9912f" /><rect x="58" y="49" width="40" height="24" rx="6" fill="#eaa93f" /><g fill="#c07a22"><circle cx="64" cy="56" r="1.1" /><circle cx="72" cy="62" r="1.1" /><circle cx="84" cy="54" r="1.1" /><circle cx="90" cy="66" r="1.1" /><circle cx="78" cy="68" r="1.1" /><circle cx="68" cy="68" r="1" /><circle cx="92" cy="57" r="1" /></g></g><circle cx="88" cy="30" r="11" fill="#fff" stroke="#e3ddd0" stroke-width="1.5" /><circle cx="88" cy="30" r="8" fill="#f3eed9" /><g fill="#8bc34a"><circle cx="85" cy="28" r="1" /><circle cx="90" cy="31" r="1" /><circle cx="87" cy="33" r=".9" /></g></g></svg></span>
+                              <span data-i18n="experience.mock.cheese" class="fm-name">Fried cheese with fries</span>
+                              <span data-i18n="experience.mock.cheeseDesc" class="fm-desc">Golden breaded cheese, tartare sauce</span>
+                              <span class="fm-price">40,00 zł</span>
+                            </div>
+                            <div class="fm-card" data-fm="salmon">
+                              <span class="fm-img"><svg viewBox="0 0 120 100" preserveAspectRatio="xMidYMid slice" focusable="false"><g id="fm-food-salmon"><rect width="120" height="100" fill="#e6ecef" /><ellipse cx="60" cy="55" rx="54" ry="42" fill="#fff" /><ellipse cx="60" cy="55" rx="47" ry="36" fill="none" stroke="#e8edf0" stroke-width="1.5" /><circle cx="30" cy="68" r="6" fill="#f4a259" /><circle cx="40" cy="75" r="5" fill="#8bc34a" /><circle cx="25" cy="56" r="5" fill="#e76f51" /><circle cx="36" cy="61" r="4" fill="#f6d365" /><g transform="rotate(-8 70 52)"><rect x="46" y="38" width="50" height="28" rx="11" fill="#f08a6c" /><path d="M56 40c4 8 4 18 0 26M66 39c4 9 4 19 0 27M76 39c4 9 4 19 0 27M86 40c4 8 4 18 0 26" stroke="#fbd0bd" stroke-width="2" fill="none" /><path d="M52 48l38-5M52 58l40-5" stroke="#b9553b" stroke-width="2.4" opacity=".45" stroke-linecap="round" /></g><path d="M82 72a12 12 0 0 1 24 0z" fill="#f7d44c" stroke="#f1c232" /><path d="M94 72v-10M94 72l-7-7M94 72l7-7" stroke="#fdf1b8" /><path d="M54 31c4-5 9-5 11-1-4 4-8 4-11 1z" fill="#43a047" /></g></svg></span>
+                              <span data-i18n="experience.mock.dish2" class="fm-name">Grilled salmon</span>
+                              <span data-i18n="experience.mock.dish2Desc" class="fm-desc">With lemon sauce</span>
+                              <span class="fm-price">42,00 zł</span>
+                            </div>
+                            <div class="fm-card" data-gluten>
+                              <span class="fm-img"><svg viewBox="0 0 120 100" preserveAspectRatio="xMidYMid slice" focusable="false"><g id="fm-food-burger"><rect width="120" height="100" fill="#f1ebe2" /><ellipse cx="60" cy="84" rx="54" ry="10" fill="#dcc3a0" /><g fill="#f6c453" stroke="#dea22f" stroke-width=".7"><rect x="86" y="46" width="6" height="34" rx="2" transform="rotate(8 89 63)" /><rect x="94" y="50" width="6" height="30" rx="2" transform="rotate(-6 97 65)" /><rect x="101" y="54" width="6" height="26" rx="2" transform="rotate(10 104 67)" /></g><path d="M18 74h58a4 4 0 0 1 0 8H18a4 4 0 0 1 0-8z" fill="#d99a4e" /><rect x="16" y="64" width="62" height="11" rx="5" fill="#6b3a22" /><path d="M16 62h62l-6 8-6-4-8 7-8-6-8 6-8-7-8 5-6-5z" fill="#f5c542" /><path d="M14 60c4-4 8 0 12-3s8 2 12-1 8 2 12-1 8 2 12-1 8 2 10 1v5H14z" fill="#7cb342" /><path d="M18 57c0-18 16-26 29-26s29 8 29 26z" fill="#e3a24f" /><g fill="#fbeccd"><ellipse cx="34" cy="42" rx="2" ry="1.1" transform="rotate(-20 34 42)" /><ellipse cx="46" cy="37" rx="2" ry="1.1" /><ellipse cx="58" cy="41" rx="2" ry="1.1" transform="rotate(20 58 41)" /><ellipse cx="40" cy="48" rx="2" ry="1.1" /><ellipse cx="54" cy="48" rx="2" ry="1.1" transform="rotate(-15 54 48)" /><ellipse cx="66" cy="49" rx="2" ry="1.1" /></g></g></svg></span>
+                              <span data-i18n="experience.mock.burger" class="fm-name">Beef burger with fries</span>
+                              <span data-i18n="experience.mock.burgerDesc" class="fm-desc">Cheddar, lettuce, house sauce</span>
+                              <span class="fm-price">37,00 zł</span>
+                            </div>
+                            <div class="fm-card">
+                              <span class="fm-img"><svg viewBox="0 0 120 100" preserveAspectRatio="xMidYMid slice" focusable="false"><g id="fm-food-salad"><rect width="120" height="100" fill="#eef0e6" /><circle cx="60" cy="52" r="42" fill="#fff" /><circle cx="60" cy="52" r="36" fill="#f5f5f0" /><g fill="#6aa84f"><path d="M34 44c6-10 18-10 22-2-8 6-16 6-22 2z" /><path d="M62 30c8-4 16 0 16 8-8 2-14 0-16-8z" /><path d="M70 62c8-2 14 4 12 10-8 0-12-4-12-10z" /><path d="M40 64c2-8 10-10 16-6-4 6-10 8-16 6z" /></g><g fill="#9b2c4b"><rect x="46" y="46" width="8" height="8" rx="1.5" transform="rotate(12 50 50)" /><rect x="62" y="44" width="8" height="8" rx="1.5" transform="rotate(-8 66 48)" /><rect x="56" y="58" width="8" height="8" rx="1.5" transform="rotate(20 60 62)" /><rect x="72" y="52" width="7" height="7" rx="1.5" /></g><g fill="#fffdf6" stroke="#e8e2cf" stroke-width=".6"><circle cx="54" cy="38" r="4" /><circle cx="68" cy="58" r="3.6" /><circle cx="48" cy="58" r="3.4" /></g><g fill="#a0703c"><ellipse cx="62" cy="36" rx="3" ry="2.2" /><ellipse cx="44" cy="50" rx="2.8" ry="2" /><ellipse cx="76" cy="44" rx="2.8" ry="2" /></g></g></svg></span>
+                              <span data-i18n="experience.mock.new" class="fm-new">New</span>
+                              <span data-i18n="experience.mock.dish3" class="fm-name">Beetroot salad</span>
+                              <span data-i18n="experience.mock.dish3Desc" class="fm-desc">Goat cheese and walnuts</span>
+                              <span class="fm-price">26,00 zł</span>
+                            </div>
+                            <div class="fm-card">
+                              <span class="fm-img"><svg viewBox="0 0 120 100" preserveAspectRatio="xMidYMid slice" focusable="false"><g id="fm-food-tomato"><rect width="120" height="100" fill="#f4e7e1" /><circle cx="60" cy="52" r="42" fill="#fff" /><circle cx="60" cy="52" r="33" fill="#d8553c" /><path d="M48 46c6-8 20-6 22 2s-10 12-16 8" stroke="#fff5ec" stroke-width="3" fill="none" stroke-linecap="round" opacity=".9" /><g fill="#2e7d32"><path d="M66 60c4-6 10-6 12-2-4 4-8 4-12 2z" /><path d="M70 64c2-6 8-8 11-5-3 5-7 6-11 5z" /></g></g></svg></span>
+                              <span data-i18n="experience.mock.dish1" class="fm-name">Cream of tomato soup</span>
+                              <span data-i18n="experience.mock.dish1Desc" class="fm-desc">With basil and olive oil</span>
+                              <span class="fm-price">19,00 zł</span>
+                            </div>
+                            <div class="fm-card" data-gluten>
+                              <span class="fm-img"><svg viewBox="0 0 120 100" preserveAspectRatio="xMidYMid slice" focusable="false"><g id="fm-food-goulash"><rect width="120" height="100" fill="#eee5da" /><ellipse cx="60" cy="55" rx="54" ry="42" fill="#fff" /><path d="M52 36c14-6 34 0 38 12s-4 24-18 26-28-4-30-14 0-20 10-24z" fill="#7a3b20" /><path d="M58 44c8-4 18-2 22 4" stroke="#9c4a26" stroke-width="3" fill="none" stroke-linecap="round" /><g fill="none" stroke="#f3e9dc" stroke-width="1.8"><circle cx="66" cy="52" r="5" /><circle cx="76" cy="58" r="4" /><circle cx="62" cy="62" r="3.5" /></g><g fill="#f3ead6" stroke="#e1d4b6"><rect x="16" y="46" width="14" height="30" rx="6" transform="rotate(-12 23 61)" /><rect x="28" y="44" width="14" height="30" rx="6" transform="rotate(-4 35 59)" /><rect x="40" y="46" width="14" height="30" rx="6" transform="rotate(6 47 61)" /></g><g fill="#d8c9a5"><circle cx="22" cy="56" r=".9" /><circle cx="25" cy="66" r=".9" /><circle cx="34" cy="54" r=".9" /><circle cx="36" cy="64" r=".9" /><circle cx="47" cy="58" r=".9" /><circle cx="46" cy="68" r=".9" /></g></g></svg></span>
+                              <span data-i18n="experience.mock.goulash" class="fm-name">Goulash with dumplings</span>
+                              <span data-i18n="experience.mock.goulashDesc" class="fm-desc">Beef, onion, paprika</span>
+                              <span class="fm-price">36,00 zł</span>
+                            </div>
                           </div>
-                          <p data-i18n="experience.mock.recommended" class="mock-heading">Recommended</p>
-                          <div class="mt-[0.7em] grid gap-[0.6em]">
-                            <div class="mock-row">
-                              <span class="mock-img mock-food-tomato mock-table-rose"></span>
-                              <div class="grid gap-[0.25em]">
-                                <span data-i18n="experience.mock.dish1" class="mock-dish">Cream of tomato soup</span>
-                                <span data-i18n="experience.mock.dish1Desc" class="mock-desc">With basil and olive oil</span>
-                                <span class="mock-price">19,00 zł</span>
-                                <span class="mock-chips"><span data-i18n="experience.mock.lactose" class="mock-chip">Lactose</span><span data-i18n="experience.mock.celery" class="mock-chip">Celery</span></span>
+                          </div>
+
+                          <div class="fm-scrim"></div>
+
+                          <div class="fm-sheet">
+                            <div class="fm-sheet-head">
+                              <span class="fm-sheet-icon"><svg class="fm-icon" viewBox="0 0 24 24" fill="currentColor" stroke="#3b3b3b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6z" /><path d="M9 12h6M12 9v6" /></svg></span>
+                              <div>
+                                <p data-i18n="experience.mock.filterTitle" class="fm-sheet-title">Filter allergens</p>
+                                <p data-i18n="experience.mock.filterHint" class="fm-sheet-sub">Select the allergens whose dishes should be hidden from the menu.</p>
                               </div>
                             </div>
-                            <div class="mock-row">
-                              <span class="mock-img mock-food-salmon mock-table-sky"></span>
-                              <div class="grid gap-[0.25em]">
-                                <span data-i18n="experience.mock.dish2" class="mock-dish">Grilled salmon</span>
-                                <span data-i18n="experience.mock.dish2Desc" class="mock-desc">With lemon sauce</span>
-                                <span class="mock-price">42,00 zł</span>
-                                <span class="mock-chips"><span data-i18n="experience.mock.fish" class="mock-chip">Fish</span></span>
-                              </div>
+                            <div class="fm-chips"><span class="fm-chip fm-chip-gluten" data-fm="gluten"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="m5 13 4 4L19 7" /></svg><span>Gluten</span></span><span data-i18n="experience.mock.mustard" class="fm-chip">Mustard</span><span data-i18n="experience.mock.eggs" class="fm-chip">Eggs</span><span data-i18n="experience.mock.lactose" class="fm-chip">Lactose</span><span data-i18n="experience.mock.nuts" class="fm-chip">Nuts</span><span data-i18n="experience.mock.fish" class="fm-chip">Fish</span><span data-i18n="experience.mock.celery" class="fm-chip">Celery</span><span data-i18n="experience.mock.soy" class="fm-chip">Soy</span></div>
+                            <div class="fm-actions">
+                              <span data-i18n="experience.mock.clear" class="fm-clear">Clear</span>
+                              <span class="fm-apply" data-fm="apply">
+                                <svg class="fm-icon" viewBox="0 0 24 24" fill="currentColor" stroke="#d4af37" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6z" /><path d="M9 12h6M12 9v6" /></svg>
+                                <span data-i18n="experience.mock.apply">Apply filters</span>
+                              </span>
                             </div>
-                            <div class="mock-row">
-                              <span class="mock-img mock-food-beet mock-table-sage"></span>
-                              <div class="grid gap-[0.25em]">
-                                <span data-i18n="experience.mock.dish3" class="mock-dish">Beetroot salad</span>
-                                <span data-i18n="experience.mock.dish3Desc" class="mock-desc">Goat cheese and walnuts</span>
-                                <span class="mock-price">26,00 zł</span>
-                                <span class="mock-chips"><span data-i18n="experience.mock.lactose" class="mock-chip">Lactose</span><span data-i18n="experience.mock.nuts" class="mock-chip">Nuts</span></span>
+                          </div>
+
+                          <div class="fm-detail">
+                            <span class="fm-detail-img"><svg viewBox="0 0 120 100" preserveAspectRatio="xMidYMid slice" focusable="false"><use href="#fm-food-salmon" /></svg></span>
+                            <span class="fm-close" data-fm="close"><svg class="fm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" focusable="false"><path d="M6 6l12 12M18 6 6 18" /></svg></span>
+                            <div class="fm-detail-body">
+                              <div class="fm-detail-head">
+                                <p data-i18n="experience.mock.dish2" class="fm-detail-name">Grilled salmon</p>
+                                <p class="fm-detail-price">42,00 zł</p>
+                              </div>
+                              <p data-i18n="experience.mock.description" class="fm-h">Description</p>
+                              <p data-i18n="experience.mock.salmonLong" class="fm-detail-text">Grilled salmon fillet with lemon sauce and roasted vegetables.</p>
+                              <p data-i18n="experience.mock.ingredients" class="fm-h">Ingredients and allergens</p>
+                              <div class="fm-tags">
+                                <span data-i18n="experience.mock.fish" class="fm-tag">Fish</span>
+                                <span class="fm-tag is-good"><svg class="fm-icon text-[#6aa84f]" viewBox="0 0 24 24" fill="currentColor" focusable="false"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" /></svg><span data-i18n="experience.mock.bestseller">Bestseller</span></span>
                               </div>
                             </div>
                           </div>
+
+                          <span class="fm-tap"></span>
                         </div>
                       </div>
                     </div>
