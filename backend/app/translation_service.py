@@ -27,6 +27,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from .menu_labels import BUILT_IN_ALLERGENS, BUILT_IN_TAGS, custom_labels
 from .menu_languages import MENU_LANGUAGES
 from .models import MenuCategory, TranslationDictionary
 
@@ -110,8 +111,26 @@ async def menu_phrases(db: AsyncSession, restaurant_id: uuid.UUID) -> list[str]:
     for category in categories:
         texts.append(category.name)
         for item in category.items:
-            texts.extend((item.name, item.description, item.ingredients))
+            texts.extend(dish_texts(item))
     return collect_sources(texts)
+
+
+def dish_texts(item) -> list[str]:
+    """Everything the owner wrote on one dish, in reading order.
+
+    Their own allergens and tags count — "Sezam" needs translating like a dish
+    name does — but built-in ones do not: the guest interface already has them
+    in every language, and listing them would ask the owner to translate
+    "Gluten" thirty-four times for nothing. Works on the ORM row and on the
+    response model alike; both carry these attributes.
+    """
+    return [
+        item.name,
+        item.description,
+        item.ingredients,
+        *custom_labels(item.allergens or [], BUILT_IN_ALLERGENS),
+        *custom_labels(item.tags or [], BUILT_IN_TAGS),
+    ]
 
 
 async def translated_counts(

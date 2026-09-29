@@ -190,6 +190,28 @@ export function MenuItemEditorDialog({
     [selectedCategory, item?.id],
   );
 
+  // The owner's own allergens and tags from the rest of the menu, offered
+  // here too so "Sezam" is picked, not typed again as a slightly different
+  // label.
+  const customLabels = useMemo(() => {
+    const allergens = new Set<string>();
+    const tags = new Set<string>();
+    for (const category of categories) {
+      for (const dish of category.items) {
+        for (const entry of dish.allergens) {
+          if (!(ALLERGEN_OPTIONS as readonly string[]).includes(entry))
+            allergens.add(entry);
+        }
+        for (const entry of dish.tags) {
+          if (!(TAG_OPTIONS as readonly string[]).includes(entry)) tags.add(entry);
+        }
+      }
+    }
+    const sorted = (set: Set<string>) =>
+      [...set].sort((a, b) => a.localeCompare(b, 'pl'));
+    return { allergens: sorted(allergens), tags: sorted(tags) };
+  }, [categories]);
+
   const requestClose = () => {
     if (isSubmitting) return;
     if (isDirty) setConfirmDiscard(true);
@@ -378,6 +400,8 @@ export function MenuItemEditorDialog({
             label="Alergeny"
             hint="Goście z alergią odfiltrowują po nich menu — zaznacz wszystkie, które zawiera danie."
             options={ALLERGEN_OPTIONS}
+            known={customLabels.allergens}
+            addLabel="Własny alergen"
             value={field.value}
             onChange={field.onChange}
             iconFor={getAllergenIcon}
@@ -395,6 +419,8 @@ export function MenuItemEditorDialog({
             label="Oznaczenia"
             hint="Wyróżniają danie na karcie."
             options={TAG_OPTIONS}
+            known={customLabels.tags}
+            addLabel="Własne oznaczenie"
             value={field.value}
             onChange={field.onChange}
             iconFor={getTagIcon}

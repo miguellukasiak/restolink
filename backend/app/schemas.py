@@ -18,10 +18,18 @@ from pydantic import (
     EmailStr,
     Field,
     PlainSerializer,
+    field_validator,
     model_validator,
 )
 
 from .cloudinary_service import with_delivery_transformation
+from .menu_labels import (
+    BUILT_IN_ALLERGENS,
+    BUILT_IN_TAGS,
+    MAX_LABEL_LENGTH,
+    MAX_LABELS,
+    clean_labels,
+)
 from .models import RestaurantStatus
 from .security import MAX_PASSWORD_BYTES
 
@@ -173,6 +181,29 @@ class MenuItemRequest(BaseModel):
     tags: list[str] = Field(default_factory=list)
     is_available: bool = True
     image_url: str | None = None
+
+    @field_validator("allergens")
+    @classmethod
+    def _allergens(cls, values: list[str]) -> list[str]:
+        return _checked_labels(values, BUILT_IN_ALLERGENS)
+
+    @field_validator("tags")
+    @classmethod
+    def _tags(cls, values: list[str]) -> list[str]:
+        return _checked_labels(values, BUILT_IN_TAGS)
+
+
+def _checked_labels(values: list[str], built_in: tuple[str, ...]) -> list[str]:
+    """Built-in or the owner's own, but bounded: each a chip, a handful per dish."""
+    cleaned = clean_labels(values, built_in)
+    if len(cleaned) > MAX_LABELS:
+        raise ValueError(f"Najwyżej {MAX_LABELS} pozycji na danie.")
+    for label in cleaned:
+        if len(label) > MAX_LABEL_LENGTH:
+            raise ValueError(
+                f"„{label[:20]}…” jest za długie — najwyżej {MAX_LABEL_LENGTH} znaków."
+            )
+    return cleaned
 
 
 class MenuItemResponse(BaseModel):

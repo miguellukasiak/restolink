@@ -452,13 +452,21 @@ product and answers `REQUEST_DENIED` if only the new one is enabled. The cache
 row stores the `place_id` it describes, so correcting a mistyped id does not keep
 serving another restaurant's reviews.
 
-**Allergens and tags on the public menu.** Stored as their Polish label from a
-fixed vocabulary (`ALLERGEN_OPTIONS`, `TAG_OPTIONS`) and passed through by the
-API untranslated. The guest menu translates them with `useMenuLabels()`, which
+**Allergens and tags on the public menu.** Stored as plain strings. The
+**built-in** ones (`ALLERGEN_OPTIONS`, `TAG_OPTIONS`, mirrored by
+`BUILT_IN_ALLERGENS` / `BUILT_IN_TAGS` in `backend/app/menu_labels.py`; a test
+keeps them equal) are stored as their Polish label and passed through by the
+API untranslated; the guest menu translates them with `useMenuLabels()`, which
 maps each stored value to a stable i18n key (`allergenFish`, `tagSpicy`, …) via
-`getAllergenI18nKey` / `getTagI18nKey`; a value outside the vocabulary is shown
-as stored. **Filtering, matching and icons always use the stored value** — only
-what the guest reads is translated. A new option needs a key in the map and in
+`getAllergenI18nKey` / `getTagI18nKey`. **Filtering, matching and icons use the
+stored value.** Owners can also add **their own** ("Sezam", "Z pieca") in the
+dish editor (`ChoiceChips`): typed text is tidied and snapped to a built-in on
+a case-insensitive match, labels used on any dish are offered on every other,
+and the API bounds them (`MAX_LABEL_LENGTH` 40, `MAX_LABELS` 20 per list). Own
+labels are phrases like dish names — `dish_texts()` lists them in the
+dictionary, and the public menu serves them translated, consistently across
+the payload, so the allergy filter built from it still matches. Built-in
+labels are never taken from the dictionary. A new option needs a key in the map and in
 every locale file (one per catalogue language, plus Polish).
 
 **Contact form (landing page).** `POST /api/v1/public/contact`
@@ -748,10 +756,12 @@ Known product gaps, not bugs:
   email (§7).
 - The landing page footer's phone (`+48 000 000 000`) and address
   (`Lorem ipsum 1, 00-000 …`, in every locale) are still placeholders.
-- The allergen vocabulary (`ALLERGEN_OPTIONS`) covers 8 of the EU's 14; there
-  is no peanut, crustacean, mollusc, sesame, sulphite or lupin option. Because an
-  owner may tick "Orzechy" for peanuts, it is translated to the broad everyday
-  word (Nuts / Nüsse / Frutos secos) rather than the narrower "tree nuts".
+- The built-in allergen vocabulary (`ALLERGEN_OPTIONS`) covers 8 of the EU's
+  14; peanut, crustacean, mollusc, sesame, sulphite and lupin exist only as an
+  owner's own label, translated by hand in "Języki". Making them built-in means
+  a key in all 35 guest locales. Because an owner may tick "Orzechy" for
+  peanuts, it is translated to the broad everyday word (Nuts / Nüsse / Frutos
+  secos) rather than the narrower "tree nuts".
 - The public menu's blocked-status screen ("Menu chwilowo niedostępne.") is
   hardcoded Polish.
 - The landing page promises **unlimited languages** (hero chip and pricing),

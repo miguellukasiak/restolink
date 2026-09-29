@@ -10,8 +10,10 @@ from sqlalchemy.orm import noload, selectinload
 from ..database import get_db
 from ..menu_languages import offered_languages
 from ..models import MenuCategory, Restaurant
+from ..menu_labels import BUILT_IN_ALLERGENS, BUILT_IN_TAGS
 from ..translation_service import (
     collect_sources,
+    dish_texts,
     load_dictionary,
     resolve_phrases,
 )
@@ -107,11 +109,14 @@ async def _localize(
     already done it, and Polish for the rest, which beats holding the whole menu
     back to Polish over one missing dish.
 
-    Only author-written prose is touched: category names, dish names,
-    descriptions and ingredients. Ids, prices, availability, allergens and tags
-    are left alone — ids because they address rows, prices because a translation
-    must never be able to change a number, and allergens/tags because they come
-    from a fixed vocabulary the frontend already translates through i18next.
+    Only author-written text is touched: category names, dish names,
+    descriptions, ingredients, and the allergens and tags the owner made up.
+    Ids, prices, availability and the *built-in* allergens and tags are left
+    alone — ids because they address rows, prices because a translation must
+    never be able to change a number, and built-in labels because the frontend
+    already translates them through i18next and filters by their stored value.
+    A custom allergen is translated consistently across the whole payload, so
+    the guest's allergy filter, built from the same payload, still matches it.
     """
     phrases, language = await resolve_phrases(
         db, restaurant.id, lang, restaurant.base_language
@@ -123,7 +128,7 @@ async def _localize(
     for category in payload.categories:
         sources.append(category.name)
         for item in category.items:
-            sources.extend((item.name, item.description, item.ingredients))
+            sources.extend(dish_texts(item))
 
     # `.get(text, text)` throughout: an untranslated phrase keeps its original
     # wording, so a half-finished dictionary degrades one dish at a time.
@@ -133,6 +138,14 @@ async def _localize(
             item.name = phrases.get(item.name, item.name)
             item.description = phrases.get(item.description, item.description)
             item.ingredients = phrases.get(item.ingredients, item.ingredients)
+            item.allergens = [
+                label if label in BUILT_IN_ALLERGENS else phrases.get(label, label)
+                for label in item.allergens
+            ]
+            item.tags = [
+                label if label in BUILT_IN_TAGS else phrases.get(label, label)
+                for label in item.tags
+            ]
 
     distinct = collect_sources(sources)
     translated = sum(1 for phrase in distinct if phrase in phrases)
