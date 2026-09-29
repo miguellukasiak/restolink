@@ -44,14 +44,18 @@
 
     <!-- ===================== Header ===================== -->
     <header class="sticky top-0 z-40 bg-white/70 backdrop-blur-xl">
+      <!-- Three equal-sided columns from lg up, so the nav sits on the page's
+           centre line. With justify-between it centred between the logo and
+           the far wider language + sign-in group, landing ~90px left of the
+           hero below it. -->
       <div
-        class="mx-auto flex h-18 max-w-7xl items-center justify-between gap-3 px-5 sm:gap-4 sm:px-8"
+        class="mx-auto flex h-18 max-w-7xl items-center justify-between gap-3 px-5 sm:gap-4 sm:px-8 lg:grid lg:grid-cols-[1fr_auto_1fr]"
       >
         <a
           href="#main"
           data-i18n-aria-label="a11y.home"
           aria-label="RestoLink — home"
-          class="flex shrink-0 items-center gap-2.5 rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600"
+          class="flex shrink-0 items-center gap-2.5 justify-self-start rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600"
         >
           <!-- Brand name: never translated, and no longer hidden on narrow
                screens — it used to share the bar with an "R" tile that carried
@@ -97,7 +101,7 @@
           </a>
         </nav>
 
-        <div class="flex shrink-0 items-center gap-2 sm:gap-3">
+        <div class="flex shrink-0 items-center gap-2 justify-self-end sm:gap-3">
           <!-- A native <select>: keyboard handling, the mobile picker and
                screen-reader semantics all come for free. Option labels stay in
                their own language — a switcher that renames itself is useless to
