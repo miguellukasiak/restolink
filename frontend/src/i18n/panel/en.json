@@ -296,7 +296,7 @@
     "rename": "Rename",
     "delete": "Delete category",
     "addFirstDish": "Add the first dish",
-    "dropHint": "…or drag a dish here from another category"
+    "dropHint": "or drag a dish here from another category"
   },
   "labels": {
     "allergenGluten": "Gluten",

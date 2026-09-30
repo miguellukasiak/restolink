@@ -304,7 +304,7 @@
     "rename": "Zmień nazwę",
     "delete": "Usuń kategorię",
     "addFirstDish": "Dodaj pierwsze danie",
-    "dropHint": "…albo przeciągnij tu danie z innej kategorii"
+    "dropHint": "albo przeciągnij tu danie z innej kategorii"
   },
   "labels": {
     "allergenGluten": "Gluten",
