@@ -4,6 +4,7 @@ import { fetchMenuCategories } from '../services/menuService';
 export const menuQueryKeys = {
   all: ['menu'] as const,
   categories: (restaurantId: string) => ['menu', 'categories', restaurantId] as const,
+  notes: (restaurantId: string) => ['menu', 'notes', restaurantId] as const,
 };
 
 /** Menu categories (with nested dishes) for one restaurant. */

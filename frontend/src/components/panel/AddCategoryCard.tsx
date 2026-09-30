@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography';
 import { alpha } from '@mui/material/styles';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import PlaylistAddRoundedIcon from '@mui/icons-material/PlaylistAddRounded';
+import NotesRoundedIcon from '@mui/icons-material/NotesRounded';
 import { radii } from '../../theme';
 import { TonalIcon } from './TonalIcon';
 import { usePanelT } from '../../i18n/panel';
@@ -16,17 +17,22 @@ interface AddCategoryCardProps {
   busy: boolean;
   onQuickAdd: (name: string) => void;
   onCustom: () => void;
+  /** Adds a note — text between the sections — at the foot of the menu. */
+  onAddNote: () => void;
 }
 
 /**
  * The foot of the board. Most menus open with the same few sections, so the
  * common ones are a tap away; anything else goes through the naming dialog.
+ * A note is offered here too — on a phone this is the only way to add one,
+ * since the header's buttons are hidden there.
  */
 export function AddCategoryCard({
   suggestions,
   busy,
   onQuickAdd,
   onCustom,
+  onAddNote,
 }: AddCategoryCardProps) {
   const { t } = usePanelT();
   return (
@@ -80,6 +86,14 @@ export function AddCategoryCard({
           sx={{ height: 36, px: 2 }}
         >
           {t('addCategory.customName')}
+        </Button>
+        <Button
+          size="small"
+          startIcon={<NotesRoundedIcon />}
+          onClick={onAddNote}
+          sx={{ height: 36, px: 2 }}
+        >
+          {t('addCategory.addNote')}
         </Button>
       </Box>
     </Box>

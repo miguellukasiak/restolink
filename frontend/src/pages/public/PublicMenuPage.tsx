@@ -271,6 +271,7 @@ export function PublicMenuPage() {
             restaurantName={menu.data.restaurant.name}
             logoUrl={menu.data.restaurant.theme.logo_url}
             categories={menu.data.categories}
+            notes={menu.data.notes}
             onOpenItem={openDetail}
             selectedAllergens={selectedAllergens}
             canFilterAllergens={availableAllergens.length > 0}

@@ -9,15 +9,18 @@ import { alpha, useTheme } from '@mui/material/styles';
 import { visuallyHidden } from '@mui/utils';
 import SearchOffRoundedIcon from '@mui/icons-material/SearchOffRounded';
 import HealthAndSafetyRoundedIcon from '@mui/icons-material/HealthAndSafetyRounded';
-import type { PublicMenuCategory, PublicMenuItem } from '../../types';
+import type { MenuNote, PublicMenuCategory, PublicMenuItem } from '../../types';
 import { useCategoryScrollSpy } from '../../hooks/useCategoryScrollSpy';
 import { CategoryPills } from './CategoryPills';
 import { MenuHeader } from './MenuHeader';
 import { PublicItemCard } from './PublicItemCard';
+import { MenuNoteCard } from './MenuNoteCard';
+import { menuSections } from '../../utils/menuLayout';
 
 /** Stable empty default so the filter memo isn't invalidated every render. */
 const NO_ALLERGENS: string[] = [];
 const NO_LANGUAGES: readonly string[] = [];
+const NO_NOTES: MenuNote[] = [];
 
 /*
  * Container queries against `<main>`'s content box, which is the viewport
@@ -32,6 +35,8 @@ interface PublicMenuViewProps {
   restaurantName: string;
   logoUrl?: string | null;
   categories: PublicMenuCategory[];
+  /** The owner's notes, placed among the categories by `order`. */
+  notes?: MenuNote[];
   /** Omit to render a read-only variant (settings live preview). */
   onOpenItem?: (item: PublicMenuItem) => void;
   /** Allergens the guest wants excluded — dishes containing any are hidden. */
@@ -56,6 +61,7 @@ export function PublicMenuView({
   restaurantName,
   logoUrl,
   categories,
+  notes = NO_NOTES,
   onOpenItem,
   selectedAllergens = NO_ALLERGENS,
   canFilterAllergens = false,
@@ -105,6 +111,14 @@ export function PublicMenuView({
   );
   const { activeId: activeCategoryId, selectCategory } =
     useCategoryScrollSpy(categoryIds);
+
+  // A search is a hunt for a dish, so the notes step aside while it runs.
+  // The allergy filter is not: a guest browses with it on all visit long.
+  const searching = query.trim() !== '';
+  const sections = useMemo(
+    () => menuSections(filteredCategories, searching ? NO_NOTES : notes),
+    [filteredCategories, notes, searching],
+  );
 
   const resultsCount = useMemo(
     () => filteredCategories.reduce((sum, category) => sum + category.items.length, 0),
@@ -210,54 +224,77 @@ export function PublicMenuView({
 
         {categories.length === 0 && emptyState}
 
-        {filteredCategories.map((category) => (
-          <ScrollElement name={category.id} id={category.id} key={category.id}>
-            <Box
-              component="section"
-              aria-labelledby={`category-heading-${category.id}`}
-              sx={{ pt: 2.5 }}
-            >
-              <Typography
-                component="h2"
-                id={`category-heading-${category.id}`}
-                sx={{
-                  // Was `variant="h5"` in the heading serif — handsome, but it
-                  // ate close to 40px per category on a phone. Kept clearly
-                  // dominant over the 14px dish names without the bulk.
-                  fontSize: 17 * (theme.menuDecor?.headingScale ?? 1),
-                  [WIDE]: { fontSize: 20 * (theme.menuDecor?.headingScale ?? 1) },
-                  // The theme's heading face: this is where a menu's
-                  // character shows, while dish names stay in the text face.
-                  fontFamily: theme.typography.h5.fontFamily,
-                  fontWeight: theme.typography.h5.fontWeight,
-                  letterSpacing: '-0.01em',
-                  mb: 1,
-                }}
-              >
-                {category.name}
-              </Typography>
-              <Box
-                sx={{
-                  display: 'grid',
-                  // Fixed column counts rather than `auto-fill minmax()`: the
-                  // old rule could drop to a single column on a narrow phone,
-                  // which is exactly the low-density layout being replaced.
-                  // Two-up is guaranteed at every width.
-                  gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-                  [WIDE]: { gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' },
-                  [WIDEST]: { gridTemplateColumns: 'repeat(4, minmax(0, 1fr))' },
-                  gap: 1.5,
-                  alignItems: 'stretch',
-                }}
-              >
-                {category.items.map((item) => (
-                  <PublicItemCard key={item.id} item={item} onOpen={onOpenItem} />
-                ))}
-              </Box>
+        {sections.map((section) =>
+          section.kind === 'note' ? (
+            <Box key={section.id} id={section.id} sx={{ pt: 2.5 }}>
+              <MenuNoteCard body={section.note.body} />
             </Box>
-          </ScrollElement>
-        ))}
+          ) : (
+            <CategorySection
+              key={section.id}
+              category={section.category}
+              onOpenItem={onOpenItem}
+            />
+          ),
+        )}
       </Box>
     </Box>
+  );
+}
+
+function CategorySection({
+  category,
+  onOpenItem,
+}: {
+  category: PublicMenuCategory;
+  onOpenItem?: (item: PublicMenuItem) => void;
+}) {
+  const theme = useTheme();
+  return (
+    <ScrollElement name={category.id} id={category.id}>
+      <Box
+        component="section"
+        aria-labelledby={`category-heading-${category.id}`}
+        sx={{ pt: 2.5 }}
+      >
+        <Typography
+          component="h2"
+          id={`category-heading-${category.id}`}
+          sx={{
+            // Was `variant="h5"` in the heading serif — handsome, but it
+            // ate close to 40px per category on a phone. Kept clearly
+            // dominant over the 14px dish names without the bulk.
+            fontSize: 17 * (theme.menuDecor?.headingScale ?? 1),
+            [WIDE]: { fontSize: 20 * (theme.menuDecor?.headingScale ?? 1) },
+            // The theme's heading face: this is where a menu's
+            // character shows, while dish names stay in the text face.
+            fontFamily: theme.typography.h5.fontFamily,
+            fontWeight: theme.typography.h5.fontWeight,
+            letterSpacing: '-0.01em',
+            mb: 1,
+          }}
+        >
+          {category.name}
+        </Typography>
+        <Box
+          sx={{
+            display: 'grid',
+            // Fixed column counts rather than `auto-fill minmax()`: the
+            // old rule could drop to a single column on a narrow phone,
+            // which is exactly the low-density layout being replaced.
+            // Two-up is guaranteed at every width.
+            gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+            [WIDE]: { gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' },
+            [WIDEST]: { gridTemplateColumns: 'repeat(4, minmax(0, 1fr))' },
+            gap: 1.5,
+            alignItems: 'stretch',
+          }}
+        >
+          {category.items.map((item) => (
+            <PublicItemCard key={item.id} item={item} onOpen={onOpenItem} />
+          ))}
+        </Box>
+      </Box>
+    </ScrollElement>
   );
 }

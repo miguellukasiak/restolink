@@ -1,4 +1,4 @@
-"""Restaurant-owner panel endpoints: info, theme, menu categories & items."""
+"""Restaurant-owner panel endpoints: info, theme, menu categories, items & notes."""
 
 import uuid
 from datetime import datetime, timezone
@@ -11,13 +11,16 @@ from sqlalchemy.orm import selectinload
 from ..cloudinary_service import ImageUploadError, upload_image_if_needed
 from ..database import get_db
 from ..dependencies import verify_restaurant_access
-from ..models import MenuCategory, MenuItem, Restaurant
+from ..models import MenuCategory, MenuItem, MenuNote, Restaurant, menu_layout
 from ..schemas import (
     MenuCategoryCreate,
     MenuCategoryResponse,
     MenuCategoryUpdate,
     MenuItemRequest,
     MenuItemResponse,
+    MenuNoteCreate,
+    MenuNoteResponse,
+    MenuNoteUpdate,
     MenuOrderUpdate,
     RestaurantPanelInfo,
     RestaurantThemeUpdate,
@@ -70,6 +73,29 @@ async def _load_category(
         .where(MenuCategory.id == category_id, MenuCategory.deleted_at.is_(None))
     )
     return result.first()
+
+
+async def _edge_position(
+    db: AsyncSession, restaurant_id: uuid.UUID, *, at: str = "end"
+) -> int:
+    """A `sort_order` past either end of the menu, notes and categories alike.
+
+    Both kinds share one numbering, so a new section is placed against both:
+    counting categories alone would slip a new one in above a note at the end.
+    """
+    pick = func.max if at == "end" else func.min
+    edges = [
+        await db.scalar(
+            select(pick(model.sort_order)).where(
+                model.restaurant_id == restaurant_id, model.deleted_at.is_(None)
+            )
+        )
+        for model in (MenuCategory, MenuNote)
+    ]
+    known = [edge for edge in edges if edge is not None]
+    if at == "end":
+        return max(known, default=0) + 1
+    return min(known, default=1) - 1
 
 
 @router.get("/{restaurant_id}", response_model=RestaurantPanelInfo)
@@ -130,18 +156,12 @@ async def create_category(
     payload: MenuCategoryCreate,
     db: AsyncSession = Depends(get_db),
 ) -> MenuCategory:
-    """Append a new category after the current highest sort order."""
+    """Append a new category at the end of the menu."""
     await _require_restaurant(db, restaurant_id)
-    max_order = await db.scalar(
-        select(func.max(MenuCategory.sort_order)).where(
-            MenuCategory.restaurant_id == restaurant_id,
-            MenuCategory.deleted_at.is_(None),
-        )
-    )
     category = MenuCategory(
         restaurant_id=restaurant_id,
         name=payload.name,
-        sort_order=(max_order or 0) + 1,
+        sort_order=await _edge_position(db, restaurant_id),
     )
     db.add(category)
     await db.flush()
@@ -208,6 +228,89 @@ async def delete_category(
     )
     for item in items:
         item.deleted_at = now
+    await db.flush()
+
+
+# --------------------------------------------------------------------------- #
+# Notes: the owner's own text between the sections
+# --------------------------------------------------------------------------- #
+
+
+async def _require_note(
+    db: AsyncSession, restaurant_id: uuid.UUID, note_id: uuid.UUID
+) -> MenuNote:
+    note = await db.get(MenuNote, note_id)
+    if (
+        note is None
+        or note.deleted_at is not None
+        or note.restaurant_id != restaurant_id
+    ):
+        raise HTTPException(status_code=404, detail="Nie znaleziono tekstu.")
+    return note
+
+
+@router.get("/{restaurant_id}/menu/notes", response_model=list[MenuNoteResponse])
+async def list_notes(
+    restaurant_id: uuid.UUID, db: AsyncSession = Depends(get_db)
+) -> list[MenuNote]:
+    """The notes, each with the place it holds among the categories."""
+    await _require_restaurant(db, restaurant_id)
+    result = await db.scalars(
+        select(MenuNote)
+        .where(MenuNote.restaurant_id == restaurant_id, MenuNote.deleted_at.is_(None))
+        .order_by(MenuNote.sort_order, MenuNote.created_at)
+    )
+    return list(result.all())
+
+
+@router.post(
+    "/{restaurant_id}/menu/notes", status_code=201, response_model=MenuNoteResponse
+)
+async def create_note(
+    restaurant_id: uuid.UUID,
+    payload: MenuNoteCreate,
+    db: AsyncSession = Depends(get_db),
+) -> MenuNote:
+    """Add a note at the top or the bottom of the menu; the owner drags it on."""
+    await _require_restaurant(db, restaurant_id)
+    note = MenuNote(
+        restaurant_id=restaurant_id,
+        body=payload.body,
+        sort_order=await _edge_position(db, restaurant_id, at=payload.at),
+    )
+    db.add(note)
+    await db.flush()
+    await db.refresh(note)
+    return note
+
+
+@router.patch(
+    "/{restaurant_id}/menu/notes/{note_id}", response_model=MenuNoteResponse
+)
+async def update_note(
+    restaurant_id: uuid.UUID,
+    note_id: uuid.UUID,
+    payload: MenuNoteUpdate,
+    db: AsyncSession = Depends(get_db),
+) -> MenuNote:
+    """Rewrite a note's text; its place is the board's business."""
+    await _require_restaurant(db, restaurant_id)
+    note = await _require_note(db, restaurant_id, note_id)
+    note.body = payload.body
+    await db.flush()
+    await db.refresh(note)
+    return note
+
+
+@router.delete("/{restaurant_id}/menu/notes/{note_id}", status_code=204)
+async def delete_note(
+    restaurant_id: uuid.UUID,
+    note_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+) -> None:
+    await _require_restaurant(db, restaurant_id)
+    note = await _require_note(db, restaurant_id, note_id)
+    note.deleted_at = datetime.now(timezone.utc)
     await db.flush()
 
 
@@ -308,13 +411,17 @@ async def reorder_menu(
     payload: MenuOrderUpdate,
     db: AsyncSession = Depends(get_db),
 ) -> None:
-    """Persist the board after a drag: category order, dish order, dish moves.
+    """Persist the board after a drag: section order, dish order, dish moves.
 
     Every id must belong to this restaurant. One that does not answers 404
     without saying whether it exists elsewhere, like the rest of the panel.
     Live rows the body leaves out — a dish added from another tab while this
     one was dragging — keep their relative order after the listed ones rather
     than being lost or failing the whole request.
+
+    `layout` places categories and notes together. A body without it comes
+    from a client that has never seen a note: its categories take the places
+    categories held, so every note stays between the same neighbours' slots.
     """
     await _require_restaurant(db, restaurant_id)
 
@@ -349,13 +456,42 @@ async def reorder_menu(
     if not listed_item_ids <= items_by_id.keys():
         raise HTTPException(status_code=404, detail="Nie znaleziono dania.")
 
-    listed_category_ids = {entry.id for entry in payload.categories}
-    ordered_categories = [categories_by_id[entry.id] for entry in payload.categories]
-    ordered_categories += [
-        category for category in categories if category.id not in listed_category_ids
-    ]
-    for position, category in enumerate(ordered_categories, start=1):
-        category.sort_order = position
+    notes = list(
+        await db.scalars(
+            select(MenuNote)
+            .where(
+                MenuNote.restaurant_id == restaurant_id,
+                MenuNote.deleted_at.is_(None),
+            )
+            .order_by(MenuNote.sort_order, MenuNote.created_at)
+        )
+    )
+    current = menu_layout(categories, notes)
+    if payload.layout is None:
+        listed_category_ids = {entry.id for entry in payload.categories}
+        ordered_categories = iter(
+            [categories_by_id[entry.id] for entry in payload.categories]
+            + [
+                category
+                for category in categories
+                if category.id not in listed_category_ids
+            ]
+        )
+        sections = [
+            next(ordered_categories) if isinstance(block, MenuCategory) else block
+            for block in current
+        ]
+    else:
+        blocks_by_id = {block.id: block for block in current}
+        # The categories were checked above, so an unknown id here is a note
+        # — deleted in another tab, or never this restaurant's.
+        if any(block_id not in blocks_by_id for block_id in payload.layout):
+            raise HTTPException(status_code=404, detail="Nie znaleziono tekstu.")
+        listed = set(payload.layout)
+        sections = [blocks_by_id[block_id] for block_id in payload.layout]
+        sections += [block for block in current if block.id not in listed]
+    for position, block in enumerate(sections, start=1):
+        block.sort_order = position
 
     columns: dict[uuid.UUID, list[MenuItem]] = {
         category.id: [] for category in categories

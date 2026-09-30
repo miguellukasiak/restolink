@@ -261,6 +261,7 @@
     "preview": "Preview",
     "previewDialog": "Menu preview",
     "newCategory": "New category",
+    "newNote": "New text",
     "showAll": "Show everything",
     "noMatch": "Nothing matches. Try another name.",
     "filtered": "Showing matching dishes only. Dragging comes back when you clear the filter.",
@@ -358,7 +359,41 @@
     "placeholder": "e.g. Drinks",
     "popular": "Popular:",
     "creating": "Creating…",
-    "create": "Create category"
+    "create": "Create category",
+    "addNote": "Add text"
+  },
+  "note": {
+    "label": "Text on the menu",
+    "drag": "Drag to move this text",
+    "edit": "Edit text: {{text}}",
+    "editShort": "Edit",
+    "more": "More options for this text",
+    "delete": "Delete",
+    "deleteTitle": "Delete this text?",
+    "deleteBody": "Guests will no longer see it on the menu.",
+    "saved": "Text saved.",
+    "addedTop": "Text added at the top of the menu — drag it wherever you like.",
+    "addedBottom": "Text added at the bottom of the menu — drag it wherever you like.",
+    "deleted": "Text deleted."
+  },
+  "noteDialog": {
+    "newTitle": "New text on the menu",
+    "editTitle": "Edit text",
+    "subtitle": "Serving hours, what a set menu includes — anything guests should read that is not a dish.",
+    "field": "Text",
+    "placeholder": "e.g. Our lunch menu is served Monday to Friday, 12:00–16:00.",
+    "hintTop": "It appears at the top of the menu; drag it anywhere afterwards.",
+    "hintBottom": "It appears at the bottom of the menu; drag it anywhere afterwards.",
+    "hintEdit": "Line breaks are kept. Ctrl + Enter saves.",
+    "templatesTitle": "Start from an example:",
+    "templates": {
+      "lunch": "Lunch menu",
+      "allergies": "Allergies",
+      "waitingTime": "Waiting time",
+      "service": "Service charge"
+    },
+    "preview": "AS GUESTS WILL SEE IT",
+    "add": "Add to menu"
   },
   "chips": {
     "selected": "Selected: {{count}}",

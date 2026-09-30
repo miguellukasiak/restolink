@@ -313,7 +313,8 @@ export function TranslationEditor({
                 >
                   <Typography
                     variant="body2"
-                    sx={{ wordBreak: 'break-word', flexGrow: 1 }}
+                    // A note from the menu keeps its paragraphs here too.
+                    sx={{ wordBreak: 'break-word', whiteSpace: 'pre-line', flexGrow: 1 }}
                   >
                     {entry.original_text}
                   </Typography>

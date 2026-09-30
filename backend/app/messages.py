@@ -55,6 +55,11 @@ ENGLISH: dict[str, str] = {
         "A category appears in the layout more than once."
     ),
     "Danie występuje w układzie więcej niż raz.": "A dish appears in the layout more than once.",
+    "Element występuje w układzie więcej niż raz.": (
+        "An entry appears in the layout more than once."
+    ),
+    "Nie znaleziono tekstu.": "Text block not found.",
+    "Tekst jest pusty.": "The text is empty.",
     # Payments
     "Płatności nie są jeszcze skonfigurowane na serwerze.": (
         "Payments are not set up on the server yet."
@@ -171,6 +176,10 @@ _PATTERNS: list[tuple[re.Pattern[str], str]] = [
     (
         re.compile(r"^„(.*)” jest za długie — najwyżej (\d+) znaków\.$"),
         "“{0}” is too long — at most {1} characters.",
+    ),
+    (
+        re.compile(r"^Tekst jest za długi — najwyżej (\d+) znaków\.$"),
+        "The text is too long — at most {0} characters.",
     ),
 ]
 

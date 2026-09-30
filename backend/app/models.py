@@ -342,6 +342,50 @@ class MenuCategory(Base):
     )
 
 
+class MenuNote(TimestampSoftDeleteMixin, Base):
+    """A block of the owner's own text between the menu's categories.
+
+    Lunch hours, what a set menu consists of, a word about allergies — things
+    a guest should read that are not a dish. Placed among the categories, not
+    inside one: `sort_order` shares its numbering with
+    `MenuCategory.sort_order` of the same restaurant, so one sequence says
+    where every section and every note sits. On a tie the category comes
+    first (`menu_layout`).
+
+    A table of its own rather than a kind of category, so nothing that lists
+    categories — the dish editor's picker, the guest's category strip, the
+    readiness count — has to learn to skip it, and so the deploy needs no
+    migration: `create_all` creates a missing table.
+    """
+
+    __tablename__ = "menu_note"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    restaurant_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("restaurant.id"), nullable=False, index=True
+    )
+    #: Plain text. Line breaks are kept and shown; nothing else is markup.
+    body: Mapped[str] = mapped_column(Text, nullable=False)
+    sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
+
+def menu_layout(
+    categories: "list[MenuCategory]", notes: "list[MenuNote]"
+) -> "list[MenuCategory | MenuNote]":
+    """The menu's sections top to bottom: categories and notes interleaved.
+
+    Both lists are expected in their own order already; the sort is stable, so
+    that order breaks any tie, and a category precedes a note on the same
+    number.
+    """
+    return sorted(
+        [*categories, *notes],
+        key=lambda block: (block.sort_order, isinstance(block, MenuNote)),
+    )
+
+
 class MenuItem(TimestampSoftDeleteMixin, Base):
     __tablename__ = "menu_item"
 

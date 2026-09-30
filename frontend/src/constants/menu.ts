@@ -36,6 +36,34 @@ export const CATEGORY_SUGGESTIONS = [
 /** The skeleton an empty menu can be started from in one click. */
 export const STARTER_CATEGORIES = ['Przystawki', 'Dania główne', 'Desery', 'Napoje'] as const;
 
+/**
+ * Starting points for a note between the menu's sections, in the menu's own
+ * language like the category names above. The owner edits the hours and
+ * amounts; the panel names each one through `noteDialog.templates.<key>`.
+ */
+export const NOTE_TEMPLATES = [
+  {
+    key: 'lunch',
+    body:
+      'Menu obiadowe podajemy od poniedziałku do piątku w godzinach 12:00–16:00.\n' +
+      'Zestaw: zupa + danie dnia.',
+  },
+  {
+    key: 'allergies',
+    body: 'Masz alergię lub nietolerancję pokarmową? Powiedz obsłudze — chętnie doradzimy.',
+  },
+  {
+    key: 'waitingTime',
+    body: 'Wszystkie dania przygotowujemy na bieżąco, dlatego czas oczekiwania może się wydłużyć.',
+  },
+  {
+    key: 'service',
+    body: 'Do rachunku dla grup od 8 osób doliczamy 10% serwisu.',
+  },
+] as const;
+
+export const NOTE_MAX_LENGTH = 1000;
+
 export type MenuAllergen = (typeof ALLERGEN_OPTIONS)[number];
 export type MenuTag = (typeof TAG_OPTIONS)[number];
 

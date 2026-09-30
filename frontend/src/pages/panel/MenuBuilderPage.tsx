@@ -24,7 +24,8 @@ import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import SmartphoneRoundedIcon from '@mui/icons-material/SmartphoneRounded';
-import type { MenuCategory, MenuItem } from '../../types';
+import NotesRoundedIcon from '@mui/icons-material/NotesRounded';
+import type { MenuCategory, MenuItem, MenuNote } from '../../types';
 import { CATEGORY_SUGGESTIONS, STARTER_CATEGORIES } from '../../constants/menu';
 import { useMenu } from '../../hooks/useMenu';
 import { usePublicMenu } from '../../hooks/usePublicMenu';
@@ -34,6 +35,12 @@ import { useAddCategory } from '../../hooks/useAddCategory';
 import { useUpdateCategory } from '../../hooks/useUpdateCategory';
 import { useDeleteCategory } from '../../hooks/useDeleteCategory';
 import { useDeleteMenuItem } from '../../hooks/useDeleteMenuItem';
+import {
+  useAddMenuNote,
+  useDeleteMenuNote,
+  useMenuNotes,
+  useUpdateMenuNote,
+} from '../../hooks/useMenuNotes';
 import { useSnackbar } from '../../components/feedback/SnackbarProvider';
 import { getApiErrorMessage } from '../../services/api';
 import { radii } from '../../theme';
@@ -46,6 +53,9 @@ import { LiveMenuPreview } from '../../components/panel/LiveMenuPreview';
 import { useFittedPhone } from '../../hooks/useFittedPhone';
 import { MenuReadiness, type DishFilter } from '../../components/panel/MenuReadiness';
 import { MenuStarter } from '../../components/panel/MenuStarter';
+import { MenuNoteBlock } from '../../components/panel/MenuNoteBlock';
+import { MenuNoteDialog } from '../../components/panel/MenuNoteDialog';
+import { menuSections, renumber } from '../../utils/menuLayout';
 import { usePanelT } from '../../i18n/panel';
 
 interface EditorState {
@@ -57,10 +67,26 @@ interface EditorState {
 
 const CLOSED_EDITOR: EditorState = { open: false, categoryId: '', item: null };
 
+interface NoteEditorState {
+  open: boolean;
+  /** Null writes a new note. */
+  note: MenuNote | null;
+  /** Where a new note lands: the header's button puts it at the top, the
+   *  foot of the board at the bottom. */
+  placement: 'start' | 'end';
+}
+
+const CLOSED_NOTE_EDITOR: NoteEditorState = {
+  open: false,
+  note: null,
+  placement: 'start',
+};
+
 /** What the confirmation dialog is about to delete. */
 type DeleteTarget =
   | { kind: 'category'; category: MenuCategory }
-  | { kind: 'item'; item: MenuItem };
+  | { kind: 'item'; item: MenuItem }
+  | { kind: 'note'; note: MenuNote };
 
 /** How long a just-saved dish glows on the board. */
 const HIGHLIGHT_MS = 1800;
@@ -131,8 +157,9 @@ function BoardSkeleton() {
  * The menu is edited the way a guest reads it — top to bottom, one section per
  * category — with the guest's phone beside it showing every change as it
  * happens. Categories drag by their header; dishes drag within a category and
- * across categories. Every drag is shown at once and saved in the background
- * (`useReorderMenu`), so the order survives a refresh.
+ * across categories; notes — the owner's own text, such as lunch hours — sit
+ * between the categories and drag among them. Every drag is shown at once and
+ * saved in the background (`useReorderMenu`), so the order survives a refresh.
  */
 export function MenuBuilderPage() {
   const { t } = usePanelT();
@@ -155,12 +182,19 @@ export function MenuBuilderPage() {
   const updateCategory = useUpdateCategory(restaurantId);
   const deleteCategory = useDeleteCategory(restaurantId);
   const deleteItem = useDeleteMenuItem(restaurantId);
+  const menuNotes = useMenuNotes(restaurantId);
+  const addNote = useAddMenuNote(restaurantId);
+  const updateNote = useUpdateMenuNote(restaurantId);
+  const deleteNote = useDeleteMenuNote(restaurantId);
   const { showSuccess, showError } = useSnackbar();
 
   // The board's own copy, so a drag or a switch is on screen before the
   // server has answered.
   const [categories, setCategories] = useState<MenuCategory[]>([]);
+  // Numbered in one sequence with the categories (utils/menuLayout.ts).
+  const [notes, setNotes] = useState<MenuNote[]>([]);
   const [editor, setEditor] = useState<EditorState>(CLOSED_EDITOR);
+  const [noteEditor, setNoteEditor] = useState<NoteEditorState>(CLOSED_NOTE_EDITOR);
   const [addCategoryOpen, setAddCategoryOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -175,13 +209,19 @@ export function MenuBuilderPage() {
   // The latest board, for callbacks that finish after a request: reading it
   // from a closure would see the board as it was when the request started.
   const categoriesRef = useRef(categories);
+  const notesRef = useRef(notes);
   useEffect(() => {
     categoriesRef.current = categories;
-  }, [categories]);
+    notesRef.current = notes;
+  }, [categories, notes]);
 
   useEffect(() => {
     if (menu.data) setCategories(menu.data);
   }, [menu.data]);
+
+  useEffect(() => {
+    if (menuNotes.data) setNotes(menuNotes.data);
+  }, [menuNotes.data]);
 
   useEffect(() => () => clearTimeout(highlightTimer.current), []);
 
@@ -204,33 +244,38 @@ export function MenuBuilderPage() {
     }, 60);
   }, []);
 
-  /** Glows a dish for a moment and brings it into view on the board. */
-  const highlight = useCallback((itemId: string) => {
+  /** Glows a dish or a note for a moment and brings it into view on the board. */
+  const highlight = useCallback((id: string) => {
     clearTimeout(highlightTimer.current);
-    setHighlightedId(itemId);
+    setHighlightedId(id);
     // A timer, not an animation: a hidden tab would freeze an animation on
     // its first frame (CLAUDE.md, trap 7).
     highlightTimer.current = setTimeout(() => setHighlightedId(null), HIGHLIGHT_MS);
     setTimeout(() => {
-      document
-        .getElementById(`dish-row-${itemId}`)
-        ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      (
+        document.getElementById(`dish-row-${id}`) ??
+        document.getElementById(`builder-note-${id}`)
+      )?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }, 60);
   }, []);
 
   const persistOrder = useCallback(
-    (next: MenuCategory[]) => {
-      reorderMenu.mutate(next, {
-        onError: (error) => showError(getApiErrorMessage(error)),
-      });
+    (next: MenuCategory[], nextNotes: MenuNote[] = notesRef.current) => {
+      reorderMenu.mutate(
+        { categories: next, notes: nextNotes },
+        { onError: (error) => showError(getApiErrorMessage(error)) },
+      );
     },
     [reorderMenu, showError],
   );
 
   const handleBeforeCapture = (before: BeforeCapture) => {
-    // Grabbing a category folds every section to its header first, so the
-    // whole menu fits on screen and the drop target is easy to see.
-    if (categories.some((category) => category.id === before.draggableId)) {
+    // Grabbing a category or a note folds every section to its header first,
+    // so the whole menu fits on screen and the drop target is easy to see.
+    if (
+      categories.some((category) => category.id === before.draggableId) ||
+      notes.some((note) => note.id === before.draggableId)
+    ) {
       setDraggingCategory(true);
     }
   };
@@ -246,18 +291,29 @@ export function MenuBuilderPage() {
       return;
     }
 
-    let next: MenuCategory[];
     if (type === 'CATEGORY') {
-      next = reorder(categories, source.index, destination.index);
-    } else {
-      next = categories.map((category) => ({ ...category, items: [...category.items] }));
-      const from = next.find((category) => category.id === source.droppableId);
-      const to = next.find((category) => category.id === destination.droppableId);
-      if (!from || !to) return;
-      const [moved] = from.items.splice(source.index, 1);
-      to.items.splice(destination.index, 0, { ...moved, category_id: to.id });
-      showInPreview(to.id);
+      // Categories and notes share the board: move the section, then number
+      // both lists again from the new order.
+      const board = renumber(
+        reorder(menuSections(categories, notes), source.index, destination.index),
+      );
+      setCategories(board.categories);
+      setNotes(board.notes);
+      persistOrder(board.categories, board.notes);
+      showInPreview(result.draggableId);
+      return;
     }
+
+    const next = categories.map((category) => ({
+      ...category,
+      items: [...category.items],
+    }));
+    const from = next.find((category) => category.id === source.droppableId);
+    const to = next.find((category) => category.id === destination.droppableId);
+    if (!from || !to) return;
+    const [moved] = from.items.splice(source.index, 1);
+    to.items.splice(destination.index, 0, { ...moved, category_id: to.id });
+    showInPreview(to.id);
     setCategories(next);
     persistOrder(next);
   };
@@ -424,6 +480,17 @@ export function MenuBuilderPage() {
           showError(getApiErrorMessage(error));
         },
       });
+    } else if (deleteTarget.kind === 'note') {
+      const { note } = deleteTarget;
+      const notesSnapshot = notes;
+      setNotes((previous) => previous.filter((existing) => existing.id !== note.id));
+      deleteNote.mutate(note.id, {
+        onSuccess: () => showSuccess(t('note.deleted')),
+        onError: (error) => {
+          setNotes(notesSnapshot);
+          showError(getApiErrorMessage(error));
+        },
+      });
     } else {
       const { item } = deleteTarget;
       setCategories((previous) =>
@@ -457,6 +524,58 @@ export function MenuBuilderPage() {
     if (item) {
       setPreviewOpen(false);
       openEdit(item);
+    }
+  };
+
+  const openNewNote = (placement: 'start' | 'end') => {
+    setNoteEditor({ open: true, note: null, placement });
+  };
+
+  const openEditNote = useCallback((note: MenuNote) => {
+    setNoteEditor({ open: true, note, placement: 'start' });
+  }, []);
+
+  const handleRequestDeleteNote = useCallback((note: MenuNote) => {
+    setDeleteTarget({ kind: 'note', note });
+  }, []);
+
+  const saveNote = (body: string) => {
+    const { note, placement } = noteEditor;
+    const landed = (saved: MenuNote) => {
+      setNotes((previous) =>
+        previous.some((existing) => existing.id === saved.id)
+          ? previous.map((existing) => (existing.id === saved.id ? saved : existing))
+          : [...previous, saved],
+      );
+      setNoteEditor((previous) => ({ ...previous, open: false }));
+      highlight(saved.id);
+      showInPreview(saved.id);
+    };
+    const onError = (error: unknown) => showError(getApiErrorMessage(error));
+    if (note) {
+      updateNote.mutate(
+        { noteId: note.id, body },
+        {
+          onSuccess: (saved) => {
+            landed(saved);
+            showSuccess(t('note.saved'));
+          },
+          onError,
+        },
+      );
+    } else {
+      addNote.mutate(
+        { body, at: placement },
+        {
+          onSuccess: (saved) => {
+            landed(saved);
+            showSuccess(
+              placement === 'start' ? t('note.addedTop') : t('note.addedBottom'),
+            );
+          },
+          onError,
+        },
+      );
     }
   };
 
@@ -516,12 +635,42 @@ export function MenuBuilderPage() {
     return CATEGORY_SUGGESTIONS.filter((name) => !taken.has(name.toLowerCase()));
   }, [categories]);
 
-  const isEmpty = !menu.isLoading && !menu.isError && categories.length === 0;
+  // Before the notes arrive the board waits too, so they do not pop in under
+  // the owner's hand. Notes that fail to load (an API that predates them)
+  // leave the categories to work on their own.
+  const loading = menu.isLoading || menuNotes.isLoading;
+  const isEmpty =
+    !loading && !menu.isError && categories.length === 0 && notes.length === 0;
+
+  // The board top to bottom. While a search or filter runs only categories
+  // show — the notes hold no dishes — and nothing drags.
+  const sections = useMemo(() => menuSections(categories, notes), [categories, notes]);
+
+  const renderCategory = (category: MenuCategory, items: MenuItem[], index: number) => (
+    <MenuCategorySection
+      key={category.id}
+      category={category}
+      index={index}
+      items={items}
+      collapsed={draggingCategory || (!filtering && collapsed.has(category.id))}
+      filtering={filtering}
+      highlightedItemId={highlightedId}
+      onToggleCollapsed={handleToggleCollapsed}
+      onAddItem={openCreate}
+      onEditItem={openEdit}
+      onToggleAvailability={handleToggleAvailability}
+      onDuplicateItem={handleDuplicate}
+      onRequestDeleteItem={handleRequestDeleteItem}
+      onRenameCategory={handleRenameCategory}
+      onRequestDeleteCategory={handleRequestDeleteCategory}
+    />
+  );
 
   const preview = (
     <LiveMenuPreview
       restaurantId={restaurantId}
       categories={categories}
+      notes={notes}
       publicMenu={publicMenu.data}
       onOpenItem={openEditById}
       scrollRef={previewScrollRef}
@@ -619,6 +768,18 @@ export function MenuBuilderPage() {
                   </Button>
                 )}
                 <Button
+                  variant="outlined"
+                  startIcon={<NotesRoundedIcon />}
+                  onClick={() => openNewNote('start')}
+                  sx={{
+                    flexShrink: 0,
+                    display: { xs: 'none', sm: 'inline-flex' },
+                    bgcolor: 'background.paper',
+                  }}
+                >
+                  {t('builder.newNote')}
+                </Button>
+                <Button
                   variant="contained"
                   startIcon={<AddRoundedIcon />}
                   onClick={() => setAddCategoryOpen(true)}
@@ -644,7 +805,7 @@ export function MenuBuilderPage() {
             </Alert>
           )}
 
-          {menu.isLoading ? (
+          {loading ? (
             <BoardSkeleton />
           ) : isEmpty ? (
             <MenuStarter
@@ -691,27 +852,28 @@ export function MenuBuilderPage() {
                 <Droppable droppableId="board" type="CATEGORY">
                   {(provided: DroppableProvided) => (
                     <Box ref={provided.innerRef} {...provided.droppableProps}>
-                      {visible.map(({ category, items }, index) => (
-                        <MenuCategorySection
-                          key={category.id}
-                          category={category}
-                          index={index}
-                          items={items}
-                          collapsed={
-                            draggingCategory || (!filtering && collapsed.has(category.id))
-                          }
-                          filtering={filtering}
-                          highlightedItemId={highlightedId}
-                          onToggleCollapsed={handleToggleCollapsed}
-                          onAddItem={openCreate}
-                          onEditItem={openEdit}
-                          onToggleAvailability={handleToggleAvailability}
-                          onDuplicateItem={handleDuplicate}
-                          onRequestDeleteItem={handleRequestDeleteItem}
-                          onRenameCategory={handleRenameCategory}
-                          onRequestDeleteCategory={handleRequestDeleteCategory}
-                        />
-                      ))}
+                      {filtering
+                        ? visible.map(({ category, items }, index) =>
+                            renderCategory(category, items, index),
+                          )
+                        : sections.map((section, index) =>
+                            section.kind === 'note' ? (
+                              <MenuNoteBlock
+                                key={section.id}
+                                note={section.note}
+                                index={index}
+                                highlighted={section.id === highlightedId}
+                                onEdit={openEditNote}
+                                onRequestDelete={handleRequestDeleteNote}
+                              />
+                            ) : (
+                              renderCategory(
+                                section.category,
+                                section.category.items,
+                                index,
+                              )
+                            ),
+                          )}
                       {provided.placeholder}
                     </Box>
                   )}
@@ -724,6 +886,7 @@ export function MenuBuilderPage() {
                   busy={addCategory.isPending}
                   onQuickAdd={createCategory}
                   onCustom={() => setAddCategoryOpen(true)}
+                  onAddNote={() => openNewNote('end')}
                 />
               )}
             </>
@@ -744,6 +907,7 @@ export function MenuBuilderPage() {
           <LiveMenuPreview
             restaurantId={restaurantId}
             categories={categories}
+            notes={notes}
             publicMenu={publicMenu.data}
             onOpenItem={openEditById}
             phone={dialogPhone}
@@ -779,19 +943,33 @@ export function MenuBuilderPage() {
         }}
       />
 
+      <MenuNoteDialog
+        open={noteEditor.open}
+        note={noteEditor.note}
+        placement={noteEditor.placement}
+        menuTheme={publicMenu.data?.restaurant.theme}
+        saving={addNote.isPending || updateNote.isPending}
+        onClose={() => setNoteEditor((previous) => ({ ...previous, open: false }))}
+        onSave={saveNote}
+      />
+
       <ConfirmDialog
         open={deleteTarget !== null}
         title={
           deleteTarget?.kind === 'item'
             ? t('builder.deleteDishTitle')
-            : t('builder.deleteCategoryTitle')
+            : deleteTarget?.kind === 'note'
+              ? t('note.deleteTitle')
+              : t('builder.deleteCategoryTitle')
         }
         description={
           deleteTarget?.kind === 'category'
             ? t('builder.deleteCategoryBody', { name: deleteTarget.category.name })
             : deleteTarget?.kind === 'item'
               ? t('builder.deleteDishBody', { name: deleteTarget.item.name })
-              : ''
+              : deleteTarget?.kind === 'note'
+                ? t('note.deleteBody')
+                : ''
         }
         confirmLabel={t('common.delete')}
         onConfirm={handleConfirmDelete}

@@ -261,6 +261,7 @@
     "preview": "Podgląd",
     "previewDialog": "Podgląd menu",
     "newCategory": "Nowa kategoria",
+    "newNote": "Nowy tekst",
     "showAll": "Pokaż wszystko",
     "noMatch": "Nic nie pasuje. Spróbuj innej nazwy.",
     "filtered": "Pokazuję tylko pasujące dania. Przeciąganie wróci, gdy wyczyścisz filtr.",
@@ -370,7 +371,41 @@
     "placeholder": "np. Napoje",
     "popular": "Popularne:",
     "creating": "Tworzenie…",
-    "create": "Utwórz kategorię"
+    "create": "Utwórz kategorię",
+    "addNote": "Dodaj tekst"
+  },
+  "note": {
+    "label": "Tekst w menu",
+    "drag": "Przeciągnij, aby przenieść tekst",
+    "edit": "Edytuj tekst: {{text}}",
+    "editShort": "Edytuj",
+    "more": "Więcej opcji tekstu",
+    "delete": "Usuń",
+    "deleteTitle": "Usunąć ten tekst?",
+    "deleteBody": "Goście przestaną go widzieć w menu.",
+    "saved": "Tekst zapisany.",
+    "addedTop": "Tekst dodany na górze menu — przeciągnij go, gdzie chcesz.",
+    "addedBottom": "Tekst dodany na dole menu — przeciągnij go, gdzie chcesz.",
+    "deleted": "Tekst usunięty."
+  },
+  "noteDialog": {
+    "newTitle": "Nowy tekst w menu",
+    "editTitle": "Edytuj tekst",
+    "subtitle": "Godziny podawania, skład zestawu — wszystko, co gość powinien przeczytać, a nie jest daniem.",
+    "field": "Treść",
+    "placeholder": "np. Menu obiadowe podajemy od poniedziałku do piątku w godzinach 12:00–16:00.",
+    "hintTop": "Pojawi się na górze menu — potem przeciągniesz go, gdzie chcesz.",
+    "hintBottom": "Pojawi się na dole menu — potem przeciągniesz go, gdzie chcesz.",
+    "hintEdit": "Nowe linie zostaną zachowane. Ctrl + Enter zapisuje.",
+    "templatesTitle": "Zacznij od przykładu:",
+    "templates": {
+      "lunch": "Menu obiadowe",
+      "allergies": "Alergie",
+      "waitingTime": "Czas oczekiwania",
+      "service": "Serwis dla grup"
+    },
+    "preview": "TAK ZOBACZĄ TO GOŚCIE",
+    "add": "Dodaj do menu"
   },
   "chips": {
     "selected": "Zaznaczone: {{count}}",

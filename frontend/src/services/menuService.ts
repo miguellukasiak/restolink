@@ -3,9 +3,11 @@ import type {
   MenuCategory,
   MenuItem,
   MenuItemRequest,
+  MenuNote,
   RestaurantPanelInfo,
   RestaurantThemeUpdate,
 } from '../types';
+import { menuSections } from '../utils/menuLayout';
 
 /** GET /api/v1/restaurants/{restaurantId} — restaurant details for the panel header. */
 export async function fetchRestaurantPanelInfo(
@@ -106,11 +108,50 @@ export async function saveMenuItem(
 export async function reorderMenu(
   restaurantId: string,
   categories: MenuCategory[],
+  notes: MenuNote[] = [],
 ): Promise<void> {
   await api.put(`/api/v1/restaurants/${restaurantId}/menu/order`, {
     categories: categories.map((category) => ({
       id: category.id,
       item_ids: category.items.map((item) => item.id),
     })),
+    // Every section top to bottom, notes among the categories.
+    layout: menuSections(categories, notes).map((section) => section.id),
   });
+}
+
+const notesUrl = (restaurantId: string) =>
+  `/api/v1/restaurants/${restaurantId}/menu/notes`;
+
+/** GET …/menu/notes — the notes, each placed by `order` among the categories. */
+export async function fetchMenuNotes(restaurantId: string): Promise<MenuNote[]> {
+  const { data } = await api.get<MenuNote[]>(notesUrl(restaurantId));
+  return [...data].sort((a, b) => a.order - b.order);
+}
+
+/** POST …/menu/notes — adds a note at the top or the bottom of the menu. */
+export async function createMenuNote(
+  restaurantId: string,
+  body: string,
+  at: 'start' | 'end',
+): Promise<MenuNote> {
+  const { data } = await api.post<MenuNote>(notesUrl(restaurantId), { body, at });
+  return data;
+}
+
+/** PATCH …/menu/notes/{noteId} — rewrites a note's text. */
+export async function updateMenuNote(
+  restaurantId: string,
+  noteId: string,
+  body: string,
+): Promise<MenuNote> {
+  const { data } = await api.patch<MenuNote>(`${notesUrl(restaurantId)}/${noteId}`, {
+    body,
+  });
+  return data;
+}
+
+/** DELETE …/menu/notes/{noteId} */
+export async function deleteMenuNote(restaurantId: string, noteId: string): Promise<void> {
+  await api.delete(`${notesUrl(restaurantId)}/${noteId}`);
 }

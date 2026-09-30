@@ -29,7 +29,7 @@ from sqlalchemy.orm import selectinload
 
 from .menu_labels import BUILT_IN_ALLERGENS, BUILT_IN_TAGS, custom_labels
 from .menu_languages import MENU_LANGUAGES
-from .models import MenuCategory, TranslationDictionary
+from .models import MenuCategory, MenuNote, TranslationDictionary, menu_layout
 
 #: Languages the public menu will serve. A `?lang=` outside this set is ignored
 #: rather than looked up.
@@ -92,8 +92,9 @@ def collect_sources(texts: Iterable[str]) -> list[str]:
 async def menu_phrases(db: AsyncSession, restaurant_id: uuid.UUID) -> list[str]:
     """Every distinct phrase in the menu, in menu order.
 
-    Category names come before their dishes so the dictionary screen reads like
-    the menu it describes, rather than like a database dump.
+    Category names come before their dishes, and the owner's notes sit where
+    they sit on the menu, so the dictionary screen reads like the menu it
+    describes rather than like a database dump.
     """
     categories = (
         await db.scalars(
@@ -106,11 +107,24 @@ async def menu_phrases(db: AsyncSession, restaurant_id: uuid.UUID) -> list[str]:
             .order_by(MenuCategory.sort_order.asc())
         )
     ).all()
+    notes = (
+        await db.scalars(
+            select(MenuNote)
+            .where(
+                MenuNote.restaurant_id == restaurant_id,
+                MenuNote.deleted_at.is_(None),
+            )
+            .order_by(MenuNote.sort_order, MenuNote.created_at)
+        )
+    ).all()
 
     texts: list[str] = []
-    for category in categories:
-        texts.append(category.name)
-        for item in category.items:
+    for block in menu_layout(list(categories), list(notes)):
+        if isinstance(block, MenuNote):
+            texts.append(block.body)
+            continue
+        texts.append(block.name)
+        for item in block.items:
             texts.extend(dish_texts(item))
     return collect_sources(texts)
 

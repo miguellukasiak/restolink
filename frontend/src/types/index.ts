@@ -92,6 +92,17 @@ export interface MenuCategory {
   items: MenuItem[];
 }
 
+/**
+ * Schema: MenuNote — the owner's own text between the menu's sections (lunch
+ * hours, what a set menu consists of). `order` shares its numbering with the
+ * categories' `order`; `utils/menuLayout.ts` merges the two.
+ */
+export interface MenuNote {
+  id: string;
+  body: string;
+  order: number;
+}
+
 /** Schema: MenuItemRequest */
 export interface MenuItemRequest {
   category_id: string;
@@ -147,6 +158,8 @@ export interface PublicMenuResponse {
     languages?: string[];
   };
   categories: PublicMenuCategory[];
+  /** Absent from an API that predates notes. */
+  notes?: MenuNote[];
   /**
    * Present only when the menu was requested in a language other than its own.
    * Coverage can be partial: the owner writes these translations by hand, and

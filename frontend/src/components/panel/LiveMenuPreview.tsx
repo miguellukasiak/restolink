@@ -8,7 +8,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
-import type { MenuCategory, PublicMenuResponse } from '../../types';
+import type { MenuCategory, MenuNote, PublicMenuResponse } from '../../types';
 import { createRestaurantTheme } from '../public/RestaurantThemeProvider';
 import { PublicMenuView } from '../public/PublicMenuView';
 import { MenuSkeleton } from '../public/MenuSkeleton';
@@ -21,6 +21,8 @@ interface LiveMenuPreviewProps {
   restaurantId: string;
   /** The board as it is right now — including moves not yet saved. */
   categories: MenuCategory[];
+  /** The board's notes, placed among the categories. */
+  notes: MenuNote[];
   /** For the restaurant's name, logo and colours. */
   publicMenu: PublicMenuResponse | undefined;
   onOpenItem: (itemId: string) => void;
@@ -33,8 +35,8 @@ interface LiveMenuPreviewProps {
 
 /**
  * The guest menu on a phone, fed from the builder's own state rather than the
- * saved menu, so a dragged dish, a flipped availability switch or a renamed
- * category shows up on the phone the moment it happens on the board.
+ * saved menu, so a dragged dish or note, a flipped availability switch or a
+ * renamed category shows up on the phone the moment it happens on the board.
  *
  * It is the real guest menu component under the restaurant's real theme. The
  * header (search, language, allergy filter) is inert here — the preview is for
@@ -44,6 +46,7 @@ interface LiveMenuPreviewProps {
 export function LiveMenuPreview({
   restaurantId,
   categories,
+  notes,
   publicMenu,
   onOpenItem,
   scrollRef,
@@ -137,6 +140,7 @@ export function LiveMenuPreview({
                   logoUrl={publicMenu.restaurant.theme.logo_url}
                   languages={publicMenu.restaurant.languages}
                   categories={categories}
+                  notes={notes}
                   onOpenItem={(dish) => onOpenItem(dish.id)}
                   emptyState={<EmptyMenuPreview />}
                 />

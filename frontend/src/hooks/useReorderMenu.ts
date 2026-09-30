@@ -1,8 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { reorderMenu } from '../services/menuService';
-import type { MenuCategory } from '../types';
+import type { MenuCategory, MenuNote } from '../types';
 import { menuQueryKeys } from './useMenu';
 import { writesTo } from '../services/cacheSync';
+
+interface Board {
+  /** Numbered in one sequence with the notes (utils/menuLayout.ts). */
+  categories: MenuCategory[];
+  notes: MenuNote[];
+}
 
 /**
  * Persists the builder's layout after a drag.
@@ -16,27 +22,28 @@ import { writesTo } from '../services/cacheSync';
 export function useReorderMenu(restaurantId: string) {
   const queryClient = useQueryClient();
   const mutationKey = ['menu', 'reorder', restaurantId] as const;
+  const boardKeys = [
+    menuQueryKeys.categories(restaurantId),
+    menuQueryKeys.notes(restaurantId),
+  ];
 
   return useMutation({
     mutationKey,
-    mutationFn: (categories: MenuCategory[]) => reorderMenu(restaurantId, categories),
-    // The builder's own list is left alone: re-reading it mid-gesture is the
-    // jump described above. Everything else showing the menu refreshes.
-    meta: writesTo(restaurantId, ['menu'], [menuQueryKeys.categories(restaurantId)]),
-    onSuccess: (_data, categories) => {
+    mutationFn: ({ categories, notes }: Board) =>
+      reorderMenu(restaurantId, categories, notes),
+    // The builder's own lists are left alone: re-reading them mid-gesture is
+    // the jump described above. Everything else showing the menu refreshes.
+    meta: writesTo(restaurantId, ['menu'], boardKeys),
+    onSuccess: (_data, { categories, notes }) => {
       // Still counted as pending while its own callbacks run, so 1 means
       // "this is the only one left".
       if (queryClient.isMutating({ mutationKey }) > 1) return;
-      queryClient.setQueryData<MenuCategory[]>(
-        menuQueryKeys.categories(restaurantId),
-        categories.map((category, index) => ({ ...category, order: index + 1 })),
-      );
+      queryClient.setQueryData(menuQueryKeys.categories(restaurantId), categories);
+      queryClient.setQueryData(menuQueryKeys.notes(restaurantId), notes);
     },
     onError: () => {
       // The board may now show an order the server refused; re-read the truth.
-      void queryClient.invalidateQueries({
-        queryKey: menuQueryKeys.categories(restaurantId),
-      });
+      for (const queryKey of boardKeys) void queryClient.invalidateQueries({ queryKey });
     },
   });
 }

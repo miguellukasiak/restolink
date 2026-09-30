@@ -472,6 +472,7 @@ export function AppearancePage() {
               logoUrl={watched.logo_url}
               languages={menu.data.restaurant.languages}
               categories={menu.data.categories}
+              notes={menu.data.notes}
               emptyState={<EmptyMenuPreview hint={t('preview.emptyMenuHint')} />}
             />
           </Box>

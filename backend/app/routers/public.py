@@ -9,7 +9,7 @@ from sqlalchemy.orm import noload, selectinload
 
 from ..database import get_db
 from ..menu_languages import offered_languages
-from ..models import MenuCategory, Restaurant
+from ..models import MenuCategory, MenuNote, Restaurant
 from ..menu_labels import BUILT_IN_ALLERGENS, BUILT_IN_TAGS
 from ..translation_service import (
     collect_sources,
@@ -19,6 +19,7 @@ from ..translation_service import (
 )
 from ..schemas import (
     MenuCategoryResponse,
+    MenuNoteResponse,
     PublicMenuResponse,
     PublicRestaurant,
     ThemeSettings,
@@ -48,7 +49,8 @@ async def get_public_menu(
     """Restaurant name, theme, and non-deleted categories with non-deleted items.
 
     The whole menu is fetched in a fixed, small number of queries regardless of
-    size: one for the restaurant, one for its categories, and a single
+    size: one for the restaurant, one for its categories, one for the owner's
+    notes between them, and a single
     ``selectinload`` batch for *all* items across those categories (never one
     query per category — that would be the classic N+1). `allergens`/`tags` are
     JSONB columns on the item row, so they add no extra round-trips.
@@ -73,6 +75,11 @@ async def get_public_menu(
         .order_by(MenuCategory.sort_order.asc())
     )
     categories = result.all()
+    notes = await db.scalars(
+        select(MenuNote)
+        .where(MenuNote.restaurant_id == restaurant_id, MenuNote.deleted_at.is_(None))
+        .order_by(MenuNote.sort_order, MenuNote.created_at)
+    )
 
     payload = PublicMenuResponse(
         restaurant=PublicRestaurant(
@@ -86,6 +93,7 @@ async def get_public_menu(
             ],
         ),
         categories=[MenuCategoryResponse.model_validate(c) for c in categories],
+        notes=[MenuNoteResponse.model_validate(note) for note in notes],
     )
 
     await _localize(db, payload, restaurant, lang)
@@ -110,7 +118,8 @@ async def _localize(
     back to Polish over one missing dish.
 
     Only author-written text is touched: category names, dish names,
-    descriptions, ingredients, and the allergens and tags the owner made up.
+    descriptions, ingredients, the allergens and tags the owner made up, and
+    the notes between the sections.
     Ids, prices, availability and the *built-in* allergens and tags are left
     alone — ids because they address rows, prices because a translation must
     never be able to change a number, and built-in labels because the frontend
@@ -124,7 +133,7 @@ async def _localize(
     if language is None:
         return
 
-    sources: list[str] = []
+    sources: list[str] = [note.body for note in payload.notes]
     for category in payload.categories:
         sources.append(category.name)
         for item in category.items:
@@ -146,6 +155,9 @@ async def _localize(
                 label if label in BUILT_IN_TAGS else phrases.get(label, label)
                 for label in item.tags
             ]
+
+    for note in payload.notes:
+        note.body = phrases.get(note.body, note.body)
 
     distinct = collect_sources(sources)
     translated = sum(1 for phrase in distinct if phrase in phrases)

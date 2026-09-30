@@ -89,6 +89,7 @@ baseline revision against a production database whose schema it never authored.
 | `010_add_menu_pattern.sql`        | `restaurant.menu_pattern`                           | **required** |
 | `011_add_menu_languages.sql`      | `restaurant.menu_languages`                         | **required** |
 | `012_add_panel_language.sql`      | `restaurant.panel_language` (existing rows get `pl`) | **required** |
+| `013_add_menu_notes.sql`          | `menu_note`                                         | optional (table only) |
 
 ### 2.2 Configuration comes only from the environment
 
@@ -133,6 +134,7 @@ Anything that grants access, moves money, or changes who can do either writes an
 ```
 subscription_package
 restaurant ─┬─ menu_category ── menu_item
+            ├─ menu_note               (text between the categories)
             ├─ payment_history
             ├─ password_reset          (activation + reset grants)
             ├─ translation_dictionary
@@ -523,6 +525,26 @@ naming the variable, a Resend failure a 502, and both write the whole inquiry to
 the log so it can be recovered. Every visitor-typed value is HTML-escaped in the
 email. The landing page's own origin must be listed in `CORS_ALLOWED_ORIGINS`.
 
+**Notes between the sections ("Tekst w menu").** Lunch hours, what a set
+menu consists of, a word about allergies — text a guest should read that is
+not a dish. `menu_note` is its own table rather than a kind of category, so
+nothing that lists categories (the dish editor's picker, the guest's category
+strip, the readiness count) has to learn to skip it, and the deploy needs no
+migration. Its `sort_order` **shares one numbering with the categories'** of
+the same restaurant; `menu_layout()` (models.py) and `menuSections()`
+(`utils/menuLayout.ts`) merge the two, a category first on a tie. So every
+path that places a section counts both: a new category goes after
+`_edge_position` over both tables, and `PUT …/menu/order` takes `layout` — all
+section ids top to bottom. A body without `layout` comes from a client that
+has never seen a note: its categories fill the category slots and the notes
+keep theirs. Notes drag among the categories on the board (same `CATEGORY`
+droppable), are added at the top from the header ("Nowy tekst") or at the
+bottom from the board's foot (the only way on a phone), hide while the guest
+searches (not under the allergy filter), keep the owner's line breaks, and are
+phrases in the dictionary like dish names — listed where they sit in the menu
+and served translated. Starting texts are `NOTE_TEMPLATES` in
+`constants/menu.ts`, Polish like the category suggestions.
+
 **Menu builder ("Kreator menu").** One vertical section per category, with
 the guest menu on a phone beside it (`LiveMenuPreview`, `lg` and up; a
 "Podgląd" dialog below that). The phone renders the real `PublicMenuView`
@@ -799,7 +821,8 @@ Deployment prerequisites, carried across several sessions:
       Applied to production (confirmed by the owner, 2026-09-29).
 - [x] **Migration `012`** (`restaurant.panel_language`) — required column.
       Applied to production (confirmed by the owner, 2026-09-29).
-- [ ] `007` and `008` are table-only and optional (`create_all` covers them).
+- [ ] `007`, `008` and `013` are table-only and optional (`create_all` covers
+      them).
 - [ ] **DeepL quota is shared by every restaurant.** Drafting a whole menu into
       one language costs its character count; with 34 languages on offer, a
       free-tier key (500k characters/month) can run dry. Watch usage; the

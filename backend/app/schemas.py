@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from pydantic import (
     BaseModel,
@@ -262,6 +262,59 @@ class MenuCategoryResponse(BaseModel):
     items: list[MenuItemResponse] = Field(default_factory=list)
 
 
+#: Long enough for opening hours and what a set menu consists of; short
+#: enough to stay a note between sections rather than a page of its own.
+MAX_NOTE_LENGTH = 1000
+
+
+def _clean_note(body: str) -> str:
+    """Line endings unified, trailing spaces and runs of blank lines dropped."""
+    unified = body.replace("\r\n", "\n").replace("\r", "\n")
+    lines = [line.rstrip() for line in unified.split("\n")]
+    text = "\n".join(lines).strip()
+    while "\n\n\n" in text:
+        text = text.replace("\n\n\n", "\n\n")
+    if not text:
+        raise ValueError("Tekst jest pusty.")
+    if len(text) > MAX_NOTE_LENGTH:
+        raise ValueError(
+            f"Tekst jest za długi — najwyżej {MAX_NOTE_LENGTH} znaków."
+        )
+    return text
+
+
+class MenuNoteCreate(BaseModel):
+    body: str
+    #: Where it goes: the header's button puts it at the top, where hours and
+    #: set-menu notes usually belong; the foot of the board at the bottom.
+    at: Literal["start", "end"] = "end"
+
+    @field_validator("body")
+    @classmethod
+    def _body(cls, value: str) -> str:
+        return _clean_note(value)
+
+
+class MenuNoteUpdate(BaseModel):
+    body: str
+
+    @field_validator("body")
+    @classmethod
+    def _body(cls, value: str) -> str:
+        return _clean_note(value)
+
+
+class MenuNoteResponse(BaseModel):
+    """A note between the menu's sections. `order` shares its numbering with
+    the categories' `order`, which is how a client interleaves the two."""
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: uuid.UUID
+    body: str
+    order: int = Field(validation_alias="sort_order", serialization_alias="order")
+
+
 class MenuOrderCategory(BaseModel):
     """One category's place on the board, with its dishes in display order."""
 
@@ -279,12 +332,18 @@ class MenuOrderUpdate(BaseModel):
     """
 
     categories: list[MenuOrderCategory] = Field(max_length=200)
+    #: The sections top to bottom, category and note ids interleaved; it
+    #: decides the order of both. Absent from a client that predates notes —
+    #: its categories then fill the category places and the notes stay put.
+    layout: list[uuid.UUID] | None = Field(default=None, max_length=400)
 
     @model_validator(mode="after")
     def _each_id_once(self) -> "MenuOrderUpdate":
         category_ids = [category.id for category in self.categories]
         if len(set(category_ids)) != len(category_ids):
             raise ValueError("Kategoria występuje w układzie więcej niż raz.")
+        if self.layout is not None and len(set(self.layout)) != len(self.layout):
+            raise ValueError("Element występuje w układzie więcej niż raz.")
         item_ids = [
             item_id for category in self.categories for item_id in category.item_ids
         ]
@@ -330,6 +389,9 @@ class TranslationStatus(BaseModel):
 class PublicMenuResponse(BaseModel):
     restaurant: PublicRestaurant
     categories: list[MenuCategoryResponse]
+    #: The owner's notes between the sections, placed by `order` among the
+    #: categories' own.
+    notes: list[MenuNoteResponse] = Field(default_factory=list)
     #: Absent when the menu was requested in its own language.
     translation: TranslationStatus | None = None
 
