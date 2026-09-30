@@ -678,7 +678,13 @@ In the print document, style `body>svg`, never `svg` — the codes are nested
 - Brand: primary `#0F8256` (the landing page's CTA green, `--color-brand-600`),
   dark `#0C6544`, light `#16A06A`. The wordmark is the `Wordmark` component in
   **Dela Gothic One** — one weight, display only, deliberately not in the body
-  font stack. There is no letter-tile logo any more.
+  font stack. There is no letter-tile logo any more. Beside it the owner
+  panel's header shows the restaurant as its menu does (`RestaurantIdentity`):
+  its logo, or a monogram in its brand colour, and its name in the heading
+  face of its font pairing — no tagline. The header info
+  (`GET /restaurants/{id}`) carries `logo_url`, `primary_color` and
+  `font_family` for it, and its query reads `theme`, so a new look shows at
+  once.
 - Owner nav order is the setup order: **Menu builder → Menu design → QR codes**
   (Kreator menu → Wygląd menu → Kody QR), then the extras (Languages, Google
   reviews) below a divider.

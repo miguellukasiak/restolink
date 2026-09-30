@@ -66,6 +66,10 @@ export interface RestaurantPanelInfo {
   subscription_valid_until: string | null;
   /** The owner panel's second language beside English; null for English only. */
   panel_language?: string | null;
+  /** The restaurant's own look, for the panel header (RestaurantIdentity). */
+  logo_url?: string | null;
+  primary_color?: string | null;
+  font_family?: string | null;
 }
 
 /** Schema: MenuItem */

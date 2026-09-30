@@ -156,6 +156,12 @@ class RestaurantPanelInfo(BaseModel):
     subscription_valid_until: datetime | None
     #: The panel's second language beside English; None means English only.
     panel_language: str | None = None
+    #: The restaurant's own look, so the panel's header wears its brand: the
+    #: logo, or a monogram in its colour, beside its name in its menu's
+    #: heading face.
+    logo_url: HostedImageUrl = None
+    primary_color: str | None = None
+    font_family: str | None = None
 
 
 class RestaurantThemeUpdate(BaseModel):

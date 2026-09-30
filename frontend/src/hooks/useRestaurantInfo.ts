@@ -11,6 +11,8 @@ export function useRestaurantInfo(restaurantId: string) {
     queryKey: restaurantInfoQueryKeys.detail(restaurantId),
     queryFn: () => fetchRestaurantPanelInfo(restaurantId),
     enabled: Boolean(restaurantId),
-    // staleTime inherited from the global QueryClient default (5 min).
+    // staleTime inherited from the global QueryClient default (5 min). The
+    // header shows the logo, colour and font, so a new look refreshes it.
+    meta: { reads: ['theme'] },
   });
 }

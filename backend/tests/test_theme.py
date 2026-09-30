@@ -85,3 +85,23 @@ async def test_a_pattern_must_be_a_short_slug(restaurant, pattern):
         response = await save_theme(client, restaurant, {"menu_pattern": pattern})
         assert response.status_code == 422
         assert (await public_theme(client, restaurant))["menu_pattern"] is None
+
+
+async def test_the_panel_header_wears_the_restaurants_look(restaurant):
+    """The owner panel shows the logo, or a monogram in the brand colour,
+    beside the name in the menu's heading face — read with the header info."""
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        await save_theme(
+            client,
+            restaurant,
+            {"primary_color": "#E4572E", "font_family": "Pacifico"},
+        )
+        response = await client.get(
+            f"/api/v1/restaurants/{restaurant.id}", headers=owner_headers(restaurant.id)
+        )
+
+    assert response.status_code == 200
+    info = response.json()
+    assert info["primary_color"] == "#E4572E"
+    assert info["font_family"] == "Pacifico"
+    assert info["logo_url"] is None

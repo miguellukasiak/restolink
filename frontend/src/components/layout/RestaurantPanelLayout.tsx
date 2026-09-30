@@ -1,7 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
@@ -11,7 +10,6 @@ import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
-import Skeleton from '@mui/material/Skeleton';
 import { alpha } from '@mui/material/styles';
 import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded';
 import QrCode2RoundedIcon from '@mui/icons-material/QrCode2Rounded';
@@ -28,6 +26,7 @@ import { ImpersonationBanner } from '../panel/ImpersonationBanner';
 import { useSnackbar } from '../feedback/SnackbarProvider';
 import { resolveAccessState } from '../../constants/subscription';
 import { PanelLanguageSwitch } from '../panel/PanelLanguageSwitch';
+import { RestaurantIdentity } from './RestaurantIdentity';
 import {
   PANEL_DEFAULT_LANGUAGE,
   isPanelLanguage,
@@ -138,7 +137,8 @@ export function RestaurantPanelLayout() {
                 they work in all day. On a phone there is room for one of
                 the two, and it is theirs: the name on one line, cut with an
                 ellipsis, rather than five wrapped lines pushing the bar over
-                the page. */}
+                the page. Theirs is set as their menu sets it
+                (RestaurantIdentity). */}
             <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center' }}>
               <Wordmark size={18} color="text.primary" />
             </Box>
@@ -147,27 +147,16 @@ export function RestaurantPanelLayout() {
               flexItem
               sx={{ my: 0.75, display: { xs: 'none', sm: 'block' } }}
             />
-            <Box sx={{ minWidth: 0 }}>
-              {restaurant.isLoading ? (
-                <Skeleton variant="text" width={160} height={24} />
-              ) : (
-                <Typography
-                  variant="subtitle1"
-                  noWrap
-                  sx={{ fontWeight: 700, lineHeight: 1.2 }}
-                >
-                  {restaurant.data?.name ?? t('nav.ownerPanel')}
-                </Typography>
-              )}
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                noWrap
-                sx={{ display: { xs: 'none', sm: 'block' } }}
-              >
-                {t('nav.tagline')}
-              </Typography>
-            </Box>
+            <RestaurantIdentity
+              name={
+                restaurant.data?.name ??
+                (restaurant.isError ? t('nav.ownerPanel') : undefined)
+              }
+              logoUrl={restaurant.data?.logo_url}
+              primaryColor={restaurant.data?.primary_color}
+              fontFamily={restaurant.data?.font_family}
+              loading={restaurant.isLoading}
+            />
           </Stack>
           <Box sx={{ flexGrow: 1, minWidth: 8 }} />
           <Box sx={{ mr: { xs: 0.5, sm: 2 }, flexShrink: 0 }}>
