@@ -272,33 +272,6 @@ export function coverageStep(value: number): 0 | 1 | 2 | 3 {
 }
 
 /**
- * A share said the way a person says it — "about one in three" — for the
- * map's hover card. Exact percentages invited the wrong questions ("why 93
- * and not 100?") about numbers that are estimates to begin with. Words stay
- * consistent with the map's colours: "almost everyone" is its darkest step.
- */
-export type ShareWords =
-  | 'all'
-  | 'most'
-  | 'half'
-  | 'third'
-  | 'quarter'
-  | 'fifth'
-  | 'tenth'
-  | 'few';
-
-export function shareWords(value: number): ShareWords {
-  if (value >= 0.85) return 'all';
-  if (value >= 0.6) return 'most';
-  if (value >= 0.4) return 'half';
-  if (value >= 0.29) return 'third';
-  if (value >= 0.225) return 'quarter';
-  if (value >= 0.15) return 'fifth';
-  if (value >= 0.075) return 'tenth';
-  return 'few';
-}
-
-/**
  * The offered languages that people in a country read, most read first —
  * who the menu's current readers there are.
  */

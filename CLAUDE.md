@@ -485,11 +485,12 @@ tinted half the world at 5–8 % English). A share means who can **read** a
 menu in the language, not whose mother tongue it is: a country's official
 language counts as read by nearly everyone schooled there (a native-speaker
 86 % once had the map promise 93 % of Lithuania after adding Lithuanian). The
-hover card speaks in sentences, not percentages — "Teraz Twoje menu przeczyta
-tu mniej więcej co druga osoba… Dodaj litewski, a przeczyta je prawie każdy —
-o 1,4 mln osób więcej" — through `shareWords`, whose "almost everyone" is
-exactly the map's darkest step; exact figures invited "why 93 and not 100?"
-about numbers that are estimates to begin with. Guidance is deliberate: "Polecane w
+hover card speaks in whole sentences with the figures in them — "Teraz Twoje
+menu przeczyta tu 49% mieszkańców. Czytają je ci, którzy znają angielski lub
+polski. Dodaj litewski, a przeczyta je 98% mieszkańców — o 1,4 mln osób
+więcej." — which says what is now, what is after, and why. The owner asked for
+percentages over words like "most"; an estimate is shown as at most 99% and
+at least "less than 1%", never rounded into a promise. Guidance is deliberate: "Polecane w
 Polsce" (tiered, one-line reasons with no invented statistics) comes before
 world reach, each candidate shows the *new* readers it adds, the upkeep is
 spelled out per new dish, the page warns from `MANY_LANGUAGES` (6) and asks

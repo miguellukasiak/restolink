@@ -10,7 +10,6 @@ import {
   gain,
   languagesReadIn,
   reach,
-  shareWords,
 } from './reach';
 
 const countries = worldMap.countries;
@@ -108,24 +107,6 @@ describe('the map helpers', () => {
     expect([0, 0.08, 0.1, 0.49, 0.5, 0.84, 0.85, 1].map(coverageStep)).toEqual([
       0, 0, 1, 1, 2, 2, 3, 3,
     ]);
-  });
-
-  it('says a share in words, in step with the map', () => {
-    expect([0.03, 0.08, 0.2, 0.25, 0.33, 0.49, 0.7, 0.85, 0.99].map(shareWords)).toEqual([
-      'few',
-      'tenth',
-      'fifth',
-      'quarter',
-      'third',
-      'half',
-      'most',
-      'all',
-      'all',
-    ]);
-    // Whatever the map colours darkest, the card calls "almost everyone".
-    for (let value = 0; value <= 1; value += 0.01) {
-      expect(shareWords(value) === 'all', String(value)).toBe(coverageStep(value) === 3);
-    }
   });
 
   it('names who reads the menu in a country, most read first', () => {

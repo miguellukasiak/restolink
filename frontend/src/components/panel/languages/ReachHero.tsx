@@ -18,9 +18,9 @@ import {
   coverage,
   formatPeople,
   gain,
+  coverageStep,
   languagesReadIn,
   reach,
-  shareWords,
 } from './reach';
 import { WorldLanguageMap } from './WorldLanguageMap';
 import { PREVIEW_FILL, STEP_FILLS, countryAnchor, type MapView } from './mapGeometry';
@@ -81,33 +81,40 @@ export function ReachHero({
     hovered && hovered !== home ? bestLanguageFor(hovered, languages, candidates) : null;
   const preview = externalPreview ?? suggestion?.code ?? null;
 
-  // The hover card, in sentences: who reads the menu there now, and what the
-  // suggested language would change — in words, with the people it adds.
+  // The hover card, in sentences: how much of the country reads the menu now,
+  // in which languages, and what the suggested language would change.
+  // Estimates never round up to a promise: 99.7% reads "99%", 0.3% "less
+  // than 1%".
+  const sharePercent = (value: number) =>
+    value > 0 && value < 0.005
+      ? t('reach.underOnePercent')
+      : percent(value < 1 ? Math.min(value, 0.99) : 1);
   const nowShare = hovered ? coverage(hovered, languages) : 0;
-  const nowWords = shareWords(nowShare);
   const readIn = hovered ? languagesReadIn(hovered, languages).slice(0, 3) : [];
   const afterShare =
     hovered && suggestion ? coverage(hovered, [...languages, suggestion.code]) : 0;
-  const afterWords = shareWords(afterShare);
   const newReaders = hoveredCountry ? hoveredCountry.pop * (afterShare - nowShare) : 0;
   const orList = new Intl.ListFormat(locale, { type: 'disjunction' });
   const suggestionName = suggestion ? languageName(suggestion.code) : '';
+  // Where the percentage would not move (Dutch in the Netherlands, already
+  // at 90% through English), the people it adds are the news.
+  const samePercent = sharePercent(afterShare) === sharePercent(nowShare);
   const addSentence = !suggestion
     ? null
-    : afterWords !== nowWords
+    : samePercent
       ? newReaders >= 1000
+        ? t('reach.addMore', { language: suggestionName, people: people(newReaders) })
+        : null
+      : newReaders >= 1000
         ? t('reach.add', {
             language: suggestionName,
-            who: t(`reach.who.${afterWords}`),
+            percent: sharePercent(afterShare),
             people: people(newReaders),
           })
         : t('reach.addShort', {
             language: suggestionName,
-            who: t(`reach.who.${afterWords}`),
-          })
-      : newReaders >= 1000
-        ? t('reach.addMore', { language: suggestionName, people: people(newReaders) })
-        : null;
+            percent: sharePercent(afterShare),
+          });
   const previewGain = preview ? gain(worldMap.countries, languages, preview) : 0;
   // "Not much" only when the language's readers mostly read the menu already
   // (Swedish after English) — never merely because their country is small:
@@ -273,8 +280,10 @@ export function ReachHero({
                   {t('reach.inhabitants', { people: people(hoveredCountry.pop) })}
                 </Typography>
                 <Typography variant="body2" sx={{ mt: 1 }}>
-                  {t('reach.now', { who: t(`reach.who.${nowWords}`) })}
-                  {nowWords !== 'all' && readIn.length > 0
+                  {nowShare > 0
+                    ? t('reach.now', { percent: sharePercent(nowShare) })
+                    : t('reach.nowNobody')}
+                  {hoveredCountry.key !== home && readIn.length > 0
                     ? ` ${t('reach.readIn', {
                         languages: orList.format(readIn.map(languageName)),
                       })}`
@@ -299,7 +308,7 @@ export function ReachHero({
                       {t('reach.clickToAdd', { language: suggestionName })}
                     </Typography>
                   </>
-                ) : nowWords !== 'all' ? (
+                ) : coverageStep(nowShare) < 3 ? (
                   <Typography
                     variant="caption"
                     color="text.secondary"
