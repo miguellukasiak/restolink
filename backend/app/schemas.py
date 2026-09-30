@@ -283,11 +283,25 @@ def _clean_note(body: str) -> str:
     return text
 
 
+class NoteStyle(BaseModel):
+    """How a note looks on the guest menu. Every field has a default, so a
+    row stored before an option existed still reads as it always looked."""
+
+    #: A slug naming artwork the frontend owns, like `menu_pattern`; null
+    #: means no icon. An unknown slug is drawn as the default by the frontend.
+    icon: str | None = Field(default="info", pattern=r"^[a-z0-9-]{1,32}$")
+    #: "card": a frame in the brand's tint; "filled": the brand colour
+    #: itself; "plain": the text alone, like a line of the menu.
+    variant: Literal["card", "filled", "plain"] = "card"
+    align: Literal["left", "center"] = "left"
+
+
 class MenuNoteCreate(BaseModel):
     body: str
     #: Where it goes: the header's button puts it at the top, where hours and
     #: set-menu notes usually belong; the foot of the board at the bottom.
     at: Literal["start", "end"] = "end"
+    style: NoteStyle = Field(default_factory=NoteStyle)
 
     @field_validator("body")
     @classmethod
@@ -297,6 +311,8 @@ class MenuNoteCreate(BaseModel):
 
 class MenuNoteUpdate(BaseModel):
     body: str
+    #: Absent leaves the look as it is.
+    style: NoteStyle | None = None
 
     @field_validator("body")
     @classmethod
@@ -313,6 +329,7 @@ class MenuNoteResponse(BaseModel):
     id: uuid.UUID
     body: str
     order: int = Field(validation_alias="sort_order", serialization_alias="order")
+    style: NoteStyle = Field(default_factory=NoteStyle)
 
 
 class MenuOrderCategory(BaseModel):

@@ -99,8 +99,19 @@ export interface MenuCategory {
  */
 export interface MenuNote {
   id: string;
+  /** Text with a small markup: **bold**, *italic*, "# " heading, "- " item. */
   body: string;
   order: number;
+  /** Absent from an API that predates it; `noteLook` fills the defaults. */
+  style?: MenuNoteStyle;
+}
+
+/** How a note looks on the guest menu. */
+export interface MenuNoteStyle {
+  /** A slug from `NOTE_ICONS`; null draws no icon. */
+  icon: string | null;
+  variant: 'card' | 'filled' | 'plain';
+  align: 'left' | 'center';
 }
 
 /** Schema: MenuItemRequest */

@@ -293,3 +293,70 @@ async def test_notes_are_translated_with_the_menu(restaurant, client):
 
     assert (await sections(client, restaurant.id, lang="en"))[0] == english
     assert (await sections(client, restaurant.id))[0] == LUNCH
+
+
+async def test_a_note_keeps_its_look(restaurant, client):
+    created = await add_note(client, restaurant.id, "**Mięso w kebabie** — *craftowe*!")
+    # A note made without a look gets today's: info icon, tinted frame, left.
+    assert created["style"] == {"icon": "info", "variant": "card", "align": "left"}
+
+    look = {"icon": "grill", "variant": "filled", "align": "center"}
+    edited = await client.patch(
+        notes_url(restaurant.id, created["id"]),
+        json={"body": created["body"], "style": look},
+        headers=owner_headers(restaurant.id),
+    )
+    assert edited.json()["style"] == look
+
+    # A text-only edit leaves the look alone; no icon is a choice too.
+    await client.patch(
+        notes_url(restaurant.id, created["id"]),
+        json={"body": "Tylko tekst"},
+        headers=owner_headers(restaurant.id),
+    )
+    menu = await client.get(f"/api/v1/public/restaurants/{restaurant.id}/menu")
+    assert menu.json()["notes"][0]["style"] == look
+    plain = await add_note(client, restaurant.id, "Bez ikony")
+    no_icon = await client.patch(
+        notes_url(restaurant.id, plain["id"]),
+        json={"body": "Bez ikony", "style": {"icon": None, "variant": "plain"}},
+        headers=owner_headers(restaurant.id),
+    )
+    assert no_icon.json()["style"] == {
+        "icon": None,
+        "variant": "plain",
+        "align": "left",
+    }
+
+
+async def test_an_older_row_reads_with_todays_look(restaurant, client):
+    """Rows from before migration 014 hold '{}'."""
+    async with AsyncSessionLocal() as db:
+        db.add(
+            MenuNote(restaurant_id=restaurant.id, body="Stary", sort_order=1, style={})
+        )
+        await db.commit()
+    menu = await client.get(f"/api/v1/public/restaurants/{restaurant.id}/menu")
+    assert menu.json()["notes"][0]["style"] == {
+        "icon": "info",
+        "variant": "card",
+        "align": "left",
+    }
+
+
+@pytest.mark.parametrize(
+    "style",
+    [
+        {"variant": "neon"},
+        {"align": "justify"},
+        {"icon": "<script>"},
+        {"icon": "x" * 33},
+    ],
+)
+async def test_a_look_outside_the_options_is_refused(restaurant, client, style):
+    response = await client.post(
+        notes_url(restaurant.id),
+        json={"body": "Tekst", "style": style},
+        headers=owner_headers(restaurant.id),
+    )
+    assert response.status_code == 422

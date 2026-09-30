@@ -4,6 +4,7 @@ import type {
   MenuItem,
   MenuItemRequest,
   MenuNote,
+  MenuNoteStyle,
   RestaurantPanelInfo,
   RestaurantThemeUpdate,
 } from '../types';
@@ -134,19 +135,22 @@ export async function createMenuNote(
   restaurantId: string,
   body: string,
   at: 'start' | 'end',
+  style: MenuNoteStyle,
 ): Promise<MenuNote> {
-  const { data } = await api.post<MenuNote>(notesUrl(restaurantId), { body, at });
+  const { data } = await api.post<MenuNote>(notesUrl(restaurantId), { body, at, style });
   return data;
 }
 
-/** PATCH …/menu/notes/{noteId} — rewrites a note's text. */
+/** PATCH …/menu/notes/{noteId} — rewrites a note's text and look. */
 export async function updateMenuNote(
   restaurantId: string,
   noteId: string,
   body: string,
+  style: MenuNoteStyle,
 ): Promise<MenuNote> {
   const { data } = await api.patch<MenuNote>(`${notesUrl(restaurantId)}/${noteId}`, {
     body,
+    style,
   });
   return data;
 }

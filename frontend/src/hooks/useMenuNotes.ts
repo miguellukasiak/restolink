@@ -7,6 +7,7 @@ import {
 } from '../services/menuService';
 import { writesTo } from '../services/cacheSync';
 import { menuQueryKeys } from './useMenu';
+import type { MenuNoteStyle } from '../types';
 
 /** The owner's notes between the menu's sections. */
 export function useMenuNotes(restaurantId: string) {
@@ -21,12 +22,13 @@ export function useMenuNotes(restaurantId: string) {
 interface AddNoteVariables {
   body: string;
   at: 'start' | 'end';
+  style: MenuNoteStyle;
 }
 
 export function useAddMenuNote(restaurantId: string) {
   return useMutation({
-    mutationFn: ({ body, at }: AddNoteVariables) =>
-      createMenuNote(restaurantId, body, at),
+    mutationFn: ({ body, at, style }: AddNoteVariables) =>
+      createMenuNote(restaurantId, body, at, style),
     // Refreshes the board, the previews, "Languages" and the guest menu.
     meta: writesTo(restaurantId, ['menu']),
   });
@@ -35,12 +37,13 @@ export function useAddMenuNote(restaurantId: string) {
 interface UpdateNoteVariables {
   noteId: string;
   body: string;
+  style: MenuNoteStyle;
 }
 
 export function useUpdateMenuNote(restaurantId: string) {
   return useMutation({
-    mutationFn: ({ noteId, body }: UpdateNoteVariables) =>
-      updateMenuNote(restaurantId, noteId, body),
+    mutationFn: ({ noteId, body, style }: UpdateNoteVariables) =>
+      updateMenuNote(restaurantId, noteId, body, style),
     meta: writesTo(restaurantId, ['menu']),
   });
 }

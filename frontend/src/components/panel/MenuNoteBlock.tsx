@@ -24,6 +24,9 @@ import type { MenuNote } from '../../types';
 import { radii } from '../../theme';
 import { usePanelT } from '../../i18n/panel';
 import { TonalIcon } from './TonalIcon';
+import { NoteText } from '../public/MenuNoteCard';
+import { noteIconComponent, noteLook } from '../public/noteIcons';
+import { plainNote } from '../public/noteMarkup';
 
 interface MenuNoteBlockProps {
   note: MenuNote;
@@ -36,7 +39,7 @@ interface MenuNoteBlockProps {
 
 /** The start of a note, on one line — enough to tell one from another. */
 const excerpt = (body: string) => {
-  const line = body.replace(/\s+/g, ' ');
+  const line = plainNote(body).replace(/\s+/g, ' ');
   return line.length > 60 ? `${line.slice(0, 59)}…` : line;
 };
 
@@ -55,6 +58,9 @@ function MenuNoteBlockComponent({
 }: MenuNoteBlockProps) {
   const { t } = usePanelT();
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
+  const NoteIcon = noteIconComponent(noteLook(note.style).icon) ?? NotesRoundedIcon;
+  // Long notes fade out at the foot of the block instead of stopping mid-line.
+  const long = note.body.length > 220 || note.body.split('\n').length > 5;
 
   return (
     <Draggable draggableId={note.id} index={index}>
@@ -116,7 +122,7 @@ function MenuNoteBlockComponent({
                 }}
               >
                 <TonalIcon size={36}>
-                  <NotesRoundedIcon fontSize="small" />
+                  <NoteIcon fontSize="small" />
                 </TonalIcon>
                 <Box sx={{ minWidth: 0, flex: 1 }}>
                   <Typography
@@ -130,19 +136,19 @@ function MenuNoteBlockComponent({
                   >
                     {t('note.label')}
                   </Typography>
-                  <Typography
-                    variant="body2"
+                  <Box
                     sx={{
-                      whiteSpace: 'pre-line',
-                      overflowWrap: 'anywhere',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 4,
-                      WebkitBoxOrient: 'vertical',
+                      typography: 'body2',
+                      maxHeight: '8.5em',
                       overflow: 'hidden',
+                      ...(long && {
+                        WebkitMaskImage: 'linear-gradient(black 70%, transparent)',
+                        maskImage: 'linear-gradient(black 70%, transparent)',
+                      }),
                     }}
                   >
-                    {note.body}
-                  </Typography>
+                    <NoteText body={note.body} />
+                  </Box>
                 </Box>
               </ButtonBase>
 

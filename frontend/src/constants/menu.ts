@@ -38,27 +38,33 @@ export const STARTER_CATEGORIES = ['Przystawki', 'Dania główne', 'Desery', 'Na
 
 /**
  * Starting points for a note between the menu's sections, in the menu's own
- * language like the category names above. The owner edits the hours and
- * amounts; the panel names each one through `noteDialog.templates.<key>`.
+ * language like the category names above, each with the icon that suits it.
+ * The owner edits the hours and amounts; the panel names each one through
+ * `noteDialog.templates.<key>`.
  */
 export const NOTE_TEMPLATES = [
   {
     key: 'lunch',
+    icon: 'clock',
     body:
-      'Menu obiadowe podajemy od poniedziałku do piątku w godzinach 12:00–16:00.\n' +
+      '# Menu obiadowe\n' +
+      'Od poniedziałku do piątku, **12:00–16:00**.\n' +
       'Zestaw: zupa + danie dnia.',
   },
   {
     key: 'allergies',
-    body: 'Masz alergię lub nietolerancję pokarmową? Powiedz obsłudze — chętnie doradzimy.',
+    icon: 'allergy',
+    body: 'Masz alergię lub nietolerancję pokarmową? **Powiedz obsłudze** — chętnie doradzimy.',
   },
   {
     key: 'waitingTime',
+    icon: 'fire',
     body: 'Wszystkie dania przygotowujemy na bieżąco, dlatego czas oczekiwania może się wydłużyć.',
   },
   {
     key: 'service',
-    body: 'Do rachunku dla grup od 8 osób doliczamy 10% serwisu.',
+    icon: 'info',
+    body: 'Do rachunku dla grup od 8 osób doliczamy **10% serwisu**.',
   },
 ] as const;
 

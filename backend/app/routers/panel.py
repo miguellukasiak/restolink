@@ -276,6 +276,7 @@ async def create_note(
     note = MenuNote(
         restaurant_id=restaurant_id,
         body=payload.body,
+        style=payload.style.model_dump(),
         sort_order=await _edge_position(db, restaurant_id, at=payload.at),
     )
     db.add(note)
@@ -293,10 +294,12 @@ async def update_note(
     payload: MenuNoteUpdate,
     db: AsyncSession = Depends(get_db),
 ) -> MenuNote:
-    """Rewrite a note's text; its place is the board's business."""
+    """Rewrite a note's text and look; its place is the board's business."""
     await _require_restaurant(db, restaurant_id)
     note = await _require_note(db, restaurant_id, note_id)
     note.body = payload.body
+    if payload.style is not None:
+        note.style = payload.style.model_dump()
     await db.flush()
     await db.refresh(note)
     return note

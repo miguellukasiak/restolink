@@ -354,8 +354,7 @@ class MenuNote(TimestampSoftDeleteMixin, Base):
 
     A table of its own rather than a kind of category, so nothing that lists
     categories — the dish editor's picker, the guest's category strip, the
-    readiness count — has to learn to skip it, and so the deploy needs no
-    migration: `create_all` creates a missing table.
+    readiness count — has to learn to skip it.
     """
 
     __tablename__ = "menu_note"
@@ -366,9 +365,19 @@ class MenuNote(TimestampSoftDeleteMixin, Base):
     restaurant_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("restaurant.id"), nullable=False, index=True
     )
-    #: Plain text. Line breaks are kept and shown; nothing else is markup.
+    #: The owner's text with a small markup the guest menu renders itself:
+    #: **bold**, *italic*, a line starting "# " as a heading and "- " as a
+    #: list item. Never HTML — the frontend builds elements from it, so
+    #: nothing typed here can inject markup.
     body: Mapped[str] = mapped_column(Text, nullable=False)
     sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    #: How the note looks: its icon (a slug the frontend owns, or null for
+    #: none), frame ("card", "filled", "plain") and alignment. One JSON column
+    #: so a new option needs no migration; `NoteStyle` in schemas.py validates
+    #: it and fills in what an older row lacks.
+    style: Mapped[dict] = mapped_column(
+        JSONB, default=dict, server_default=text("'{}'"), nullable=False
+    )
 
 
 def menu_layout(

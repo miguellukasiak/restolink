@@ -25,7 +25,7 @@ import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import SmartphoneRoundedIcon from '@mui/icons-material/SmartphoneRounded';
 import NotesRoundedIcon from '@mui/icons-material/NotesRounded';
-import type { MenuCategory, MenuItem, MenuNote } from '../../types';
+import type { MenuCategory, MenuItem, MenuNote, MenuNoteStyle } from '../../types';
 import { CATEGORY_SUGGESTIONS, STARTER_CATEGORIES } from '../../constants/menu';
 import { useMenu } from '../../hooks/useMenu';
 import { usePublicMenu } from '../../hooks/usePublicMenu';
@@ -539,7 +539,7 @@ export function MenuBuilderPage() {
     setDeleteTarget({ kind: 'note', note });
   }, []);
 
-  const saveNote = (body: string) => {
+  const saveNote = (body: string, style: MenuNoteStyle) => {
     const { note, placement } = noteEditor;
     const landed = (saved: MenuNote) => {
       setNotes((previous) =>
@@ -554,7 +554,7 @@ export function MenuBuilderPage() {
     const onError = (error: unknown) => showError(getApiErrorMessage(error));
     if (note) {
       updateNote.mutate(
-        { noteId: note.id, body },
+        { noteId: note.id, body, style },
         {
           onSuccess: (saved) => {
             landed(saved);
@@ -565,7 +565,7 @@ export function MenuBuilderPage() {
       );
     } else {
       addNote.mutate(
-        { body, at: placement },
+        { body, at: placement, style },
         {
           onSuccess: (saved) => {
             landed(saved);

@@ -227,7 +227,7 @@ export function PublicMenuView({
         {sections.map((section) =>
           section.kind === 'note' ? (
             <Box key={section.id} id={section.id} sx={{ pt: 2.5 }}>
-              <MenuNoteCard body={section.note.body} />
+              <MenuNoteCard body={section.note.body} style={section.note.style} />
             </Box>
           ) : (
             <CategorySection

@@ -90,6 +90,7 @@ baseline revision against a production database whose schema it never authored.
 | `011_add_menu_languages.sql`      | `restaurant.menu_languages`                         | **required** |
 | `012_add_panel_language.sql`      | `restaurant.panel_language` (existing rows get `pl`) | **required** |
 | `013_add_menu_notes.sql`          | `menu_note`                                         | optional (table only) |
+| `014_add_menu_note_style.sql`     | `menu_note.style` (JSONB, existing rows get `{}`)   | **required** |
 
 ### 2.2 Configuration comes only from the environment
 
@@ -552,7 +553,21 @@ bottom from the board's foot (the only way on a phone), hide while the guest
 searches (not under the allergy filter), keep the owner's line breaks, and are
 phrases in the dictionary like dish names — listed where they sit in the menu
 and served translated. Starting texts are `NOTE_TEMPLATES` in
-`constants/menu.ts`, Polish like the category suggestions.
+`constants/menu.ts`, Polish like the category suggestions, each with an icon.
+
+A note's text carries a small markup — `**bold**`, `*italic*`, a line
+starting `# ` (heading, in the theme's heading face) or `- ` (list item) —
+parsed by `components/public/noteMarkup.ts` into data and built into elements
+by React, **never** set as HTML, so nothing typed can inject markup. It is
+plain text in a textarea on purpose: the editor's toolbar and Ctrl+B / Ctrl+I
+write the markers, the preview beside it shows the result, and the stored
+note stays one phrase the dictionary can hold. `menu_note.style` (JSONB,
+validated by `NoteStyle`) holds the look: `icon` (a slug from `NOTE_ICONS`
+in `noteIcons.ts`, null for none, an unknown slug drawn as the default — the
+frontend owns the artwork, like `menu_pattern`), `variant` (`card` tinted
+frame, `filled` brand colour with contrasting text, `plain` text alone) and
+`align`. Every field has a default, so `{}` reads as the original look; a new
+option is a new field with a default, not a migration.
 
 **Menu builder ("Kreator menu").** One vertical section per category, with
 the guest menu on a phone beside it (`LiveMenuPreview`, `lg` and up; a
@@ -830,6 +845,9 @@ Deployment prerequisites, carried across several sessions:
       Applied to production (confirmed by the owner, 2026-09-29).
 - [x] **Migration `012`** (`restaurant.panel_language`) — required column.
       Applied to production (confirmed by the owner, 2026-09-29).
+- [ ] **Migration `014`** (`menu_note.style`) — required column. Apply
+      before the richer note editor reaches `main`: without it every query on
+      `menu_note`, the public menu included, fails.
 - [ ] `007`, `008` and `013` are table-only and optional (`create_all` covers
       them).
 - [ ] **DeepL quota is shared by every restaurant.** Drafting a whole menu into
