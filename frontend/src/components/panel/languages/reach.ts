@@ -8,6 +8,12 @@
  * own make-up, and second-language shares (English above all) are deliberately
  * conservative. Populations come from Natural Earth with the map itself.
  *
+ * The question is who can *read* a menu, not whose mother tongue it is. A
+ * country's official language counts as read by nearly everyone who went to
+ * school there: 86% of Lithuanians speak Lithuanian natively, but nearly all
+ * can read a menu in it, and a native-speaker figure made the map promise an
+ * owner only 93% of Lithuania after adding Lithuanian.
+ *
  * A country's coverage combines its languages as independent chances,
  * 1 − Π(1 − share), so it never exceeds 1 and a person is counted once however
  * many of the menu's languages they read. That is what makes the headline
@@ -25,7 +31,7 @@ export const COUNTRY_SHARES: Record<string, Record<string, number>> = {
   GB: { en: 0.98 },
   IT: { it: 0.97, en: 0.35 },
   ES: { es: 0.98, en: 0.35 },
-  UA: { uk: 0.9, ru: 0.75, en: 0.2 },
+  UA: { uk: 0.95, ru: 0.75, en: 0.2 },
   PL: { pl: 0.99, en: 0.4, de: 0.1 },
   RO: { ro: 0.97, en: 0.35, hu: 0.06 },
   NL: { nl: 0.97, en: 0.9, de: 0.5 },
@@ -41,20 +47,20 @@ export const COUNTRY_SHARES: Record<string, Record<string, number>> = {
   BG: { bg: 0.97, ru: 0.3, en: 0.3 },
   RS: { hr: 0.8, en: 0.4, ru: 0.1 },
   DK: { da: 0.97, en: 0.88, nb: 0.8, sv: 0.6, de: 0.3 },
-  FI: { fi: 0.9, sv: 0.3, en: 0.75 },
+  FI: { fi: 0.97, sv: 0.3, en: 0.75 },
   SK: { sk: 0.98, cs: 0.9, en: 0.35, hu: 0.08 },
   NO: { nb: 0.97, en: 0.9, sv: 0.8, da: 0.8 },
   IE: { en: 0.99 },
   HR: { hr: 0.98, en: 0.55, de: 0.2 },
   BA: { hr: 0.9, en: 0.35 },
   AL: { en: 0.35, it: 0.3 },
-  LT: { lt: 0.86, ru: 0.6, en: 0.45, pl: 0.07 },
+  LT: { lt: 0.97, ru: 0.6, en: 0.45, pl: 0.07 },
   MD: { ro: 0.8, ru: 0.7, en: 0.2 },
   SI: { sl: 0.97, hr: 0.5, en: 0.6, de: 0.3 },
   MK: { bg: 0.6, hr: 0.4, en: 0.35 },
-  LV: { lv: 0.7, ru: 0.65, en: 0.5 },
+  LV: { lv: 0.9, ru: 0.65, en: 0.5 },
   XK: { en: 0.4, hr: 0.1 },
-  EE: { et: 0.7, ru: 0.45, en: 0.6, fi: 0.2 },
+  EE: { et: 0.85, ru: 0.45, en: 0.6, fi: 0.2 },
   LU: { fr: 0.9, de: 0.9, en: 0.8, pt: 0.15 },
   ME: { hr: 0.85, en: 0.35, ru: 0.1 },
   IS: { en: 0.9, da: 0.3 },
@@ -263,6 +269,47 @@ export function coverageStep(value: number): 0 | 1 | 2 | 3 {
   if (value >= 0.5) return 2;
   if (value >= 0.1) return 1;
   return 0;
+}
+
+/**
+ * A share said the way a person says it — "about one in three" — for the
+ * map's hover card. Exact percentages invited the wrong questions ("why 93
+ * and not 100?") about numbers that are estimates to begin with. Words stay
+ * consistent with the map's colours: "almost everyone" is its darkest step.
+ */
+export type ShareWords =
+  | 'all'
+  | 'most'
+  | 'half'
+  | 'third'
+  | 'quarter'
+  | 'fifth'
+  | 'tenth'
+  | 'few';
+
+export function shareWords(value: number): ShareWords {
+  if (value >= 0.85) return 'all';
+  if (value >= 0.6) return 'most';
+  if (value >= 0.4) return 'half';
+  if (value >= 0.29) return 'third';
+  if (value >= 0.225) return 'quarter';
+  if (value >= 0.15) return 'fifth';
+  if (value >= 0.075) return 'tenth';
+  return 'few';
+}
+
+/**
+ * The offered languages that people in a country read, most read first —
+ * who the menu's current readers there are.
+ */
+export function languagesReadIn(
+  countryKey: string,
+  languages: readonly string[],
+): string[] {
+  const shares = COUNTRY_SHARES[countryKey] ?? {};
+  return languages
+    .filter((code) => (shares[code] ?? 0) > 0)
+    .sort((a, b) => shares[b] - shares[a]);
 }
 
 /** "1,6 mld", "41 mln", "850 tys." (or "1.6B", "41M", "850K") — rounded as

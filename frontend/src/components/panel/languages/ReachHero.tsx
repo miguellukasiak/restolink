@@ -18,7 +18,9 @@ import {
   coverage,
   formatPeople,
   gain,
+  languagesReadIn,
   reach,
+  shareWords,
 } from './reach';
 import { WorldLanguageMap } from './WorldLanguageMap';
 import { PREVIEW_FILL, STEP_FILLS, countryAnchor, type MapView } from './mapGeometry';
@@ -78,7 +80,40 @@ export function ReachHero({
   const suggestion =
     hovered && hovered !== home ? bestLanguageFor(hovered, languages, candidates) : null;
   const preview = externalPreview ?? suggestion?.code ?? null;
+
+  // The hover card, in sentences: who reads the menu there now, and what the
+  // suggested language would change — in words, with the people it adds.
+  const nowShare = hovered ? coverage(hovered, languages) : 0;
+  const nowWords = shareWords(nowShare);
+  const readIn = hovered ? languagesReadIn(hovered, languages).slice(0, 3) : [];
+  const afterShare =
+    hovered && suggestion ? coverage(hovered, [...languages, suggestion.code]) : 0;
+  const afterWords = shareWords(afterShare);
+  const newReaders = hoveredCountry ? hoveredCountry.pop * (afterShare - nowShare) : 0;
+  const orList = new Intl.ListFormat(locale, { type: 'disjunction' });
+  const suggestionName = suggestion ? languageName(suggestion.code) : '';
+  const addSentence = !suggestion
+    ? null
+    : afterWords !== nowWords
+      ? newReaders >= 1000
+        ? t('reach.add', {
+            language: suggestionName,
+            who: t(`reach.who.${afterWords}`),
+            people: people(newReaders),
+          })
+        : t('reach.addShort', {
+            language: suggestionName,
+            who: t(`reach.who.${afterWords}`),
+          })
+      : newReaders >= 1000
+        ? t('reach.addMore', { language: suggestionName, people: people(newReaders) })
+        : null;
   const previewGain = preview ? gain(worldMap.countries, languages, preview) : 0;
+  // "Not much" only when the language's readers mostly read the menu already
+  // (Swedish after English) — never merely because their country is small:
+  // Lithuanian adds 1.4M, half of Lithuania, and that is not "not much".
+  const previewMostlyRead =
+    preview !== null && previewGain < 0.25 * reach(worldMap.countries, [preview]);
   const anchor = hovered ? countryAnchor(hovered, view) : null;
 
   const pick = (key: string) => {
@@ -155,7 +190,7 @@ export function ReachHero({
                   })}
                 </Typography>
                 <Typography variant="caption" color="text.secondary" component="p">
-                  {previewGain < 5e6
+                  {previewMostlyRead
                     ? t('reach.previewSmall')
                     : t('reach.previewTotal', { total: people(total + previewGain) })}
                 </Typography>
@@ -221,7 +256,7 @@ export function ReachHero({
                   py: 1,
                   borderRadius: radii.sm,
                   pointerEvents: 'none',
-                  maxWidth: 240,
+                  maxWidth: 290,
                   zIndex: 2,
                 }}
               >
@@ -235,29 +270,45 @@ export function ReachHero({
                   )}
                 </Typography>
                 <Typography variant="caption" color="text.secondary" component="p">
-                  {t('reach.countryStats', {
-                    people: people(hoveredCountry.pop),
-                    percent: percent(coverage(hoveredCountry.key, languages)),
-                  })}
+                  {t('reach.inhabitants', { people: people(hoveredCountry.pop) })}
                 </Typography>
-                <Typography
-                  variant="caption"
-                  component="p"
-                  sx={{ fontWeight: 600, mt: 0.25 }}
-                >
-                  {hoveredCountry.key === home
-                    ? t('reach.home')
-                    : suggestion
-                      ? t('reach.clickToAdd', {
-                          name: languageName(suggestion.code),
-                          percent: percent(
-                            coverage(hoveredCountry.key, [...languages, suggestion.code]),
-                          ),
-                        })
-                      : coverage(hoveredCountry.key, languages) >= 0.85
-                        ? t('reach.alreadyRead')
-                        : t('reach.notInCatalogue')}
+                <Typography variant="body2" sx={{ mt: 1 }}>
+                  {t('reach.now', { who: t(`reach.who.${nowWords}`) })}
+                  {nowWords !== 'all' && readIn.length > 0
+                    ? ` ${t('reach.readIn', {
+                        languages: orList.format(readIn.map(languageName)),
+                      })}`
+                    : null}
                 </Typography>
+                {hoveredCountry.key === home ? (
+                  <Typography variant="body2" sx={{ mt: 1, fontWeight: 600 }}>
+                    {t('reach.home')}
+                  </Typography>
+                ) : suggestion ? (
+                  <>
+                    {addSentence && (
+                      <Typography variant="body2" sx={{ mt: 1 }}>
+                        {addSentence}
+                      </Typography>
+                    )}
+                    <Typography
+                      variant="caption"
+                      component="p"
+                      sx={{ mt: 1, fontWeight: 700, color: 'primary.main' }}
+                    >
+                      {t('reach.clickToAdd', { language: suggestionName })}
+                    </Typography>
+                  </>
+                ) : nowWords !== 'all' ? (
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    component="p"
+                    sx={{ mt: 1 }}
+                  >
+                    {t('reach.notInCatalogue')}
+                  </Typography>
+                ) : null}
               </Paper>
             )}
 
