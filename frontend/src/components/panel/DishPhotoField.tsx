@@ -24,13 +24,16 @@ interface DishPhotoFieldProps {
   value: string | null;
   onChange: (value: string | null) => void;
   disabled?: boolean;
+  /** The menu's background colour, offered when a photo needs a backdrop. */
+  menuBackground?: string;
 }
 
 /**
  * Square photo tile for the dish editor.
  *
  * Accepts a click or a dropped file, and every photo goes through the 1:1
- * cropper, so the guest menu's grid stays even. Once there is a photo, "Zmień"
+ * cropper, so the guest menu's grid stays even — a photo of another shape
+ * can be fitted whole there, on a backdrop. Once there is a photo, "Zmień"
  * and the bin sit on the image itself rather than in a hover-only overlay —
  * a tablet behind the bar has no hover.
  */
@@ -38,6 +41,7 @@ export function DishPhotoField({
   value,
   onChange,
   disabled = false,
+  menuBackground,
 }: DishPhotoFieldProps) {
   const { t } = usePanelT();
   const { showError } = useSnackbar();
@@ -213,6 +217,7 @@ export function DishPhotoField({
       <ImageCropperDialog
         open={cropperSrc !== null}
         imageSrc={cropperSrc}
+        menuBackground={menuBackground}
         onApply={(cropped) => {
           onChange(cropped);
           setCropperSrc(null);

@@ -387,7 +387,16 @@ stripped once read so a refresh does not re-announce an old payment.
 
 **Images (Cloudinary).** The browser uploads a Base64 data URI; the API swaps it
 for a hosted URL before persisting (this removed a 13 MB → 0.45 MB payload
-bottleneck). Delivery transformations (`w_600,q_auto,f_auto`) are injected at
+bottleneck). Every dish photo is a 600×600 JPEG made in the browser by
+`ImageCropperDialog`. It opens cropped to fill the square; a photo of another
+shape can be shrunk to fit whole (`restrictPosition` is off below zoom 1, so
+the crop area may reach past the photo), and `utils/photoFill.ts` paints what
+it leaves uncovered — the dominant colour of the edges that meet the
+background, with the photo's edge faded into it, when those edges are a plain
+backdrop, else the photo blurred (shrunk and grown in steps, since Safari's
+canvas has no `filter`); the owner can pick another colour or the menu's
+background. The frame is the whole square window with the fill behind the
+photo, so the dialog shows exactly what is saved. Delivery transformations (`w_600,q_auto,f_auto`) are injected at
 **Pydantic serialization** via `HostedImageUrl`, so they can be retuned in one
 place with no migration and no re-upload.
 

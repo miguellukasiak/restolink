@@ -289,6 +289,7 @@ export function MenuItemEditorDialog({
                 value={field.value}
                 onChange={(value) => field.onChange(value)}
                 disabled={isSubmitting}
+                menuBackground={menuTheme?.background_color}
               />
             )}
           />

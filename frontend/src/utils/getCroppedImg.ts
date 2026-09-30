@@ -1,4 +1,5 @@
 import type { Area } from 'react-easy-crop';
+import { renderSquare, type PhotoFill } from './photoFill';
 
 /**
  * Fixed output dimensions — every cropped dish photo is a uniform square, hard
@@ -14,53 +15,26 @@ const OUTPUT_QUALITY = 0.8;
 /** Output MIME type. JPEG keeps payloads tiny and decodes everywhere (old phones). */
 const OUTPUT_MIME = 'image/jpeg';
 
-/** Loads an image and resolves once it's ready to be drawn to a canvas. */
-function loadImage(src: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-    image.addEventListener('load', () => resolve(image));
-    image.addEventListener('error', () => reject(new Error('Could not load the image.')));
-    image.crossOrigin = 'anonymous';
-    image.src = src;
-  });
-}
-
 /**
- * Crops `imageSrc` to the pixel rectangle `pixelCrop` (as reported by
- * react-easy-crop's `onCropComplete`) and rasterizes it into a fixed
- * `OUTPUT_SIZE`x`OUTPUT_SIZE` square, regardless of the source resolution or
- * the crop rectangle's own size — every dish photo ends up identically sized
- * and compressed, so even a 5 MB phone photo uploads as a tiny JPEG.
+ * Rasterizes the part of `imageSrc` the cropper framed (`pixelCrop`, as
+ * react-easy-crop reports it) into a fixed `OUTPUT_SIZE` square, regardless
+ * of the source resolution — every dish photo ends up identically sized and
+ * compressed, so even a 5 MB phone photo uploads as a tiny JPEG.
+ *
+ * The frame may reach past the photo when the owner shrank it to fit whole;
+ * `fill` paints what the photo leaves uncovered (utils/photoFill.ts).
  */
-export async function getCroppedImg(imageSrc: string, pixelCrop: Area): Promise<Blob> {
-  const image = await loadImage(imageSrc);
-  const canvas = document.createElement('canvas');
-  canvas.width = OUTPUT_SIZE;
-  canvas.height = OUTPUT_SIZE;
-
-  const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('This browser cannot process images.');
-
-  // High-quality downscale — the source region is almost always far larger than
-  // 600px, so good resampling keeps the shrunk photo crisp.
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = 'high';
-
-  ctx.drawImage(
-    image,
-    pixelCrop.x,
-    pixelCrop.y,
-    pixelCrop.width,
-    pixelCrop.height,
-    0,
-    0,
-    OUTPUT_SIZE,
-    OUTPUT_SIZE,
-  );
-
+export async function getCroppedImg(
+  imageSrc: string,
+  pixelCrop: Area,
+  fill: PhotoFill = { kind: 'color', color: '#ffffff' },
+  blurred?: string,
+): Promise<Blob> {
+  const canvas = await renderSquare(imageSrc, pixelCrop, fill, OUTPUT_SIZE, blurred);
   return new Promise((resolve, reject) => {
     canvas.toBlob(
-      (blob) => (blob ? resolve(blob) : reject(new Error('Could not process the image.'))),
+      (blob) =>
+        blob ? resolve(blob) : reject(new Error('Could not process the image.')),
       OUTPUT_MIME,
       OUTPUT_QUALITY,
     );
