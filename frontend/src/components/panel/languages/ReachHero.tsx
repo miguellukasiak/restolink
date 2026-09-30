@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Paper from '@mui/material/Paper';
+import Popper from '@mui/material/Popper';
 import Stack from '@mui/material/Stack';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
@@ -122,6 +123,32 @@ export function ReachHero({
   const previewMostlyRead =
     preview !== null && previewGain < 0.25 * reach(worldMap.countries, [preview]);
   const anchor = hovered ? countryAnchor(hovered, view) : null;
+  const mapRef = useRef<HTMLDivElement>(null);
+  // The hover card hangs off the country's centre, but lives in a popper
+  // outside the map: inside it, the map's rounded, clipped frame cut off
+  // any card taller than the space above the country (Czechia in Europe
+  // view lost its first lines). Out here it flips below or to the side when
+  // there is no room, and stays inside the window, clear of the app bar.
+  const anchorX = anchor?.x;
+  const anchorY = anchor?.y;
+  const cardAnchor = useMemo(
+    () =>
+      anchorX === undefined || anchorY === undefined
+        ? null
+        : {
+            contextElement: mapRef.current ?? undefined,
+            getBoundingClientRect: () => {
+              const box = mapRef.current?.getBoundingClientRect();
+              return new DOMRect(
+                (box?.left ?? 0) + anchorX * (box?.width ?? 0),
+                (box?.top ?? 0) + anchorY * (box?.height ?? 0),
+                0,
+                0,
+              );
+            },
+          },
+    [anchorX, anchorY],
+  );
 
   const pick = (key: string) => {
     if (key === home) return;
@@ -229,6 +256,7 @@ export function ReachHero({
 
         <Box>
           <Box
+            ref={mapRef}
             sx={{
               position: 'relative',
               borderRadius: radii.md,
@@ -246,79 +274,90 @@ export function ReachHero({
               onPick={pick}
             />
 
-            {hoveredCountry && anchor && (
-              <Paper
-                elevation={6}
-                sx={{
-                  position: 'absolute',
-                  left: `${Math.min(Math.max(anchor.x * 100, 14), 86)}%`,
-                  top: `${anchor.y * 100}%`,
-                  // Above the country, unless it sits high on the map — then
-                  // below, clear of the view switch in the corner.
-                  transform:
-                    anchor.y < 0.4
-                      ? 'translate(-50%, 14px)'
-                      : 'translate(-50%, calc(-100% - 10px))',
-                  px: 1.5,
-                  py: 1,
-                  borderRadius: radii.sm,
-                  pointerEvents: 'none',
-                  maxWidth: 290,
-                  zIndex: 2,
-                }}
+            {hoveredCountry && cardAnchor && (
+              <Popper
+                open
+                anchorEl={cardAnchor}
+                placement="top"
+                modifiers={[
+                  { name: 'offset', options: { offset: [0, 12] } },
+                  {
+                    name: 'flip',
+                    options: {
+                      fallbackPlacements: ['bottom', 'right', 'left'],
+                      padding: { top: 72, bottom: 8, left: 8, right: 8 },
+                    },
+                  },
+                  {
+                    name: 'preventOverflow',
+                    options: { padding: { top: 72, bottom: 8, left: 8, right: 8 } },
+                  },
+                ]}
+                // Under the app bar and dialogs, over the page.
+                sx={{ zIndex: (theme) => theme.zIndex.appBar - 1, pointerEvents: 'none' }}
               >
-                <Typography variant="subtitle2" noWrap>
-                  {countryName(
-                    hoveredCountry.key,
-                    t(`reach.country.${hoveredCountry.key}`, {
-                      defaultValue: hoveredCountry.name,
-                    }),
-                    locale,
-                  )}
-                </Typography>
-                <Typography variant="caption" color="text.secondary" component="p">
-                  {t('reach.inhabitants', { people: people(hoveredCountry.pop) })}
-                </Typography>
-                <Typography variant="body2" sx={{ mt: 1 }}>
-                  {nowShare > 0
-                    ? t('reach.now', { percent: sharePercent(nowShare) })
-                    : t('reach.nowNobody')}
-                  {hoveredCountry.key !== home && readIn.length > 0
-                    ? ` ${t('reach.readIn', {
-                        languages: orList.format(readIn.map(languageName)),
-                      })}`
-                    : null}
-                </Typography>
-                {hoveredCountry.key === home ? (
-                  <Typography variant="body2" sx={{ mt: 1, fontWeight: 600 }}>
-                    {t('reach.home')}
-                  </Typography>
-                ) : suggestion ? (
-                  <>
-                    {addSentence && (
-                      <Typography variant="body2" sx={{ mt: 1 }}>
-                        {addSentence}
-                      </Typography>
+                <Paper
+                  elevation={6}
+                  sx={{
+                    px: 1.5,
+                    py: 1,
+                    borderRadius: radii.sm,
+                    maxWidth: 290,
+                  }}
+                >
+                  <Typography variant="subtitle2" noWrap>
+                    {countryName(
+                      hoveredCountry.key,
+                      t(`reach.country.${hoveredCountry.key}`, {
+                        defaultValue: hoveredCountry.name,
+                      }),
+                      locale,
                     )}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" component="p">
+                    {t('reach.inhabitants', { people: people(hoveredCountry.pop) })}
+                  </Typography>
+                  <Typography variant="body2" sx={{ mt: 1 }}>
+                    {nowShare > 0
+                      ? t('reach.now', { percent: sharePercent(nowShare) })
+                      : t('reach.nowNobody')}
+                    {hoveredCountry.key !== home && readIn.length > 0
+                      ? ` ${t('reach.readIn', {
+                          languages: orList.format(readIn.map(languageName)),
+                        })}`
+                      : null}
+                  </Typography>
+                  {hoveredCountry.key === home ? (
+                    <Typography variant="body2" sx={{ mt: 1, fontWeight: 600 }}>
+                      {t('reach.home')}
+                    </Typography>
+                  ) : suggestion ? (
+                    <>
+                      {addSentence && (
+                        <Typography variant="body2" sx={{ mt: 1 }}>
+                          {addSentence}
+                        </Typography>
+                      )}
+                      <Typography
+                        variant="caption"
+                        component="p"
+                        sx={{ mt: 1, fontWeight: 700, color: 'primary.main' }}
+                      >
+                        {t('reach.clickToAdd', { language: suggestionName })}
+                      </Typography>
+                    </>
+                  ) : coverageStep(nowShare) < 3 ? (
                     <Typography
                       variant="caption"
+                      color="text.secondary"
                       component="p"
-                      sx={{ mt: 1, fontWeight: 700, color: 'primary.main' }}
+                      sx={{ mt: 1 }}
                     >
-                      {t('reach.clickToAdd', { language: suggestionName })}
+                      {t('reach.notInCatalogue')}
                     </Typography>
-                  </>
-                ) : coverageStep(nowShare) < 3 ? (
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    component="p"
-                    sx={{ mt: 1 }}
-                  >
-                    {t('reach.notInCatalogue')}
-                  </Typography>
-                ) : null}
-              </Paper>
+                  ) : null}
+                </Paper>
+              </Popper>
             )}
 
             <ToggleButtonGroup
