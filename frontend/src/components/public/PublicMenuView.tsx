@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Element as ScrollElement } from 'react-scroll';
 import Box from '@mui/material/Box';
@@ -42,6 +42,9 @@ interface PublicMenuViewProps {
   onOpenAllergyFilter?: () => void;
   /** Languages the restaurant offers, its own first. One or none hides the switcher. */
   languages?: readonly string[];
+  /** Shown where the dishes go when the menu has no categories yet — the
+   *  panel's previews pass one; the guest page does not. */
+  emptyState?: ReactNode;
 }
 
 /**
@@ -58,6 +61,7 @@ export function PublicMenuView({
   canFilterAllergens = false,
   languages = NO_LANGUAGES,
   onOpenAllergyFilter,
+  emptyState,
 }: PublicMenuViewProps) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -203,6 +207,8 @@ export function PublicMenuView({
             )}
           </Stack>
         )}
+
+        {categories.length === 0 && emptyState}
 
         {filteredCategories.map((category) => (
           <ScrollElement name={category.id} id={category.id} key={category.id}>

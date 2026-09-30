@@ -1,4 +1,4 @@
-import type { ReactNode, Ref } from 'react';
+import { useCallback, type ReactNode, type Ref } from 'react';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -54,6 +54,18 @@ export function PhoneFrame({
   const scale = (width - BEZEL * 2) / PHONE_VIEWPORT_WIDTH;
 
   const content = useMeasuredHeight(measureKey);
+  // The visible page area, so a short page (an empty menu) can still fill
+  // it: a real browser paints the page's background down to the bottom of
+  // the screen, not just behind the content.
+  const viewport = useMeasuredHeight(measureKey);
+  const setViewport = useCallback(
+    (node: HTMLDivElement | null) => {
+      viewport.ref.current = node;
+      if (typeof scrollRef === 'function') scrollRef(node);
+      else if (scrollRef) scrollRef.current = node;
+    },
+    [viewport.ref, scrollRef],
+  );
 
   return (
     <Box
@@ -153,7 +165,7 @@ export function PhoneFrame({
         </Box>
 
         <Box
-          ref={scrollRef}
+          ref={setViewport}
           sx={{
             flex: 1,
             minHeight: 0,
@@ -180,6 +192,11 @@ export function PhoneFrame({
                 width: PHONE_VIEWPORT_WIDTH,
                 transform: `scale(${scale})`,
                 transformOrigin: 'top left',
+                // At least a screen tall, with the page stretched to fill it.
+                minHeight: viewport.height !== null ? viewport.height / scale : undefined,
+                display: 'flex',
+                flexDirection: 'column',
+                '& > *': { flexGrow: 1 },
               }}
             >
               {children}

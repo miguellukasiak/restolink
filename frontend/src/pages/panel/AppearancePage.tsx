@@ -44,6 +44,7 @@ import { MENU_PATTERNS, patternCss } from '../../components/public/menuPatterns'
 import { PublicMenuView } from '../../components/public/PublicMenuView';
 import { MenuSkeleton } from '../../components/public/MenuSkeleton';
 import { PhoneFrame } from '../../components/panel/PhoneFrame';
+import { EmptyMenuPreview } from '../../components/panel/EmptyMenuPreview';
 import { ThemeThumb, type ThumbDish } from '../../components/panel/ThemeThumb';
 import { useMeasuredHeight } from '../../hooks/useMeasuredHeight';
 import { useFittedPhone } from '../../hooks/useFittedPhone';
@@ -438,12 +439,23 @@ export function AppearancePage() {
     ) : (
       <GuestPreviewLanguage>
         <ThemeProvider theme={previewTheme}>
-          <Box sx={{ pointerEvents: 'none', bgcolor: 'background.default' }}>
+          <Box
+            sx={{
+              pointerEvents: 'none',
+              bgcolor: 'background.default',
+              // Stretched to the screen by the frame around it, so an empty
+              // or short menu still fills it in its own colours.
+              display: 'flex',
+              flexDirection: 'column',
+              '& > *': { flexGrow: 1 },
+            }}
+          >
             <PublicMenuView
               restaurantName={menu.data.restaurant.name}
               logoUrl={watched.logo_url}
               languages={menu.data.restaurant.languages}
               categories={menu.data.categories}
+              emptyState={<EmptyMenuPreview hint={t('preview.emptyMenuHint')} />}
             />
           </Box>
         </ThemeProvider>
@@ -1019,6 +1031,11 @@ export function AppearancePage() {
                         width: DESKTOP_WIDTH,
                         transform: `scale(${DESKTOP_SCALE})`,
                         transformOrigin: 'top left',
+                        // At least the window's height, so a short menu fills it.
+                        minHeight: (phone.screenHeight - 20) / DESKTOP_SCALE,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        '& > *': { flexGrow: 1 },
                       }}
                     >
                       {preview}

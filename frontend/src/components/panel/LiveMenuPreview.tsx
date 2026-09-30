@@ -7,13 +7,13 @@ import Typography from '@mui/material/Typography';
 import { ThemeProvider } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
-import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded';
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 import type { MenuCategory, PublicMenuResponse } from '../../types';
 import { createRestaurantTheme } from '../public/RestaurantThemeProvider';
 import { PublicMenuView } from '../public/PublicMenuView';
 import { MenuSkeleton } from '../public/MenuSkeleton';
 import { PhoneFrame } from './PhoneFrame';
+import { EmptyMenuPreview } from './EmptyMenuPreview';
 import { GuestPreviewLanguage } from './GuestPreviewLanguage';
 import { usePanelT } from '../../i18n/panel';
 
@@ -124,7 +124,11 @@ export function LiveMenuPreview({
               <Box
                 sx={{
                   bgcolor: 'background.default',
-                  minHeight: 560,
+                  // Stretched to the screen by PhoneFrame; the menu fills it,
+                  // background pattern included.
+                  display: 'flex',
+                  flexDirection: 'column',
+                  '& > *': { flexGrow: 1 },
                   '& header': { pointerEvents: 'none' },
                 }}
               >
@@ -134,20 +138,8 @@ export function LiveMenuPreview({
                   languages={publicMenu.restaurant.languages}
                   categories={categories}
                   onOpenItem={(dish) => onOpenItem(dish.id)}
+                  emptyState={<EmptyMenuPreview />}
                 />
-                {categories.length === 0 && (
-                  <Stack
-                    spacing={1.5}
-                    sx={{ alignItems: 'center', pt: 14, px: 4, color: 'text.secondary' }}
-                  >
-                    <MenuBookRoundedIcon sx={{ fontSize: 56, opacity: 0.35 }} />
-                    <Typography
-                      sx={{ fontSize: 17, fontWeight: 600, textAlign: 'center' }}
-                    >
-                      {t('preview.emptyMenu')}
-                    </Typography>
-                  </Stack>
-                )}
               </Box>
             </ThemeProvider>
           </GuestPreviewLanguage>

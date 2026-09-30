@@ -100,7 +100,8 @@
     "emptyMenu": "Your menu will appear here",
     "clickToEdit": "Click a dish on the phone to edit it.",
     "inMenu": "IN THE MENU",
-    "onTap": "WHEN TAPPED"
+    "onTap": "WHEN TAPPED",
+    "emptyMenuHint": "Add dishes in the Menu builder and you will see them here in this design."
   },
   "appearance": {
     "intro": "Pick a theme the way you pick a video-call background — your menu tries it on straight away. Save when you find the right one.",
