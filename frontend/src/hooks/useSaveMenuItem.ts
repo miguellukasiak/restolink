@@ -1,6 +1,6 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { saveMenuItem } from '../services/menuService';
-import { menuQueryKeys } from './useMenu';
+import { writesTo } from '../services/cacheSync';
 import type { MenuItemRequest } from '../types';
 
 interface SaveMenuItemVariables {
@@ -11,15 +11,10 @@ interface SaveMenuItemVariables {
 
 /** Saves a dish and refreshes the restaurant's menu on success. */
 export function useSaveMenuItem(restaurantId: string) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ payload, itemId }: SaveMenuItemVariables) =>
       saveMenuItem(restaurantId, payload, itemId),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: menuQueryKeys.categories(restaurantId),
-      });
-    },
+    // Refreshes the builder, the previews, "Languages" and the guest menu.
+    meta: writesTo(restaurantId, ['menu']),
   });
 }

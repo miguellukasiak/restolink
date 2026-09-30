@@ -1,6 +1,6 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { updateMenuCategory } from '../services/menuService';
-import { menuQueryKeys } from './useMenu';
+import { writesTo } from '../services/cacheSync';
 
 interface UpdateCategoryVariables {
   categoryId: string;
@@ -9,15 +9,10 @@ interface UpdateCategoryVariables {
 
 /** Renames a category and refreshes the restaurant's menu on success. */
 export function useUpdateCategory(restaurantId: string) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ categoryId, name }: UpdateCategoryVariables) =>
       updateMenuCategory(restaurantId, categoryId, name),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: menuQueryKeys.categories(restaurantId),
-      });
-    },
+    // Refreshes the builder, the previews, "Languages" and the guest menu.
+    meta: writesTo(restaurantId, ['menu']),
   });
 }

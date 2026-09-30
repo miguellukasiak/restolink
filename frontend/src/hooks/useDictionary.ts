@@ -5,6 +5,7 @@ import {
   saveDictionary,
   type DictionaryEntry,
 } from '../services/dictionaryService';
+import { writesTo } from '../services/cacheSync';
 
 export const dictionaryQueryKeys = {
   /** Prefix matching every language's dictionary for one restaurant. */
@@ -19,6 +20,8 @@ export function useDictionary(restaurantId: string, targetLang: string) {
     queryKey: dictionaryQueryKeys.forLanguage(restaurantId, targetLang),
     queryFn: () => fetchDictionary(restaurantId, targetLang),
     enabled: Boolean(restaurantId && targetLang),
+    // The phrases are the menu's own text.
+    meta: { reads: ['menu', 'dictionary'] },
   });
 }
 
@@ -29,6 +32,13 @@ export function useSaveDictionary(restaurantId: string, targetLang: string) {
   return useMutation({
     mutationFn: (entries: DictionaryEntry[]) =>
       saveDictionary(restaurantId, targetLang, entries),
+    // The guest menu now reads differently and "Languages" counts translated
+    // phrases; this language's dictionary is seeded from the response below.
+    meta: writesTo(
+      restaurantId,
+      ['dictionary'],
+      [dictionaryQueryKeys.forLanguage(restaurantId, targetLang)],
+    ),
     onSuccess: (data) => {
       // The PUT returns the rebuilt dictionary, so seed the cache with it
       // instead of refetching what we were just handed.
@@ -36,10 +46,6 @@ export function useSaveDictionary(restaurantId: string, targetLang: string) {
         dictionaryQueryKeys.forLanguage(restaurantId, targetLang),
         data,
       );
-      // The public menu in this language now reads differently, and the
-      // languages screen counts translated phrases.
-      void queryClient.invalidateQueries({ queryKey: ['public-menu', restaurantId] });
-      void queryClient.invalidateQueries({ queryKey: ['menu-languages', restaurantId] });
     },
   });
 }

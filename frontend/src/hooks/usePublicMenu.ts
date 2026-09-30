@@ -30,7 +30,9 @@ export function usePublicMenu(restaurantId: string) {
     // No polling: translations come from the owner's dictionary and are
     // complete the moment the menu is served. The old interval existed only to
     // wait out a background machine-translation pass, which no longer exists.
-    // staleTime inherited from the global QueryClient default (5 min); the theme
-    // save (useUpdateTheme) invalidates this key so the preview stays in sync.
+    // staleTime inherited from the global QueryClient default (5 min). The
+    // guest menu is built from everything an owner edits, so a write to any of
+    // it refreshes this — in this tab and the others (cacheSync).
+    meta: { reads: ['menu', 'theme', 'languages', 'dictionary'] },
   });
 }

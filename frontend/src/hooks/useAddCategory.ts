@@ -1,17 +1,12 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { createMenuCategory } from '../services/menuService';
-import { menuQueryKeys } from './useMenu';
+import { writesTo } from '../services/cacheSync';
 
 /** Creates a menu category and refreshes the restaurant's menu on success. */
 export function useAddCategory(restaurantId: string) {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (name: string) => createMenuCategory(restaurantId, name),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: menuQueryKeys.categories(restaurantId),
-      });
-    },
+    // Refreshes the builder, the previews, "Languages" and the guest menu.
+    meta: writesTo(restaurantId, ['menu']),
   });
 }

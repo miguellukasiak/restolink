@@ -13,6 +13,7 @@ export function useMenu(restaurantId: string) {
     queryFn: () => fetchMenuCategories(restaurantId),
     enabled: Boolean(restaurantId),
     // staleTime inherited from the global QueryClient default (5 min) so tab
-    // navigation is instant; mutations invalidate this key to stay accurate.
+    // navigation is instant; any menu write refreshes it (cacheSync).
+    meta: { reads: ['menu'] },
   });
 }

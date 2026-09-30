@@ -4,7 +4,7 @@ import {
   saveMenuLanguages,
   type MenuLanguagesResponse,
 } from '../services/languagesService';
-import { publicMenuQueryKeys } from './usePublicMenu';
+import { writesTo } from '../services/cacheSync';
 
 export const menuLanguagesQueryKey = (restaurantId: string) =>
   ['menu-languages', restaurantId] as const;
@@ -15,6 +15,8 @@ export function useMenuLanguages(restaurantId: string) {
     queryKey: menuLanguagesQueryKey(restaurantId),
     queryFn: () => fetchMenuLanguages(restaurantId),
     enabled: Boolean(restaurantId),
+    // Progress counts the menu's phrases and the ones translated.
+    meta: { reads: ['menu', 'languages', 'dictionary'] },
   });
 }
 
@@ -28,6 +30,9 @@ export function useSaveMenuLanguages(restaurantId: string) {
 
   return useMutation({
     mutationFn: (languages: string[]) => saveMenuLanguages(restaurantId, languages),
+    // The guest menu's switcher lists the offered languages; this screen keeps
+    // its own answer from the response below.
+    meta: writesTo(restaurantId, ['languages'], [key]),
     onMutate: async (languages) => {
       await queryClient.cancelQueries({ queryKey: key });
       const previous = queryClient.getQueryData<MenuLanguagesResponse>(key);
@@ -50,10 +55,6 @@ export function useSaveMenuLanguages(restaurantId: string) {
     },
     onSuccess: (data) => {
       queryClient.setQueryData(key, data);
-      // Guests' language switcher reads the offered languages off the menu.
-      void queryClient.invalidateQueries({
-        queryKey: publicMenuQueryKeys.all(restaurantId),
-      });
     },
   });
 }

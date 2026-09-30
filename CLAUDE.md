@@ -592,6 +592,21 @@ In the print document, style `body>svg`, never `svg` — the codes are nested
 - **All server state goes through TanStack Query.** No `useEffect` fetching.
 - `services/*.ts` own the HTTP calls and their types; `hooks/*.ts` wrap them in
   queries and mutations; pages compose hooks.
+- **Invalidation is declared, not hand-written** (`services/cacheSync.ts`).
+  Every owner query states what its answer is built from, `meta: { reads:
+  ['menu', 'theme', …] }`; every owner mutation states what it changes,
+  `meta: writesTo(restaurantId, ['menu'])`. On success the `MutationCache` in
+  `main.tsx` invalidates every cached query of that restaurant that reads it,
+  and tells the browser's other tabs over a `BroadcastChannel` (ids and
+  resource names only, never data), so the guest menu opened with "Open"
+  updates as the owner works. Do not add `invalidateQueries` to a mutation's
+  `onSuccess`: before this, a dish edited in the builder never reached "Wygląd
+  menu", because each mutation refreshed only the page it lived on. A
+  mutation that seeds a query from its own response (the theme patches the
+  public menu, the dictionary and languages seed their query) runs first —
+  the invalidation is deferred a task — and lists keys it keeps correct
+  itself in `writesTo`'s third argument. A new resource goes in `Resource`;
+  `cacheSync.test.ts` fails on an owner `useMutation` without `writesTo`.
 - **Add every new owner API prefix to `sessionScopeFor` in
   `services/api.ts`.** It matches on prefixes, so a route under a new one
   silently loses its token. This already shipped a 401 once (the dictionary under

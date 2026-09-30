@@ -4,6 +4,7 @@ import {
   saveGooglePlaceId,
   type GoogleReviewsResponse,
 } from '../services/googleMapsService';
+import { writesTo } from '../services/cacheSync';
 
 export const googleReviewsQueryKeys = {
   detail: (restaurantId: string) => ['google-reviews', restaurantId] as const,
@@ -25,6 +26,7 @@ export function useGoogleReviews(restaurantId: string) {
     queryFn: () => fetchGoogleReviews(restaurantId),
     enabled: Boolean(restaurantId),
     retry: false,
+    meta: { reads: ['reviews'] },
   });
 }
 
@@ -34,6 +36,11 @@ export function useSaveGooglePlaceId(restaurantId: string) {
 
   return useMutation({
     mutationFn: (placeId: string) => saveGooglePlaceId(restaurantId, placeId),
+    meta: writesTo(
+      restaurantId,
+      ['reviews'],
+      [googleReviewsQueryKeys.detail(restaurantId)],
+    ),
     onSuccess: (data: GoogleReviewsResponse) => {
       // The PUT already returns the dashboard, so seed the cache with it
       // rather than refetching what we were just handed — which for a newly

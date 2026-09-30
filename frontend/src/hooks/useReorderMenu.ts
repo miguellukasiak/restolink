@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { reorderMenu } from '../services/menuService';
 import type { MenuCategory } from '../types';
 import { menuQueryKeys } from './useMenu';
+import { writesTo } from '../services/cacheSync';
 
 /**
  * Persists the builder's layout after a drag.
@@ -19,6 +20,9 @@ export function useReorderMenu(restaurantId: string) {
   return useMutation({
     mutationKey,
     mutationFn: (categories: MenuCategory[]) => reorderMenu(restaurantId, categories),
+    // The builder's own list is left alone: re-reading it mid-gesture is the
+    // jump described above. Everything else showing the menu refreshes.
+    meta: writesTo(restaurantId, ['menu'], [menuQueryKeys.categories(restaurantId)]),
     onSuccess: (_data, categories) => {
       // Still counted as pending while its own callbacks run, so 1 means
       // "this is the only one left".
