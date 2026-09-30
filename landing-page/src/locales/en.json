@@ -16,6 +16,10 @@
     "contact": "Contact",
     "login": "Log in"
   },
+  "venue": {
+    "name": "Old Town Tavern",
+    "slug": "old-town-tavern"
+  },
   "hero": {
     "badge": "No app, no download",
     "title": "Menus, reinvented.",

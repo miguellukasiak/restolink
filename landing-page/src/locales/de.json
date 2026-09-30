@@ -16,6 +16,10 @@
     "contact": "Kontakt",
     "login": "Anmelden"
   },
+  "venue": {
+    "name": "Altstadt-Taverne",
+    "slug": "altstadt-taverne"
+  },
   "hero": {
     "badge": "Keine App, kein Download",
     "title": "Speisekarten, neu gedacht.",

@@ -16,6 +16,10 @@
     "contact": "Contacto",
     "login": "Iniciar sesión"
   },
+  "venue": {
+    "name": "Taberna del Casco Viejo",
+    "slug": "taberna-casco-viejo"
+  },
   "hero": {
     "badge": "Sin aplicación, sin descargas",
     "title": "La carta, reinventada.",

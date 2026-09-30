@@ -16,6 +16,10 @@
     "contact": "Kontakt",
     "login": "Zaloguj się"
   },
+  "venue": {
+    "name": "Karczma Staromiejska",
+    "slug": "karczma-staromiejska"
+  },
   "hero": {
     "badge": "Bez aplikacji, bez pobierania",
     "title": "Menu, wymyślone na nowo.",

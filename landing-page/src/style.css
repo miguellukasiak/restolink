@@ -328,6 +328,34 @@
   --mock-line: rgb(245 241 230 / 0.1);
 }
 
+/* The example tavern's own look — the panel's "Polska karczma" theme: warm
+   linen, oxblood, and the faint grain of its "wood" background pattern
+   (menuPatterns.ts in the app). Sized in em so the grain scales with the
+   mockup, at about the size a real phone shows it. */
+.mock-screen.mock-theme-tavern {
+  --mock-bg: #f3e9dc;
+  --mock-surface: #fffaf3;
+  --mock-ink: #2b1b14;
+  --mock-muted: #7c6552;
+  --mock-accent: #9e2a2b;
+  --mock-line: rgb(43 27 20 / 0.1);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='48' viewBox='0 0 200 48'%3E%3Cg opacity='0.1'%3E%3Cpath d='M0 6C40 3 70 10 110 6S170 3 200 6' stroke='%239e2a2b' stroke-width='1.4' fill='none'/%3E%3Cpath d='M0 17C40 15 70 21 110 17S170 14 200 17' stroke='%239e2a2b' stroke-width='0.8' fill='none'/%3E%3Cpath d='M0 29C40 28 70 33 110 29S170 26 200 29' stroke='%239e2a2b' stroke-width='1.4' fill='none'/%3E%3Cpath d='M0 40C40 40 70 44 110 40S170 37 200 40' stroke='%239e2a2b' stroke-width='0.8' fill='none'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 12em 2.88em;
+}
+
+/* The same tavern after dark: the "Pub" theme — dark wood and amber. */
+.mock-screen.mock-theme-cellar {
+  --mock-bg: #2a1e17;
+  --mock-surface: #3a2a20;
+  --mock-ink: #f6ebdd;
+  --mock-muted: #c9b59c;
+  --mock-accent: #e3a42b;
+  --mock-accent-ink: #2a1e17;
+  --mock-line: rgb(246 235 221 / 0.1);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='48' viewBox='0 0 200 48'%3E%3Cg opacity='0.15'%3E%3Cpath d='M0 6C40 3 70 10 110 6S170 3 200 6' stroke='%23e3a42b' stroke-width='1.4' fill='none'/%3E%3Cpath d='M0 17C40 15 70 21 110 17S170 14 200 17' stroke='%23e3a42b' stroke-width='0.8' fill='none'/%3E%3Cpath d='M0 29C40 28 70 33 110 29S170 26 200 29' stroke='%23e3a42b' stroke-width='1.4' fill='none'/%3E%3Cpath d='M0 40C40 40 70 44 110 40S170 37 200 40' stroke='%23e3a42b' stroke-width='0.8' fill='none'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 12em 2.88em;
+}
+
 /* Faded out for the moment the demo switches language. */
 .mock-screen.is-switching .mock-content {
   opacity: 0;
@@ -359,11 +387,22 @@
   font-weight: 700;
 }
 
+/* The tavern's emblem (#tavern-mark in index.html), drawn in the logo's ink. */
+.mock-mark {
+  width: 1.4em;
+  height: 1.4em;
+}
+
+/* A long name in some languages ("Taverne de la Vieille Ville") ends in an
+   ellipsis rather than running under the language pill. */
 .mock-name {
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
   font-family: Georgia, 'Times New Roman', serif;
   font-size: 1.15em;
   font-weight: 700;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -477,6 +516,11 @@
   background-color: rgb(212 175 55 / 0.12);
 }
 
+.mock-theme-cellar .mock-chip {
+  border-color: rgb(227 164 43 / 0.45);
+  background-color: rgb(227 164 43 / 0.12);
+}
+
 /* A top-down plate: the dish colour, a white rim, the table behind. */
 .mock-img {
   display: block;
@@ -535,6 +579,10 @@
 
 .mock-theme-dark .mock-img {
   --table: #2e2b26;
+}
+
+.mock-theme-cellar .mock-img {
+  --table: #4a3527;
 }
 
 /* The dark phone lists dishes as rows — the product's single-column layout on

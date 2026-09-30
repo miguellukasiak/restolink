@@ -16,6 +16,10 @@
     "contact": "Contact",
     "login": "Connexion"
   },
+  "venue": {
+    "name": "Taverne de la Vieille Ville",
+    "slug": "taverne-vieille-ville"
+  },
   "hero": {
     "badge": "Sans application, sans téléchargement",
     "title": "La carte, réinventée.",
