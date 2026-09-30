@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useParams } from 'react-router-dom';
 import Alert from '@mui/material/Alert';
@@ -24,17 +24,33 @@ import { radii } from '../../theme';
 /** Where a menu written in this language is: the pin on the map. */
 const HOME_COUNTRY: Record<string, string> = { pl: 'PL' };
 
+/** How long the translations glow after a language is added. */
+const SPOTLIGHT_MS = 2400;
+
 function Section({
   title,
   hint,
+  spotlight = false,
   children,
 }: {
   title: string;
   hint?: string;
+  /** A ring for a moment, where the page has just sent the owner. */
+  spotlight?: boolean;
   children: ReactNode;
 }) {
   return (
-    <Paper elevation={1} sx={{ borderRadius: radii.lg, p: { xs: 2, sm: 3 } }}>
+    <Paper
+      elevation={1}
+      sx={{
+        borderRadius: radii.lg,
+        p: { xs: 2, sm: 3 },
+        outline: '2px solid',
+        outlineColor: (theme) => (spotlight ? theme.palette.primary.main : 'transparent'),
+        outlineOffset: 2,
+        transition: 'outline-color 0.4s ease',
+      }}
+    >
       <Typography variant="h6" component="h2">
         {title}
       </Typography>
@@ -76,7 +92,11 @@ export default function LanguagesPage() {
   const [editorDirty, setEditorDirty] = useState(false);
   const [pendingEdit, setPendingEdit] = useState<string | null>(null);
   const [pendingAdd, setPendingAdd] = useState<string | null>(null);
+  const [spotlight, setSpotlight] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null);
+  const spotlightTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => () => clearTimeout(spotlightTimer.current), []);
 
   const offered = data.data?.languages ?? [];
   const base = data.data?.base_language ?? 'pl';
@@ -112,6 +132,30 @@ export default function LanguagesPage() {
     );
   };
 
+  /**
+   * Takes the owner from where they added a language — often the map at the
+   * top — to its translations, and rings them for a moment. Added without
+   * this, the language only produced a snackbar, and it looked done while
+   * guests would still read the menu in Polish.
+   */
+  const showTranslations = (code: string) => {
+    if (editorDirty) return; // They are mid-edit in another language; stay.
+    setEditing(code);
+    // After the new language's editor has rendered in its place.
+    setTimeout(
+      () => editorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+      80,
+    );
+    clearTimeout(spotlightTimer.current);
+    setSpotlight(true);
+    // A timer, not an animation: a hidden tab would freeze an animation on
+    // its first frame (CLAUDE.md, trap 7).
+    spotlightTimer.current = setTimeout(() => setSpotlight(false), SPOTLIGHT_MS);
+  };
+
+  const needsTranslating = (code: string) =>
+    phrasesTotal > 0 && translated(code) < phrasesTotal;
+
   const commit = (next: string[], message: string) => {
     save.mutate(next, {
       onSuccess: () => showSuccess(message),
@@ -128,12 +172,13 @@ export default function LanguagesPage() {
     const name = languageName(code);
     commit(
       [...offered, code],
-      translated(code) >= phrasesTotal && phrasesTotal > 0
-        ? t('languages.addedReady', { name })
-        : t('languages.addedTranslate', { name }),
+      needsTranslating(code)
+        ? t('languages.addedTranslate', { name })
+        : t('languages.addedReady', { name }),
     );
     setPreview(null);
-    if (!editorDirty) setEditing(code);
+    if (needsTranslating(code)) showTranslations(code);
+    else if (!editorDirty) setEditing(code);
   };
 
   const remove = (code: string) => {
@@ -220,6 +265,7 @@ export default function LanguagesPage() {
             <Section
               title={t('languages.translations')}
               hint={t('languages.translationsHint')}
+              spotlight={spotlight}
             >
               {current ? (
                 <Stack spacing={2.5}>
@@ -285,6 +331,7 @@ export default function LanguagesPage() {
           setPendingAdd(null);
           if (!code) return;
           commit([...offered, code], t('languages.added', { name: languageName(code) }));
+          if (needsTranslating(code)) showTranslations(code);
         }}
         onClose={() => setPendingAdd(null)}
       />

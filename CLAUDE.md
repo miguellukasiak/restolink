@@ -495,7 +495,10 @@ at least "less than 1%", never rounded into a promise. Guidance is deliberate: "
 Polsce" (tiered, one-line reasons with no invented statistics) comes before
 world reach, each candidate shows the *new* readers it adds, the upkeep is
 spelled out per new dish, the page warns from `MANY_LANGUAGES` (6) and asks
-for confirmation past `CONFIRM_LANGUAGES_OVER` (10).
+for confirmation past `CONFIRM_LANGUAGES_OVER` (10). Adding a language that
+still needs translating — from the map or the list — scrolls to its
+translations and rings them for a moment; a snackbar alone made a new
+language look finished while guests still read Polish.
 
 **Google reviews.** `GET /api/v1/panel/{id}/google-reviews`, backed by a
 24-hour `google_review_cache`. Uses **Places API (New)**

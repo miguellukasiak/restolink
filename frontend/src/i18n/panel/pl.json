@@ -708,7 +708,7 @@
     },
     "subtitle": "Pokaż menu gościom w ich języku. Mapa podpowie, gdzie już je przeczytają — dodawaj języki tam, skąd przychodzą Twoi goście.",
     "addedReady": "Dodano: {{name}}. Tłumaczenia są gotowe — goście już go widzą.",
-    "addedTranslate": "Dodano: {{name}}. Goście już go widzą — przetłumacz menu poniżej.",
+    "addedTranslate": "Dodano: {{name}}. Goście już go widzą — teraz przetłumacz menu na ten język.",
     "added": "Dodano: {{name}}.",
     "hidden": "Ukryto: {{name}}. Tłumaczenia zostają — możesz wrócić w każdej chwili.",
     "yours": "Twoje języki",

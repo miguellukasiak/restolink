@@ -688,7 +688,7 @@
     },
     "subtitle": "Show guests the menu in their own language. The map shows where it can already be read — add languages where your guests come from.",
     "addedReady": "Added: {{name}}. The translations are ready — guests can see it now.",
-    "addedTranslate": "Added: {{name}}. Guests can see it now — translate the menu below.",
+    "addedTranslate": "Added: {{name}}. Guests can see it now — next, translate your menu into it.",
     "added": "Added: {{name}}.",
     "hidden": "Hidden: {{name}}. The translations stay — you can bring it back at any time.",
     "yours": "Your languages",

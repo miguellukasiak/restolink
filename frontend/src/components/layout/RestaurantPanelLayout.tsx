@@ -127,28 +127,50 @@ export function RestaurantPanelLayout() {
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
       <AppBar position="fixed" elevation={0} sx={{ zIndex: (t) => t.zIndex.drawer + 1 }}>
         <Toolbar>
-          <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
+          <Stack
+            direction="row"
+            spacing={1.5}
+            sx={{ alignItems: 'center', minWidth: 0, flex: '0 1 auto' }}
+          >
             {/* The wordmark stands where the brand tile did, so the owner's
                 own restaurant name keeps the prominence it had — demoting it
                 to make room for ours would be the wrong trade on the screen
-                they work in all day. */}
-            <Wordmark size={18} color="text.primary" />
-            <Divider orientation="vertical" flexItem sx={{ my: 0.75 }} />
-            <Box>
+                they work in all day. On a phone there is room for one of
+                the two, and it is theirs: the name on one line, cut with an
+                ellipsis, rather than five wrapped lines pushing the bar over
+                the page. */}
+            <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center' }}>
+              <Wordmark size={18} color="text.primary" />
+            </Box>
+            <Divider
+              orientation="vertical"
+              flexItem
+              sx={{ my: 0.75, display: { xs: 'none', sm: 'block' } }}
+            />
+            <Box sx={{ minWidth: 0 }}>
               {restaurant.isLoading ? (
                 <Skeleton variant="text" width={160} height={24} />
               ) : (
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+                <Typography
+                  variant="subtitle1"
+                  noWrap
+                  sx={{ fontWeight: 700, lineHeight: 1.2 }}
+                >
                   {restaurant.data?.name ?? t('nav.ownerPanel')}
                 </Typography>
               )}
-              <Typography variant="caption" color="text.secondary">
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                noWrap
+                sx={{ display: { xs: 'none', sm: 'block' } }}
+              >
                 {t('nav.tagline')}
               </Typography>
             </Box>
           </Stack>
-          <Box sx={{ flexGrow: 1 }} />
-          <Box sx={{ mr: { xs: 1, sm: 2 } }}>
+          <Box sx={{ flexGrow: 1, minWidth: 8 }} />
+          <Box sx={{ mr: { xs: 0.5, sm: 2 }, flexShrink: 0 }}>
             <PanelLanguageSwitch languages={panelLanguages} />
           </Box>
           <Chip
