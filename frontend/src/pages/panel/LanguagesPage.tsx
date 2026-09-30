@@ -10,6 +10,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useSnackbar } from '../../components/feedback/SnackbarProvider';
 import { ConfirmDialog } from '../../components/panel/ConfirmDialog';
+import { UnsavedChangesGuard } from '../../components/panel/UnsavedChangesGuard';
 import { AddLanguagePanel } from '../../components/panel/languages/AddLanguagePanel';
 import { OfferedLanguages } from '../../components/panel/languages/OfferedLanguages';
 import { ReachHero } from '../../components/panel/languages/ReachHero';
@@ -152,6 +153,8 @@ export default function LanguagesPage() {
 
   return (
     <Box sx={{ maxWidth: 1360, mx: 'auto', pt: 4 }}>
+      {/* Unsaved translations: their Save lives in the editor. */}
+      <UnsavedChangesGuard when={editorDirty} />
       <Stack spacing={0.5} sx={{ mb: 3 }}>
         <Typography variant="h4" component="h1">
           {t('nav.languages')}

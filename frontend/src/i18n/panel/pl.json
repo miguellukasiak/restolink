@@ -769,5 +769,12 @@
     "latest": "Najnowsze opinie",
     "noText": "Google nie udostępnia jeszcze żadnych opinii tekstowych dla tej wizytówki.",
     "synced": "Zsynchronizowano: {{at}} · dane odświeżają się raz na dobę"
+  },
+  "unsaved": {
+    "title": "Wyjść bez zapisywania?",
+    "body": "Masz niezapisane zmiany na tej stronie. Jeśli teraz wyjdziesz, przepadną.",
+    "stay": "Zostań",
+    "leave": "Wyjdź bez zapisywania",
+    "saveAndContinue": "Zapisz i przejdź"
   }
 }

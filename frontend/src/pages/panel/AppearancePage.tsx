@@ -45,6 +45,7 @@ import { PublicMenuView } from '../../components/public/PublicMenuView';
 import { MenuSkeleton } from '../../components/public/MenuSkeleton';
 import { PhoneFrame } from '../../components/panel/PhoneFrame';
 import { EmptyMenuPreview } from '../../components/panel/EmptyMenuPreview';
+import { UnsavedChangesGuard } from '../../components/panel/UnsavedChangesGuard';
 import { ThemeThumb, type ThumbDish } from '../../components/panel/ThemeThumb';
 import { useMeasuredHeight } from '../../hooks/useMeasuredHeight';
 import { useFittedPhone } from '../../hooks/useFittedPhone';
@@ -428,6 +429,22 @@ export function AppearancePage() {
     });
   });
 
+  /** "Save and continue" in the leave dialog: true once the look is saved. */
+  const saveBeforeLeaving = async () => {
+    let saved = false;
+    await handleSubmit(async (values) => {
+      try {
+        await updateTheme.mutateAsync(values);
+        reset(values);
+        showSuccess(t('appearance.saved'));
+        saved = true;
+      } catch (error) {
+        showError(getApiErrorMessage(error));
+      }
+    })();
+    return saved;
+  };
+
   const isSaving = updateTheme.isPending;
 
   // Same rich, page-shaped skeleton used on the live public menu — shown until
@@ -464,6 +481,7 @@ export function AppearancePage() {
 
   return (
     <Box sx={{ maxWidth: 1360, mx: 'auto', pt: 4 }}>
+      <UnsavedChangesGuard when={isDirty} onSave={saveBeforeLeaving} />
       <Box
         component="form"
         onSubmit={onSubmit}
@@ -785,8 +803,14 @@ export function AppearancePage() {
                               component="span"
                               sx={{
                                 fontFamily: fontStack(pairing.body.family),
-                                fontSize: 10,
+                                fontSize: 9.5,
+                                letterSpacing: '-0.01em',
                                 opacity: 0.75,
+                                // One line in every face, the wide ones too.
+                                whiteSpace: 'nowrap',
+                                maxWidth: '100%',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
                               }}
                             >
                               {t('appearance.fontSample')}

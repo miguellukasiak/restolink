@@ -611,6 +611,12 @@ In the print document, style `body>svg`, never `svg` — the codes are nested
   reviews) below a divider.
 - Route guards (`RequireAuth.tsx`) are a **convenience, not the boundary** —
   every protected endpoint is enforced server-side.
+- **A page that holds unsaved edits mounts `UnsavedChangesGuard`** (Wygląd
+  menu, the translations in Języki). Leaving for another panel page, Back
+  included, opens a stay / leave / save-and-continue dialog; closing or
+  reloading the tab gets the browser's prompt; signing out is not held up. It
+  relies on `useBlocker`, so the app runs on a **data router**
+  (`createBrowserRouter` in `App.tsx`) — do not go back to `<BrowserRouter>`.
 - **Phone previews keep a real phone's proportions.** `PhoneFrame` defaults
   its screen to `PHONE_ASPECT` for its width, and `useFittedPhone` sizes the
   whole device from the window height (browser zoom included). Never squeeze

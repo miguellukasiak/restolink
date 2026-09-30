@@ -743,5 +743,12 @@
     "latest": "Latest reviews",
     "noText": "Google does not share any written reviews for this listing yet.",
     "synced": "Synced: {{at}} · the data refreshes once a day"
+  },
+  "unsaved": {
+    "title": "Leave without saving?",
+    "body": "You have unsaved changes on this page. If you leave now, they will be lost.",
+    "stay": "Stay",
+    "leave": "Leave without saving",
+    "saveAndContinue": "Save and continue"
   }
 }
