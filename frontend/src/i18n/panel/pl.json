@@ -125,7 +125,7 @@
     "pickPaletteAria": "{{label}} — wybierz z palety",
     "paletteAria": "{{label}} — paleta kolorów",
     "typeface": "Czcionka",
-    "fontSample": "Pierogi ruskie",
+    "fontSample": "Pierogi z mięsem",
     "pattern": {
       "title": "Wzór tła",
       "hint": "Delikatny motyw w tle — dania dostają wtedy własne karty, żeby wszystko było czytelne.",
@@ -149,7 +149,7 @@
     "previewComputer": "Podgląd na komputerze",
     "sample": {
       "category": "Dania główne",
-      "dish1": "Pierogi ruskie",
+      "dish1": "Pierogi z mięsem",
       "dish2": "Żurek",
       "dish3": "Schabowy",
       "dish4": "Sernik"
@@ -390,7 +390,7 @@
     "descriptionMax": "Opis może mieć maksymalnie {{max}} znaków",
     "ingredientsMax": "Lista składników może mieć maksymalnie {{max}} znaków",
     "name": "Nazwa dania",
-    "namePlaceholder": "np. Pierogi ruskie",
+    "namePlaceholder": "np. Pierogi z mięsem",
     "price": "Cena",
     "category": "Kategoria",
     "description": "Opis",
