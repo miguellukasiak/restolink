@@ -845,9 +845,8 @@ Deployment prerequisites, carried across several sessions:
       Applied to production (confirmed by the owner, 2026-09-29).
 - [x] **Migration `012`** (`restaurant.panel_language`) — required column.
       Applied to production (confirmed by the owner, 2026-09-29).
-- [ ] **Migration `014`** (`menu_note.style`) — required column. Apply
-      before the richer note editor reaches `main`: without it every query on
-      `menu_note`, the public menu included, fails.
+- [x] **Migration `014`** (`menu_note.style`) — required column.
+      Applied to production (confirmed by the owner, 2026-09-30).
 - [ ] `007`, `008` and `013` are table-only and optional (`create_all` covers
       them).
 - [ ] **DeepL quota is shared by every restaurant.** Drafting a whole menu into
