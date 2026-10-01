@@ -60,15 +60,49 @@ export const DOT_OPTIONS: readonly DotStyle[] = [
 
 export const EYE_OPTIONS: readonly EyeStyle[] = ['square', 'rounded', 'circle', 'leaf'];
 
-/** Printed for guests, so in the menu's language whatever the panel's. */
-export const CTA_PRESETS = [
-  'Zeskanuj, aby zobaczyć menu',
-  'Zeskanuj menu',
-  'Menu',
-  'Zeskanuj menu · Scan the menu',
-] as const;
+/** How long each printed text may be, so it still fits its place. */
+export const TEXT_LIMITS = { name: 40, cta: 40, footer: 80, step: 40 } as const;
 
-export const CTA_MAX_LENGTH = 40;
+/**
+ * Every printed text at once, in one language or two — the starting points
+ * the owner then edits freely. Printed for guests, so these are the guests'
+ * words whatever the panel's language; Polish first, the menu's base.
+ * Named in the panel by `qr.textSet.<id>`.
+ */
+export interface PrintedTextSet {
+  id: 'pl' | 'en' | 'plEn';
+  cta: string;
+  footer: string;
+  steps: string[];
+}
+
+export const PRINTED_TEXT_SETS: readonly PrintedTextSet[] = [
+  {
+    id: 'pl',
+    cta: 'Zeskanuj, aby zobaczyć menu',
+    footer: 'Otwórz aparat w telefonie i skieruj go na kod',
+    steps: ['Otwórz aparat', 'Skieruj na kod', 'Wybierz dania'],
+  },
+  {
+    id: 'en',
+    cta: 'Scan to see the menu',
+    footer: 'Open your phone camera and point it at the code',
+    steps: ['Open the camera', 'Point it at the code', 'Choose your dishes'],
+  },
+  {
+    // " · " is where the template breaks a line, so each language gets its own.
+    id: 'plEn',
+    cta: 'Zeskanuj menu · Scan the menu',
+    footer: 'Otwórz aparat i skieruj na kod · Open the camera, point at the code',
+    steps: [
+      'Otwórz aparat · Open the camera',
+      'Skieruj na kod · Point at the code',
+      'Wybierz dania · Choose your dishes',
+    ],
+  },
+];
+
+export const DEFAULT_TEXTS = PRINTED_TEXT_SETS[0];
 
 /** Dark, print-safe colours: every one reads at 7:1 or better on white.
  *  Named in the panel by `qr.swatch.<id>`. */
@@ -189,7 +223,14 @@ export function defaultDesign(brandColor: string, hasLogo: boolean): QrDesign {
     format: 'tent',
     sizes: DEFAULT_SIZES,
     customCm: 6,
-    wording: { cta: CTA_PRESETS[0], showName: true, surface: 'brand' },
+    wording: {
+      cta: DEFAULT_TEXTS.cta,
+      showName: true,
+      name: null,
+      footer: DEFAULT_TEXTS.footer,
+      steps: [...DEFAULT_TEXTS.steps],
+      surface: 'brand',
+    },
   };
 }
 

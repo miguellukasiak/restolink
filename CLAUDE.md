@@ -494,8 +494,9 @@ DeepL**. Pieces:
   it; without DeepL it goes out in English and the restaurant is still made.
 - What stays Polish whatever the panel's language, because it is the **menu's**
   content, not the panel's: category suggestions and the starter layout, the
-  words printed on QR templates, the stored allergen/tag values (the panel
-  shows built-ins translated, `usePanelLabels`).
+  starting words printed on QR templates (the owner rewrites them, see the QR
+  studio), the stored allergen/tag values (the panel shows built-ins
+  translated, `usePanelLabels`).
 
 A DeepL language needs nothing from a developer. Writing one **by hand**
 instead (better than DeepL, say for a large market): its
@@ -649,6 +650,18 @@ from designs built from the restaurant's own colour, darkened by
 `readableOnWhite` until it reaches 4.5:1 contrast. It shows the chosen design
 on templates in real millimetres: a table card, a round sticker, a poster,
 or the bare code.
+
+Every word on a template is the owner's to write ("Napisy", `QrWording`):
+the name (null follows the restaurant's), the headline, the table card's
+line under the code and the poster's three steps — only the fields the
+chosen format prints are shown. An empty one is left off; the poster
+renumbers and re-centres the steps it keeps. They start Polish, and
+`PRINTED_TEXT_SETS` fills them all at once in Polish, English or both (a
+` · ` is where a template breaks the line, one language per line). Texts are
+bounded by `TEXT_LIMITS` and fitted by width, a name always on one line. The
+design, texts included, is remembered per restaurant in the browser
+(`restolink.qr-design.<id>`); an older one without the newer texts gets the
+Polish set.
 
 Each template has print sizes:
 
@@ -952,7 +965,7 @@ Known product gaps, not bugs:
   panel can mirror its layout.
 - A restaurant outside Poland gets its panel in its language, but the **menu**
   is still Polish-based: the base language is `pl`, prices are in zł, the
-  starter categories and printed QR words are Polish, Google reviews are
+  starter categories and the QR templates' starting words are Polish, Google reviews are
   fetched in Polish, and "Języki" recommends languages for Poland. Serving
   another country is its own piece of work, separate from the panel language.
 - Scroll-spy tuning (`SPY_ROOT_MARGIN` in `useCategoryScrollSpy.ts`) has never

@@ -14,9 +14,11 @@ import { SVG_NS, escapeXml } from './qrArt';
  * the A4 print sheet — what the owner sees is exactly what comes out of the
  * printer.
  *
- * The words printed on them ("Otwórz aparat…") are for guests, so they are in
- * the menu's language, not the panel's: an owner reading the panel in English
- * still prints a card for Polish guests.
+ * Every word printed on them — the name, the headline, the card's line under
+ * the code, the poster's steps — is the owner's to write (QrWording), in
+ * whatever language their guests read: a Polish restaurant may well print in
+ * English. They start in Polish, the menu's base language, whatever the
+ * panel's; an empty one is left off.
  */
 
 export type QrFormat = 'code' | 'tent' | 'sticker' | 'poster';
@@ -32,8 +34,15 @@ export interface QrBrand {
 }
 
 export interface QrWording {
+  /** The headline: "Zeskanuj menu". */
   cta: string;
   showName: boolean;
+  /** The name as printed; null prints the restaurant's own, as it is now. */
+  name: string | null;
+  /** The table card's line under the code. */
+  footer: string;
+  /** The poster's numbered steps under the code; empty ones are left out. */
+  steps: string[];
   /** Brand colour behind the code, or a light surface with brand accents. */
   surface: 'brand' | 'light';
 }
@@ -196,6 +205,18 @@ function textWidth(text: string, family: string, size: number, weight = 700): nu
   return (measureContext.measureText(text).width / 100) * size;
 }
 
+/** The largest size, up to `maxSize`, at which `text` fits `maxWidth` on one
+ *  line — for a name, which is never broken. */
+function fitLine(
+  text: string,
+  family: string,
+  maxWidth: number,
+  maxSize: number,
+  weight = 700,
+): number {
+  return Math.min(maxSize, maxWidth / textWidth(text, family, 1, weight));
+}
+
 /**
  * The largest size, up to `maxSize`, at which `text` fits `maxWidth` — on one
  * line if that stays at or above `minSize`, otherwise broken at the space that
@@ -260,15 +281,26 @@ function textBlock(
   fit: { lines: string[]; size: number },
   family: string,
   fill: string,
+  opacity?: number,
 ): string {
   const lineHeight = fit.size * 1.18;
   // Baseline of the first line, placing the caps' optical centre on `middle`.
   const first = middle - ((fit.lines.length - 1) * lineHeight) / 2 + fit.size * 0.36;
   return fit.lines
     .map((line, index) =>
-      textTag(x, first + index * lineHeight, line, { size: fit.size, family, fill }),
+      textTag(x, first + index * lineHeight, line, {
+        size: fit.size,
+        family,
+        fill,
+        opacity,
+      }),
     )
     .join('');
+}
+
+/** The name as it will be printed, or '' when there is none. */
+export function printedName(brand: QrBrand, wording: QrWording): string {
+  return wording.showName ? (wording.name ?? brand.name).trim() : '';
 }
 
 // ---------------------------------------------------------------------------
@@ -330,28 +362,33 @@ function tent(art: QrArtwork, brand: QrBrand, wording: QrWording, H: number): st
   const W = FORMATS.tent.width;
   const colors = palette(brand, wording.surface);
   let body = `<rect width="${W}" height="${H}" fill="${colors.surface}"/>`;
-  if (wording.showName && brand.name) {
-    const name = fitText(brand.name, brand.fontFamily, 84, 6.5, 6.5, brand.fontWeight);
-    body += textTag(W / 2, 19, name.lines[0], {
-      size: name.size,
+  const name = printedName(brand, wording);
+  if (name) {
+    body += textTag(W / 2, 19, name, {
+      size: fitLine(name, brand.fontFamily, 84, 6.5, brand.fontWeight),
       family: brand.fontFamily,
       weight: brand.fontWeight,
       fill: colors.accent,
     });
   }
-  if (wording.cta) {
-    const cta = fitText(wording.cta, CTA_FONT, 88, 10, 7);
-    const top = wording.showName && brand.name ? 26 : 12;
-    body += textBlock(W / 2, (top + 48) / 2, cta, CTA_FONT, colors.text);
+  const cta = wording.cta.trim();
+  if (cta) {
+    const top = name ? 26 : 12;
+    body += textBlock(
+      W / 2,
+      (top + 48) / 2,
+      fitText(cta, CTA_FONT, 88, 10, 7),
+      CTA_FONT,
+      colors.text,
+    );
   }
   body += panel(16.5, 52, 72, 5, colors.panelStroke);
   body += placeCode(art, 22.5, 58, 60);
-  body += textTag(W / 2, 134, 'Otwórz aparat w telefonie i skieruj go na kod', {
-    size: 3.1,
-    family: CTA_FONT,
-    fill: colors.text,
-    opacity: 0.8,
-  });
+  const footer = wording.footer.trim();
+  if (footer) {
+    const fit = fitText(footer, CTA_FONT, 88, 3.1, 2.6);
+    body += textBlock(W / 2, 133, fit, CTA_FONT, colors.text, 0.8);
+  }
   return body;
 }
 
@@ -390,8 +427,10 @@ function sticker(art: QrArtwork, brand: QrBrand, wording: QrWording, id: string)
       `startOffset="50%">${escapeXml(letters)}</textPath></text>`
     );
   };
-  if (wording.cta) body += arcText(wording.cta, 5, false, 'top');
-  if (wording.showName && brand.name) body += arcText(brand.name, 4, true, 'bottom');
+  const cta = wording.cta.trim();
+  const name = printedName(brand, wording);
+  if (cta) body += arcText(cta, 5, false, 'top');
+  if (name) body += arcText(name, 4, true, 'bottom');
   for (const x of [R - (inner + ring / 2), R + (inner + ring / 2)]) {
     body += `<circle cx="${x}" cy="${R}" r="0.9" fill="${colors.accent}"/>`;
   }
@@ -403,28 +442,35 @@ function poster(art: QrArtwork, brand: QrBrand, wording: QrWording, H: number): 
   const W = FORMATS.poster.width;
   const colors = palette(brand, wording.surface);
   let body = `<rect width="${W}" height="${H}" fill="${colors.surface}"/>`;
-  if (wording.showName && brand.name) {
-    const name = fitText(brand.name, brand.fontFamily, 170, 12, 12, brand.fontWeight);
-    body += textTag(W / 2, 38, name.lines[0], {
-      size: name.size,
+  const name = printedName(brand, wording);
+  if (name) {
+    body += textTag(W / 2, 38, name, {
+      size: fitLine(name, brand.fontFamily, 170, 12, brand.fontWeight),
       family: brand.fontFamily,
       weight: brand.fontWeight,
       fill: colors.accent,
     });
   }
-  if (wording.cta) {
-    const cta = fitText(wording.cta, CTA_FONT, 172, 17, 11);
-    const top = wording.showName && brand.name ? 50 : 26;
-    body += textBlock(W / 2, (top + 92) / 2, cta, CTA_FONT, colors.text);
+  const cta = wording.cta.trim();
+  if (cta) {
+    const top = name ? 50 : 26;
+    body += textBlock(
+      W / 2,
+      (top + 92) / 2,
+      fitText(cta, CTA_FONT, 172, 17, 11),
+      CTA_FONT,
+      colors.text,
+    );
   }
   body += panel(40, 100, 130, 8, colors.panelStroke);
   body += placeCode(art, 50, 110, 110);
 
-  const steps = ['Otwórz aparat', 'Skieruj na kod', 'Wybierz dania'];
+  // The steps the owner kept, numbered in order and centred as a row.
+  const steps = wording.steps.map((step) => step.trim()).filter(Boolean);
   const badge = wording.surface === 'brand' ? '#FFFFFF' : colors.accent;
   const badgeText = getContrastingTextColor(badge, { dark: INK });
   steps.forEach((label, index) => {
-    const x = 45 + index * 60;
+    const x = W / 2 + (index - (steps.length - 1) / 2) * 60;
     body +=
       `<circle cx="${x}" cy="252" r="6.5" fill="${badge}"/>` +
       textTag(x, 254.3, String(index + 1), {
@@ -432,7 +478,7 @@ function poster(art: QrArtwork, brand: QrBrand, wording: QrWording, H: number): 
         family: CTA_FONT,
         fill: badgeText,
       }) +
-      textTag(x, 270, label, { size: 4.6, family: CTA_FONT, fill: colors.text });
+      textBlock(x, 268.3, fitText(label, CTA_FONT, 56, 4.6, 3.6), CTA_FONT, colors.text);
   });
   return body;
 }

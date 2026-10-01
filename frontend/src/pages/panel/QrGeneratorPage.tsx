@@ -69,12 +69,13 @@ import {
 } from '../../components/panel/qr/qrTemplates';
 import {
   CENTER_SCALE,
-  CTA_MAX_LENGTH,
-  CTA_PRESETS,
   DEFAULT_SIZES,
+  DEFAULT_TEXTS,
   DOT_OPTIONS,
   EYE_OPTIONS,
+  PRINTED_TEXT_SETS,
   SAFE_SWATCHES,
+  TEXT_LIMITS,
   assessReadability,
   defaultDesign,
   presetsFor,
@@ -112,6 +113,38 @@ const FORMAT_ORDER: { value: QrFormat; icon: ReactNode }[] = [
   { value: 'poster', icon: <ArticleRoundedIcon /> },
   { value: 'code', icon: <QrCode2RoundedIcon /> },
 ];
+
+/** One printed text: what guests will read, with how much room is left. An
+ *  empty one is left off the print. */
+function PrintedTextField({
+  label,
+  value,
+  max,
+  onChange,
+  hideLabel = false,
+}: {
+  label: string;
+  value: string;
+  max: number;
+  onChange: (value: string) => void;
+  /** For a field that sits right under its own heading. */
+  hideLabel?: boolean;
+}) {
+  return (
+    <TextField
+      label={hideLabel ? undefined : label}
+      size="small"
+      fullWidth
+      value={value}
+      onChange={(event) => onChange(event.target.value.slice(0, max))}
+      helperText={`${value.length}/${max}`}
+      slotProps={{
+        htmlInput: { 'aria-label': label },
+        formHelperText: { sx: { textAlign: 'right', mr: 0, mt: 0.25 } },
+      }}
+    />
+  );
+}
 
 /** Where the last design is remembered, per restaurant and per browser. */
 const storageKey = (restaurantId: string) => `restolink.qr-design.${restaurantId}`;
@@ -153,11 +186,27 @@ function loadDesign(restaurantId: string): QrDesign | null {
       typeof saved.customCm === 'number' && Number.isFinite(saved.customCm)
         ? Math.min(CUSTOM_CODE_CM.max, Math.max(CUSTOM_CODE_CM.min, saved.customCm))
         : 6;
+    // Designs saved before every text was editable have only the headline:
+    // the rest starts from the Polish set the templates used to print.
+    const text = (value: unknown, fallback: string, max: number) =>
+      typeof value === 'string' ? value.slice(0, max) : fallback;
     return {
       ...saved,
       sizes,
       customCm,
-      wording: { ...wording, cta: wording.cta.slice(0, CTA_MAX_LENGTH) },
+      wording: {
+        cta: wording.cta.slice(0, TEXT_LIMITS.cta),
+        showName: wording.showName,
+        name:
+          typeof wording.name === 'string'
+            ? wording.name.slice(0, TEXT_LIMITS.name)
+            : null,
+        footer: text(wording.footer, DEFAULT_TEXTS.footer, TEXT_LIMITS.footer),
+        steps: DEFAULT_TEXTS.steps.map((step, index) =>
+          text(wording.steps?.[index], step, TEXT_LIMITS.step),
+        ),
+        surface: wording.surface,
+      },
     };
   } catch {
     return null;
@@ -939,43 +988,95 @@ export function QrGeneratorPage() {
                   direction="row"
                   useFlexGap
                   spacing={0.75}
-                  sx={{ flexWrap: 'wrap', mb: 1.25 }}
+                  sx={{ flexWrap: 'wrap', alignItems: 'center', mb: 2 }}
                 >
-                  {CTA_PRESETS.map((cta) => (
-                    <Chip
-                      key={cta}
-                      label={cta}
-                      size="small"
-                      clickable
-                      variant={design.wording.cta === cta ? 'filled' : 'outlined'}
-                      color={design.wording.cta === cta ? 'primary' : 'default'}
-                      onClick={() => updateWording({ cta })}
-                    />
-                  ))}
+                  <Typography variant="body2" color="text.secondary" sx={{ mr: 0.25 }}>
+                    {t('qr.textSets')}
+                  </Typography>
+                  {PRINTED_TEXT_SETS.map((set) => {
+                    const selected =
+                      design.wording.cta === set.cta &&
+                      design.wording.footer === set.footer &&
+                      set.steps.every(
+                        (step, index) => design.wording.steps[index] === step,
+                      );
+                    return (
+                      <Chip
+                        key={set.id}
+                        label={t(`qr.textSet.${set.id}`)}
+                        size="small"
+                        clickable
+                        variant={selected ? 'filled' : 'outlined'}
+                        color={selected ? 'primary' : 'default'}
+                        onClick={() =>
+                          updateWording({
+                            cta: set.cta,
+                            footer: set.footer,
+                            steps: [...set.steps],
+                          })
+                        }
+                      />
+                    );
+                  })}
                 </Stack>
-                <TextField
-                  label={t('qr.customText')}
-                  size="small"
-                  fullWidth
-                  value={design.wording.cta}
-                  onChange={(event) =>
-                    updateWording({ cta: event.target.value.slice(0, CTA_MAX_LENGTH) })
-                  }
-                  helperText={`${design.wording.cta.length}/${CTA_MAX_LENGTH}`}
-                  slotProps={{ formHelperText: { sx: { textAlign: 'right', mr: 0 } } }}
-                />
-                <Stack
-                  direction="row"
-                  sx={{ alignItems: 'center', justifyContent: 'space-between', mt: 0.5 }}
-                >
-                  <Typography variant="body2">{t('qr.restaurantName')}</Typography>
-                  <Switch
-                    checked={design.wording.showName}
-                    onChange={(event) =>
-                      updateWording({ showName: event.target.checked })
-                    }
-                    slotProps={{ input: { 'aria-label': t('qr.showName') } }}
+                <Stack spacing={2}>
+                  <Box>
+                    <Stack
+                      direction="row"
+                      sx={{ alignItems: 'center', justifyContent: 'space-between' }}
+                    >
+                      <Typography variant="body2">{t('qr.restaurantName')}</Typography>
+                      <Switch
+                        checked={design.wording.showName}
+                        onChange={(event) =>
+                          updateWording({ showName: event.target.checked })
+                        }
+                        slotProps={{ input: { 'aria-label': t('qr.showName') } }}
+                      />
+                    </Stack>
+                    {design.wording.showName && (
+                      <PrintedTextField
+                        label={t('qr.restaurantName')}
+                        value={design.wording.name ?? brand.name}
+                        max={TEXT_LIMITS.name}
+                        onChange={(name) => updateWording({ name })}
+                        hideLabel
+                      />
+                    )}
+                  </Box>
+                  <PrintedTextField
+                    label={t('qr.headline')}
+                    value={design.wording.cta}
+                    max={TEXT_LIMITS.cta}
+                    onChange={(cta) => updateWording({ cta })}
                   />
+                  {format === 'tent' && (
+                    <PrintedTextField
+                      label={t('qr.footerLine')}
+                      value={design.wording.footer}
+                      max={TEXT_LIMITS.footer}
+                      onChange={(footer) => updateWording({ footer })}
+                    />
+                  )}
+                  {format === 'poster' && (
+                    <Stack spacing={1.25}>
+                      {design.wording.steps.map((step, index) => (
+                        <PrintedTextField
+                          key={index}
+                          label={t('qr.step', { number: index + 1 })}
+                          value={step}
+                          max={TEXT_LIMITS.step}
+                          onChange={(value) =>
+                            updateWording({
+                              steps: design.wording.steps.map((other, at) =>
+                                at === index ? value : other,
+                              ),
+                            })
+                          }
+                        />
+                      ))}
+                    </Stack>
+                  )}
                 </Stack>
                 <ToggleButtonGroup
                   exclusive
@@ -985,7 +1086,7 @@ export function QrGeneratorPage() {
                     value && updateWording({ surface: value })
                   }
                   aria-label={t('qr.background')}
-                  sx={{ display: 'flex', mt: 0.5 }}
+                  sx={{ display: 'flex', mt: 2 }}
                 >
                   <ToggleButton value="brand" sx={{ flex: 1, gap: 1 }}>
                     <Box
