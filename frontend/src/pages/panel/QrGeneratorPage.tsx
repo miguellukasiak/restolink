@@ -1012,7 +1012,7 @@ export function QrGeneratorPage() {
               </Box>
             </ControlGroup>
 
-            <ControlGroup title={t('qr.centerTitle')} hint={t('qr.centerHint')}>
+            <ControlGroup title={t('qr.centerTitle')}>
               <OptionGrid columns={4}>
                 {centerOptions.map((option) => {
                   const tile = (
