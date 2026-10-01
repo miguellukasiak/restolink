@@ -769,3 +769,57 @@ class WebhookAck(BaseModel):
     #: processed | duplicate | ignored | unmatched
     status: str
     event_type: str = ""
+
+
+# --------------------------------------------------------------------------- #
+# Panel languages made by DeepL (routers/panel_locales.py)
+# --------------------------------------------------------------------------- #
+
+#: One DeepL request's worth: the API takes up to 50 texts at once.
+MAX_INTERFACE_BATCH = 50
+#: The panel has ~700 strings; room to grow, not room to abuse.
+MAX_PANEL_STRINGS = 3000
+MAX_PANEL_STRING = 2000
+
+
+class InterfaceTexts(BaseModel):
+    texts: list[str] = Field(min_length=1, max_length=MAX_INTERFACE_BATCH)
+
+    @field_validator("texts")
+    @classmethod
+    def _bounded(cls, texts: list[str]) -> list[str]:
+        if any(len(text) > MAX_PANEL_STRING for text in texts):
+            raise ValueError(f"Tekst dłuższy niż {MAX_PANEL_STRING} znaków.")
+        return texts
+
+
+class InterfaceTranslations(BaseModel):
+    translations: list[str]
+
+
+class PanelLocaleUpload(BaseModel):
+    """What the HQ browser made: flat keys, and the English each came from."""
+
+    strings: dict[str, str] = Field(max_length=MAX_PANEL_STRINGS)
+    sources: dict[str, str] = Field(max_length=MAX_PANEL_STRINGS)
+
+    @model_validator(mode="after")
+    def _bounded(self) -> "PanelLocaleUpload":
+        for mapping in (self.strings, self.sources):
+            for key, text in mapping.items():
+                if len(key) > 200 or len(text) > MAX_PANEL_STRING:
+                    raise ValueError(f"Tekst dłuższy niż {MAX_PANEL_STRING} znaków.")
+        return self
+
+
+class PanelLocaleStatus(BaseModel):
+    code: str
+    #: How many of the panel's strings it has.
+    strings: int
+    updated_at: datetime
+
+
+class PanelLocaleResponse(BaseModel):
+    code: str
+    strings: dict[str, str]
+    sources: dict[str, str]

@@ -13,6 +13,7 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from .database import AsyncSessionLocal, engine
+from . import panel_texts
 from .messages import localize
 from .panel_language import request_language
 from .models import Base
@@ -25,6 +26,7 @@ from .routers import (
     google_maps,
     languages,
     panel,
+    panel_locales,
     public,
 )
 from .seed import seed_if_empty
@@ -38,6 +40,10 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     async with AsyncSessionLocal() as session:
         await seed_if_empty(session)
         await session.commit()
+    # The DeepL-made panel languages' messages and emails, for the handlers
+    # below and the email service, which read them synchronously.
+    async with AsyncSessionLocal() as session:
+        await panel_texts.load(session)
     yield
     await engine.dispose()
 
@@ -124,6 +130,10 @@ app.include_router(billing.router)
 # signature check on the raw body is the whole of its security.
 app.include_router(billing.webhook_router)
 app.include_router(public.router)
+# HQ spends the DeepL quota on a panel language; anyone may read the result —
+# it is interface text, and the sign-in pages need it before any session.
+app.include_router(panel_locales.admin_router)
+app.include_router(panel_locales.public_router)
 # Also unauthenticated: the landing page's contact form. Rate-limited and
 # honeypotted, because it is the one public route that sends an email.
 app.include_router(contact.router)

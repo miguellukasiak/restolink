@@ -6,7 +6,6 @@ bearer token is valid and that it belongs to the restaurant named in the path.
 """
 
 import logging
-import os
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -17,6 +16,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import noload
 
 from ..database import get_db
+from ..deepl_client import (
+    DEEPL_TARGET,
+    DEEPL_VARIANTS,
+    deepl_key as _deepl_key,
+    translation_failure as _translation_failure,
+)
 from ..dependencies import verify_restaurant_access
 from ..models import Restaurant, TranslationDictionary
 from ..schemas import (
@@ -44,17 +49,10 @@ router = APIRouter(
     dependencies=[Depends(verify_restaurant_access)],
 )
 
-#: Where DeepL's target code is not simply ours in upper case. It refuses a
-#: bare "EN" and "PT" — the caller, not the engine, decides which variant — so:
-#: British English and European Portuguese, because the guests this exists for
-#: are travellers in Europe; Chinese in simplified characters, what visitors
-#: from mainland China read; Norwegian as Bokmål, the written standard.
-_DEEPL_VARIANTS = {"en": "EN-GB", "pt": "PT-PT", "zh": "ZH-HANS", "nb": "NB"}
-
-#: Every catalogue language's DeepL target.
-_DEEPL_TARGET = {
-    code: _DEEPL_VARIANTS.get(code, code.upper()) for code in DICTIONARY_LANGUAGES
-}
+#: The catalogue's DeepL targets (deepl_client.py), under the name the tests
+#: and the rest of this module know.
+_DEEPL_VARIANTS = DEEPL_VARIANTS
+_DEEPL_TARGET = DEEPL_TARGET
 
 #: Source codes have no regional variants, so this is just an uppercase pass —
 #: guarded against a `base_language` DeepL does not know, where passing nothing
@@ -200,26 +198,6 @@ async def save_dictionary(
 # --------------------------------------------------------------------------- #
 
 
-def _deepl_key() -> str:
-    """The API key, or a 500 that says exactly what is missing.
-
-    A configuration gap, not a user error — hence 500 rather than 4xx, and a
-    message the owner can forward to whoever administers the deployment instead
-    of a bare "translation failed".
-    """
-    key = os.getenv("DEEPL_API_KEY", "").strip()
-    if not key:
-        logger.error("DEEPL_API_KEY is not set — auto-translate is unavailable.")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=(
-                "Automatyczne tłumaczenie nie jest skonfigurowane "
-                "(brak klucza DEEPL_API_KEY). Tłumaczenia można wpisać ręcznie."
-            ),
-        )
-    return key
-
-
 def _translate_batch(
     texts: list[str], target_lang: str, source_lang: str | None, auth_key: str
 ) -> list[str]:
@@ -312,58 +290,3 @@ async def auto_translate(
         target,
     )
     return AutoTranslateResponse(target_lang=language, entries=entries, failed=failed)
-
-
-def _translation_failure(exc: Exception) -> HTTPException:
-    """Turn a DeepL error into a message that says what to do about it.
-
-    The distinction that matters is whose problem it is: a bad key or an empty
-    quota is ours to fix and reads as 500, while the API being unreachable or
-    busy is upstream's and reads as 502. Either way the owner keeps their typed
-    translations — this endpoint never saves, so a failure costs them nothing
-    but the drafts.
-    """
-    import deepl
-
-    if isinstance(exc, deepl.AuthorizationException):
-        logger.error("DeepL rejected the API key.")
-        return HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Klucz DeepL został odrzucony. Sprawdź konfigurację serwera.",
-        )
-
-    if isinstance(exc, deepl.QuotaExceededException):
-        logger.error("DeepL translation quota exhausted.")
-        return HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=(
-                "Wyczerpano miesięczny limit tłumaczeń DeepL. "
-                "Tłumaczenia można wpisać ręcznie."
-            ),
-        )
-
-    if isinstance(exc, deepl.TooManyRequestsException):
-        logger.warning("DeepL rate-limited the request.")
-        return HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="DeepL chwilowo odrzuca żądania. Spróbuj ponownie za chwilę.",
-        )
-
-    # DeepL's language list grows and its plans differ; a target our key cannot
-    # use is a 400 naming `target_lang`. The owner can still type translations,
-    # so say that rather than a generic failure.
-    if isinstance(exc, deepl.DeepLException) and "target_lang" in str(exc):
-        logger.warning("DeepL refused the target language: %s", exc)
-        return HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=(
-                "DeepL nie podpowiada jeszcze tłumaczeń w tym języku. "
-                "Tłumaczenia można wpisać ręcznie."
-            ),
-        )
-
-    logger.exception("DeepL translation failed")
-    return HTTPException(
-        status_code=status.HTTP_502_BAD_GATEWAY,
-        detail="Nie udało się pobrać tłumaczeń. Spróbuj ponownie za chwilę.",
-    )

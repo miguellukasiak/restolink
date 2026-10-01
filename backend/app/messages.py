@@ -6,12 +6,14 @@ they are. The owner panel is English by default, so a request that asks for
 English (see panel_language.request_language) gets each message swapped here
 for its English version, by exact text. A message missing from the table goes
 out in Polish rather than blank; tests/test_panel_language.py fails if one is
-raised that is not here.
+raised that is not here. A panel language DeepL made gets DeepL's version of
+the English (panel_texts.py), or the English.
 """
 
 import re
 
-from .panel_language import DEFAULT_PANEL_LANGUAGE
+from .panel_language import BUILT_IN_PANEL_LANGUAGES, DEFAULT_PANEL_LANGUAGE
+from .panel_texts import messages_for
 
 ENGLISH: dict[str, str] = {
     # Sessions and access
@@ -59,6 +61,13 @@ ENGLISH: dict[str, str] = {
         "An entry appears in the layout more than once."
     ),
     "Nie znaleziono tekstu.": "Text block not found.",
+    # Panel languages made by DeepL
+    "Tego języka panelu nie tłumaczy się automatycznie.": (
+        "This panel language is not translated automatically."
+    ),
+    "Panel nie jest jeszcze przetłumaczony na ten język.": (
+        "The panel is not translated into this language yet."
+    ),
     "Tekst jest pusty.": "The text is empty.",
     # Payments
     "Płatności nie są jeszcze skonfigurowane na serwerze.": (
@@ -178,16 +187,18 @@ _PATTERNS: list[tuple[re.Pattern[str], str]] = [
         "“{0}” is too long — at most {1} characters.",
     ),
     (
+        re.compile(r"^Tekst dłuższy niż (\d+) znaków\.$"),
+        "A text is longer than {0} characters.",
+    ),
+    (
         re.compile(r"^Tekst jest za długi — najwyżej (\d+) znaków\.$"),
         "The text is too long — at most {0} characters.",
     ),
 ]
 
 
-def localize(message: str, language: str) -> str:
-    """`message` in `language` — English swapped in, anything else as written."""
-    if language != DEFAULT_PANEL_LANGUAGE:
-        return message
+def english(message: str) -> str:
+    """`message` in English, or as raised when the table has no entry."""
     if message in ENGLISH:
         return ENGLISH[message]
     for pattern, template in _PATTERNS:
@@ -195,3 +206,44 @@ def localize(message: str, language: str) -> str:
         if match:
             return template.format(*match.groups())
     return message
+
+
+def localize(message: str, language: str) -> str:
+    """`message` in `language`.
+
+    Polish is how messages are raised, so it goes out as it is. English is
+    the table above. Any other panel language uses what DeepL made of the
+    English when HQ first chose it (panel_texts.py) — and falls back to
+    English, never to Polish: an owner who picked Turkish reads English far
+    more likely than Polish.
+    """
+    if language in BUILT_IN_PANEL_LANGUAGES:
+        return message
+    fallback = english(message)
+    if language == DEFAULT_PANEL_LANGUAGE:
+        return fallback
+    table = messages_for(language)
+    if not table:
+        return fallback
+    exact = table.get("exact", {}).get(message)
+    if exact:
+        return exact
+    for index, (pattern, _template) in enumerate(_PATTERNS):
+        match = pattern.match(message)
+        if not match:
+            continue
+        template = table.get("patterns", {}).get(str(index))
+        if template:
+            try:
+                return template.format(*match.groups())
+            except (IndexError, KeyError, ValueError):
+                pass  # DeepL mangled a field; English is still right.
+        break
+    return fallback
+
+
+def message_sources() -> tuple[dict[str, str], dict[str, str]]:
+    """What a new panel language translates: every exact message's English,
+    and every pattern's template, keyed as `localize` looks them up."""
+    patterns = {str(index): template for index, (_p, template) in enumerate(_PATTERNS)}
+    return dict(ENGLISH), patterns

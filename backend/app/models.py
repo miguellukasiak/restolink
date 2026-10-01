@@ -395,6 +395,38 @@ def menu_layout(
     )
 
 
+class PanelLocale(Base):
+    """The owner panel in a language nobody on the team wrote by hand.
+
+    Made by DeepL from the English the first time HQ gives a restaurant this
+    panel language (routers/panel_locales.py), then shared by every
+    restaurant with it. Interface text, not a menu: a stiff phrase here costs
+    nothing, while a missing language costs an owner who cannot read the
+    panel. Polish is not here — it is written by hand and ships with the app.
+    """
+
+    __tablename__ = "panel_locale"
+
+    code: Mapped[str] = mapped_column(String(8), primary_key=True)
+    #: The panel's strings, flat: "builder.newNote" -> text. Assembled in the
+    #: browser, which owns the English source (src/i18n/panel/en.json).
+    strings: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)
+    #: The English each string was made from, so a string whose English has
+    #: changed since is translated again and the rest are not paid for twice.
+    sources: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)
+    #: Server messages: {"exact": {Polish as raised: text}, "patterns":
+    #: {index in messages._PATTERNS: template}}.
+    messages: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)
+    #: The owner emails, keyed like email_service.EMAIL_COPY["en"].
+    emails: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)
+    #: Stamped in Python (CLAUDE.md §11, trap 6).
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+    )
+
+
 class MenuItem(TimestampSoftDeleteMixin, Base):
     __tablename__ = "menu_item"
 

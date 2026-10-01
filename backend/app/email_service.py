@@ -24,6 +24,8 @@ from typing import Any
 import resend
 from fastapi.concurrency import run_in_threadpool
 
+from .panel_texts import emails_for
+
 logger = logging.getLogger(__name__)
 
 APP_BASE_URL = os.getenv("APP_BASE_URL", "https://restolink-vert.vercel.app").rstrip("/")
@@ -66,8 +68,9 @@ async def _deliver(params: dict[str, Any]) -> None:
 
 #: Owner emails go out in the restaurant's second panel language when it has
 #: one (an email has no language switch, so the owner's own is the safer
-#: choice), and in English otherwise. Every code in
-#: panel_language.PANEL_LANGUAGES needs an entry; a test checks.
+#: choice), and in English otherwise. Every hand-written panel language
+#: (panel_language.BUILT_IN_PANEL_LANGUAGES) needs an entry here, a test
+#: checks; a language DeepL made has its emails in `panel_locale`.
 EMAIL_COPY: dict[str, dict[str, str]] = {
     "en": {
         "reset_subject": "Reset your RestoLink password",
@@ -129,12 +132,34 @@ RESET_TTL_MINUTES = 30
 
 
 def _copy(language: str | None) -> dict[str, str]:
-    return EMAIL_COPY.get(language or "en", EMAIL_COPY["en"])
+    """The email's words: hand-written, or what DeepL made of the English for
+    a panel language HQ chose (panel_texts.py) — any line it lacks in English."""
+    if language in EMAIL_COPY:
+        return EMAIL_COPY[language]
+    made = emails_for(language) if language else None
+    return {**EMAIL_COPY["en"], **(made or {})}
+
+
+def _line(copy: dict[str, str], key: str, **fields: object) -> str:
+    """One line with its fields filled in. A machine-made line whose field
+    did not survive translation falls back to the English line rather than
+    failing the email."""
+    try:
+        return copy[key].format(**fields)
+    except (KeyError, IndexError, ValueError):
+        return EMAIL_COPY["en"][key].format(**fields)
+
+
+def email_language(language: str | None) -> str:
+    """The language an owner's email is actually written in."""
+    if language in EMAIL_COPY:
+        return language
+    return language if language and emails_for(language) else "en"
 
 
 def _lang_query(language: str | None) -> str:
     # The link opens the panel's page in the email's language.
-    return f"&lang={language}" if language in EMAIL_COPY else "&lang=en"
+    return f"&lang={email_language(language)}"
 
 
 def reset_password_url(raw_token: str, language: str | None = None) -> str:
@@ -177,12 +202,12 @@ def _owner_email_html(
 def reset_email(restaurant_name: str, url: str, language: str | None) -> dict[str, str]:
     """Subject, HTML and text of the reset email in `language`."""
     copy = _copy(language)
-    greeting = copy["reset_greeting"].format(name=restaurant_name)
-    body = copy["reset_body"].format(minutes=RESET_TTL_MINUTES)
+    greeting = _line(copy, "reset_greeting", name=restaurant_name)
+    body = _line(copy, "reset_body", minutes=RESET_TTL_MINUTES)
     return {
         "subject": copy["reset_subject"],
         "html": _owner_email_html(
-            language=language if language in EMAIL_COPY else "en",
+            language=email_language(language),
             greeting=greeting,
             body=body,
             button=copy["reset_button"],
@@ -198,12 +223,12 @@ def welcome_email(
 ) -> dict[str, str]:
     """Subject, HTML and text of the welcome email in `language`."""
     copy = _copy(language)
-    greeting = copy["welcome_greeting"].format(name=restaurant_name)
-    note = copy["welcome_validity"].format(days=days)
+    greeting = _line(copy, "welcome_greeting", name=restaurant_name)
+    note = _line(copy, "welcome_validity", days=days)
     return {
         "subject": copy["welcome_subject"],
         "html": _owner_email_html(
-            language=language if language in EMAIL_COPY else "en",
+            language=email_language(language),
             greeting=greeting,
             body=copy["welcome_body"],
             button=copy["welcome_button"],

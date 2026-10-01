@@ -1,21 +1,39 @@
 """The language of the owner's panel — English, plus at most one more.
 
 Every restaurant's panel speaks English. HQ may give a restaurant one second
-language when creating it — Polish for a restaurant in Poland — and the panel
-then shows a switch between the two. One extra language per restaurant keeps
-the promise small enough to keep: each language here needs the whole panel,
-the emails and the server's messages translated.
+language when creating it, and the panel then shows a switch between the two;
+the owner's emails and the server's messages follow it.
 
-Adding one is a locale file in the frontend (src/i18n/panel/<code>.json), its
-emails in email_service.py and its messages in messages.py;
-tests/test_panel_language.py checks they exist. Kept free of imports.
+Polish is written by hand and ships with the app. Every other language in the
+menu catalogue can be chosen too: the first time HQ picks one, the panel is
+translated into it by DeepL from the English (routers/panel_locales.py) and
+kept in `panel_locale`, so each language is translated once for every
+restaurant that uses it. Right-to-left languages are left out until the
+panel's layout can mirror.
+
+Kept free of imports beyond the catalogue, which itself has none.
 """
+
+from .menu_languages import MENU_LANGUAGES
 
 #: The one every panel has and every request falls back to.
 DEFAULT_PANEL_LANGUAGE = "en"
 
-#: Languages HQ can give a restaurant as its second panel language.
-PANEL_LANGUAGES: tuple[str, ...] = ("pl",)
+#: Written by hand: the frontend's src/i18n/panel/<code>.json, the emails in
+#: email_service.py, the messages as raised. tests/test_panel_language.py
+#: checks each one is complete.
+BUILT_IN_PANEL_LANGUAGES: tuple[str, ...] = ("pl",)
+
+#: The panel lays out left to right; these need a mirrored layout first.
+RIGHT_TO_LEFT: tuple[str, ...] = ("ar", "he")
+
+#: Every language HQ can give a restaurant: the hand-written ones first, then
+#: the catalogue's, which DeepL translates on first use.
+PANEL_LANGUAGES: tuple[str, ...] = BUILT_IN_PANEL_LANGUAGES + tuple(
+    code
+    for code in MENU_LANGUAGES
+    if code not in (DEFAULT_PANEL_LANGUAGE, *BUILT_IN_PANEL_LANGUAGES, *RIGHT_TO_LEFT)
+)
 
 
 def request_language(accept_language: str | None) -> str:

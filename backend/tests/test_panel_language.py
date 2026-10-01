@@ -17,7 +17,7 @@ from app.email_service import EMAIL_COPY, welcome_email
 from app.main import app
 from app.messages import localize
 from app.models import AdminUser
-from app.panel_language import PANEL_LANGUAGES, request_language
+from app.panel_language import BUILT_IN_PANEL_LANGUAGES, request_language
 from app.security import (
     ADMIN_TOKEN_TTL,
     RESTAURANT_TOKEN_TTL,
@@ -92,9 +92,11 @@ async def test_without_one_the_panel_is_english_only(restaurant):
     assert response.json()["panel_language"] is None
 
 
-@pytest.mark.parametrize("code", ["xx", "de", "PL "])
+# Not a catalogue language, right to left (the panel cannot mirror yet), or
+# not a code at all.
+@pytest.mark.parametrize("code", ["xx", "ar", "he", "PL "])
 @pytest.mark.asyncio
-async def test_a_language_without_a_translated_panel_is_refused(restaurant, code):
+async def test_a_language_the_panel_cannot_have_is_refused(restaurant, code):
     async with client() as http:
         response = await create(http, restaurant, panel_language=code)
     assert response.status_code == 422
@@ -139,7 +141,9 @@ def test_the_request_language_is_english_unless_a_panel_language_is_asked_for():
     assert request_language(None) == "en"
     assert request_language("pl") == "pl"
     assert request_language("pl-PL,pl;q=0.9,en;q=0.8") == "pl"
-    assert request_language("de-DE") == "en"
+    # Any panel language, hand-written or DeepL-made, is honoured.
+    assert request_language("de-DE") == "de"
+    assert request_language("ar") == "en"
 
 
 @pytest.mark.asyncio
@@ -177,7 +181,12 @@ async def test_our_validation_messages_follow_the_panel_too(restaurant):
 def _raised_messages() -> list[str]:
     """Every fixed message the server can put in front of a person."""
     messages: list[str] = []
-    for path in [*APP.glob("routers/*.py"), APP / "dependencies.py", APP / "security.py"]:
+    for path in [
+        *APP.glob("routers/*.py"),
+        APP / "dependencies.py",
+        APP / "security.py",
+        APP / "deepl_client.py",
+    ]:
         source = path.read_text(encoding="utf-8")
         calls = re.finditer(
             r"(?:detail=|TokenError\(|_UpstreamError\(\s*status\.\w+,\s*)\(?\s*((?:\"[^\"]*\"\s*)+)",
@@ -206,8 +215,8 @@ def test_every_message_the_server_raises_has_an_english_version():
 # --------------------------------------------------------------------------- #
 
 
-def test_every_panel_language_has_its_emails():
-    for code in ("en", *PANEL_LANGUAGES):
+def test_every_hand_written_panel_language_has_its_emails():
+    for code in ("en", *BUILT_IN_PANEL_LANGUAGES):
         assert EMAIL_COPY[code].keys() == EMAIL_COPY["en"].keys(), code
 
 
@@ -219,7 +228,7 @@ def test_welcome_email_is_in_the_restaurants_language_and_escapes_its_name():
     assert "<b>" not in polish["html"] and "&lt;b&gt;" in polish["html"]
 
 
-def test_every_panel_language_has_a_translated_panel():
+def test_every_hand_written_panel_language_has_a_translated_panel():
     # Plural forms differ by language (English has one and other, Polish adds
     # few and many), so strings are compared by their key without the suffix.
     # The frontend's own test checks each language has the forms it needs.
@@ -236,6 +245,6 @@ def test_every_panel_language_has_a_translated_panel():
 
     folder = FRONTEND / "i18n" / "panel"
     reference = keys(json.loads((folder / "en.json").read_text(encoding="utf-8")))
-    for code in PANEL_LANGUAGES:
+    for code in BUILT_IN_PANEL_LANGUAGES:
         translated = json.loads((folder / f"{code}.json").read_text(encoding="utf-8"))
         assert keys(translated) == reference, code
