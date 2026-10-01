@@ -1014,9 +1014,9 @@ Deployment prerequisites, carried across several sessions:
       2026-10-01).
 - [ ] `007`, `008`, `013` and `015` are table-only and optional (`create_all`
       covers them).
-- [ ] **Migration `017`** (optional, data only) — puts every restaurant on the
-      one plan and retires the demo tiers. The app works without it; run it
-      before tiers ever mean something.
+- [x] **Migration `017`** (optional, data only) — every restaurant on the
+      one plan, demo tiers retired. Applied to production (confirmed by the
+      owner, 2026-10-01).
 - [ ] **DeepL quota is shared by every restaurant.** Drafting a whole menu into
       one language costs its character count; with 34 languages on offer, a
       free-tier key (500k characters/month) can run dry. Watch usage; the
