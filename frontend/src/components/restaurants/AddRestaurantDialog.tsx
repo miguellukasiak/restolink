@@ -130,7 +130,7 @@ export function AddRestaurantDialog({
             <Typography variant="h6" component="div">
               Dodaj restaurację
             </Typography>
-            <Typography variant="body2" color="text.secondary" noWrap>
+            <Typography variant="body2" color="textSecondary" noWrap>
               Załóż nowe konto restauratora
             </Typography>
           </Box>

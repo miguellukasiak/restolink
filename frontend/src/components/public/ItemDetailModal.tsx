@@ -141,7 +141,7 @@ export function DishDetailBody({
           >
             {t('description')}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="textSecondary">
             {item.description}
           </Typography>
         </Box>
@@ -158,7 +158,7 @@ export function DishDetailBody({
             {t('ingredientsAndAllergens')}
           </Typography>
           {item.ingredients && (
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+            <Typography variant="body2" color="textSecondary" sx={{ mb: 1.5 }}>
               {item.ingredients}
             </Typography>
           )}
@@ -253,7 +253,7 @@ export function DishDetailBody({
                 </Typography>
                 <Typography
                   variant="caption"
-                  color="text.secondary"
+                  color="textSecondary"
                   sx={{ letterSpacing: '0.08em' }}
                 >
                   {tile.label}

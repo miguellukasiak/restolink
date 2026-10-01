@@ -952,10 +952,10 @@ Each of these cost real debugging time in this repo. They are not hypothetical.
 17. **MUI v9 `Typography` ignores `color="text.secondary"`.** Its `color` prop
     takes `textSecondary` / `textPrimary` / `textDisabled` (or a palette
     name); the dotted path was a system prop, removed after v6, and is now
-    dropped without a warning — the text renders in `text.primary`. Found
-    when the builder's preview hint came out black; the codebase still has
-    many `color="text.secondary"` on `Typography`, all rendering as primary.
-    Use `color="textSecondary"` or `sx={{ color: 'text.secondary' }}`.
+    dropped without a warning — the text renders in `text.primary`. It had
+    flattened every subtitle, hint and description in the panels, HQ and the
+    guest menu to primary text (89 uses, fixed together). Use
+    `color="textSecondary"` or `sx={{ color: 'text.secondary' }}`.
 
 ---
 

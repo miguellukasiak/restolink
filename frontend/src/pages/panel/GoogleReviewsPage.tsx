@@ -154,7 +154,7 @@ function SetupScreen({
               <Typography variant="h5" component="h2" sx={{ mb: 1 }}>
                 {t('google.connectTitle')}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="textSecondary">
                 {t('google.connectBody')}
               </Typography>
             </Box>
@@ -235,7 +235,7 @@ function ReviewCard({ review, now }: { review: GoogleReview; now: number }) {
             </Typography>
             <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
               <Stars value={review.rating} size={16} />
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" color="textSecondary">
                 {reviewAge(review.time, now, i18n.language) ??
                   review.relative_time_description}
               </Typography>
@@ -246,13 +246,13 @@ function ReviewCard({ review, now }: { review: GoogleReview; now: number }) {
         {review.text ? (
           <Typography
             variant="body2"
-            color="text.secondary"
+            color="textSecondary"
             sx={{ lineHeight: 1.7, whiteSpace: 'pre-line' }}
           >
             {review.text}
           </Typography>
         ) : (
-          <Typography variant="body2" color="text.disabled" sx={{ fontStyle: 'italic' }}>
+          <Typography variant="body2" color="textDisabled" sx={{ fontStyle: 'italic' }}>
             {t('google.noComment')}
           </Typography>
         )}
@@ -315,7 +315,7 @@ export function GoogleReviewsPage() {
       <Typography variant="h5" component="h1" sx={{ mb: 0.5 }}>
         {t('nav.reviews')}
       </Typography>
-      <Typography variant="body2" color="text.secondary">
+      <Typography variant="body2" color="textSecondary">
         {t('google.subtitle')}
       </Typography>
     </Box>
@@ -436,7 +436,7 @@ export function GoogleReviewsPage() {
                 <Typography variant="h5" sx={{ mb: 0.5 }}>
                   {t('google.noRatings')}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="textSecondary">
                   {t('google.noRatingsBody')}
                 </Typography>
               </Box>
@@ -457,7 +457,7 @@ export function GoogleReviewsPage() {
                   })}
                 </Typography>
                 <Stars value={rating} size={24} />
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="textSecondary">
                   {/* In Polish "na podstawie" takes the genitive, which
                       splits only between one and many: 1 oceny, 2 ocen,
                       1342 ocen — the plural forms in the panel files. */}
@@ -476,7 +476,7 @@ export function GoogleReviewsPage() {
             />
 
             <Stack spacing={1.5} sx={{ alignItems: 'flex-start' }}>
-              <Typography variant="overline" color="text.secondary">
+              <Typography variant="overline" color="textSecondary">
                 {t('google.listing')}
               </Typography>
               <Typography
@@ -545,7 +545,7 @@ export function GoogleReviewsPage() {
       {syncedAt && (
         <Typography
           variant="caption"
-          color="text.disabled"
+          color="textDisabled"
           sx={{ display: 'block', mt: 3, textAlign: 'center' }}
         >
           {t('google.synced', { at: syncedAt })}

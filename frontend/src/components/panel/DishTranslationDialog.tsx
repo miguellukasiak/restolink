@@ -92,7 +92,7 @@ export function DishTranslationDialog({
     >
       <DialogTitle sx={{ pb: 1 }}>{t('dishTranslate.title')}</DialogTitle>
       <DialogContent>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
           {t('dishTranslate.intro', {
             languages: languages.map(([code]) => languageName(code)).join(', '),
           })}
@@ -101,7 +101,7 @@ export function DishTranslationDialog({
         {drafts.isFetching && (
           <Box sx={{ mb: 2 }} aria-live="polite">
             <LinearProgress sx={{ mb: 1 }} />
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="textSecondary">
               {t('dishTranslate.drafting')}
             </Typography>
           </Box>
@@ -123,7 +123,7 @@ export function DishTranslationDialog({
                   <Box key={phrase}>
                     <Typography
                       variant="caption"
-                      color="text.secondary"
+                      color="textSecondary"
                       sx={{ display: 'block', mb: 0.5, whiteSpace: 'pre-line' }}
                     >
                       {phrase}

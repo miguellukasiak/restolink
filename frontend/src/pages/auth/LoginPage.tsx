@@ -53,7 +53,7 @@ export function LoginPage() {
       title={t('login.title')}
       subtitle={t('login.subtitle')}
       footer={
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" color="textSecondary">
           {t('login.noAccount')}{' '}
           <Link component={RouterLink} to="/#kontakt" underline="hover">
             {t('login.contactUs')}

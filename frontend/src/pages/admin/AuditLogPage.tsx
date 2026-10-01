@@ -128,7 +128,7 @@ export function AuditLogPage() {
         minWidth: 260,
         sortable: false,
         renderCell: (params: GridRenderCellParams<AuditLogEntry>) => (
-          <Typography variant="body2" color="text.secondary" noWrap>
+          <Typography variant="body2" color="textSecondary" noWrap>
             {params.row.target_entity}
           </Typography>
         ),
@@ -141,7 +141,7 @@ export function AuditLogPage() {
     <Box sx={{ maxWidth: 1200, mx: 'auto', pt: 4 }}>
       <Stack spacing={0.5} sx={{ mb: 3 }}>
         <Typography variant="h4">Dziennik zdarzeń</Typography>
-        <Typography variant="body1" color="text.secondary">
+        <Typography variant="body1" color="textSecondary">
           Kto, co i kiedy zrobił w panelu HQ. Zapis jest tylko do odczytu.
         </Typography>
       </Stack>

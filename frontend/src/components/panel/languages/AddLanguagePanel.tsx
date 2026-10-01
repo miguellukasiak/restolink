@@ -171,7 +171,7 @@ export function AddLanguagePanel({
               },
             }}
           />
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" color="textSecondary">
             {t('addLanguage.sortHint')}
           </Typography>
         </>
@@ -182,7 +182,7 @@ export function AddLanguagePanel({
         sx={{ display: 'grid', gap: 1, maxHeight: 520, overflowY: 'auto', pr: 0.5 }}
       >
         {shown.length === 0 && (
-          <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
+          <Typography variant="body2" color="textSecondary" sx={{ py: 2 }}>
             {tab === 'recommended'
               ? t('addLanguage.allRecommended')
               : t('addLanguage.noSuch')}
@@ -265,7 +265,7 @@ function Candidate({
           {language.endonym.toLowerCase() !== name.toLowerCase() && (
             <Typography
               variant="caption"
-              color="text.secondary"
+              color="textSecondary"
               lang={language.code}
               dir="auto"
             >
@@ -274,7 +274,7 @@ function Candidate({
           )}
         </Stack>
         {reason && (
-          <Typography variant="caption" color="text.secondary" component="p">
+          <Typography variant="caption" color="textSecondary" component="p">
             {reason}
           </Typography>
         )}

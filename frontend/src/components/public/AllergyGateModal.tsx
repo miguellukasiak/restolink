@@ -125,7 +125,7 @@ export function AllergyGateModal({
             >
               {isWelcome ? t('allergyWelcomeTitle') : t('allergyFilter')}
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            <Typography variant="body2" color="textSecondary" sx={{ mt: 0.5 }}>
               {isWelcome ? t('allergyWelcomeHint') : t('allergyFilterHint')}
             </Typography>
           </Box>

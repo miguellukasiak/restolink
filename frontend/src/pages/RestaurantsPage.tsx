@@ -200,7 +200,7 @@ export function RestaurantsPage() {
             </Stack>
             <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
               <PhoneRoundedIcon sx={{ fontSize: 15, color: 'text.secondary' }} />
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" color="textSecondary">
                 {params.row.contact_phone}
               </Typography>
             </Stack>
@@ -222,7 +222,7 @@ export function RestaurantsPage() {
               <Typography variant="body2" noWrap>
                 {countryName(params.row.country, 'pl')}
               </Typography>
-              <Typography variant="caption" color="text.secondary" noWrap>
+              <Typography variant="caption" color="textSecondary" noWrap>
                 menu {languageTag(params.row.base_language)} · {params.row.currency}
               </Typography>
             </Stack>
@@ -377,7 +377,7 @@ export function RestaurantsPage() {
       >
         <Stack spacing={0.5}>
           <Typography variant="h4">Zarządzanie restauratorami</Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" color="textSecondary">
             Przeglądaj konta restauracji i statusy ich subskrypcji.
           </Typography>
         </Stack>

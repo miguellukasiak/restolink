@@ -59,7 +59,7 @@ export function SubscriptionPaywall({
           <Typography variant="h5" component="h1">
             {t('subscription.expired')}
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" color="textSecondary">
             {t('subscription.expiredHint')}
           </Typography>
           <Button

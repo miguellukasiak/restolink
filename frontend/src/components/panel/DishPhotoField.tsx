@@ -194,7 +194,7 @@ export function DishPhotoField({
               <AddPhotoAlternateRoundedIcon />
             </Box>
             <Typography variant="subtitle2">{t('photo.add')}</Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.3 }}>
+            <Typography variant="caption" color="textSecondary" sx={{ lineHeight: 1.3 }}>
               {dragOver ? t('photo.dropHere') : t('photo.dragOrClick')}
             </Typography>
           </ButtonBase>

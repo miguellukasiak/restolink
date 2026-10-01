@@ -581,7 +581,7 @@ export function QrGeneratorPage() {
         <Typography variant="h4" component="h1">
           {t('nav.qr')}
         </Typography>
-        <Typography variant="body1" color="text.secondary">
+        <Typography variant="body1" color="textSecondary">
           {t('qr.subtitle')}
         </Typography>
       </Stack>
@@ -726,7 +726,7 @@ export function QrGeneratorPage() {
                 />
               )}
               <Box sx={{ flex: 1 }} />
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" color="textSecondary">
                 {sheetLabel}
               </Typography>
             </Stack>
@@ -758,7 +758,7 @@ export function QrGeneratorPage() {
               </Typography>
               <Typography
                 variant="caption"
-                color="text.secondary"
+                color="textSecondary"
                 component="p"
                 sx={{ mb: 1.5 }}
               >
@@ -857,7 +857,7 @@ export function QrGeneratorPage() {
             </Stack>
             <Stack direction="row" spacing={1} sx={{ mt: 1.5, alignItems: 'flex-start' }}>
               <CheckCircleRoundedIcon color="primary" sx={{ fontSize: 18, mt: '1px' }} />
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="textSecondary">
                 {t('qr.neverChanges')}
               </Typography>
             </Stack>
@@ -1005,7 +1005,7 @@ export function QrGeneratorPage() {
                   spacing={0.75}
                   sx={{ flexWrap: 'wrap', alignItems: 'center', mb: 2 }}
                 >
-                  <Typography variant="body2" color="text.secondary" sx={{ mr: 0.25 }}>
+                  <Typography variant="body2" color="textSecondary" sx={{ mr: 0.25 }}>
                     {t('qr.textSets')}
                   </Typography>
                   {(textSets ?? []).map((set) => {

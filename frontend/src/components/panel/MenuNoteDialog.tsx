@@ -311,7 +311,7 @@ export function MenuNoteDialog({
           px: 0.5,
         }}
       >
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" color="textSecondary">
           {note
             ? t('noteDialog.hintEdit')
             : placement === 'start'
@@ -330,7 +330,7 @@ export function MenuNoteDialog({
       <Typography
         variant="caption"
         component="p"
-        color="text.secondary"
+        color="textSecondary"
         sx={{
           mt: 1.5,
           px: 1.25,
@@ -523,7 +523,7 @@ export function MenuNoteDialog({
             <Typography variant="h6" component="div">
               {note ? t('noteDialog.editTitle') : t('noteDialog.newTitle')}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="textSecondary">
               {t('noteDialog.subtitle')}
             </Typography>
           </Box>

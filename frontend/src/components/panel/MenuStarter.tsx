@@ -96,7 +96,7 @@ export function MenuStarter({ names, busy, onStart, onCustom }: MenuStarterProps
       </Typography>
       <Typography
         variant="body1"
-        color="text.secondary"
+        color="textSecondary"
         sx={{ mt: 1, maxWidth: 460, mx: 'auto' }}
       >
         {t('starter.body')}
@@ -126,7 +126,7 @@ export function MenuStarter({ names, busy, onStart, onCustom }: MenuStarterProps
           {t('starter.custom')}
         </Button>
       </Stack>
-      <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 2 }}>
+      <Typography variant="caption" color="textSecondary" component="p" sx={{ mt: 2 }}>
         {names.join(' · ')}
       </Typography>
     </Paper>

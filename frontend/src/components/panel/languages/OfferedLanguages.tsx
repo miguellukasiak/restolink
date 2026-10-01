@@ -154,7 +154,7 @@ export function OfferedLanguages({
           }}
         >
           <Typography variant="subtitle2">{t('offered.workTitle')}</Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="textSecondary">
             {t('offered.work', {
               translations: offered.length * 3,
               inLanguages: t('reach.inLanguages', { count: offered.length }),
@@ -228,17 +228,17 @@ function Row({
               {title}
             </Typography>
             {endonym && endonym.toLowerCase() !== title.toLowerCase() && (
-              <Typography variant="body2" color="text.secondary" lang={code} dir="auto">
+              <Typography variant="body2" color="textSecondary" lang={code} dir="auto">
                 {endonym}
               </Typography>
             )}
             {aside && (
-              <Typography variant="caption" color="text.secondary" sx={{ ml: 'auto' }}>
+              <Typography variant="caption" color="textSecondary" sx={{ ml: 'auto' }}>
                 {aside}
               </Typography>
             )}
           </Stack>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="textSecondary">
             {subtitle}
           </Typography>
         </Box>

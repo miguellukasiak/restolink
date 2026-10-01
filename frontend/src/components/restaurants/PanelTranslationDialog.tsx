@@ -78,7 +78,7 @@ export function PanelTranslationDialog({
       <DialogContent>
         {run.state === 'working' && (
           <>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
               DeepL tłumaczy panel, maile i komunikaty — raz, dla wszystkich restauracji z
               tym językiem.
             </Typography>
@@ -92,7 +92,7 @@ export function PanelTranslationDialog({
             />
             <Typography
               variant="caption"
-              color="text.secondary"
+              color="textSecondary"
               component="p"
               sx={{ mt: 1 }}
             >

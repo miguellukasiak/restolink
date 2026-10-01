@@ -116,7 +116,7 @@ export function ManualPaymentDialog({ open, restaurant, onClose }: ManualPayment
             <Typography variant="h6" component="div">
               Zatwierdź płatność ręcznie
             </Typography>
-            <Typography variant="body2" color="text.secondary" noWrap>
+            <Typography variant="body2" color="textSecondary" noWrap>
               {restaurant?.name ?? '—'}
             </Typography>
           </Box>
@@ -133,7 +133,7 @@ export function ManualPaymentDialog({ open, restaurant, onClose }: ManualPayment
 
       <DialogContent>
         <Stack spacing={2.5} sx={{ mt: 1 }}>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="textSecondary">
             Zaksięgowanie wpłaty tradycyjnej aktywuje konto restauracji i przedłuży
             jej subskrypcję.
           </Typography>

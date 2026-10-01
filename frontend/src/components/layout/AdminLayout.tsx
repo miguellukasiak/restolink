@@ -55,13 +55,13 @@ export function AdminLayout() {
                 <Wordmark size={19} color="text.primary" />
                 <Typography
                   variant="subtitle2"
-                  color="text.secondary"
+                  color="textSecondary"
                   sx={{ letterSpacing: '0.04em' }}
                 >
                   Admin
                 </Typography>
               </Stack>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" color="textSecondary">
                 {adminEmail || 'Panel administracyjny platformy'}
               </Typography>
             </Box>

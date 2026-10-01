@@ -122,7 +122,7 @@ export function MenuReadiness({
           >
             {title}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="textSecondary">
             {hint}
           </Typography>
 

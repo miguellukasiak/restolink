@@ -285,7 +285,7 @@ export function TranslationEditor({
                 bgcolor: (theme) => alpha(theme.palette.text.primary, 0.03),
               }}
             >
-              <Typography variant="subtitle2" color="text.secondary">
+              <Typography variant="subtitle2" color="textSecondary">
                 {heading}
               </Typography>
             </Box>
@@ -293,7 +293,7 @@ export function TranslationEditor({
 
           {shown.length === 0 && (
             <Box sx={{ gridColumn: '1 / -1', px: 2.5, py: 3 }}>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="textSecondary">
                 {t('editor.allDone')}
               </Typography>
             </Box>
@@ -373,7 +373,7 @@ export function TranslationEditor({
         </Box>
       </Paper>
 
-      <Typography variant="caption" color="text.secondary">
+      <Typography variant="caption" color="textSecondary">
         {base === 'pl'
           ? t('editor.fallbackNote')
           : t('editor.fallbackNoteBase', { base: languageName(base) })}

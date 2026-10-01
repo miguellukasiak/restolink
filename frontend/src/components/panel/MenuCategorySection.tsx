@@ -373,7 +373,7 @@ function MenuCategorySectionComponent({
                           {total === 0 && (
                             <Typography
                               variant="caption"
-                              color="text.secondary"
+                              color="textSecondary"
                               component="p"
                             >
                               {t('category.dropHint')}

@@ -142,7 +142,7 @@ function Section({
             {title}
           </Typography>
           {hint && (
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="textSecondary">
               {hint}
             </Typography>
           )}
@@ -495,7 +495,7 @@ export function AppearancePage() {
             <Typography variant="h4" component="h1">
               {t('nav.appearance')}
             </Typography>
-            <Typography variant="body1" color="text.secondary">
+            <Typography variant="body1" color="textSecondary">
               {t('appearance.intro')}
             </Typography>
           </Stack>
@@ -594,7 +594,7 @@ export function AppearancePage() {
                       </Typography>
                       <Typography
                         variant="caption"
-                        color="text.secondary"
+                        color="textSecondary"
                         component="p"
                         sx={{
                           lineHeight: 1.3,
@@ -663,7 +663,7 @@ export function AppearancePage() {
                       </Typography>
                       <Typography
                         variant="caption"
-                        color="text.secondary"
+                        color="textSecondary"
                         component="p"
                         sx={{ display: { xs: 'none', sm: 'block' } }}
                       >
@@ -826,7 +826,7 @@ export function AppearancePage() {
                 </Typography>
                 <Typography
                   variant="caption"
-                  color="text.secondary"
+                  color="textSecondary"
                   component="p"
                   sx={{ mb: 1 }}
                 >
@@ -913,7 +913,7 @@ export function AppearancePage() {
             >
               <Typography
                 variant="body2"
-                color="text.secondary"
+                color="textSecondary"
                 sx={{ flex: 1, minWidth: 0 }}
                 aria-live="polite"
               >
@@ -1021,7 +1021,7 @@ export function AppearancePage() {
                       borderColor: 'divider',
                     }}
                   >
-                    <Typography variant="caption" color="text.secondary" noWrap>
+                    <Typography variant="caption" color="textSecondary" noWrap>
                       {window.location.host}/menu/{restaurantId.slice(0, 8)}…
                     </Typography>
                   </Box>

@@ -102,7 +102,7 @@ export function AddCategoryDialog({
             <Typography variant="h6" component="div">
               {t('builder.newCategory')}
             </Typography>
-            <Typography variant="body2" color="text.secondary" noWrap>
+            <Typography variant="body2" color="textSecondary" noWrap>
               {t('addCategory.subtitle')}
             </Typography>
           </Box>
@@ -131,7 +131,7 @@ export function AddCategoryDialog({
         />
         {suggestions.length > 0 && (
           <>
-            <Typography variant="caption" color="text.secondary" component="p">
+            <Typography variant="caption" color="textSecondary" component="p">
               {t('addCategory.popular')}
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>

@@ -145,13 +145,13 @@ export function ChoiceChips({
           {label}
         </Typography>
         {value.length > 0 && (
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" color="textSecondary">
             {t('chips.selected', { count: value.length })}
           </Typography>
         )}
       </Stack>
       {hint && (
-        <Typography variant="caption" color="text.secondary" component="p">
+        <Typography variant="caption" color="textSecondary" component="p">
           {hint}
         </Typography>
       )}
@@ -247,7 +247,7 @@ export function ChoiceChips({
       {customSelected && !error && (
         <Typography
           variant="caption"
-          color="text.secondary"
+          color="textSecondary"
           component="p"
           sx={{ mt: 0.75 }}
         >

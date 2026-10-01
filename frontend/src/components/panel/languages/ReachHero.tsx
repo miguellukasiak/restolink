@@ -173,7 +173,7 @@ export function ReachHero({
           <Box>
             <Typography
               variant="overline"
-              color="text.secondary"
+              color="textSecondary"
               sx={{ letterSpacing: 1 }}
             >
               {t('reach.readBy')}
@@ -191,11 +191,11 @@ export function ReachHero({
               >
                 {people(total)}
               </Typography>
-              <Typography variant="h6" component="span" color="text.secondary">
+              <Typography variant="h6" component="span" color="textSecondary">
                 {t('reach.people')}
               </Typography>
             </Stack>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75 }}>
+            <Typography variant="body2" color="textSecondary" sx={{ mt: 0.75 }}>
               {t('reach.worldShare', {
                 percent: percent(total / WORLD_POPULATION),
                 inLanguages: t('reach.inLanguages', { count: languages.length }),
@@ -223,14 +223,14 @@ export function ReachHero({
                     people: people(previewGain),
                   })}
                 </Typography>
-                <Typography variant="caption" color="text.secondary" component="p">
+                <Typography variant="caption" color="textSecondary" component="p">
                   {previewMostlyRead
                     ? t('reach.previewSmall')
                     : t('reach.previewTotal', { total: people(total + previewGain) })}
                 </Typography>
               </>
             ) : (
-              <Typography variant="caption" color="text.secondary" component="p">
+              <Typography variant="caption" color="textSecondary" component="p">
                 {t('reach.hint')}
               </Typography>
             )}
@@ -314,7 +314,7 @@ export function ReachHero({
                       locale,
                     )}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary" component="p">
+                  <Typography variant="caption" color="textSecondary" component="p">
                     {t('reach.inhabitants', { people: people(hoveredCountry.pop) })}
                   </Typography>
                   <Typography variant="body2" sx={{ mt: 1 }}>
@@ -349,7 +349,7 @@ export function ReachHero({
                   ) : coverageStep(nowShare) < 3 ? (
                     <Typography
                       variant="caption"
-                      color="text.secondary"
+                      color="textSecondary"
                       component="p"
                       sx={{ mt: 1 }}
                     >
@@ -390,7 +390,7 @@ export function ReachHero({
             spacing={2}
             sx={{ mt: 1.5, flexWrap: 'wrap', alignItems: 'center' }}
           >
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" color="textSecondary">
               {t('reach.legendTitle')}
             </Typography>
             {LEGEND.map((step) => (
@@ -409,7 +409,7 @@ export function ReachHero({
                   }}
                   aria-hidden
                 />
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" color="textSecondary">
                   {t(`reach.legend.${step}`)}
                 </Typography>
               </Stack>

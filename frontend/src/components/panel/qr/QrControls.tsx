@@ -38,7 +38,7 @@ export function ControlGroup({
         {title}
       </Typography>
       {hint && (
-        <Typography variant="caption" color="text.secondary" component="p">
+        <Typography variant="caption" color="textSecondary" component="p">
           {hint}
         </Typography>
       )}

@@ -455,7 +455,7 @@ export function MenuItemEditorDialog({
           >
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography variant="subtitle2">{t('dishForm.available')}</Typography>
-              <Typography variant="caption" color="text.secondary" component="p">
+              <Typography variant="caption" color="textSecondary" component="p">
                 {field.value ? t('dishForm.availableOn') : t('dishForm.availableOff')}
               </Typography>
             </Box>
@@ -533,7 +533,7 @@ export function MenuItemEditorDialog({
                 ? t('dishForm.editTitle', { name: item.name })
                 : t('dishForm.newTitle')}
             </Typography>
-            <Typography variant="body2" color="text.secondary" noWrap>
+            <Typography variant="body2" color="textSecondary" noWrap>
               {selectedCategory
                 ? t('dishForm.inCategory', { name: selectedCategory.name })
                 : ' '}
@@ -577,7 +577,7 @@ export function MenuItemEditorDialog({
             </Stack>
             <Typography
               variant="caption"
-              color="text.secondary"
+              color="textSecondary"
               component="p"
               sx={{ mb: 2 }}
             >
@@ -615,7 +615,7 @@ export function MenuItemEditorDialog({
           <Box sx={{ flex: 1 }} />
           <Typography
             variant="caption"
-            color="text.secondary"
+            color="textSecondary"
             sx={{ display: { xs: 'none', lg: 'block' }, mr: 1 }}
           >
             {t('dishForm.shortcutSaves', { shortcut: SAVE_SHORTCUT })}

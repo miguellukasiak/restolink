@@ -52,7 +52,7 @@ export function AddCategoryCard({
           <Typography variant="subtitle1" component="h2" sx={{ fontWeight: 700 }}>
             {t('addCategory.title')}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="textSecondary">
             {suggestions.length > 0
               ? t('addCategory.pickOrName')
               : t('addCategory.nameNew')}

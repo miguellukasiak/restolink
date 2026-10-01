@@ -761,7 +761,7 @@ export function MenuBuilderPage() {
               <Typography variant="h4" component="h1">
                 {t('nav.builder')}
               </Typography>
-              <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
+              <Typography variant="body1" color="textSecondary" sx={{ mt: 0.5 }}>
                 {t('builder.subtitle')}
               </Typography>
             </Box>

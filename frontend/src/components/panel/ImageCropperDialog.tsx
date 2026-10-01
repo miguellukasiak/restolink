@@ -219,7 +219,7 @@ export function ImageCropperDialog({
             <Typography variant="h6" component="div">
               {t('crop.title')}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="textSecondary">
               {canShrink ? t('crop.subtitleShrink') : t('crop.subtitle')}
             </Typography>
           </Box>
@@ -375,7 +375,7 @@ export function ImageCropperDialog({
                 <Typography
                   variant="caption"
                   component="p"
-                  color="text.secondary"
+                  color="textSecondary"
                   sx={{ mt: 1 }}
                 >
                   {t('crop.bgHint')}

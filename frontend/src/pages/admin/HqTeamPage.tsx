@@ -144,7 +144,7 @@ export function HqTeamPage() {
       >
         <Stack spacing={0.5}>
           <Typography variant="h4">Zespół HQ</Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" color="textSecondary">
             Konta z dostępem do panelu administracyjnego platformy.
           </Typography>
         </Stack>
@@ -199,7 +199,7 @@ export function HqTeamPage() {
         />
       </Card>
 
-      <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mt: 2 }}>
+      <Typography variant="caption" color="textDisabled" sx={{ display: 'block', mt: 2 }}>
         Odebranie dostępu nie usuwa konta — dziennik zdarzeń musi nadal wskazywać
         na istniejącą osobę. Zmiana działa natychmiast, przy najbliższym żądaniu.
       </Typography>
