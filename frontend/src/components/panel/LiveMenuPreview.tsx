@@ -4,10 +4,11 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider, alpha } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
+import TouchAppRoundedIcon from '@mui/icons-material/TouchAppRounded';
 import type { MenuCategory, MenuNote, PublicMenuResponse } from '../../types';
 import { createRestaurantTheme } from '../public/RestaurantThemeProvider';
 import { PublicMenuView } from '../public/PublicMenuView';
@@ -16,6 +17,7 @@ import { PhoneFrame } from './PhoneFrame';
 import { EmptyMenuPreview } from './EmptyMenuPreview';
 import { GuestPreviewLanguage } from './GuestPreviewLanguage';
 import { usePanelT } from '../../i18n/panel';
+import { radii } from '../../theme';
 
 interface LiveMenuPreviewProps {
   restaurantId: string;
@@ -55,6 +57,7 @@ export function LiveMenuPreview({
 }: LiveMenuPreviewProps) {
   const { t } = usePanelT();
   const theme = publicMenu?.restaurant.theme;
+  const hasDishes = categories.some((category) => category.items.length > 0);
   const menuTheme = useMemo(
     () =>
       createRestaurantTheme({
@@ -152,9 +155,32 @@ export function LiveMenuPreview({
         )}
       </PhoneFrame>
 
-      <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center' }}>
-        {t('preview.clickToEdit')}
-      </Typography>
+      {/* A hint, not a footnote: it says what the phone can do, so it reads
+          like the header above rather than small print in the phone's
+          shadow — and only once there is a dish to click. */}
+      {hasDishes && (
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            mt: 1,
+            px: 1.75,
+            py: 0.75,
+            maxWidth: phone.width,
+            alignItems: 'center',
+            borderRadius: radii.pill,
+            bgcolor: (t) => alpha(t.palette.primary.main, 0.07),
+            color: 'text.secondary',
+          }}
+        >
+          <TouchAppRoundedIcon
+            sx={{ fontSize: 18, color: 'primary.main', flexShrink: 0 }}
+          />
+          <Typography variant="body2" sx={{ fontWeight: 500, lineHeight: 1.35 }}>
+            {t('preview.clickToEdit')}
+          </Typography>
+        </Stack>
+      )}
     </Stack>
   );
 }
