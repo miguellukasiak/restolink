@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import Cropper from 'react-easy-crop';
 import type { Area, Point } from 'react-easy-crop';
 import Dialog from '@mui/material/Dialog';
@@ -20,7 +20,6 @@ import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import FitScreenRoundedIcon from '@mui/icons-material/FitScreenRounded';
 import CropFreeRoundedIcon from '@mui/icons-material/CropFreeRounded';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
-import ColorizeRoundedIcon from '@mui/icons-material/ColorizeRounded';
 import { getCroppedImg, blobToDataUrl } from '../../utils/getCroppedImg';
 import {
   analyzePhoto,
@@ -33,6 +32,7 @@ import { radii } from '../../theme';
 import { useSnackbar } from '../feedback/SnackbarProvider';
 import { TonalIcon } from './TonalIcon';
 import { usePanelT } from '../../i18n/panel';
+import { CustomColorSwatch } from './ColorPick';
 
 interface ImageCropperDialogProps {
   open: boolean;
@@ -128,7 +128,6 @@ export function ImageCropperDialog({
   const [analysis, setAnalysis] = useState<PhotoAnalysis | null>(null);
   const [choice, setChoice] = useState<FillChoice>('auto');
   const [custom, setCustom] = useState<string | null>(null);
-  const colorInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -307,68 +306,70 @@ export function ImageCropperDialog({
               >
                 {t('crop.background')}
               </Typography>
-              <Stack
-                direction="row"
-                role="radiogroup"
-                aria-label={t('crop.background')}
-                useFlexGap
-                spacing={1}
-                sx={{ flexWrap: 'wrap', alignItems: 'center' }}
-              >
-                <Swatch
-                  label={analysis?.uniform ? t('crop.bgAutoColor') : t('crop.bgAutoBlur')}
-                  selected={choice === 'auto'}
-                  onClick={() => setChoice('auto')}
-                  background="transparent"
-                >
-                  <AutoAwesomeRoundedIcon sx={{ fontSize: 18, color: 'primary.main' }} />
-                </Swatch>
-                {analysis && (
-                  <Swatch
-                    label={t('crop.bgBlur')}
-                    selected={choice === 'blur'}
-                    onClick={() => setChoice('blur')}
-                    background={`center / cover no-repeat url("${analysis.blurred}")`}
-                  />
-                )}
-                {edgeSwatches.map((color) => (
-                  <Swatch
-                    key={color}
-                    label={t('crop.bgEdge')}
-                    selected={choice === color}
-                    onClick={() => setChoice(color)}
-                    background={color}
-                  />
-                ))}
-                {extras.map(({ color, label }) => (
-                  <Swatch
-                    key={color}
-                    label={label}
-                    selected={choice === color}
-                    onClick={() => setChoice(color)}
-                    background={color}
-                  />
-                ))}
-                <Swatch
-                  label={t('crop.bgCustom')}
-                  selected={custom !== null && choice === custom}
-                  onClick={() => colorInput.current?.click()}
-                  background={custom ?? 'transparent'}
-                >
-                  {custom === null && <ColorizeRoundedIcon sx={{ fontSize: 17 }} />}
-                </Swatch>
-                <input
-                  ref={colorInput}
-                  type="color"
-                  tabIndex={-1}
-                  aria-hidden
-                  value={custom ?? '#ffffff'}
-                  onChange={(event) => {
-                    setCustom(event.target.value);
-                    setChoice(event.target.value);
+              <Stack direction="row" spacing={1} sx={{ alignItems: 'flex-start' }}>
+                <CustomColorSwatch
+                  value={custom ?? '#FFFFFF'}
+                  onChange={(color) => {
+                    setCustom(color);
+                    setChoice(color);
                   }}
-                  style={{ position: 'absolute', opacity: 0, width: 0, height: 0 }}
+                  label={t('crop.background')}
                 />
+                <Stack
+                  direction="row"
+                  role="radiogroup"
+                  aria-label={t('crop.background')}
+                  useFlexGap
+                  spacing={1}
+                  sx={{ flexWrap: 'wrap', alignItems: 'center', flex: 1, minWidth: 0 }}
+                >
+                  {custom !== null && (
+                    <Swatch
+                      label={t('color.yours', { hex: custom })}
+                      selected={choice === custom}
+                      onClick={() => setChoice(custom)}
+                      background={custom}
+                    />
+                  )}
+                  <Swatch
+                    label={
+                      analysis?.uniform ? t('crop.bgAutoColor') : t('crop.bgAutoBlur')
+                    }
+                    selected={choice === 'auto'}
+                    onClick={() => setChoice('auto')}
+                    background="transparent"
+                  >
+                    <AutoAwesomeRoundedIcon
+                      sx={{ fontSize: 18, color: 'primary.main' }}
+                    />
+                  </Swatch>
+                  {analysis && (
+                    <Swatch
+                      label={t('crop.bgBlur')}
+                      selected={choice === 'blur'}
+                      onClick={() => setChoice('blur')}
+                      background={`center / cover no-repeat url("${analysis.blurred}")`}
+                    />
+                  )}
+                  {edgeSwatches.map((color) => (
+                    <Swatch
+                      key={color}
+                      label={t('crop.bgEdge')}
+                      selected={choice === color}
+                      onClick={() => setChoice(color)}
+                      background={color}
+                    />
+                  ))}
+                  {extras.map(({ color, label }) => (
+                    <Swatch
+                      key={color}
+                      label={label}
+                      selected={choice === color}
+                      onClick={() => setChoice(color)}
+                      background={color}
+                    />
+                  ))}
+                </Stack>
               </Stack>
               {!shrunk && (
                 <Typography

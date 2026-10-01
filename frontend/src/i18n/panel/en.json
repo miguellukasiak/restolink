@@ -129,9 +129,6 @@
     "hexError": "Enter a colour as #RRGGBB",
     "primary": "Main colour",
     "background": "Background colour",
-    "pickPalette": "Pick from a palette",
-    "pickPaletteAria": "{{label}} — pick from a palette",
-    "paletteAria": "{{label}} — colour palette",
     "typeface": "Typeface",
     "fontSample": "Tomato soup",
     "pattern": {
@@ -519,7 +516,6 @@
     "bgEdge": "A colour from the photo’s edges",
     "bgWhite": "White",
     "bgMenu": "Your menu’s background",
-    "bgCustom": "Your own colour",
     "bgHint": "Shrink the photo and this background fills the space around it.",
     "processing": "Processing…",
     "apply": "Apply"
@@ -591,8 +587,6 @@
       "lines": "Lines",
       "elegant": "Elegant"
     },
-    "customColour": "Custom colour",
-    "anyColour": "pick any colour",
     "checking": "Checking readability…",
     "verdict": {
       "great": "Excellent readability",
@@ -867,5 +861,12 @@
     "later": "Later",
     "save": "Save translations",
     "saved": "Translations saved — guests already see them."
+  },
+  "color": {
+    "pickAny": "Pick any colour",
+    "pickAnyFor": "{{label}}: pick any colour",
+    "eyedropper": "Take a colour from the screen",
+    "eyedropperFor": "{{label}}: take a colour from the screen",
+    "yours": "Your colour {{hex}}"
   }
 }

@@ -1,4 +1,3 @@
-import { useRef } from 'react';
 import type { ReactNode } from 'react';
 import Box from '@mui/material/Box';
 import ButtonBase from '@mui/material/ButtonBase';
@@ -7,7 +6,6 @@ import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import { alpha } from '@mui/material/styles';
-import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import ErrorRoundedIcon from '@mui/icons-material/ErrorRounded';
@@ -21,6 +19,8 @@ import {
 } from './qrDesign';
 import { usePanelT } from '../../../i18n/panel';
 import { SvgView } from './QrStage';
+import { CustomColorSwatch, OwnColorSwatch } from '../ColorPick';
+import { useOwnColor } from '../../../hooks/useOwnColor';
 
 /** A titled group of controls in the design panel. */
 export function ControlGroup({
@@ -138,7 +138,10 @@ export function ShapeSample({ svg }: { svg: string }) {
   return <SvgView svg={svg} sx={{ width: 26, height: 26 }} />;
 }
 
-/** One-tap colours, plus a native picker for anything else. */
+/**
+ * One-tap colours, led by the rainbow circle for any other; a colour picked
+ * there stays in the row as the owner's own (`ColorPick.tsx`).
+ */
 export function SwatchRow({
   swatches,
   value,
@@ -150,10 +153,9 @@ export function SwatchRow({
   onChange: (color: string) => void;
   label: string;
 }) {
-  const { t } = usePanelT();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const known = swatches.some(
-    (swatch) => swatch.color.toLowerCase() === value.toLowerCase(),
+  const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
+  const [own, remember] = useOwnColor(value, (color) =>
+    swatches.some((swatch) => same(swatch.color, color)),
   );
   return (
     <Stack
@@ -162,8 +164,26 @@ export function SwatchRow({
       spacing={1}
       sx={{ flexWrap: 'wrap', alignItems: 'center' }}
     >
+      <CustomColorSwatch
+        value={value}
+        onChange={(color) => {
+          remember(color);
+          onChange(color);
+        }}
+        label={label}
+      />
+      {own && (
+        <OwnColorSwatch
+          color={own}
+          selected={same(value, own)}
+          onSelect={() => onChange(own)}
+          label={label}
+        >
+          {same(value, own) && <CheckRoundedIcon sx={{ fontSize: 18 }} />}
+        </OwnColorSwatch>
+      )}
       {swatches.map((swatch) => {
-        const selected = swatch.color.toLowerCase() === value.toLowerCase();
+        const selected = same(swatch.color, value);
         return (
           <Tooltip key={swatch.label} title={swatch.label} arrow>
             <ButtonBase
@@ -187,46 +207,6 @@ export function SwatchRow({
           </Tooltip>
         );
       })}
-      <Tooltip title={t('qr.customColour')} arrow>
-        <ButtonBase
-          onClick={() => inputRef.current?.click()}
-          aria-label={`${label}: ${t('qr.customColour')}`}
-          aria-pressed={!known}
-          sx={{
-            width: 34,
-            height: 34,
-            borderRadius: '50%',
-            border: known ? '1.5px dashed' : 'none',
-            borderColor: 'text.disabled',
-            bgcolor: known ? 'transparent' : value,
-            color: known ? 'text.secondary' : '#FFFFFF',
-            boxShadow: (t) =>
-              known
-                ? 'none'
-                : `0 0 0 2px ${t.palette.background.paper}, 0 0 0 4px ${t.palette.primary.main}`,
-          }}
-        >
-          {known ? (
-            <AddRoundedIcon fontSize="small" />
-          ) : (
-            <CheckRoundedIcon sx={{ fontSize: 18 }} />
-          )}
-        </ButtonBase>
-      </Tooltip>
-      <input
-        ref={inputRef}
-        type="color"
-        value={value}
-        onChange={(event) => onChange(event.target.value.toUpperCase())}
-        aria-label={`${label}: ${t('qr.anyColour')}`}
-        style={{
-          position: 'absolute',
-          width: 1,
-          height: 1,
-          opacity: 0,
-          pointerEvents: 'none',
-        }}
-      />
     </Stack>
   );
 }

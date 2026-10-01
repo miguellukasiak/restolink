@@ -807,6 +807,18 @@ In the print document, style `body>svg`, never `svg` — the codes are nested
   outside the panels): anything pinned to the bottom of the screen — the
   snackbar, Wygląd menu's save bar, a page's end — sits at
   `calc(var(--bottom-nav, 0px) + …)`, or it ends up under the bar.
+- **Colour pickers speak one language** (`components/panel/ColorPick.tsx`),
+  the one every Paint user knows: a row of swatches opens with a rainbow
+  circle (with a "+" badge) for any colour, and a colour the owner picks
+  there — or types as hex, or takes with the eyedropper — joins the row as
+  "Twój kolor", one tap away after trying a ready one (`useOwnColor`; a
+  theme's colour shows there while it is current but is not kept). The
+  square before a hex field opens the same picker; the eyedropper is the
+  browser's real one (`EyeDropper`, Chrome/Edge) and absent elsewhere. The
+  native `<input type="color">` lies invisibly over the swatch, so the tap
+  lands on it — iOS ignores a scripted click on a hidden one — and the
+  browser anchors its popup there. Used by Wygląd menu, the QR studio and
+  the photo cropper's background; a new colour setting uses these too.
 - Route guards (`RequireAuth.tsx`) are a **convenience, not the boundary** —
   every protected endpoint is enforced server-side.
 - **A page that holds unsaved edits mounts `UnsavedChangesGuard`** (Wygląd

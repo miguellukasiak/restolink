@@ -22,7 +22,6 @@ import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import SmartphoneRoundedIcon from '@mui/icons-material/SmartphoneRounded';
 import DesktopWindowsRoundedIcon from '@mui/icons-material/DesktopWindowsRounded';
 import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
-import ColorizeRoundedIcon from '@mui/icons-material/ColorizeRounded';
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import CasinoRoundedIcon from '@mui/icons-material/CasinoRounded';
 import BlockRoundedIcon from '@mui/icons-material/BlockRounded';
@@ -50,6 +49,13 @@ import { ThemeThumb, type ThumbDish } from '../../components/panel/ThemeThumb';
 import { useMeasuredHeight } from '../../hooks/useMeasuredHeight';
 import { useFittedPhone } from '../../hooks/useFittedPhone';
 import { GuestPreviewLanguage } from '../../components/panel/GuestPreviewLanguage';
+import {
+  ColorSquare,
+  CustomColorSwatch,
+  EyeDropperButton,
+  OwnColorSwatch,
+} from '../../components/panel/ColorPick';
+import { useOwnColor } from '../../hooks/useOwnColor';
 import { usePanelT } from '../../i18n/panel';
 
 const HEX_PATTERN = /^#[0-9a-fA-F]{6}$/;
@@ -203,16 +209,42 @@ interface ColorFieldProps {
   error?: string;
 }
 
-/** Preset swatches + hex input + native colour picker for one colour setting. */
+/**
+ * One colour setting: the rainbow circle for any colour, the owner's own
+ * colour once there is one, the ready swatches, and the hex field — whose
+ * square opens the same picker, and whose eyedropper (where the browser has
+ * one) takes a colour from the screen, the logo above for instance.
+ */
 function ColorField({ label, value, onChange, presets, error }: ColorFieldProps) {
-  const { t } = usePanelT();
-  const nativeInputRef = useRef<HTMLInputElement>(null);
+  const [own, remember] = useOwnColor(value, (color) =>
+    presets.some((preset) => sameColor(preset, color)),
+  );
+  // What the owner picks themselves stays in the row as their own colour.
+  const pick = (color: string) => {
+    remember(color);
+    onChange(color);
+  };
   return (
     <Box>
       <Typography variant="subtitle2" component="h3" sx={{ mb: 1 }}>
         {label}
       </Typography>
-      <Stack direction="row" useFlexGap spacing={1} sx={{ flexWrap: 'wrap', mb: 1.5 }}>
+      <Stack
+        direction="row"
+        useFlexGap
+        spacing={1}
+        sx={{ flexWrap: 'wrap', alignItems: 'center', mb: 1.5 }}
+      >
+        <CustomColorSwatch value={value} onChange={pick} label={label} size={30} />
+        {own && (
+          <OwnColorSwatch
+            color={own}
+            selected={sameColor(value, own)}
+            onSelect={() => onChange(own)}
+            label={label}
+            size={30}
+          />
+        )}
         {presets.map((preset) => {
           const selected = sameColor(value, preset);
           return (
@@ -239,52 +271,15 @@ function ColorField({ label, value, onChange, presets, error }: ColorFieldProps)
         size="small"
         fullWidth
         value={value}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={(event) => pick(event.target.value)}
         error={Boolean(error)}
         helperText={error ?? ' '}
         slotProps={{
           htmlInput: { 'aria-label': `${label} (HEX)` },
           input: {
-            startAdornment: (
-              <Box
-                aria-hidden
-                sx={{
-                  width: 20,
-                  height: 20,
-                  mr: 1,
-                  borderRadius: '6px',
-                  bgcolor: HEX_PATTERN.test(value) ? value : 'divider',
-                  border: '1px solid',
-                  borderColor: 'divider',
-                }}
-              />
-            ),
-            endAdornment: (
-              <Tooltip title={t('appearance.pickPalette')} arrow>
-                <IconButton
-                  size="small"
-                  aria-label={t('appearance.pickPaletteAria', { label })}
-                  onClick={() => nativeInputRef.current?.click()}
-                >
-                  <ColorizeRoundedIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            ),
+            startAdornment: <ColorSquare value={value} onChange={pick} label={label} />,
+            endAdornment: <EyeDropperButton onPick={pick} label={label} />,
           },
-        }}
-      />
-      <input
-        ref={nativeInputRef}
-        type="color"
-        value={HEX_PATTERN.test(value) ? value : '#000000'}
-        onChange={(event) => onChange(event.target.value.toUpperCase())}
-        aria-label={t('appearance.paletteAria', { label })}
-        style={{
-          position: 'absolute',
-          width: 1,
-          height: 1,
-          opacity: 0,
-          pointerEvents: 'none',
         }}
       />
     </Box>

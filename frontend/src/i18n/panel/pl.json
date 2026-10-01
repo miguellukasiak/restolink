@@ -131,9 +131,6 @@
     "hexError": "Podaj kolor w formacie #RRGGBB",
     "primary": "Kolor główny",
     "background": "Kolor tła",
-    "pickPalette": "Wybierz z palety",
-    "pickPaletteAria": "{{label}} — wybierz z palety",
-    "paletteAria": "{{label}} — paleta kolorów",
     "typeface": "Czcionka",
     "fontSample": "Pierogi z mięsem",
     "pattern": {
@@ -533,7 +530,6 @@
     "bgEdge": "Kolor z krawędzi zdjęcia",
     "bgWhite": "Biały",
     "bgMenu": "Tło Twojego menu",
-    "bgCustom": "Własny kolor",
     "bgHint": "Pomniejsz zdjęcie, a wolne miejsce wokół wypełni to tło.",
     "processing": "Przetwarzanie…",
     "apply": "Zastosuj"
@@ -613,8 +609,6 @@
       "lines": "Linie",
       "elegant": "Elegancki"
     },
-    "customColour": "Własny kolor",
-    "anyColour": "wybierz dowolny kolor",
     "checking": "Sprawdzam czytelność…",
     "verdict": {
       "great": "Świetna czytelność",
@@ -895,5 +889,12 @@
     "later": "Później",
     "save": "Zapisz tłumaczenia",
     "saved": "Tłumaczenia zapisane — goście już je widzą."
+  },
+  "color": {
+    "pickAny": "Wybierz dowolny kolor",
+    "pickAnyFor": "{{label}}: wybierz dowolny kolor",
+    "eyedropper": "Pobierz kolor z ekranu",
+    "eyedropperFor": "{{label}}: pobierz kolor z ekranu",
+    "yours": "Twój kolor {{hex}}"
   }
 }
