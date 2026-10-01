@@ -56,7 +56,7 @@ public_router = APIRouter(
 
 def _machine_language(code: str) -> str:
     """A panel language DeepL makes — not English, not a hand-written one."""
-    if code not in PANEL_LANGUAGES or code in BUILT_IN_PANEL_LANGUAGES:
+    if not is_machine_language(code):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Tego języka panelu nie tłumaczy się automatycznie.",
@@ -104,15 +104,13 @@ async def translate_panel_strings(
     return InterfaceTranslations(translations=await _translate(payload.texts, language))
 
 
-@admin_router.put("/{code}", response_model=PanelLocaleStatus)
-async def save_panel_locale(
-    code: str,
-    payload: PanelLocaleUpload,
-    db: AsyncSession = Depends(get_db),
-) -> PanelLocaleStatus:
-    """Stores the panel's strings, and makes the server's side of the
-    language: every message and email line not yet translated."""
-    language = _machine_language(code)
+async def ensure_server_texts(db: AsyncSession, language: str) -> PanelLocale:
+    """The server's side of a DeepL language — every message and email line —
+    translating whatever is not yet; creates the row if there is none.
+
+    Called on every save of the panel's strings, and by HQ's restaurant
+    creation before the welcome email goes out, so the first restaurant given
+    a new language is welcomed in it rather than in English."""
     row = await db.get(PanelLocale, language)
 
     stored_messages = (row.messages if row else None) or {}
@@ -138,24 +136,47 @@ async def save_panel_locale(
             if key not in emails
         ]
     )
+    if not todo and row is not None:
+        return row
     if todo:
         translated = await _translate([text for _, _, text in todo], language)
         for (kind, key, _), text in zip(todo, translated, strict=False):
             {"exact": exact, "patterns": patterns, "emails": emails}[kind][key] = text
 
-    now = datetime.now(timezone.utc)
     if row is None:
         row = PanelLocale(code=language, strings={}, sources={}, messages={}, emails={})
         db.add(row)
     # New dicts, not edits in place: JSONB columns track assignment.
-    row.strings = {**(row.strings or {}), **payload.strings}
-    row.sources = {**(row.sources or {}), **payload.sources}
     row.messages = {"exact": exact, "patterns": patterns}
     row.emails = emails
-    row.updated_at = now
+    row.updated_at = datetime.now(timezone.utc)
     await db.flush()
     remember(language, row.messages, row.emails)
-    return PanelLocaleStatus(code=language, strings=len(row.strings), updated_at=now)
+    return row
+
+
+def is_machine_language(code: str | None) -> bool:
+    """True for a panel language DeepL makes."""
+    return (
+        bool(code) and code in PANEL_LANGUAGES and code not in BUILT_IN_PANEL_LANGUAGES
+    )
+
+
+@admin_router.put("/{code}", response_model=PanelLocaleStatus)
+async def save_panel_locale(
+    code: str,
+    payload: PanelLocaleUpload,
+    db: AsyncSession = Depends(get_db),
+) -> PanelLocaleStatus:
+    """Stores the panel's strings, and makes the server's side of the
+    language: every message and email line not yet translated."""
+    row = await ensure_server_texts(db, _machine_language(code))
+    now = datetime.now(timezone.utc)
+    row.strings = {**(row.strings or {}), **payload.strings}
+    row.sources = {**(row.sources or {}), **payload.sources}
+    row.updated_at = now
+    await db.flush()
+    return PanelLocaleStatus(code=row.code, strings=len(row.strings), updated_at=now)
 
 
 @public_router.get("/{code}", response_model=PanelLocaleResponse)

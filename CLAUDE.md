@@ -20,8 +20,9 @@ dev-server entry the Browser pane uses.
 
 > This file is written in English to match every docstring and comment in the
 > codebase. The HQ panel and the guest menu's base content are **Polish**; the
-> owner panel is **English by default** with Polish (and later others) as a
-> translation — see "Owner panel language" in §9. API messages are written in
+> owner panel is **English by default**, with Polish written by hand and any
+> other catalogue language translated by DeepL — see "Owner panel language"
+> in §9. API messages are written in
 > Polish where they are raised and swapped to English per request.
 
 ---
@@ -91,6 +92,7 @@ baseline revision against a production database whose schema it never authored.
 | `012_add_panel_language.sql`      | `restaurant.panel_language` (existing rows get `pl`) | **required** |
 | `013_add_menu_notes.sql`          | `menu_note`                                         | optional (table only) |
 | `014_add_menu_note_style.sql`     | `menu_note.style` (JSONB, existing rows get `{}`)   | **required** |
+| `015_add_panel_locales.sql`       | `panel_locale` (DeepL-made panel languages)         | optional (table only) |
 
 ### 2.2 Configuration comes only from the environment
 
@@ -431,41 +433,76 @@ original.
 
 **Owner panel language.** Every owner panel is **English**. HQ may give a
 restaurant one more language (`restaurant.panel_language`, set in the HQ
-create/edit forms, "Dodatkowy język panelu"); the panel's app bar then shows a
-switch between the two, and the choice is remembered per device
-(`restolink.panel.lang`). NULL means English only; migration 012 gave every
-existing restaurant `pl`. The panel speaks exactly the languages in
-`PANEL_LANGUAGES` — `backend/app/panel_language.py` and `src/i18n/panel.ts`
-must list the same codes. Pieces:
+create/edit forms, "Dodatkowy język panelu" — a searchable list of every
+choice, each marked hand-written / ready / "DeepL przetłumaczy po zapisie");
+the panel's app bar then shows a switch between the two, and the choice is
+remembered per device (`restolink.panel.lang`). NULL means English only;
+migration 012 gave every existing restaurant `pl`. `PANEL_LANGUAGES` —
+`backend/app/panel_language.py` and `src/i18n/panel.ts`, kept equal by a test
+on each side — is English and Polish, **written by hand**, plus every
+catalogue language (`MENU_LANGUAGES`) except Arabic and Hebrew, which the
+panel's left-to-right layout cannot carry yet; those are **translated by
+DeepL**. Pieces:
 
-- **Strings** live in `src/i18n/panel/<code>.json`, read through `usePanelT()`
-  (or `tp()` outside React). It is a **second i18next instance**, deliberately
-  not registered with react-i18next, so every `useTranslation()` in the guest
-  components still means the guest menu's instance. Guest components shown
-  inside the panel (phone previews, the dish preview) are wrapped in
-  `GuestPreviewLanguage`, which gives them a private instance in the panel's
-  language. Plurals use i18next's `_one/_few/_many/_other` keys; language and
-  country names come from `Intl.DisplayNames`, never a hand-kept list.
-- **Before sign-in** the auth screens offer every panel language; links in
-  emails carry `&lang=<code>` so the page continues in the email's language.
-  `/hq-access` has no switch — HQ is Polish only.
+- **Strings** live in `src/i18n/panel/<code>.json` for `en` and `pl`, read
+  through `usePanelT()` (or `tp()` outside React). It is a **second i18next
+  instance**, deliberately not registered with react-i18next, so every
+  `useTranslation()` in the guest components still means the guest menu's
+  instance. Guest components shown inside the panel (phone previews, the dish
+  preview) are wrapped in `GuestPreviewLanguage`, which gives them a private
+  instance in the panel's language. Plurals use i18next's
+  `_one/_few/_many/_other` keys; language and country names come from
+  `Intl.DisplayNames`, never a hand-kept list.
+- **DeepL languages** are one `panel_locale` row each (`models.PanelLocale`,
+  migration 015, optional): the panel's strings with the English each came
+  from, the server's messages and the email lines. Made **once, from HQ's
+  browser**, right after the save that first chooses the language
+  (`PanelTranslationDialog` → `services/panelTranslation.ts`), because the
+  browser holds the panel's English: it sends batches of 50 to
+  `POST /api/v1/admin/panel-locales/{code}/translate` (HQ only — it spends the
+  shared DeepL quota) and stores each batch with `PUT …/{code}`, so closing
+  the dialog loses at most one batch; saving the restaurant again — "Zapisz"
+  stays enabled while its language is incomplete — sends only what is
+  missing, and so does a later deploy's new strings (a key is redone when its
+  stored English differs). Plurals: for every form the target language needs
+  (`Intl.PluralRules`), DeepL gets the English with a number from that form
+  ("2 dishes" for Ukrainian `few`) and the number is turned back into
+  `{{count}}`; if it does not come back as written, the template is sent with
+  `{{count}}` itself. Placeholders are fenced from DeepL as `<x>` ignore-tags
+  (`deepl_client.protect`). The panel fetches a finished language from the
+  public `GET /api/v1/public/panel-locales/{code}` (sign-in screens need it
+  too) and reads **English for any key it lacks**, so a half-made language is
+  English, never broken. A language counts as ready when its row has as many
+  strings as the panel needs (`panelLanguageState`).
+- **Before sign-in** the auth screens offer English, Polish and whatever
+  language is already chosen or carried by the link; links in emails carry
+  `&lang=<code>` so the page continues in the email's language. `/hq-access`
+  has no switch — HQ is Polish only.
 - **Server messages** are raised in Polish and localised on the way out
   (`app/messages.py`, applied by the exception handlers in `main.py`) from the
   request's `Accept-Language`, which `services/api.ts` sets: `pl` for HQ
   routes, the panel language for owner routes, nothing for guest routes.
-  `tests/test_panel_language.py` fails if a raised message has no English.
-- **Emails** (welcome, reset) go out in `panel_language`, else English
-  (`EMAIL_COPY` in `email_service.py`).
+  `tests/test_panel_language.py` fails if a raised message has no English. A
+  DeepL language uses DeepL's version of that English, kept in memory
+  (`panel_texts.py`, loaded at start-up), and falls back to **English, never
+  Polish** — an owner who picked Turkish reads English far more likely.
+- **Emails** (welcome, reset) go out in `panel_language`: hand-written
+  `EMAIL_COPY` for en/pl, DeepL's lines for the rest (any line DeepL mangled —
+  a lost `{field}` — falls back to its English). Creating a restaurant with a
+  language nobody has made yet translates the messages and emails **on the
+  server first** (`ensure_server_texts`), so the welcome email is already in
+  it; without DeepL it goes out in English and the restaurant is still made.
 - What stays Polish whatever the panel's language, because it is the **menu's**
   content, not the panel's: category suggestions and the starter layout, the
   words printed on QR templates, the stored allergen/tag values (the panel
   shows built-ins translated, `usePanelLabels`).
 
-Adding a language (Czech, say): its `src/i18n/panel/<code>.json` with every
-key, the code in both `PANEL_LANGUAGES`, its `EMAIL_COPY` block, and — if the
-panel shows the guest preview in it — nothing more, the guest locales exist
-already. `src/i18n/panel.test.ts` checks key parity, plural forms, placeholders
-and that every key the code asks for exists.
+A DeepL language needs nothing from a developer. Writing one **by hand**
+instead (better than DeepL, say for a large market): its
+`src/i18n/panel/<code>.json` with every key, the code in both
+`BUILT_IN_PANEL_LANGUAGES`, and its `EMAIL_COPY` block.
+`src/i18n/panel.test.ts` checks key parity, plural forms, placeholders and
+that every key the code asks for exists.
 
 **Menu languages ("Języki", `/panel/:id/dictionary`).** A catalogue of 34
 languages, `MENU_LANGUAGES` in `backend/app/menu_languages.py` — mirrored by
@@ -810,7 +847,7 @@ Each of these cost real debugging time in this repo. They are not hypothetical.
 | `STRIPE_API_KEY`, `STRIPE_PRICE_ID` | checkout | 503 from the checkout endpoint |
 | `STRIPE_WEBHOOK_SECRET` | webhook | **500, refuses to act** — never skips verification |
 | `GOOGLE_MAPS_API_KEY` | reviews | 503 naming the variable |
-| `DEEPL_API_KEY` | dictionary drafts | 500 naming the variable; manual entry still works |
+| `DEEPL_API_KEY` | dictionary drafts; making a new owner-panel language | 500 naming the variable; manual entry still works. HQ's panel translation fails with that message (the restaurant is still saved, its panel and emails English) |
 | `VITE_API_URL` | frontend build | defaults to `http://localhost:8000` |
 | `VITE_API_URL` | landing-page build | **build fails** — a form posting to localhost would lose every lead. Set it in the `restolink-landing` Vercel project (Production and Preview) to `https://restolink.onrender.com` — there is no `restolink-backend.onrender.com`, and Render's 404 for an unknown host carries no CORS headers, so a wrong URL surfaces in the browser as a CORS error. `landing-page/.env.example` |
 
@@ -865,12 +902,15 @@ Deployment prerequisites, carried across several sessions:
       Applied to production (confirmed by the owner, 2026-09-29).
 - [x] **Migration `014`** (`menu_note.style`) — required column.
       Applied to production (confirmed by the owner, 2026-09-30).
-- [ ] `007`, `008` and `013` are table-only and optional (`create_all` covers
-      them).
+- [ ] `007`, `008`, `013` and `015` are table-only and optional (`create_all`
+      covers them).
 - [ ] **DeepL quota is shared by every restaurant.** Drafting a whole menu into
       one language costs its character count; with 34 languages on offer, a
       free-tier key (500k characters/month) can run dry. Watch usage; the
-      endpoint already answers an exhausted quota with a clear message.
+      endpoint already answers an exhausted quota with a clear message. A new
+      **panel** language costs about 22k characters once (18.5k of panel
+      strings, 3.8k of messages and emails), then only what later deploys add.
+      `DEEPL_API_KEY` must be set on Render for HQ to offer one.
 - [ ] **Bootstrap the first HQ account** (`scripts/promote_admin.py`, or the
       equivalent SQL insert). Until it exists nobody can reach `/hq-access`.
 - [ ] **Remove `SUPERADMIN_PASSWORD`** from the Render environment once a real
@@ -906,6 +946,10 @@ Known product gaps, not bugs:
   and deliberately names no number. The catalogue is 34 languages
   (`menu_languages.py`), each with a hand-written guest interface; do not "fix"
   the landing copy back to a count.
+- A DeepL panel language is DeepL's wording, unreviewed. There is no screen to
+  correct a string; a bad one is fixed by hand-writing the language (§9) or
+  editing its `panel_locale` row. Arabic and Hebrew are not offered until the
+  panel can mirror its layout.
 - A restaurant outside Poland gets its panel in its language, but the **menu**
   is still Polish-based: the base language is `pl`, prices are in zł, the
   starter categories and printed QR words are Polish, Google reviews are

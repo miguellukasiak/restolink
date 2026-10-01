@@ -3,8 +3,8 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Box from '@mui/material/Box';
 import { alpha } from '@mui/material/styles';
 import {
-  PANEL_LANGUAGE_LABELS,
   isPanelLanguage,
+  panelLanguageLabel,
   setPanelLanguage,
   usePanelT,
   type PanelLanguage,
@@ -75,7 +75,7 @@ export function PanelLanguageSwitch({
       {languages.map((code) => (
         <ToggleButton key={code} value={code} lang={code}>
           <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
-            {PANEL_LANGUAGE_LABELS[code]}
+            {panelLanguageLabel(code)}
           </Box>
           <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>
             {code.toUpperCase()}

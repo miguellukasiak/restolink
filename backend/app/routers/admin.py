@@ -14,6 +14,7 @@ from .. import audit
 from ..database import get_db
 from ..email_service import EmailSendError, activation_url, send_welcome
 from ..dependencies import get_current_superadmin
+from .panel_locales import ensure_server_texts, is_machine_language
 from ..models import (
     AdminUser,
     AuditLog,
@@ -151,6 +152,25 @@ async def _issue_activation_grant(
     return raw_token, expires_at
 
 
+async def _prepare_email_language(db: AsyncSession, language: str | None) -> None:
+    """Makes sure a DeepL panel language has its emails before one is sent.
+
+    The panel's own strings are translated afterwards, from HQ's browser; the
+    emails cannot wait for that. If DeepL is unset or refuses, the email goes
+    out in English — never a reason to fail creating the restaurant."""
+    if not is_machine_language(language):
+        return
+    try:
+        await ensure_server_texts(db, language)
+    except HTTPException as exc:
+        logger.warning(
+            "Panel language %s could not be prepared (%s); the email goes out "
+            "in English.",
+            language,
+            exc.detail,
+        )
+
+
 @router.post("/restaurants", status_code=201, response_model=RestaurantListItem)
 async def create_restaurant(
     payload: RestaurantCreate,
@@ -187,6 +207,7 @@ async def create_restaurant(
     # failing the request would leave the operator retyping the form instead.
     raw_token, _ = await _issue_activation_grant(db, restaurant.id)
     await db.flush()
+    await _prepare_email_language(db, restaurant.panel_language)
     try:
         await send_welcome(
             to_email=restaurant.contact_email,
@@ -563,6 +584,7 @@ async def send_activation_link(
         target_entity=f"{restaurant.name} ({restaurant.contact_email})",
     )
     await db.flush()
+    await _prepare_email_language(db, restaurant.panel_language)
 
     try:
         await send_welcome(

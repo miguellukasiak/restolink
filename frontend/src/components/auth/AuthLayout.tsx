@@ -7,7 +7,12 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Wordmark } from '../brand/Wordmark';
 import { PanelLanguageSwitch } from '../panel/PanelLanguageSwitch';
-import { PANEL_LANGUAGES, isPanelLanguage, setPanelLanguage } from '../../i18n/panel';
+import {
+  BUILT_IN_PANEL_LANGUAGES,
+  isPanelLanguage,
+  setPanelLanguage,
+  usePanelT,
+} from '../../i18n/panel';
 
 interface AuthLayoutProps {
   title: string;
@@ -33,8 +38,9 @@ interface AuthLayoutProps {
  * the focused field — rather than behind everything.
  *
  * Before sign-in nobody knows which restaurant this is, so the switch offers
- * every panel language. Links in emails carry `?lang=`, the language the email
- * was written in, so the page it opens continues in that language.
+ * the hand-written panel languages, and the language an email link carries
+ * (`?lang=`, the one the email was written in) or this device last used, so
+ * the page continues in it.
  */
 export function AuthLayout({
   title,
@@ -45,6 +51,12 @@ export function AuthLayout({
 }: AuthLayoutProps) {
   const [searchParams] = useSearchParams();
   const linkLanguage = searchParams.get('lang');
+  const { i18n } = usePanelT();
+  // The hand-written languages, plus the one an email link brought or this
+  // device last used — a DeepL language nobody would find in a full list.
+  const offered = [
+    ...new Set([...BUILT_IN_PANEL_LANGUAGES, i18n.language, linkLanguage ?? '']),
+  ].filter(isPanelLanguage);
 
   useEffect(() => {
     if (languageSwitch && isPanelLanguage(linkLanguage)) setPanelLanguage(linkLanguage);
@@ -64,7 +76,7 @@ export function AuthLayout({
     >
       {languageSwitch ? (
         <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
-          <PanelLanguageSwitch languages={PANEL_LANGUAGES} />
+          <PanelLanguageSwitch languages={offered} />
         </Box>
       ) : null}
 

@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import en from './panel/en.json';
 import pl from './panel/pl.json';
-import { PANEL_LANGUAGES } from './panel';
+import { BUILT_IN_PANEL_LANGUAGES, PANEL_LANGUAGES } from './panel';
+import { MENU_LANGUAGES } from '../constants/menuLanguages';
 
 /*
  * The owner panel's translations. A missing key renders as the key itself
@@ -42,8 +43,22 @@ const stripComments = (source: string) =>
   source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:'"`\\])\/\/.*$/gm, '$1');
 
 describe('the owner panel translations', () => {
-  it('exist for every panel language', () => {
-    expect(Object.keys(LOCALES).sort()).toEqual([...PANEL_LANGUAGES].sort());
+  it('exist for every hand-written panel language', () => {
+    expect(Object.keys(LOCALES).sort()).toEqual([...BUILT_IN_PANEL_LANGUAGES].sort());
+  });
+
+  it('can be made by DeepL for every other catalogue language read left to right', () => {
+    // Mirrors backend/app/panel_language.py: English and Polish by hand, then
+    // the catalogue without English and without right-to-left languages.
+    const expected = [
+      'en',
+      'pl',
+      ...MENU_LANGUAGES.filter((language) => language.code !== 'en' && !language.rtl).map(
+        (language) => language.code,
+      ),
+    ];
+    expect([...PANEL_LANGUAGES]).toEqual(expected);
+    expect(PANEL_LANGUAGES).not.toContain('ar');
   });
 
   it('have the same strings in every language', () => {

@@ -44,6 +44,9 @@ import { ManualPaymentDialog } from '../components/restaurants/ManualPaymentDial
 import { AddRestaurantDialog } from '../components/restaurants/AddRestaurantDialog';
 import { EditRestaurantDialog } from '../components/restaurants/EditRestaurantDialog';
 import { ActivationLinkDialog } from '../components/restaurants/ActivationLinkDialog';
+import { PanelTranslationDialog } from '../components/restaurants/PanelTranslationDialog';
+import { useAdminPanelLocales } from '../hooks/usePanelLocales';
+import { panelLanguageState } from '../services/panelTranslation';
 import {
   copyToClipboard,
   useGenerateActivationLink,
@@ -129,6 +132,14 @@ export function RestaurantsPage() {
     } catch (err) {
       showError(getApiErrorMessage(err));
     }
+  };
+
+  // A panel language DeepL has not made yet is made right after the save
+  // that chose it; a ready or hand-written one needs nothing.
+  const panelLocales = useAdminPanelLocales();
+  const [translating, setTranslating] = useState<string | null>(null);
+  const translateIfMissing = (code: string) => {
+    if (panelLanguageState(code, panelLocales.data) === 'missing') setTranslating(code);
   };
 
   // Tracked per row so only the button that was pressed shows a spinner; the
@@ -430,7 +441,11 @@ export function RestaurantsPage() {
         onClose={() => setDialogOpen(false)}
       />
 
-      <AddRestaurantDialog open={addDialogOpen} onClose={() => setAddDialogOpen(false)} />
+      <AddRestaurantDialog
+        open={addDialogOpen}
+        onClose={() => setAddDialogOpen(false)}
+        onPanelLanguage={translateIfMissing}
+      />
 
       <Menu anchorEl={menu?.el ?? null} open={Boolean(menu)} onClose={closeMenu}>
         <MenuItem
@@ -468,7 +483,10 @@ export function RestaurantsPage() {
         open={Boolean(editTarget)}
         restaurant={editTarget}
         onClose={() => setEditTarget(null)}
+        onPanelLanguage={translateIfMissing}
       />
+
+      <PanelTranslationDialog code={translating} onClose={() => setTranslating(null)} />
 
       <ActivationLinkDialog
         open={Boolean(linkDialog)}

@@ -46,6 +46,8 @@ const EMPTY_FORM: AddRestaurantFormValues = {
 interface AddRestaurantDialogProps {
   open: boolean;
   onClose: () => void;
+  /** Called with the panel language the new restaurant was given, if any. */
+  onPanelLanguage?: (code: string) => void;
 }
 
 /**
@@ -53,7 +55,11 @@ interface AddRestaurantDialogProps {
  * fetched lazily (only while the dialog is open); submission follows the same
  * spinner + snackbar + cache-invalidation pattern as the payment dialog.
  */
-export function AddRestaurantDialog({ open, onClose }: AddRestaurantDialogProps) {
+export function AddRestaurantDialog({
+  open,
+  onClose,
+  onPanelLanguage,
+}: AddRestaurantDialogProps) {
   const { showSuccess, showError } = useSnackbar();
   const addRestaurant = useAddRestaurant();
   const packages = usePackages(open);
@@ -90,6 +96,7 @@ export function AddRestaurantDialog({ open, onClose }: AddRestaurantDialogProps)
         onSuccess: (created) => {
           showSuccess(`Restauracja „${created.name}" została utworzona.`);
           onClose();
+          if (created.panel_language) onPanelLanguage?.(created.panel_language);
         },
         onError: (error) => {
           showError(getApiErrorMessage(error));

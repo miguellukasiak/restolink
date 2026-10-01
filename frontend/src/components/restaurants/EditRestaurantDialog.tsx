@@ -10,6 +10,8 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import { useSnackbar } from '../feedback/SnackbarProvider';
 import { useUpdateRestaurant } from '../../hooks/useOnboarding';
+import { useAdminPanelLocales } from '../../hooks/usePanelLocales';
+import { panelLanguageState } from '../../services/panelTranslation';
 import { getApiErrorMessage } from '../../services/api';
 import type { RestaurantListItem } from '../../types';
 import { PanelLanguageField } from './PanelLanguageField';
@@ -18,6 +20,8 @@ interface EditRestaurantDialogProps {
   open: boolean;
   restaurant: RestaurantListItem | null;
   onClose: () => void;
+  /** Called after a save when the panel language still needs DeepL. */
+  onPanelLanguage?: (code: string) => void;
 }
 
 /**
@@ -33,9 +37,11 @@ export function EditRestaurantDialog({
   open,
   restaurant,
   onClose,
+  onPanelLanguage,
 }: EditRestaurantDialogProps) {
   const { showSuccess, showError } = useSnackbar();
   const update = useUpdateRestaurant();
+  const panelLocales = useAdminPanelLocales();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -53,12 +59,19 @@ export function EditRestaurantDialog({
     }
   }, [open, restaurant]);
 
-  const dirty =
+  const changed =
     Boolean(restaurant) &&
     (name !== restaurant?.name ||
       email !== restaurant?.contact_email ||
       phone !== restaurant?.contact_phone ||
       panelLanguage !== (restaurant?.panel_language ?? ''));
+  // A language whose translation was stopped midway can be finished by
+  // saving again, with nothing else changed.
+  const untranslated =
+    Boolean(panelLanguage) &&
+    panelLocales.isSuccess &&
+    panelLanguageState(panelLanguage, panelLocales.data) === 'missing';
+  const dirty = changed || untranslated;
   const valid = name.trim().length > 0 && email.includes('@') && phone.trim().length > 0;
 
   async function handleSubmit(event: FormEvent) {
@@ -68,19 +81,22 @@ export function EditRestaurantDialog({
     try {
       // Only what actually changed: the endpoint records the edit in the audit
       // log, and a diff full of unchanged fields makes that entry useless.
-      await update.mutateAsync({
-        restaurantId: restaurant.id,
-        payload: {
-          ...(name !== restaurant.name ? { name } : {}),
-          ...(email !== restaurant.contact_email ? { contact_email: email } : {}),
-          ...(phone !== restaurant.contact_phone ? { contact_phone: phone } : {}),
-          ...(panelLanguage !== (restaurant.panel_language ?? '')
-            ? { panel_language: panelLanguage || null }
-            : {}),
-        },
-      });
-      showSuccess('Dane zaktualizowane.');
+      if (changed) {
+        await update.mutateAsync({
+          restaurantId: restaurant.id,
+          payload: {
+            ...(name !== restaurant.name ? { name } : {}),
+            ...(email !== restaurant.contact_email ? { contact_email: email } : {}),
+            ...(phone !== restaurant.contact_phone ? { contact_phone: phone } : {}),
+            ...(panelLanguage !== (restaurant.panel_language ?? '')
+              ? { panel_language: panelLanguage || null }
+              : {}),
+          },
+        });
+        showSuccess('Dane zaktualizowane.');
+      }
       onClose();
+      if (untranslated) onPanelLanguage?.(panelLanguage);
     } catch (error) {
       showError(getApiErrorMessage(error));
     }

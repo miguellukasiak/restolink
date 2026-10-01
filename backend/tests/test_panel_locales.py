@@ -188,3 +188,44 @@ async def test_an_unfinished_language_is_not_served(restaurant):
     async with client() as http:
         response = await http.get("/api/v1/public/panel-locales/tr")
     assert response.status_code == 404
+
+
+@pytest.fixture
+def sent(monkeypatch) -> list[dict]:
+    """Every email handed to Resend."""
+    import resend
+
+    monkeypatch.setenv("RESEND_API_KEY", "re_test_key")
+    monkeypatch.setenv("RESEND_FROM", "RestoLink <noreply@restolink.test>")
+    outbox: list[dict] = []
+    monkeypatch.setattr(resend.Emails, "send", lambda params: outbox.append(params))
+    return outbox
+
+
+async def test_the_first_restaurant_in_a_language_is_welcomed_in_it(
+    restaurant, deepl, sent
+):
+    # Nobody has made Ukrainian yet: the panel's strings come later, from
+    # HQ's browser, but the welcome email goes out now and must not wait.
+    async with client() as http:
+        response = await create(http, restaurant, panel_language="uk")
+        status_ = await http.get(
+            "/api/v1/admin/panel-locales", headers=await admin_headers()
+        )
+    assert response.status_code == 201
+    assert sent[-1]["subject"] == "[uk] " + EMAIL_COPY["en"]["welcome_subject"]
+    assert "lang=uk" in sent[-1]["html"]
+    # The row exists, with no panel strings yet — HQ's picker still says
+    # the panel needs translating.
+    assert status_.json()[0]["code"] == "uk"
+    assert status_.json()[0]["strings"] == 0
+
+
+async def test_without_deepl_the_restaurant_is_still_made_and_welcomed_in_english(
+    restaurant, sent, monkeypatch
+):
+    monkeypatch.delenv("DEEPL_API_KEY", raising=False)
+    async with client() as http:
+        response = await create(http, restaurant, panel_language="tr")
+    assert response.status_code == 201
+    assert sent[-1]["subject"] == EMAIL_COPY["en"]["welcome_subject"]
