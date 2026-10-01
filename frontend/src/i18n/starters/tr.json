@@ -1,0 +1,31 @@
+{
+  "categories": [
+    "Başlangıçlar",
+    "Çorbalar",
+    "Salatalar",
+    "Ana yemekler",
+    "Makarnalar",
+    "Pizza",
+    "Burgerler",
+    "Tatlılar",
+    "İçecekler",
+    "Kahve ve çay"
+  ],
+  "notes": {
+    "lunch": "# Öğle menüsü\nPazartesiden cumaya, **12:00–16:00**.\nMenü: çorba + günün yemeği.",
+    "allergies": "Alerjiniz veya gıda intoleransınız mı var? **Personelimize söyleyin** — memnuniyetle yardımcı oluruz.",
+    "waitingTime": "Tüm yemeklerimizi siparişe göre hazırlıyoruz, bu nedenle bekleme süresi uzayabilir.",
+    "service": "8 kişi ve üzeri gruplarda hesaba **%10 servis ücreti** eklenir."
+  },
+  "qr": {
+    "cta": "Menüyü görmek için tarayın",
+    "ctaShort": "Menüyü tarayın",
+    "footer": "Telefonunuzun kamerasını açın ve koda doğrultun",
+    "footerShort": "Kamerayı açın, koda doğrultun",
+    "steps": [
+      "Kamerayı açın",
+      "Koda doğrultun",
+      "Yemeğinizi seçin"
+    ]
+  }
+}

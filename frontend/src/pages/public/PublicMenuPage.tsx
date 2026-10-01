@@ -22,6 +22,7 @@ import { useAnimationWindow } from '../../hooks/useAnimationWindow';
 import { useSplashPhase } from '../../hooks/useSplashPhase';
 import { ItemDetailModal } from '../../components/public/ItemDetailModal';
 import { AllergyGateModal } from '../../components/public/AllergyGateModal';
+import { PriceFormatProvider } from '../../components/PriceFormatProvider';
 
 interface AllergyPrefs {
   answered: boolean;
@@ -173,7 +174,9 @@ export function PublicMenuPage() {
         for (const allergen of item.allergens) set.add(allergen);
       }
     }
-    return Array.from(set).sort((a, b) => a.localeCompare(b, 'pl'));
+    // Sorted as the menu's own language sorts.
+    const locale = menu.data.restaurant.languages?.[0] ?? 'pl';
+    return Array.from(set).sort((a, b) => a.localeCompare(b, locale));
   }, [menu.data]);
 
   // Drop any persisted exclusions that no longer exist in the menu.
@@ -228,72 +231,78 @@ export function PublicMenuPage() {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
-      <CssBaseline />
+    <PriceFormatProvider
+      currency={menu.data?.restaurant.currency}
+      country={menu.data?.restaurant.country}
+      language={languages?.[0]}
+    >
+      <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+        <CssBaseline />
 
-      {splash.visible && (
-        <CinematicLoader restaurantId={restaurantId} exiting={splash.exiting} />
-      )}
+        {splash.visible && (
+          <CinematicLoader restaurantId={restaurantId} exiting={splash.exiting} />
+        )}
 
-      {menu.isError && (
-        <Box sx={{ maxWidth: 960, mx: 'auto', px: 2 }}>
-          <Alert
-            severity="error"
-            sx={{ mt: 3 }}
-            action={
-              <Button color="inherit" size="small" onClick={() => void menu.refetch()}>
-                {t('retry')}
-              </Button>
-            }
-          >
-            {getApiErrorMessage(menu.error)}
-          </Alert>
-        </Box>
-      )}
+        {menu.isError && (
+          <Box sx={{ maxWidth: 960, mx: 'auto', px: 2 }}>
+            <Alert
+              severity="error"
+              sx={{ mt: 3 }}
+              action={
+                <Button color="inherit" size="small" onClick={() => void menu.refetch()}>
+                  {t('retry')}
+                </Button>
+              }
+            >
+              {getApiErrorMessage(menu.error)}
+            </Alert>
+          </Box>
+        )}
 
-      {access === 'BLOCKED' && (
-        <StatusScreen icon="blocked" message="Menu chwilowo niedostępne." />
-      )}
+        {access === 'BLOCKED' && (
+          <StatusScreen icon="blocked" message="Menu chwilowo niedostępne." />
+        )}
 
-      {access === 'PENDING' && (
-        <StatusScreen
-          icon="pending"
-          message="Restauracja w przygotowaniu. Zapraszamy wkrótce!"
-        />
-      )}
-
-      {access === 'ACTIVE' && menu.data && (
-        // Resolves out of a blur as the splash rushes past it — the two
-        // overlap, so it reads as one camera move rather than a handoff.
-        // See `reveal.ts` for why this can never hide the content.
-        <Box sx={focusPulling ? revealFocusPullSx : undefined}>
-          <PublicMenuView
-            restaurantName={menu.data.restaurant.name}
-            logoUrl={menu.data.restaurant.theme.logo_url}
-            categories={menu.data.categories}
-            notes={menu.data.notes}
-            onOpenItem={openDetail}
-            selectedAllergens={selectedAllergens}
-            canFilterAllergens={availableAllergens.length > 0}
-            onOpenAllergyFilter={() => setGateOpen(true)}
-            languages={languages}
+        {access === 'PENDING' && (
+          <StatusScreen
+            icon="pending"
+            message="Restauracja w przygotowaniu. Zapraszamy wkrótce!"
           />
-          <ItemDetailModal
-            item={selectedItem}
-            open={detailOpen}
-            onClose={() => setDetailOpen(false)}
-          />
-          <AllergyGateModal
-            open={gateOpen}
-            mode={hasAnsweredAllergyPrompt ? 'edit' : 'welcome'}
-            allergens={availableAllergens}
-            initialSelected={selectedAllergens}
-            onApply={handleApplyAllergens}
-            onSkip={handleSkipAllergens}
-            onClose={handleCloseGate}
-          />
-        </Box>
-      )}
-    </Box>
+        )}
+
+        {access === 'ACTIVE' && menu.data && (
+          // Resolves out of a blur as the splash rushes past it — the two
+          // overlap, so it reads as one camera move rather than a handoff.
+          // See `reveal.ts` for why this can never hide the content.
+          <Box sx={focusPulling ? revealFocusPullSx : undefined}>
+            <PublicMenuView
+              restaurantName={menu.data.restaurant.name}
+              logoUrl={menu.data.restaurant.theme.logo_url}
+              categories={menu.data.categories}
+              notes={menu.data.notes}
+              onOpenItem={openDetail}
+              selectedAllergens={selectedAllergens}
+              canFilterAllergens={availableAllergens.length > 0}
+              onOpenAllergyFilter={() => setGateOpen(true)}
+              languages={languages}
+            />
+            <ItemDetailModal
+              item={selectedItem}
+              open={detailOpen}
+              onClose={() => setDetailOpen(false)}
+            />
+            <AllergyGateModal
+              open={gateOpen}
+              mode={hasAnsweredAllergyPrompt ? 'edit' : 'welcome'}
+              allergens={availableAllergens}
+              initialSelected={selectedAllergens}
+              onApply={handleApplyAllergens}
+              onSkip={handleSkipAllergens}
+              onClose={handleCloseGate}
+            />
+          </Box>
+        )}
+      </Box>
+    </PriceFormatProvider>
   );
 }

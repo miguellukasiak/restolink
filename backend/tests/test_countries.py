@@ -78,12 +78,21 @@ async def test_hq_can_choose_both_itself(restaurant):
             panel_language="uk",
         )
     body = response.json()
-    assert (body["country"], body["currency"], body["base_language"]) == ("TR", "EUR", "uk")
+    assert (body["country"], body["currency"], body["base_language"]) == (
+        "TR",
+        "EUR",
+        "uk",
+    )
 
 
 @pytest.mark.parametrize(
     "field, value",
-    [("country", "XX"), ("currency", "ABC"), ("base_language", "xx"), ("address", "x" * 301)],
+    [
+        ("country", "XX"),
+        ("currency", "ABC"),
+        ("base_language", "xx"),
+        ("address", "x" * 301),
+    ],
 )
 @pytest.mark.asyncio
 async def test_what_is_not_offered_is_refused(restaurant, field, value):
@@ -116,7 +125,10 @@ async def test_hq_moves_a_restaurant_and_the_audit_says_so(restaurant):
     assert cleared.json()["address"] is None
     async with AsyncSessionLocal() as db:
         entries = (await db.scalars(select(AuditLog.target_entity))).all()
-    assert any("country: PL → UA" in entry and "currency: PLN → UAH" in entry for entry in entries)
+    assert any(
+        "country: PL → UA" in entry and "currency: PLN → UAH" in entry
+        for entry in entries
+    )
 
 
 @pytest.mark.asyncio
@@ -132,7 +144,8 @@ async def test_the_guest_menu_and_the_languages_screen_know_where_it_is(restaura
     async with client() as http:
         menu = await http.get(f"/api/v1/public/restaurants/{restaurant.id}/menu")
         languages = await http.get(
-            f"/api/v1/panel/{restaurant.id}/languages", headers=owner_headers(restaurant.id)
+            f"/api/v1/panel/{restaurant.id}/languages",
+            headers=owner_headers(restaurant.id),
         )
     assert menu.json()["restaurant"]["currency"] == "TRY"
     assert menu.json()["restaurant"]["country"] == "TR"

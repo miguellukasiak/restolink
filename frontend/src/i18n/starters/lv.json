@@ -1,0 +1,31 @@
+{
+  "categories": [
+    "Uzkodas",
+    "Zupas",
+    "Salāti",
+    "Pamatēdieni",
+    "Makaroni",
+    "Pica",
+    "Burgeri",
+    "Deserti",
+    "Dzērieni",
+    "Kafija un tēja"
+  ],
+  "notes": {
+    "lunch": "# Pusdienu ēdienkarte\nNo pirmdienas līdz piektdienai, **12:00–16:00**.\nKomplekts: zupa + dienas ēdiens.",
+    "allergies": "Jums ir alerģija vai pārtikas nepanesība? **Pastāstiet personālam** — labprāt ieteiksim.",
+    "waitingTime": "Visus ēdienus gatavojam pēc pasūtījuma, tāpēc gaidīšanas laiks var būt ilgāks.",
+    "service": "Grupām no 8 personām rēķinam pieskaitām **10 % apkalpošanas maksu**."
+  },
+  "qr": {
+    "cta": "Noskenējiet, lai redzētu ēdienkarti",
+    "ctaShort": "Skenējiet ēdienkarti",
+    "footer": "Atveriet tālruņa kameru un pavērsiet to pret kodu",
+    "footerShort": "Atveriet kameru, pavērsiet pret kodu",
+    "steps": [
+      "Atveriet kameru",
+      "Pavērsiet pret kodu",
+      "Izvēlieties ēdienus"
+    ]
+  }
+}

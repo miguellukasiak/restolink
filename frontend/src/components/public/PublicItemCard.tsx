@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography';
 import { alpha } from '@mui/material/styles';
 import RestaurantMenuRoundedIcon from '@mui/icons-material/RestaurantMenuRounded';
 import type { PublicMenuItem } from '../../types';
-import { formatPln } from '../../constants/menu';
+import { usePriceFormat } from '../../hooks/usePriceFormat';
 import { useMenuLabels } from '../../hooks/useMenuLabels';
 
 /** Card corner radius, in px. A string — `borderRadius: 16` in `sx` is a
@@ -42,6 +42,7 @@ interface PublicItemCardProps {
 function PublicItemCardComponent({ item, onOpen }: PublicItemCardProps) {
   const { t } = useTranslation();
   const { allergenLabel } = useMenuLabels();
+  const { format: formatPrice } = usePriceFormat();
   const available = item.is_available !== false;
   const interactive = available && Boolean(onOpen);
 
@@ -51,7 +52,7 @@ function PublicItemCardComponent({ item, onOpen }: PublicItemCardProps) {
       : t('noAllergens');
   const ariaLabel = `${t('openDish', {
     name: item.name,
-    price: formatPln(item.price),
+    price: formatPrice(item.price),
   })}. ${t('allergens')}: ${allergensText}.${
     available ? '' : ` ${t('unavailable')}.`
   }`;
@@ -232,7 +233,7 @@ function PublicItemCardComponent({ item, onOpen }: PublicItemCardProps) {
               color: available ? 'text.primary' : 'text.disabled',
             }}
           >
-            {formatPln(item.price)}
+            {formatPrice(item.price)}
           </Typography>
         </Box>
       </CardActionArea>

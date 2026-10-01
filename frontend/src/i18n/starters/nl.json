@@ -1,0 +1,31 @@
+{
+  "categories": [
+    "Voorgerechten",
+    "Soepen",
+    "Salades",
+    "Hoofdgerechten",
+    "Pasta",
+    "Pizza",
+    "Burgers",
+    "Desserts",
+    "Dranken",
+    "Koffie & thee"
+  ],
+  "notes": {
+    "lunch": "# Lunchmenu\nMaandag t/m vrijdag, **12:00–16:00**.\nMenu: soep + dagschotel.",
+    "allergies": "Allergie of voedselintolerantie? **Laat het ons personeel weten** — we adviseren je graag.",
+    "waitingTime": "We bereiden alle gerechten vers, daardoor kan de wachttijd langer zijn.",
+    "service": "Voor groepen vanaf 8 personen rekenen we **10% servicekosten**."
+  },
+  "qr": {
+    "cta": "Scan om het menu te zien",
+    "ctaShort": "Scan het menu",
+    "footer": "Open de camera van je telefoon en richt op de code",
+    "footerShort": "Open de camera, richt op de code",
+    "steps": [
+      "Open de camera",
+      "Richt op de code",
+      "Kies je gerechten"
+    ]
+  }
+}

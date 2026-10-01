@@ -13,11 +13,13 @@ import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import { MENU_LANGUAGES, type MenuLanguage } from '../../../constants/menuLanguages';
 import { radii } from '../../../theme';
 import worldMap from './worldCountries.json';
-import { formatPeople, gain } from './reach';
+import { countryName, formatPeople, gain, nearbyLanguages } from './reach';
 import { PREVIEW_FILL } from './mapGeometry';
 import { useLanguageName, usePanelT } from '../../../i18n/panel';
 
 interface AddLanguagePanelProps {
+  /** Where the restaurant is (ISO 3166-1 alpha-2). */
+  country: string;
   /** Read now, the menu's own language first. */
   languages: readonly string[];
   phrasesTotal: number;
@@ -27,19 +29,24 @@ interface AddLanguagePanelProps {
   onPreview: (code: string | null) => void;
 }
 
-type Tab = 'poland' | 'all';
+type Tab = 'recommended' | 'all';
 
 /**
  * Where a language gets chosen on its merits.
  *
- * "Polecane w Polsce" leads, because what matters to a restaurant is who
+ * The recommendations lead, because what matters to a restaurant is who
  * walks in, not how many people speak a language somewhere — a kebab shop in
- * Stalowa Wola has more use for Ukrainian than for Hindi. "Wszystkie" sorts
- * by how many *new* people each language would add, which is also how the
- * screen talks the owner out of a long tail: Swedish after English adds a
- * couple of million, and the number says so.
+ * Stalowa Wola has more use for Ukrainian than for Hindi. In Poland they are
+ * a hand-made list with a reason each ("Polecane w Polsce"); anywhere else
+ * they are the languages that bring the most new readers from nearby
+ * countries (`nearbyLanguages`), each saying where it is read — no invented
+ * reasons for places nobody has written any for. "Wszystkie" sorts by how
+ * many *new* people each language would add, which is also how the screen
+ * talks the owner out of a long tail: Swedish after English adds a couple of
+ * million, and the number says so.
  */
 export function AddLanguagePanel({
+  country,
   languages,
   phrasesTotal,
   translated,
@@ -47,9 +54,26 @@ export function AddLanguagePanel({
   onAdd,
   onPreview,
 }: AddLanguagePanelProps) {
-  const { t } = usePanelT();
+  const { t, i18n } = usePanelT();
   const languageName = useLanguageName();
-  const [tab, setTab] = useState<Tab>('poland');
+  const [tab, setTab] = useState<Tab>('recommended');
+  const inPoland = country === 'PL';
+
+  // Outside Poland: the codes worth adding, and where each is read.
+  const nearby = useMemo(
+    () =>
+      inPoland
+        ? null
+        : new Map(
+            nearbyLanguages(
+              worldMap.countries,
+              country,
+              languages,
+              MENU_LANGUAGES.map((language) => language.code),
+            ).map((entry, rank) => [entry.code, { rank, readIn: entry.readIn }]),
+          ),
+    [inPoland, country, languages],
+  );
   const [query, setQuery] = useState('');
 
   const candidates = useMemo(
@@ -64,7 +88,16 @@ export function AddLanguagePanel({
   );
 
   const shown = useMemo(() => {
-    if (tab === 'poland') {
+    if (tab === 'recommended') {
+      if (nearby) {
+        return candidates
+          .filter(({ language }) => nearby.has(language.code))
+          .sort(
+            (a, b) =>
+              (nearby.get(a.language.code)?.rank ?? 0) -
+              (nearby.get(b.language.code)?.rank ?? 0),
+          );
+      }
       return candidates
         .filter(({ language }) => language.tier)
         .sort((a, b) => (a.language.tier ?? 3) - (b.language.tier ?? 3));
@@ -79,7 +112,26 @@ export function AddLanguagePanel({
           language.code === needle,
       )
       .sort((a, b) => b.gain - a.gain);
-  }, [candidates, tab, query, languageName]);
+  }, [candidates, tab, query, languageName, nearby]);
+
+  /** Why a language is recommended: Poland's own reason, or where it is read. */
+  const reasonFor = (language: MenuLanguage) => {
+    if (tab !== 'recommended') return null;
+    if (!nearby) return language.reason ? t(`languages.reason.${language.code}`) : null;
+    const where = nearby.get(language.code)?.readIn ?? [];
+    if (where.length === 0) return null;
+    return t('addLanguage.readNearby', {
+      countries: where
+        .map((key) =>
+          countryName(
+            key,
+            worldMap.countries.find((entry) => entry.key === key)?.name ?? key,
+            i18n.language,
+          ),
+        )
+        .join(', '),
+    });
+  };
 
   return (
     <Stack spacing={1.5}>
@@ -89,8 +141,16 @@ export function AddLanguagePanel({
         variant="fullWidth"
         sx={{ minHeight: 40, '& .MuiTab-root': { minHeight: 40, textTransform: 'none' } }}
       >
-        <Tab value="poland" label={t('addLanguage.recommended')} />
-        <Tab value="all" label={t('addLanguage.all', { count: MENU_LANGUAGES.length })} />
+        <Tab
+          value="recommended"
+          label={
+            inPoland ? t('addLanguage.recommended') : t('addLanguage.recommendedNearby')
+          }
+        />
+        <Tab
+          value="all"
+          label={t('addLanguage.all', { count: MENU_LANGUAGES.length - 1 })}
+        />
       </Tabs>
 
       {tab === 'all' && (
@@ -123,7 +183,9 @@ export function AddLanguagePanel({
       >
         {shown.length === 0 && (
           <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
-            {tab === 'poland' ? t('addLanguage.allRecommended') : t('addLanguage.noSuch')}
+            {tab === 'recommended'
+              ? t('addLanguage.allRecommended')
+              : t('addLanguage.noSuch')}
           </Typography>
         )}
         {shown.map(({ language, gain: people }) => (
@@ -133,7 +195,7 @@ export function AddLanguagePanel({
             people={people}
             prepared={translated(language.code)}
             phrasesTotal={phrasesTotal}
-            showReason={tab === 'poland'}
+            reason={reasonFor(language)}
             busy={busy}
             onAdd={() => onAdd(language.code)}
             onHover={(on) => onPreview(on ? language.code : null)}
@@ -149,7 +211,7 @@ function Candidate({
   people,
   prepared,
   phrasesTotal,
-  showReason,
+  reason,
   busy,
   onAdd,
   onHover,
@@ -158,7 +220,7 @@ function Candidate({
   people: number;
   prepared: number;
   phrasesTotal: number;
-  showReason: boolean;
+  reason: string | null;
   busy: boolean;
   onAdd: () => void;
   onHover: (on: boolean) => void;
@@ -211,9 +273,9 @@ function Candidate({
             </Typography>
           )}
         </Stack>
-        {showReason && language.reason && (
+        {reason && (
           <Typography variant="caption" color="text.secondary" component="p">
-            {t(`languages.reason.${language.code}`)}
+            {reason}
           </Typography>
         )}
         {prepared > 0 && (

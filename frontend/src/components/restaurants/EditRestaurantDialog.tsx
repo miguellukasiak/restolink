@@ -15,6 +15,16 @@ import { panelLanguageState } from '../../services/panelTranslation';
 import { getApiErrorMessage } from '../../services/api';
 import type { RestaurantListItem } from '../../types';
 import { PanelLanguageField } from './PanelLanguageField';
+import { LocationFields } from './LocationFields';
+import { locationFor, type RestaurantLocation } from './location';
+
+/** What a restaurant row says about where it is, as the form holds it. */
+const locationOf = (restaurant: RestaurantListItem): RestaurantLocation => ({
+  country: restaurant.country,
+  address: restaurant.address ?? '',
+  currency: restaurant.currency,
+  base_language: restaurant.base_language,
+});
 
 interface EditRestaurantDialogProps {
   open: boolean;
@@ -47,6 +57,7 @@ export function EditRestaurantDialog({
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [panelLanguage, setPanelLanguage] = useState('');
+  const [location, setLocation] = useState<RestaurantLocation>(locationFor('PL'));
 
   // Reseed whenever a different row opens the dialog, so it never shows the
   // previous restaurant's details for a frame.
@@ -56,15 +67,25 @@ export function EditRestaurantDialog({
       setEmail(restaurant.contact_email);
       setPhone(restaurant.contact_phone);
       setPanelLanguage(restaurant.panel_language ?? '');
+      setLocation(locationOf(restaurant));
     }
   }, [open, restaurant]);
 
+  const saved = restaurant ? locationOf(restaurant) : null;
+  const locationChanges: Partial<RestaurantLocation> = saved
+    ? Object.fromEntries(
+        (Object.keys(location) as (keyof RestaurantLocation)[])
+          .filter((key) => location[key].trim() !== saved[key].trim())
+          .map((key) => [key, location[key].trim()]),
+      )
+    : {};
   const changed =
     Boolean(restaurant) &&
     (name !== restaurant?.name ||
       email !== restaurant?.contact_email ||
       phone !== restaurant?.contact_phone ||
-      panelLanguage !== (restaurant?.panel_language ?? ''));
+      panelLanguage !== (restaurant?.panel_language ?? '') ||
+      Object.keys(locationChanges).length > 0);
   // A language whose translation was stopped midway can be finished by
   // saving again, with nothing else changed.
   const untranslated =
@@ -91,6 +112,7 @@ export function EditRestaurantDialog({
             ...(panelLanguage !== (restaurant.panel_language ?? '')
               ? { panel_language: panelLanguage || null }
               : {}),
+            ...locationChanges,
           },
         });
         showSuccess('Dane zaktualizowane.');
@@ -103,7 +125,7 @@ export function EditRestaurantDialog({
   }
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <form onSubmit={handleSubmit} noValidate>
         <DialogTitle>Edytuj dane restauracji</DialogTitle>
         <DialogContent>
@@ -134,6 +156,16 @@ export function EditRestaurantDialog({
               required
               fullWidth
               disabled={update.isPending}
+            />
+            <LocationFields
+              value={location}
+              onChange={setLocation}
+              disabled={update.isPending}
+              languageWarning={
+                locationChanges.base_language
+                  ? 'Wpisane już dania zostają, jak są — zmiana ich nie tłumaczy.'
+                  : undefined
+              }
             />
             <PanelLanguageField
               value={panelLanguage}

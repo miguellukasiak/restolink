@@ -1,0 +1,31 @@
+{
+  "categories": [
+    "Eelroad",
+    "Supid",
+    "Salatid",
+    "Pearoad",
+    "Pasta",
+    "Pitsa",
+    "Burgerid",
+    "Magustoidud",
+    "Joogid",
+    "Kohv ja tee"
+  ],
+  "notes": {
+    "lunch": "# Lõunamenüü\nEsmaspäevast reedeni, **12:00–16:00**.\nKomplekt: supp + päevapraad.",
+    "allergies": "Kas teil on allergia või toidutalumatus? **Andke teenindajale teada** — aitame meelsasti.",
+    "waitingTime": "Valmistame kõik toidud tellimisel, seega võib ooteaeg olla pikem.",
+    "service": "Vähemalt 8-liikmelise seltskonna arvele lisame **10% teenustasu**."
+  },
+  "qr": {
+    "cta": "Skanni ja vaata menüüd",
+    "ctaShort": "Skanni menüüd",
+    "footer": "Ava telefoni kaamera ja suuna see koodile",
+    "footerShort": "Ava kaamera, suuna koodile",
+    "steps": [
+      "Ava kaamera",
+      "Suuna koodile",
+      "Vali toidud"
+    ]
+  }
+}

@@ -27,7 +27,8 @@ import type {
   PublicMenuItem,
   RestaurantThemeSettings,
 } from '../../types';
-import { ALLERGEN_OPTIONS, CURRENCY_SYMBOL, TAG_OPTIONS } from '../../constants/menu';
+import { ALLERGEN_OPTIONS, TAG_OPTIONS } from '../../constants/menu';
+import { usePriceFormat } from '../../hooks/usePriceFormat';
 import { getAllergenIcon, getTagIcon } from '../../constants/menuIcons';
 import { useSaveMenuItem } from '../../hooks/useSaveMenuItem';
 import { getApiErrorMessage } from '../../services/api';
@@ -132,6 +133,7 @@ export function MenuItemEditorDialog({
 }: MenuItemEditorDialogProps) {
   const { t } = usePanelT();
   const { allergenLabel, tagLabel } = usePanelLabels();
+  const { symbol: priceSymbol } = usePriceFormat();
   /** A schema message (a panel key) in the panel's language. */
   const problem = (message?: string) =>
     message ? t(message, { max: TEXT_LIMIT }) : undefined;
@@ -323,7 +325,7 @@ export function MenuItemEditorDialog({
               slotProps={{
                 input: {
                   endAdornment: (
-                    <InputAdornment position="end">{CURRENCY_SYMBOL}</InputAdornment>
+                    <InputAdornment position="end">{priceSymbol}</InputAdornment>
                   ),
                 },
                 htmlInput: { inputMode: 'decimal', autoComplete: 'off' },

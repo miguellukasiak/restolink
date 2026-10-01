@@ -684,11 +684,6 @@
     "wording": "Napisy",
     "wordingHint": "To, co goście przeczytają na wydruku — wpisz w dowolnym języku. Puste pole nie trafi na wydruk.",
     "textSets": "Wypełnij:",
-    "textSet": {
-      "pl": "Po polsku",
-      "en": "Po angielsku",
-      "plEn": "Po polsku i angielsku"
-    },
     "headline": "Nagłówek",
     "footerLine": "Linijka pod kodem",
     "step": "Krok {{number}}",
@@ -787,10 +782,13 @@
     "fallback": {
       "polish": "po polsku",
       "english": "po angielsku",
-      "englishOrPolish": "po angielsku lub po polsku"
+      "englishOrPolish": "po angielsku lub po polsku",
+      "base": "w oryginale ({{base}})",
+      "englishOrBase": "po angielsku lub w oryginale ({{base}})"
     },
     "baseSubtitle": "język menu — tak piszesz w Kreatorze",
     "onlyPolish": "Goście widzą menu tylko po polsku. Zacznij od angielskiego — czyta go większość zagranicznych gości.",
+    "onlyBase": "Goście widzą menu tylko w oryginale ({{base}}). Zacznij od angielskiego — czyta go większość zagranicznych gości.",
     "done": "Gotowe — goście czytają całe menu w tym języku.",
     "untranslated": "Nieprzetłumaczone — goście widzą menu {{fallback}}.",
     "partial": "{{percent}} gotowe — resztę goście widzą {{fallback}}.",
@@ -807,6 +805,8 @@
   },
   "addLanguage": {
     "recommended": "Polecane w Polsce",
+    "recommendedNearby": "Polecane",
+    "readNearby": "Czytają go w krajach w pobliżu: {{countries}}.",
     "all": "Wszystkie ({{count}})",
     "search": "Szukaj języka",
     "sortHint": "Od największego zysku: ilu nowych ludzi przeczyta Twoje menu po dodaniu języka.",
@@ -837,7 +837,8 @@
     "changed": "zmienione",
     "placeholder": "Tłumaczenie ({{code}})",
     "phraseAria": "Tłumaczenie frazy: {{phrase}}",
-    "fallbackNote": "Frazy bez tłumaczenia goście zobaczą po angielsku, a jeśli i tego brak — po polsku."
+    "fallbackNote": "Frazy bez tłumaczenia goście zobaczą po angielsku, a jeśli i tego brak — po polsku.",
+    "fallbackNoteBase": "Frazy bez tłumaczenia goście zobaczą po angielsku, a jeśli i tego brak — w oryginale ({{base}})."
   },
   "google": {
     "placeIdHelper": "Identyfikator wizytówki, nie adres URL z Google Maps.",

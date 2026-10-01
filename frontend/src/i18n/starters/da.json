@@ -1,0 +1,31 @@
+{
+  "categories": [
+    "Forretter",
+    "Supper",
+    "Salater",
+    "Hovedretter",
+    "Pasta",
+    "Pizza",
+    "Burgere",
+    "Desserter",
+    "Drikkevarer",
+    "Kaffe og te"
+  ],
+  "notes": {
+    "lunch": "# Frokostmenu\nMandag til fredag, **12:00–16:00**.\nInklusive: suppe + dagens ret.",
+    "allergies": "Har du allergi eller fødevareintolerans? **Sig det til personalet** — vi rådgiver dig gerne.",
+    "waitingTime": "Vi tilbereder alle retter, når du bestiller, så ventetiden kan blive længere.",
+    "service": "For selskaber på 8 personer eller flere tillægges **10 % servicegebyr**."
+  },
+  "qr": {
+    "cta": "Scan for at se menuen",
+    "ctaShort": "Scan menuen",
+    "footer": "Åbn telefonens kamera og ret det mod koden",
+    "footerShort": "Åbn kameraet, ret mod koden",
+    "steps": [
+      "Åbn kameraet",
+      "Ret mod koden",
+      "Vælg retter"
+    ]
+  }
+}

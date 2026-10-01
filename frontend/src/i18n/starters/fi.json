@@ -1,0 +1,31 @@
+{
+  "categories": [
+    "Alkuruoat",
+    "Keitot",
+    "Salaatit",
+    "Pääruoat",
+    "Pastat",
+    "Pizzat",
+    "Burgerit",
+    "Jälkiruoat",
+    "Juomat",
+    "Kahvi ja tee"
+  ],
+  "notes": {
+    "lunch": "# Lounaslista\nMaanantaista perjantaihin, **12:00–16:00**.\nLounas: keitto + päivän ruoka.",
+    "allergies": "Onko sinulla allergia tai ruoka-aineyliherkkyys? **Kerro henkilökunnalle** — neuvomme mielellämme.",
+    "waitingTime": "Valmistamme kaikki annokset tilauksesta, joten odotusaika voi pidentyä.",
+    "service": "Vähintään 8 hengen seurueiden laskuun lisätään **10 % palvelumaksu**."
+  },
+  "qr": {
+    "cta": "Skannaa ja katso ruokalista",
+    "ctaShort": "Skannaa ruokalista",
+    "footer": "Avaa puhelimen kamera ja suuntaa se koodiin",
+    "footerShort": "Avaa kamera, suuntaa koodiin",
+    "steps": [
+      "Avaa kamera",
+      "Suuntaa koodiin",
+      "Valitse annokset"
+    ]
+  }
+}

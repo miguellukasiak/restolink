@@ -1,0 +1,31 @@
+{
+  "categories": [
+    "Aperitive",
+    "Supe",
+    "Salate",
+    "Feluri principale",
+    "Paste",
+    "Pizza",
+    "Burgeri",
+    "Deserturi",
+    "Băuturi",
+    "Cafea și ceai"
+  ],
+  "notes": {
+    "lunch": "# Meniul zilei\nDe luni până vineri, **12:00–16:00**.\nMeniu: supă + felul zilei.",
+    "allergies": "Aveți o alergie sau o intoleranță alimentară? **Spuneți-i ospătarului** — vă sfătuim cu plăcere.",
+    "waitingTime": "Pregătim toate preparatele la comandă, de aceea timpul de așteptare poate fi mai lung.",
+    "service": "Pentru grupurile de cel puțin 8 persoane adăugăm la notă **10% taxă de serviciu**."
+  },
+  "qr": {
+    "cta": "Scanați pentru a vedea meniul",
+    "ctaShort": "Scanați meniul",
+    "footer": "Deschideți camera telefonului și îndreptați-o spre cod",
+    "footerShort": "Deschideți camera, îndreptați-o spre cod",
+    "steps": [
+      "Deschideți camera",
+      "Îndreptați spre cod",
+      "Alegeți preparatele"
+    ]
+  }
+}

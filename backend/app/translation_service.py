@@ -33,7 +33,7 @@ from .models import MenuCategory, MenuNote, TranslationDictionary, menu_layout
 
 #: Languages the public menu will serve. A `?lang=` outside this set is ignored
 #: rather than looked up.
-SUPPORTED_LANGUAGES = frozenset({*MENU_LANGUAGES, "pl"})
+SUPPORTED_LANGUAGES = frozenset(MENU_LANGUAGES)
 
 #: Languages an owner can maintain a dictionary for: the whole catalogue, so a
 #: language can be prepared before it is switched on for guests.

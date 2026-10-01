@@ -57,6 +57,7 @@ export function TranslationEditor({
   const [onlyMissing, setOnlyMissing] = useState(false);
 
   const dictionary = useDictionary(restaurantId, language);
+  const base = dictionary.data?.base_language ?? 'pl';
   const save = useSaveDictionary(restaurantId, language);
   const auto = useAutoTranslate(restaurantId, language);
 
@@ -266,7 +267,7 @@ export function TranslationEditor({
           }}
         >
           {[
-            t('editor.original', { code: 'PL' }),
+            t('editor.original', { code: base.toUpperCase() }),
             `${capitalize(languageName(language))} (${code})`,
           ].map((heading) => (
             <Box
@@ -369,7 +370,9 @@ export function TranslationEditor({
       </Paper>
 
       <Typography variant="caption" color="text.secondary">
-        {t('editor.fallbackNote')}
+        {base === 'pl'
+          ? t('editor.fallbackNote')
+          : t('editor.fallbackNoteBase', { base: languageName(base) })}
       </Typography>
     </Stack>
   );

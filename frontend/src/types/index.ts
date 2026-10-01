@@ -20,6 +20,13 @@ export interface RestaurantListItem {
   subscription_valid_until: string;
   /** The owner panel's second language beside English; null for English only. */
   panel_language?: string | null;
+  /** Where it is (ISO 3166-1 alpha-2), and its street and town. */
+  country: string;
+  address?: string | null;
+  /** What the menu's prices are in (ISO 4217). */
+  currency: string;
+  /** The language the menu is written in. */
+  base_language: string;
   package: PackageSummary;
 }
 
@@ -56,6 +63,10 @@ export interface CreateRestaurantRequest {
   package_id: string;
   /** The owner panel's second language; null for English only. */
   panel_language?: string | null;
+  country: string;
+  address?: string | null;
+  currency: string;
+  base_language: string;
 }
 
 /** Schema: RestaurantPanelInfo — restaurant details + subscription gating. */
@@ -70,6 +81,10 @@ export interface RestaurantPanelInfo {
   logo_url?: string | null;
   primary_color?: string | null;
   font_family?: string | null;
+  /** Where it is, what its prices are in, and what its menu is written in. */
+  country: string;
+  currency: string;
+  base_language: string;
 }
 
 /** Schema: MenuItem */
@@ -171,6 +186,10 @@ export interface PublicMenuResponse {
     subscription_valid_until: string | null;
     /** What the guest can switch to: the menu's own language first. */
     languages?: string[];
+    /** What the prices are in, and where the restaurant is. Absent from an
+     *  API that predates them: złoty, in Poland. */
+    currency?: string;
+    country?: string;
   };
   categories: PublicMenuCategory[];
   /** Absent from an API that predates notes. */

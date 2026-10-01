@@ -53,9 +53,9 @@ describe('the owner panel translations', () => {
     const expected = [
       'en',
       'pl',
-      ...MENU_LANGUAGES.filter((language) => language.code !== 'en' && !language.rtl).map(
-        (language) => language.code,
-      ),
+      ...MENU_LANGUAGES.filter(
+        (language) => !['en', 'pl'].includes(language.code) && !language.rtl,
+      ).map((language) => language.code),
     ];
     expect([...PANEL_LANGUAGES]).toEqual(expected);
     expect(PANEL_LANGUAGES).not.toContain('ar');

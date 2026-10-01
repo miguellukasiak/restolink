@@ -93,6 +93,7 @@ baseline revision against a production database whose schema it never authored.
 | `013_add_menu_notes.sql`          | `menu_note`                                         | optional (table only) |
 | `014_add_menu_note_style.sql`     | `menu_note.style` (JSONB, existing rows get `{}`)   | **required** |
 | `015_add_panel_locales.sql`       | `panel_locale` (DeepL-made panel languages)         | optional (table only) |
+| `016_add_restaurant_location.sql` | `restaurant.country`, `address`, `currency` (existing rows get `PL`, `PLN`) | **required** |
 
 ### 2.2 Configuration comes only from the environment
 
@@ -492,11 +493,12 @@ DeepL**. Pieces:
   language nobody has made yet translates the messages and emails **on the
   server first** (`ensure_server_texts`), so the welcome email is already in
   it; without DeepL it goes out in English and the restaurant is still made.
-- What stays Polish whatever the panel's language, because it is the **menu's**
-  content, not the panel's: category suggestions and the starter layout, the
-  starting words printed on QR templates (the owner rewrites them, see the QR
-  studio), the stored allergen/tag values (the panel shows built-ins
-  translated, `usePanelLabels`).
+- What follows the **menu's** language (`base_language`), not the panel's,
+  because it is menu content: category suggestions and the starter layout,
+  note templates, the starting words printed on QR templates (see "Where a
+  restaurant is"). The stored allergen/tag values stay Polish labels in any
+  menu (the panel shows built-ins translated, `usePanelLabels`; the guest
+  menu by key).
 
 A DeepL language needs nothing from a developer. Writing one **by hand**
 instead (better than DeepL, say for a large market): its
@@ -505,8 +507,8 @@ instead (better than DeepL, say for a large market): its
 `src/i18n/panel.test.ts` checks key parity, plural forms, placeholders and
 that every key the code asks for exists.
 
-**Menu languages ("Języki", `/panel/:id/dictionary`).** A catalogue of 34
-languages, `MENU_LANGUAGES` in `backend/app/menu_languages.py` — mirrored by
+**Menu languages ("Języki", `/panel/:id/dictionary`).** A catalogue of 35
+languages, Polish among them, `MENU_LANGUAGES` in `backend/app/menu_languages.py` — mirrored by
 `constants/menuLanguages.ts` and backed by one guest-interface locale per code
 in `src/i18n/locales`; `tests/test_languages.py` fails if the three disagree,
 or if a code has no DeepL target. `restaurant.menu_languages` holds what the
@@ -515,7 +517,9 @@ existed and keeps the old four (en, de, fr, es)**; new rows start with `["en"]`.
 Always read it through `offered_languages()`. The public menu carries
 `restaurant.languages` (base first) and the guest switcher lists only those; a
 guest whose browser asks for another is moved to English if offered, else
-Polish. Locales other than pl/en are **lazy-loaded** (a tiny i18next backend
+the menu's own language. A menu is written in any catalogue language
+(`restaurant.base_language`, set by HQ, see "Where a restaurant is") and
+offered in the others, so a restaurant abroad can offer Polish. Locales other than pl/en are **lazy-loaded** (a tiny i18next backend
 over `import.meta.glob`), so the app root has a `Suspense` boundary. Right-to-
 left text needs no layout flip: the menu theme sets `unicode-bidi: plaintext`
 on every Typography, so each paragraph takes its direction from its own text
@@ -538,8 +542,13 @@ menu przeczyta tu 49% mieszkańców. Czytają je ci, którzy znają angielski lu
 polski. Dodaj litewski, a przeczyta je 98% mieszkańców — o 1,4 mln osób
 więcej." — which says what is now, what is after, and why. The owner asked for
 percentages over words like "most"; an estimate is shown as at most 99% and
-at least "less than 1%", never rounded into a promise. Guidance is deliberate: "Polecane w
-Polsce" (tiered, one-line reasons with no invented statistics) comes before
+at least "less than 1%", never rounded into a promise. The pin and "Twoja
+restauracja tutaj" sit in `restaurant.country`. Guidance is deliberate: for
+a restaurant in Poland "Polecane w Polsce" (tiered, one-line reasons with no
+invented statistics); anywhere else "Polecane", the languages that bring the
+most new readers from nearby countries, each country counting less the
+further it is (`nearbyLanguages` in `reach.ts`, `NEARBY` ≈ 1,600 km) and each
+saying where it is read — never a made-up reason. Either comes before
 world reach, each candidate shows the *new* readers it adds, the upkeep is
 spelled out per new dish, the page warns from `MANY_LANGUAGES` (6) and asks
 for confirmation past `CONFIRM_LANGUAGES_OVER` (10). Adding a language that
@@ -585,6 +594,33 @@ naming the variable, a Resend failure a 502, and both write the whole inquiry to
 the log so it can be recovered. Every visitor-typed value is HTML-escaped in the
 email. The landing page's own origin must be listed in `CORS_ALLOWED_ORIGINS`.
 
+**Where a restaurant is.** HQ sets `restaurant.country` (ISO 3166-1 alpha-2)
+and an optional free-text `address` in the create/edit forms ("Gdzie jest
+restauracja", `LocationFields`); every row from before is in Poland. The
+country gives the two values HQ may still change: `currency` (ISO 4217) and
+`base_language`, the language the owner writes the menu in — both from
+`COUNTRIES` (`app/countries.py`, mirrored by `constants/countries.ts`,
+`tests/test_countries.py` keeps them equal), and both follow the country in
+the form unless set by hand. Country and currency names come from
+`Intl.DisplayNames`. From them:
+
+- **Prices** are written in the restaurant's currency the way its country
+  and menu language write money (`priceFormat` in `utils/price.ts`,
+  `Intl.NumberFormat` with `narrowSymbol`: "24,90 zł", "₺120,00"), the same
+  for every guest. `PriceFormatProvider` wraps the guest menu (from the
+  public payload's `currency`/`country`) and the owner panel (from the header
+  info); components read `usePriceFormat()`. Never format a price by hand.
+- **Starting texts** — category suggestions, the starter layout (picks 0, 3,
+  7, 8 of them), note templates, the QR texts — are hand-written per menu
+  language in `src/i18n/starters/<code>.json`, lazy-loaded for the menu's
+  language (`useMenuStarterTexts`); `starterTexts.test.ts` checks every
+  catalogue language has a complete file and that each set, alone or joined
+  with English, fits `TEXT_LIMITS`.
+- **"Języki"** pins the map and recommends by country (above); its wording
+  names the menu's language instead of saying Polish.
+- **DeepL drafts** read any base language DeepL knows as a source, else
+  auto-detect; **Google reviews** are fetched in the menu's language.
+
 **Notes between the sections ("Tekst w menu").** Lunch hours, what a set
 menu consists of, a word about allergies — text a guest should read that is
 not a dish. `menu_note` is its own table rather than a kind of category, so
@@ -603,7 +639,8 @@ bottom from the board's foot (the only way on a phone), hide while the guest
 searches (not under the allergy filter), keep the owner's line breaks, and are
 phrases in the dictionary like dish names — listed where they sit in the menu
 and served translated. Starting texts are `NOTE_TEMPLATES` in
-`constants/menu.ts`, Polish like the category suggestions, each with an icon.
+`constants/menu.ts` (a key and an icon each), worded in the menu's language
+by its starter texts, like the category suggestions.
 
 A note's text carries a small markup — `**bold**`, `*italic*`, a line
 starting `# ` (heading, in the theme's heading face) or `- ` (list item) —
@@ -655,13 +692,14 @@ Every word on a template is the owner's to write ("Napisy", `QrWording`):
 the name (null follows the restaurant's), the headline, the table card's
 line under the code and the poster's three steps — only the fields the
 chosen format prints are shown. An empty one is left off; the poster
-renumbers and re-centres the steps it keeps. They start Polish, and
-`PRINTED_TEXT_SETS` fills them all at once in Polish, English or both (a
+renumbers and re-centres the steps it keeps. They start in the menu's
+language (its starter texts), and `printedTextSets` fills them all at once
+in that language, English or both — labelled by the languages' own names (a
 ` · ` is where a template breaks the line, one language per line). Texts are
 bounded by `TEXT_LIMITS` and fitted by width, a name always on one line. The
 design, texts included, is remembered per restaurant in the browser
 (`restolink.qr-design.<id>`); an older one without the newer texts gets the
-Polish set.
+menu language's set.
 
 Each template has print sizes:
 
@@ -915,6 +953,8 @@ Deployment prerequisites, carried across several sessions:
       Applied to production (confirmed by the owner, 2026-09-29).
 - [x] **Migration `014`** (`menu_note.style`) — required column.
       Applied to production (confirmed by the owner, 2026-09-30).
+- [ ] **Migration `016`** (`restaurant.country`, `address`, `currency`) —
+      required columns. Apply before the deploy that ships it.
 - [ ] `007`, `008`, `013` and `015` are table-only and optional (`create_all`
       covers them).
 - [ ] **DeepL quota is shared by every restaurant.** Drafting a whole menu into
@@ -956,17 +996,17 @@ Known product gaps, not bugs:
 - The public menu's blocked-status screen ("Menu chwilowo niedostępne.") is
   hardcoded Polish.
 - The landing page promises **unlimited languages** (hero chip and pricing),
-  and deliberately names no number. The catalogue is 34 languages
+  and deliberately names no number. The catalogue is 35 languages
   (`menu_languages.py`), each with a hand-written guest interface; do not "fix"
   the landing copy back to a count.
 - A DeepL panel language is DeepL's wording, unreviewed. There is no screen to
   correct a string; a bad one is fixed by hand-writing the language (§9) or
   editing its `panel_locale` row. Arabic and Hebrew are not offered until the
   panel can mirror its layout.
-- A restaurant outside Poland gets its panel in its language, but the **menu**
-  is still Polish-based: the base language is `pl`, prices are in zł, the
-  starter categories and the QR templates' starting words are Polish, Google reviews are
-  fetched in Polish, and "Języki" recommends languages for Poland. Serving
-  another country is its own piece of work, separate from the panel language.
+- Outside Poland, recommendations come from geography alone: who lives
+  nearby, not who actually visits (no tourism data). Only Poland has a
+  hand-made list with reasons.
+- RestoLink's own prices (subscription, the HQ manual payment) are in złoty
+  whatever a restaurant's currency; that is our billing, not its menu.
 - Scroll-spy tuning (`SPY_ROOT_MARGIN` in `useCategoryScrollSpy.ts`) has never
   been verified against real scrolling — the preview pane cannot scroll.

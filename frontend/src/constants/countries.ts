@@ -10,7 +10,10 @@
  */
 
 /** ISO 3166-1 alpha-2 → [ISO 4217 currency, the menu language it starts with]. */
-export const COUNTRIES: Record<string, readonly [currency: string, menuLanguage: string]> = {
+export const COUNTRIES: Record<
+  string,
+  readonly [currency: string, menuLanguage: string]
+> = {
   // Europe
   AD: ['EUR', 'es'],
   AL: ['ALL', 'en'],
@@ -250,9 +253,4 @@ export function currencyName(code: string, locale: string): string {
   } catch {
     return code;
   }
-}
-
-/** The flag of a country, from its code's regional-indicator letters. */
-export function countryFlag(code: string): string {
-  return String.fromCodePoint(...[...code.toUpperCase()].map((c) => 0x1f1a5 + c.charCodeAt(0)));
 }

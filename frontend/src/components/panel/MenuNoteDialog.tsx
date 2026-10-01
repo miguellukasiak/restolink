@@ -43,14 +43,12 @@ interface MenuNoteDialogProps {
   placement: 'start' | 'end';
   /** The restaurant's colours and font, for the preview. */
   menuTheme?: RestaurantThemeSettings;
+  /** Starting texts by `NOTE_TEMPLATES` key, in the menu's language. */
+  templates?: Record<string, string>;
   saving: boolean;
   onClose: () => void;
   onSave: (body: string, style: MenuNoteStyle) => void;
 }
-
-const TEMPLATE_BODIES: readonly string[] = NOTE_TEMPLATES.map(
-  (template) => template.body,
-);
 
 const LINE_PREFIX = /^(#|[-•])\s+/;
 
@@ -85,6 +83,7 @@ export function MenuNoteDialog({
   note,
   placement,
   menuTheme,
+  templates,
   saving,
   onClose,
   onSave,
@@ -119,8 +118,13 @@ export function MenuNoteDialog({
   const canSave = trimmed !== '' && !tooLong && !unchanged && !saving;
   const dirty = trimmed !== (note?.body ?? '') || !sameLook(look, original);
   // Starting points are offered until the owner writes something of their own.
+  const starting = templates
+    ? NOTE_TEMPLATES.filter((template) => templates[template.key])
+    : [];
   const offerTemplates =
-    note === null && (trimmed === '' || TEMPLATE_BODIES.includes(text));
+    note === null &&
+    starting.length > 0 &&
+    (trimmed === '' || starting.some((template) => templates?.[template.key] === text));
 
   const save = () => {
     if (canSave) onSave(trimmed, look);
@@ -342,8 +346,9 @@ export function MenuNoteDialog({
         <Box sx={{ mt: 2 }}>
           <SectionLabel>{t('noteDialog.templatesTitle')}</SectionLabel>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {NOTE_TEMPLATES.map((template) => {
-              const chosen = text === template.body;
+            {starting.map((template) => {
+              const body = templates?.[template.key] ?? '';
+              const chosen = text === body;
               return (
                 <Chip
                   key={template.key}
@@ -353,7 +358,7 @@ export function MenuNoteDialog({
                   clickable
                   disabled={saving}
                   onClick={() => {
-                    setText(template.body);
+                    setText(body);
                     setLook((current) => ({ ...current, icon: template.icon }));
                   }}
                 />

@@ -28,18 +28,22 @@ interface OfferedLanguagesProps {
 
 /**
  * What guests read where a language is not finished (`offered.fallback.*`).
- * The fallback runs per phrase — English where it exists, then Polish — so
- * an unfinished English cannot be promised as the safety net.
+ * The fallback runs per phrase — English where it exists, then the menu's
+ * own language — so an unfinished English cannot be promised as the safety
+ * net. A Polish menu keeps its own words ("po polsku"); any other names its
+ * language.
  */
 function fallbackKey(
+  base: string,
   offered: readonly string[],
   code: string,
   englishDone: number,
   phrasesTotal: number,
 ) {
-  if (code === 'en' || !offered.includes('en') || englishDone === 0) return 'polish';
+  const own = base === 'pl' ? 'polish' : 'base';
+  if (code === 'en' || !offered.includes('en') || englishDone === 0) return own;
   if (englishDone >= phrasesTotal) return 'english';
-  return 'englishOrPolish';
+  return base === 'pl' ? 'englishOrPolish' : 'englishOrBase';
 }
 
 /**
@@ -72,7 +76,9 @@ export function OfferedLanguages({
 
       {offered.length === 0 && (
         <Alert severity="info" sx={{ borderRadius: radii.md }}>
-          {t('offered.onlyPolish')}
+          {base === 'pl'
+            ? t('offered.onlyPolish')
+            : t('offered.onlyBase', { base: languageName(base) })}
         </Alert>
       )}
 
@@ -87,7 +93,8 @@ export function OfferedLanguages({
             all.filter((entry) => entry !== code),
           );
         const fallback = t(
-          `offered.fallback.${fallbackKey(offered, code, translated('en'), phrasesTotal)}`,
+          `offered.fallback.${fallbackKey(base, offered, code, translated('en'), phrasesTotal)}`,
+          { base: languageName(base) },
         );
         const status =
           share >= 1

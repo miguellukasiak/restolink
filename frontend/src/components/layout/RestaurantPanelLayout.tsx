@@ -18,6 +18,7 @@ import TranslateRoundedIcon from '@mui/icons-material/TranslateRounded';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import { NavLink, Outlet, useLocation, useParams } from 'react-router-dom';
 import { useRestaurantInfo } from '../../hooks/useRestaurantInfo';
+import { PriceFormatProvider } from '../PriceFormatProvider';
 import { useCheckout, useCheckoutReturn } from '../../hooks/useSubscription';
 import { getApiErrorMessage } from '../../services/api';
 import { LogoutButton } from '../auth/LogoutButton';
@@ -123,15 +124,24 @@ export function RestaurantPanelLayout() {
   ];
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
-      <AppBar position="fixed" elevation={0} sx={{ zIndex: (t) => t.zIndex.drawer + 1 }}>
-        <Toolbar>
-          <Stack
-            direction="row"
-            spacing={1.5}
-            sx={{ alignItems: 'center', minWidth: 0, flex: '0 1 auto' }}
-          >
-            {/* The wordmark stands where the brand tile did, so the owner's
+    <PriceFormatProvider
+      currency={restaurant.data?.currency}
+      country={restaurant.data?.country}
+      language={restaurant.data?.base_language}
+    >
+      <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
+        <AppBar
+          position="fixed"
+          elevation={0}
+          sx={{ zIndex: (t) => t.zIndex.drawer + 1 }}
+        >
+          <Toolbar>
+            <Stack
+              direction="row"
+              spacing={1.5}
+              sx={{ alignItems: 'center', minWidth: 0, flex: '0 1 auto' }}
+            >
+              {/* The wordmark stands where the brand tile did, so the owner's
                 own restaurant name keeps the prominence it had — demoting it
                 to make room for ours would be the wrong trade on the screen
                 they work in all day. On a phone there is room for one of
@@ -139,121 +149,122 @@ export function RestaurantPanelLayout() {
                 ellipsis, rather than five wrapped lines pushing the bar over
                 the page. Theirs is set as their menu sets it
                 (RestaurantIdentity). */}
-            <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center' }}>
-              <Wordmark size={18} color="text.primary" />
-            </Box>
-            <Divider
-              orientation="vertical"
-              flexItem
-              sx={{ my: 0.75, display: { xs: 'none', sm: 'block' } }}
-            />
-            <RestaurantIdentity
-              name={
-                restaurant.data?.name ??
-                (restaurant.isError ? t('nav.ownerPanel') : undefined)
-              }
-              logoUrl={restaurant.data?.logo_url}
-              primaryColor={restaurant.data?.primary_color}
-              fontFamily={restaurant.data?.font_family}
-              loading={restaurant.isLoading}
-            />
-          </Stack>
-          <Box sx={{ flexGrow: 1, minWidth: 8 }} />
-          <Box sx={{ mr: { xs: 0.5, sm: 2 }, flexShrink: 0 }}>
-            <PanelLanguageSwitch languages={panelLanguages} />
-          </Box>
-          <Chip
-            size="small"
-            variant="outlined"
-            color="secondary"
-            label={`ID: ${restaurantId.slice(0, 8)}…`}
-            sx={{ fontFamily: 'monospace', display: { xs: 'none', sm: 'inline-flex' } }}
-          />
-          <LogoutButton scope="restaurant" />
-        </Toolbar>
-      </AppBar>
-
-      <Drawer
-        variant="permanent"
-        sx={{
-          width: DRAWER_WIDTH,
-          flexShrink: 0,
-          display: { xs: 'none', md: 'block' },
-          '& .MuiDrawer-paper': {
-            width: DRAWER_WIDTH,
-            boxSizing: 'border-box',
-            border: 'none',
-            bgcolor: 'transparent',
-            px: 2,
-            display: 'flex',
-            flexDirection: 'column',
-          },
-        }}
-      >
-        <Toolbar />
-        {navGroups.map((items, groupIndex) => (
-          <List key={groupIndex} sx={{ pt: groupIndex === 0 ? 2 : 1 }}>
-            {groupIndex > 0 && <Divider sx={{ mx: 2, mb: 1.5 }} />}
-            {items.map((item) => {
-              const selected = location.pathname.startsWith(item.to);
-              return (
-                <ListItemButton
-                  key={item.to}
-                  component={NavLink}
-                  to={item.to}
-                  selected={selected}
-                  sx={{
-                    borderRadius: 999,
-                    mb: 0.5,
-                    '&.Mui-selected': {
-                      bgcolor: (t) => alpha(t.palette.secondary.main, 0.14),
-                      color: 'secondary.dark',
-                      '&:hover': {
-                        bgcolor: (t) => alpha(t.palette.secondary.main, 0.22),
-                      },
-                      '& .MuiListItemIcon-root': { color: 'secondary.dark' },
-                    },
-                  }}
-                >
-                  <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
-                  <ListItemText
-                    primary={item.label}
-                    slotProps={{ primary: { sx: { fontWeight: 600 } } }}
-                  />
-                </ListItemButton>
-              );
-            })}
-          </List>
-        ))}
-      </Drawer>
-
-      <Box
-        component="main"
-        sx={{ flexGrow: 1, minWidth: 0, px: { xs: 2, md: 4 }, pb: 6 }}
-      >
-        <Toolbar />
-        {/* Above the subscription gate on purpose: an admin looking at a
-            blocked restaurant still needs to know whose panel this is. */}
-        <ImpersonationBanner />
-        {access === 'BLOCKED' ? (
-          // Expired/blocked: no access to builder, settings or QR tools.
-          <SubscriptionPaywall
-            onPay={() => void handlePaymentCta()}
-            loading={checkout.isPending}
-          />
-        ) : (
-          <>
-            {access === 'PENDING' && (
-              <SubscriptionPendingBanner
-                onActivate={() => void handlePaymentCta()}
-                loading={checkout.isPending}
-                confirming={confirming}
+              <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center' }}>
+                <Wordmark size={18} color="text.primary" />
+              </Box>
+              <Divider
+                orientation="vertical"
+                flexItem
+                sx={{ my: 0.75, display: { xs: 'none', sm: 'block' } }}
               />
-            )}
-            <Outlet />
-          </>
-        )}
+              <RestaurantIdentity
+                name={
+                  restaurant.data?.name ??
+                  (restaurant.isError ? t('nav.ownerPanel') : undefined)
+                }
+                logoUrl={restaurant.data?.logo_url}
+                primaryColor={restaurant.data?.primary_color}
+                fontFamily={restaurant.data?.font_family}
+                loading={restaurant.isLoading}
+              />
+            </Stack>
+            <Box sx={{ flexGrow: 1, minWidth: 8 }} />
+            <Box sx={{ mr: { xs: 0.5, sm: 2 }, flexShrink: 0 }}>
+              <PanelLanguageSwitch languages={panelLanguages} />
+            </Box>
+            <Chip
+              size="small"
+              variant="outlined"
+              color="secondary"
+              label={`ID: ${restaurantId.slice(0, 8)}…`}
+              sx={{ fontFamily: 'monospace', display: { xs: 'none', sm: 'inline-flex' } }}
+            />
+            <LogoutButton scope="restaurant" />
+          </Toolbar>
+        </AppBar>
+
+        <Drawer
+          variant="permanent"
+          sx={{
+            width: DRAWER_WIDTH,
+            flexShrink: 0,
+            display: { xs: 'none', md: 'block' },
+            '& .MuiDrawer-paper': {
+              width: DRAWER_WIDTH,
+              boxSizing: 'border-box',
+              border: 'none',
+              bgcolor: 'transparent',
+              px: 2,
+              display: 'flex',
+              flexDirection: 'column',
+            },
+          }}
+        >
+          <Toolbar />
+          {navGroups.map((items, groupIndex) => (
+            <List key={groupIndex} sx={{ pt: groupIndex === 0 ? 2 : 1 }}>
+              {groupIndex > 0 && <Divider sx={{ mx: 2, mb: 1.5 }} />}
+              {items.map((item) => {
+                const selected = location.pathname.startsWith(item.to);
+                return (
+                  <ListItemButton
+                    key={item.to}
+                    component={NavLink}
+                    to={item.to}
+                    selected={selected}
+                    sx={{
+                      borderRadius: 999,
+                      mb: 0.5,
+                      '&.Mui-selected': {
+                        bgcolor: (t) => alpha(t.palette.secondary.main, 0.14),
+                        color: 'secondary.dark',
+                        '&:hover': {
+                          bgcolor: (t) => alpha(t.palette.secondary.main, 0.22),
+                        },
+                        '& .MuiListItemIcon-root': { color: 'secondary.dark' },
+                      },
+                    }}
+                  >
+                    <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
+                    <ListItemText
+                      primary={item.label}
+                      slotProps={{ primary: { sx: { fontWeight: 600 } } }}
+                    />
+                  </ListItemButton>
+                );
+              })}
+            </List>
+          ))}
+        </Drawer>
+
+        <Box
+          component="main"
+          sx={{ flexGrow: 1, minWidth: 0, px: { xs: 2, md: 4 }, pb: 6 }}
+        >
+          <Toolbar />
+          {/* Above the subscription gate on purpose: an admin looking at a
+            blocked restaurant still needs to know whose panel this is. */}
+          <ImpersonationBanner />
+          {access === 'BLOCKED' ? (
+            // Expired/blocked: no access to builder, settings or QR tools.
+            <SubscriptionPaywall
+              onPay={() => void handlePaymentCta()}
+              loading={checkout.isPending}
+            />
+          ) : (
+            <>
+              {access === 'PENDING' && (
+                <SubscriptionPendingBanner
+                  onActivate={() => void handlePaymentCta()}
+                  loading={checkout.isPending}
+                  confirming={confirming}
+                />
+              )}
+              <Outlet />
+            </>
+          )}
+        </Box>
       </Box>
-    </Box>
+    </PriceFormatProvider>
   );
 }

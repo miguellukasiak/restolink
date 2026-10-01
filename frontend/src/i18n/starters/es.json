@@ -1,0 +1,31 @@
+{
+  "categories": [
+    "Entrantes",
+    "Sopas",
+    "Ensaladas",
+    "Platos principales",
+    "Pasta",
+    "Pizza",
+    "Hamburguesas",
+    "Postres",
+    "Bebidas",
+    "Café y té"
+  ],
+  "notes": {
+    "lunch": "# Menú del día\nDe lunes a viernes, **12:00–16:00**.\nIncluye: sopa + plato del día.",
+    "allergies": "¿Tienes alguna alergia o intolerancia alimentaria? **Díselo a nuestro personal** — te asesoraremos con gusto.",
+    "waitingTime": "Preparamos todos los platos al momento, por lo que el tiempo de espera puede ser mayor.",
+    "service": "A los grupos de 8 o más personas se les añade un **10 % de servicio**."
+  },
+  "qr": {
+    "cta": "Escanea para ver el menú",
+    "ctaShort": "Escanea el menú",
+    "footer": "Abre la cámara del móvil y apunta al código",
+    "footerShort": "Abre la cámara y apunta al código",
+    "steps": [
+      "Abre la cámara",
+      "Apunta al código",
+      "Elige tus platos"
+    ]
+  }
+}

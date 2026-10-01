@@ -1,0 +1,31 @@
+{
+  "categories": [
+    "Przystawki",
+    "Zupy",
+    "Sałatki",
+    "Dania główne",
+    "Makarony",
+    "Pizza",
+    "Burgery",
+    "Desery",
+    "Napoje",
+    "Kawa i herbata"
+  ],
+  "notes": {
+    "lunch": "# Menu obiadowe\nOd poniedziałku do piątku, **12:00–16:00**.\nZestaw: zupa + danie dnia.",
+    "allergies": "Masz alergię lub nietolerancję pokarmową? **Powiedz obsłudze** — chętnie doradzimy.",
+    "waitingTime": "Wszystkie dania przygotowujemy na bieżąco, dlatego czas oczekiwania może się wydłużyć.",
+    "service": "Do rachunku dla grup od 8 osób doliczamy **10% serwisu**."
+  },
+  "qr": {
+    "cta": "Zeskanuj, aby zobaczyć menu",
+    "ctaShort": "Zeskanuj menu",
+    "footer": "Otwórz aparat w telefonie i skieruj go na kod",
+    "footerShort": "Otwórz aparat i skieruj na kod",
+    "steps": [
+      "Otwórz aparat",
+      "Skieruj na kod",
+      "Wybierz dania"
+    ]
+  }
+}

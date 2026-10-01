@@ -8,6 +8,8 @@ export interface LanguageProgress {
 
 export interface MenuLanguagesResponse {
   base_language: string;
+  /** Where the restaurant is: the map's pin and the recommendations. */
+  country?: string;
   /** Offered to guests besides the base language, in the owner's order. */
   languages: string[];
   /** The whole catalogue the owner can pick from. */

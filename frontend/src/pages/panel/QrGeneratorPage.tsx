@@ -70,21 +70,22 @@ import {
 import {
   CENTER_SCALE,
   DEFAULT_SIZES,
-  DEFAULT_TEXTS,
   DOT_OPTIONS,
   EYE_OPTIONS,
-  PRINTED_TEXT_SETS,
   SAFE_SWATCHES,
   TEXT_LIMITS,
   assessReadability,
   defaultDesign,
   presetsFor,
+  printedTextSets,
   readableOnWhite,
   weakestContrast,
   type CenterChoice,
   type CenterSize,
+  type PrintedTextSet,
   type QrDesign,
 } from '../../components/panel/qr/qrDesign';
+import { useStarterTexts } from '../../hooks/useStarterTexts';
 import {
   decodesTo,
   downloadPng,
@@ -153,7 +154,7 @@ const storageKey = (restaurantId: string) => `restolink.qr-design.${restaurantId
  * A remembered design, if it still has the shape this page expects. Colours
  * are re-validated because they end up inside SVG markup.
  */
-function loadDesign(restaurantId: string): QrDesign | null {
+function loadDesign(restaurantId: string, texts: PrintedTextSet): QrDesign | null {
   try {
     const raw = localStorage.getItem(storageKey(restaurantId));
     if (!raw) return null;
@@ -187,7 +188,8 @@ function loadDesign(restaurantId: string): QrDesign | null {
         ? Math.min(CUSTOM_CODE_CM.max, Math.max(CUSTOM_CODE_CM.min, saved.customCm))
         : 6;
     // Designs saved before every text was editable have only the headline:
-    // the rest starts from the Polish set the templates used to print.
+    // the rest starts from the menu's own language, which is what the
+    // templates used to print.
     const text = (value: unknown, fallback: string, max: number) =>
       typeof value === 'string' ? value.slice(0, max) : fallback;
     return {
@@ -201,8 +203,8 @@ function loadDesign(restaurantId: string): QrDesign | null {
           typeof wording.name === 'string'
             ? wording.name.slice(0, TEXT_LIMITS.name)
             : null,
-        footer: text(wording.footer, DEFAULT_TEXTS.footer, TEXT_LIMITS.footer),
-        steps: DEFAULT_TEXTS.steps.map((step, index) =>
+        footer: text(wording.footer, texts.footer, TEXT_LIMITS.footer),
+        steps: texts.steps.map((step, index) =>
           text(wording.steps?.[index], step, TEXT_LIMITS.step),
         ),
         surface: wording.surface,
@@ -320,13 +322,26 @@ export function QrGeneratorPage() {
   const [tuneOpen, setTuneOpen] = useState(false);
   const [busy, setBusy] = useState<'print' | 'png' | 'svg' | null>(null);
 
+  // The printed texts' starting points, in the menu's own language.
+  const menuLanguage = publicMenu.data?.restaurant.languages?.[0] ?? 'pl';
+  const ownTexts = useStarterTexts(menuLanguage);
+  const englishTexts = useStarterTexts('en');
+  const textSets = useMemo(
+    () =>
+      ownTexts && englishTexts
+        ? printedTextSets(menuLanguage, ownTexts, englishTexts)
+        : null,
+    [menuLanguage, ownTexts, englishTexts],
+  );
+
   useEffect(() => {
-    if (brand && !design) {
+    if (brand && textSets && !design) {
       setDesign(
-        loadDesign(restaurantId) ?? defaultDesign(brand.primary, Boolean(logoUrl)),
+        loadDesign(restaurantId, textSets[0]) ??
+          defaultDesign(brand.primary, Boolean(logoUrl), textSets[0]),
       );
     }
-  }, [brand, design, logoUrl, restaurantId]);
+  }, [brand, design, logoUrl, restaurantId, textSets]);
 
   useEffect(() => {
     if (design) saveDesign(restaurantId, design);
@@ -993,7 +1008,7 @@ export function QrGeneratorPage() {
                   <Typography variant="body2" color="text.secondary" sx={{ mr: 0.25 }}>
                     {t('qr.textSets')}
                   </Typography>
-                  {PRINTED_TEXT_SETS.map((set) => {
+                  {(textSets ?? []).map((set) => {
                     const selected =
                       design.wording.cta === set.cta &&
                       design.wording.footer === set.footer &&
@@ -1003,7 +1018,7 @@ export function QrGeneratorPage() {
                     return (
                       <Chip
                         key={set.id}
-                        label={t(`qr.textSet.${set.id}`)}
+                        label={set.label}
                         size="small"
                         clickable
                         variant={selected ? 'filled' : 'outlined'}

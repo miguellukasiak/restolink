@@ -20,7 +20,7 @@ import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import ContentCopyRoundedIcon from '@mui/icons-material/ContentCopyRounded';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import type { MenuItem } from '../../types';
-import { formatPln } from '../../constants/menu';
+import { usePriceFormat } from '../../hooks/usePriceFormat';
 import { getTagIcon } from '../../constants/menuIcons';
 import { radii } from '../../theme';
 import { usePanelT } from '../../i18n/panel';
@@ -64,6 +64,7 @@ function MenuItemRowComponent({
 }: MenuItemRowProps) {
   const { t } = usePanelT();
   const { allergenLabel, tagLabel } = usePanelLabels();
+  const { format: formatPrice } = usePriceFormat();
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
   const available = item.is_available;
   const description = item.description.trim();
@@ -194,7 +195,7 @@ function MenuItemRowComponent({
                 color: available ? 'text.primary' : 'text.secondary',
               }}
             >
-              {formatPln(item.price)}
+              {formatPrice(item.price)}
             </Typography>
             <Typography
               variant="caption"
@@ -272,7 +273,7 @@ function MenuItemRowComponent({
               pl: 1,
             }}
           >
-            {formatPln(item.price)}
+            {formatPrice(item.price)}
           </Typography>
         </ButtonBase>
 

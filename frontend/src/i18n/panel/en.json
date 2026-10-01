@@ -664,11 +664,6 @@
     "wording": "Printed text",
     "wordingHint": "What guests read on the print — write it in whatever language they speak. An empty field is left off.",
     "textSets": "Fill in:",
-    "textSet": {
-      "pl": "Polish",
-      "en": "English",
-      "plEn": "Polish + English"
-    },
     "headline": "Headline",
     "footerLine": "Line under the code",
     "step": "Step {{number}}",
@@ -765,10 +760,13 @@
     "fallback": {
       "polish": "in Polish",
       "english": "in English",
-      "englishOrPolish": "in English or Polish"
+      "englishOrPolish": "in English or Polish",
+      "base": "in {{base}}",
+      "englishOrBase": "in English or {{base}}"
     },
     "baseSubtitle": "the menu's language — what you write in the Menu builder",
     "onlyPolish": "Guests see the menu in Polish only. Start with English — most foreign guests read it.",
+    "onlyBase": "Guests see the menu in {{base}} only. Start with English — most foreign guests read it.",
     "done": "Done — guests read the whole menu in this language.",
     "untranslated": "Not translated — guests see the menu {{fallback}}.",
     "partial": "{{percent}} done — guests see the rest {{fallback}}.",
@@ -785,6 +783,8 @@
   },
   "addLanguage": {
     "recommended": "Recommended in Poland",
+    "recommendedNearby": "Recommended",
+    "readNearby": "Read nearby, in {{countries}}.",
     "all": "All ({{count}})",
     "search": "Search languages",
     "sortHint": "Biggest gain first: how many new people can read your menu once the language is added.",
@@ -813,7 +813,8 @@
     "changed": "changed",
     "placeholder": "Translation ({{code}})",
     "phraseAria": "Translation of: {{phrase}}",
-    "fallbackNote": "Guests see phrases without a translation in English, or in Polish if that is missing too."
+    "fallbackNote": "Guests see phrases without a translation in English, or in Polish if that is missing too.",
+    "fallbackNoteBase": "Guests see phrases without a translation in English, or in {{base}} if that is missing too."
   },
   "google": {
     "placeIdHelper": "The listing's identifier, not a URL from Google Maps.",

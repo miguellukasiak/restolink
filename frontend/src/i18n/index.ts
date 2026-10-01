@@ -2,7 +2,7 @@ import i18n from 'i18next';
 import type { BackendModule, ResourceKey } from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
-import { BASE_LANGUAGE, MENU_LANGUAGES } from '../constants/menuLanguages';
+import { MENU_LANGUAGES } from '../constants/menuLanguages';
 import en from './locales/en.json';
 import pl from './locales/pl.json';
 
@@ -19,16 +19,15 @@ import pl from './locales/pl.json';
  * restaurant's choice, carried on the menu itself — see LanguageSwitcher.
  */
 
-/** Every language the guest interface can speak: the menus' own, then the catalogue. */
-export const SUPPORTED_LANGUAGES: readonly string[] = [
-  BASE_LANGUAGE.code,
-  ...MENU_LANGUAGES.map((language) => language.code),
-];
+/** Every language the guest interface can speak: the whole catalogue. */
+export const SUPPORTED_LANGUAGES: readonly string[] = MENU_LANGUAGES.map(
+  (language) => language.code,
+);
 
 /** Endonyms: a switcher that renames itself is useless to whoever cannot read
  *  the language currently active. */
 export const LANGUAGE_LABELS: Record<string, string> = Object.fromEntries(
-  [BASE_LANGUAGE, ...MENU_LANGUAGES].map((language) => [language.code, language.endonym]),
+  MENU_LANGUAGES.map((language) => [language.code, language.endonym]),
 );
 
 // Polish and English ship with the page: the menus are written in one and

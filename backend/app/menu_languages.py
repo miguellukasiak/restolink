@@ -16,7 +16,9 @@ Every code in `MENU_LANGUAGES` needs three things to be a real choice:
 #: The catalogue an owner picks from in "Języki", in the panel's order. Large
 #: enough to honour the landing page's "unlimited languages" in any sense a
 #: restaurant cares about, and small enough that each one has a hand-written
-#: guest interface rather than a machine-translated one.
+#: guest interface rather than a machine-translated one. A menu can be written
+#: in any of them (`restaurant.base_language`) and offered in the others —
+#: Polish included, for a restaurant abroad with Polish guests.
 MENU_LANGUAGES: tuple[str, ...] = (
     "en",
     "de",
@@ -28,6 +30,7 @@ MENU_LANGUAGES: tuple[str, ...] = (
     "nl",
     "cs",
     "sk",
+    "pl",
     "ru",
     "lt",
     "lv",

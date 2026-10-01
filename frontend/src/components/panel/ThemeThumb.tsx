@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography';
 import { ThemeProvider, alpha } from '@mui/material/styles';
 import RestaurantMenuRoundedIcon from '@mui/icons-material/RestaurantMenuRounded';
 import type { RestaurantThemeUpdate } from '../../types';
-import { formatPln } from '../../constants/menu';
+import { usePriceFormat } from '../../hooks/usePriceFormat';
 import { createRestaurantTheme } from '../public/RestaurantThemeProvider';
 
 export interface ThumbDish {
@@ -31,6 +31,7 @@ interface ThemeThumbProps {
 function ThemeThumbComponent({ theme, categoryName, dishes, logoUrl }: ThemeThumbProps) {
   const muiTheme = useMemo(() => createRestaurantTheme(theme), [theme]);
   const { menuDecor } = muiTheme;
+  const { format: formatPrice } = usePriceFormat();
 
   return (
     <ThemeProvider theme={muiTheme}>
@@ -168,7 +169,7 @@ function ThemeThumbComponent({ theme, categoryName, dishes, logoUrl }: ThemeThum
                 <Typography
                   sx={{ fontSize: 8, fontWeight: 700, lineHeight: 1.3, opacity: 0.8 }}
                 >
-                  {formatPln(dish.price)}
+                  {formatPrice(dish.price)}
                 </Typography>
               </Box>
             </Box>

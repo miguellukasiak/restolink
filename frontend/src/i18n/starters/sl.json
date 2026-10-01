@@ -1,0 +1,31 @@
+{
+  "categories": [
+    "Predjedi",
+    "Juhe",
+    "Solate",
+    "Glavne jedi",
+    "Testenine",
+    "Pica",
+    "Burgerji",
+    "Sladice",
+    "Pijače",
+    "Kava in čaj"
+  ],
+  "notes": {
+    "lunch": "# Kosilo\nOd ponedeljka do petka, **12:00–16:00**.\nMeni: juha + jed dneva.",
+    "allergies": "Imate alergijo ali prehransko intoleranco? **Povejte osebju** — z veseljem vam svetujemo.",
+    "waitingTime": "Vse jedi pripravljamo sproti, zato je čas čakanja lahko daljši.",
+    "service": "Skupinam od 8 oseb naprej računu prištejemo **10 % za postrežbo**."
+  },
+  "qr": {
+    "cta": "Skenirajte in si oglejte meni",
+    "ctaShort": "Skenirajte meni",
+    "footer": "Odprite kamero telefona in jo usmerite v kodo",
+    "footerShort": "Odprite kamero, usmerite v kodo",
+    "steps": [
+      "Odprite kamero",
+      "Usmerite v kodo",
+      "Izberite jedi"
+    ]
+  }
+}

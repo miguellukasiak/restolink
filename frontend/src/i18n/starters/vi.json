@@ -1,0 +1,31 @@
+{
+  "categories": [
+    "Khai vị",
+    "Súp",
+    "Salad",
+    "Món chính",
+    "Mì Ý",
+    "Pizza",
+    "Burger",
+    "Tráng miệng",
+    "Đồ uống",
+    "Cà phê và trà"
+  ],
+  "notes": {
+    "lunch": "# Thực đơn trưa\nTừ thứ Hai đến thứ Sáu, **12:00–16:00**.\nSuất: súp + món của ngày.",
+    "allergies": "Bạn bị dị ứng hoặc không dung nạp thực phẩm? **Hãy báo nhân viên** — chúng tôi sẵn lòng tư vấn.",
+    "waitingTime": "Tất cả món ăn đều được chế biến khi gọi món, vì vậy thời gian chờ có thể lâu hơn.",
+    "service": "Nhóm từ 8 người trở lên sẽ được cộng **10% phí phục vụ** vào hóa đơn."
+  },
+  "qr": {
+    "cta": "Quét mã để xem thực đơn",
+    "ctaShort": "Quét thực đơn",
+    "footer": "Mở camera điện thoại và hướng vào mã",
+    "footerShort": "Mở camera, hướng vào mã",
+    "steps": [
+      "Mở camera",
+      "Hướng vào mã",
+      "Chọn món"
+    ]
+  }
+}

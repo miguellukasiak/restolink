@@ -1,4 +1,6 @@
 import { contrastRatio, hexToRgb } from '../../../utils/colors';
+import { getMenuLanguage } from '../../../constants/menuLanguages';
+import type { StarterTexts } from '../../../constants/starterTexts';
 import type { DotStyle, EyeStyle, QrLook } from './qrArt';
 import {
   FORMATS,
@@ -61,48 +63,52 @@ export const DOT_OPTIONS: readonly DotStyle[] = [
 export const EYE_OPTIONS: readonly EyeStyle[] = ['square', 'rounded', 'circle', 'leaf'];
 
 /** How long each printed text may be, so it still fits its place. */
-export const TEXT_LIMITS = { name: 40, cta: 40, footer: 80, step: 40 } as const;
+export const TEXT_LIMITS = { name: 40, cta: 40, footer: 80, step: 50 } as const;
 
 /**
- * Every printed text at once, in one language or two — the starting points
- * the owner then edits freely. Printed for guests, so these are the guests'
- * words whatever the panel's language; Polish first, the menu's base.
- * Named in the panel by `qr.textSet.<id>`.
+ * Every printed text at once — the starting points the owner then edits
+ * freely. Printed for guests, so in the menu's language whatever the panel's
+ * (its starter texts), in English, or in both: " · " is where a template
+ * breaks the line, so each language gets its own. Named by the languages'
+ * own names, which need no translating.
  */
 export interface PrintedTextSet {
-  id: 'pl' | 'en' | 'plEn';
+  id: string;
+  label: string;
   cta: string;
   footer: string;
   steps: string[];
 }
 
-export const PRINTED_TEXT_SETS: readonly PrintedTextSet[] = [
-  {
-    id: 'pl',
-    cta: 'Zeskanuj, aby zobaczyć menu',
-    footer: 'Otwórz aparat w telefonie i skieruj go na kod',
-    steps: ['Otwórz aparat', 'Skieruj na kod', 'Wybierz dania'],
-  },
-  {
-    id: 'en',
-    cta: 'Scan to see the menu',
-    footer: 'Open your phone camera and point it at the code',
-    steps: ['Open the camera', 'Point it at the code', 'Choose your dishes'],
-  },
-  {
-    // " · " is where the template breaks a line, so each language gets its own.
-    id: 'plEn',
-    cta: 'Zeskanuj menu · Scan the menu',
-    footer: 'Otwórz aparat i skieruj na kod · Open the camera, point at the code',
-    steps: [
-      'Otwórz aparat · Open the camera',
-      'Skieruj na kod · Point at the code',
-      'Wybierz dania · Choose your dishes',
-    ],
-  },
-];
-
-export const DEFAULT_TEXTS = PRINTED_TEXT_SETS[0];
+export function printedTextSets(
+  language: string,
+  own: StarterTexts,
+  english: StarterTexts,
+): PrintedTextSet[] {
+  const ownName = getMenuLanguage(language)?.endonym ?? language;
+  const single = (id: string, label: string, texts: StarterTexts): PrintedTextSet => ({
+    id,
+    label,
+    cta: texts.qr.cta,
+    footer: texts.qr.footer,
+    steps: [...texts.qr.steps],
+  });
+  if (language === 'en') return [single('en', 'English', english)];
+  const both = (a: string, b: string, max: number) => `${a} · ${b}`.slice(0, max);
+  return [
+    single(language, ownName, own),
+    single('en', 'English', english),
+    {
+      id: `${language}+en`,
+      label: `${ownName} + English`,
+      cta: both(own.qr.ctaShort, english.qr.ctaShort, TEXT_LIMITS.cta),
+      footer: both(own.qr.footerShort, english.qr.footerShort, TEXT_LIMITS.footer),
+      steps: own.qr.steps.map((step, index) =>
+        both(step, english.qr.steps[index], TEXT_LIMITS.step),
+      ),
+    },
+  ];
+}
 
 /** Dark, print-safe colours: every one reads at 7:1 or better on white.
  *  Named in the panel by `qr.swatch.<id>`. */
@@ -213,7 +219,13 @@ export function presetsFor(brandColor: string): QrPreset[] {
   ];
 }
 
-export function defaultDesign(brandColor: string, hasLogo: boolean): QrDesign {
+/** A new restaurant's design: its first ready-made look, with `texts` (the
+ *  menu's own language) printed on it. */
+export function defaultDesign(
+  brandColor: string,
+  hasLogo: boolean,
+  texts: PrintedTextSet,
+): QrDesign {
   const [first] = presetsFor(brandColor);
   return {
     look: first.look,
@@ -224,11 +236,11 @@ export function defaultDesign(brandColor: string, hasLogo: boolean): QrDesign {
     sizes: DEFAULT_SIZES,
     customCm: 6,
     wording: {
-      cta: DEFAULT_TEXTS.cta,
+      cta: texts.cta,
       showName: true,
       name: null,
-      footer: DEFAULT_TEXTS.footer,
-      steps: [...DEFAULT_TEXTS.steps],
+      footer: texts.footer,
+      steps: [...texts.steps],
       surface: 'brand',
     },
   };

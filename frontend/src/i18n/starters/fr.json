@@ -1,0 +1,31 @@
+{
+  "categories": [
+    "Entrées",
+    "Soupes",
+    "Salades",
+    "Plats principaux",
+    "Pâtes",
+    "Pizzas",
+    "Burgers",
+    "Desserts",
+    "Boissons",
+    "Café et thé"
+  ],
+  "notes": {
+    "lunch": "# Menu du midi\nDu lundi au vendredi, **12h00–16h00**.\nFormule : soupe + plat du jour.",
+    "allergies": "Allergie ou intolérance alimentaire ? **Parlez-en à notre équipe** — nous vous conseillerons volontiers.",
+    "waitingTime": "Tous nos plats sont préparés à la commande, le temps d’attente peut donc être plus long.",
+    "service": "Pour les groupes de 8 personnes ou plus, **10 % de service** sont ajoutés à l’addition."
+  },
+  "qr": {
+    "cta": "Scannez pour voir le menu",
+    "ctaShort": "Scannez le menu",
+    "footer": "Ouvrez l’appareil photo et visez le code",
+    "footerShort": "Ouvrez l’appareil photo, visez le code",
+    "steps": [
+      "Ouvrez l’appareil photo",
+      "Visez le code",
+      "Choisissez vos plats"
+    ]
+  }
+}

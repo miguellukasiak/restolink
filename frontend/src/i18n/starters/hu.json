@@ -1,0 +1,31 @@
+{
+  "categories": [
+    "Előételek",
+    "Levesek",
+    "Saláták",
+    "Főételek",
+    "Tészták",
+    "Pizza",
+    "Burgerek",
+    "Desszertek",
+    "Italok",
+    "Kávé és tea"
+  ],
+  "notes": {
+    "lunch": "# Ebédmenü\nHétfőtől péntekig, **12:00–16:00**.\nMenü: leves + napi ajánlat.",
+    "allergies": "Ételallergiája vagy -érzékenysége van? **Szóljon a felszolgálónak** — szívesen segítünk.",
+    "waitingTime": "Minden ételt frissen készítünk, ezért a várakozási idő hosszabb lehet.",
+    "service": "8 fős vagy nagyobb társaságok számlájához **10% szervizdíjat** számolunk fel."
+  },
+  "qr": {
+    "cta": "Szkennelje be az étlapért",
+    "ctaShort": "Szkennelje az étlapot",
+    "footer": "Nyissa meg a telefon kameráját, és irányítsa a kódra",
+    "footerShort": "Nyissa meg a kamerát, irányítsa a kódra",
+    "steps": [
+      "Nyissa meg a kamerát",
+      "Irányítsa a kódra",
+      "Válasszon ételt"
+    ]
+  }
+}

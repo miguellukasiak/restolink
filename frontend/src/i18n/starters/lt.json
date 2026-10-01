@@ -1,0 +1,31 @@
+{
+  "categories": [
+    "Užkandžiai",
+    "Sriubos",
+    "Salotos",
+    "Pagrindiniai patiekalai",
+    "Makaronai",
+    "Pica",
+    "Mėsainiai",
+    "Desertai",
+    "Gėrimai",
+    "Kava ir arbata"
+  ],
+  "notes": {
+    "lunch": "# Pietų meniu\nNuo pirmadienio iki penktadienio, **12:00–16:00**.\nRinkinys: sriuba + dienos patiekalas.",
+    "allergies": "Turite alergiją ar maisto netoleravimą? **Pasakykite personalui** — mielai patarsime.",
+    "waitingTime": "Visus patiekalus gaminame užsakius, todėl laukimo laikas gali pailgėti.",
+    "service": "Grupėms nuo 8 asmenų prie sąskaitos pridedame **10 % aptarnavimo mokestį**."
+  },
+  "qr": {
+    "cta": "Nuskenuokite ir pamatykite meniu",
+    "ctaShort": "Nuskenuokite meniu",
+    "footer": "Atidarykite telefono kamerą ir nukreipkite ją į kodą",
+    "footerShort": "Atidarykite kamerą, nukreipkite į kodą",
+    "steps": [
+      "Atidarykite kamerą",
+      "Nukreipkite į kodą",
+      "Rinkitės patiekalus"
+    ]
+  }
+}

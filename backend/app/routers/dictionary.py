@@ -64,7 +64,7 @@ _DEEPL_SOURCES = frozenset(
 )
 _DEEPL_SOURCE = {
     code: code.upper()
-    for code in ("pl", *DICTIONARY_LANGUAGES)
+    for code in DICTIONARY_LANGUAGES
     if code.upper() in _DEEPL_SOURCES
 }
 

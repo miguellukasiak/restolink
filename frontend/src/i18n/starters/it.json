@@ -1,0 +1,31 @@
+{
+  "categories": [
+    "Antipasti",
+    "Zuppe",
+    "Insalate",
+    "Piatti principali",
+    "Pasta",
+    "Pizza",
+    "Hamburger",
+    "Dolci",
+    "Bevande",
+    "Caffè e tè"
+  ],
+  "notes": {
+    "lunch": "# Menù pranzo\nDal lunedì al venerdì, **12:00–16:00**.\nMenù: zuppa + piatto del giorno.",
+    "allergies": "Allergie o intolleranze alimentari? **Chiedi al personale** — saremo lieti di consigliarti.",
+    "waitingTime": "Prepariamo tutti i piatti al momento, quindi i tempi di attesa possono allungarsi.",
+    "service": "Per i gruppi di 8 o più persone aggiungiamo al conto il **10% di servizio**."
+  },
+  "qr": {
+    "cta": "Scansiona per vedere il menù",
+    "ctaShort": "Scansiona il menù",
+    "footer": "Apri la fotocamera e inquadra il codice",
+    "footerShort": "Apri la fotocamera, inquadra il codice",
+    "steps": [
+      "Apri la fotocamera",
+      "Inquadra il codice",
+      "Scegli i piatti"
+    ]
+  }
+}

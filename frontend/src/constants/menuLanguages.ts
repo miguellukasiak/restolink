@@ -1,6 +1,7 @@
 /*
- * The languages a menu can be offered in: what the owner picks from in
- * "Języki" and what a guest can switch to.
+ * The languages a menu can be written in and offered in: what the owner
+ * picks from in "Języki" and what a guest can switch to. A restaurant's own
+ * language (`base_language`) is left out of what it can add.
  *
  * The codes and their order mirror MENU_LANGUAGES in the backend
  * (app/menu_languages.py); every one also has a guest-interface locale in
@@ -82,6 +83,8 @@ export const MENU_LANGUAGES: readonly MenuLanguage[] = [
     tier: 2,
     reason: true,
   },
+  // For a restaurant abroad; a Polish menu has it as its own language.
+  { code: 'pl', endonym: 'Polski' },
   {
     code: 'ru',
     endonym: 'Русский',
@@ -134,15 +137,7 @@ export const MENU_LANGUAGES: readonly MenuLanguage[] = [
   { code: 'th', endonym: 'ไทย' },
 ];
 
-/** The menu's own language, which is never in the catalogue above. */
-export const BASE_LANGUAGE: MenuLanguage = {
-  code: 'pl',
-  endonym: 'Polski',
-};
-
-const BY_CODE = new Map(
-  [BASE_LANGUAGE, ...MENU_LANGUAGES].map((language) => [language.code, language]),
-);
+const BY_CODE = new Map(MENU_LANGUAGES.map((language) => [language.code, language]));
 
 export function getMenuLanguage(code: string): MenuLanguage | undefined {
   return BY_CODE.get(code);

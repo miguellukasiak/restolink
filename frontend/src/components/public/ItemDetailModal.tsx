@@ -17,7 +17,7 @@ import { visuallyHidden } from '@mui/utils';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import RestaurantMenuRoundedIcon from '@mui/icons-material/RestaurantMenuRounded';
 import type { PublicMenuItem } from '../../types';
-import { formatPln } from '../../constants/menu';
+import { usePriceFormat } from '../../hooks/usePriceFormat';
 import { getAllergenIcon, getTagIcon } from '../../constants/menuIcons';
 import { useBackButtonClose } from '../../hooks/useBackButtonClose';
 import { useMenuLabels } from '../../hooks/useMenuLabels';
@@ -87,6 +87,7 @@ export function DishDetailBody({
 }) {
   const { t } = useTranslation();
   const { allergenLabel, tagLabel } = useMenuLabels();
+  const { format: formatPrice } = usePriceFormat();
 
   const allergensText =
     item.allergens.length > 0
@@ -116,15 +117,15 @@ export function DishDetailBody({
           <Typography
             variant="h5"
             component="p"
-            aria-label={`${t('price')}: ${formatPln(item.price)}`}
+            aria-label={`${t('price')}: ${formatPrice(item.price)}`}
             sx={{ color: 'primary.main', fontWeight: 800, whiteSpace: 'nowrap' }}
           >
-            {formatPln(item.price)}
+            {formatPrice(item.price)}
           </Typography>
         </Stack>
         {/* Read immediately after the title: name, price, then allergens. */}
         <Typography component="p" id={`${idPrefix}-summary`} sx={visuallyHidden}>
-          {`${item.name}. ${t('price')}: ${formatPln(item.price)}. ${t(
+          {`${item.name}. ${t('price')}: ${formatPrice(item.price)}. ${t(
             'allergens',
           )}: ${allergensText}.`}
         </Typography>

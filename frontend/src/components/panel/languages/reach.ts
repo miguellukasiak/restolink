@@ -238,6 +238,77 @@ export function gain(
   return reach(countries, [...languages, language]) - reach(countries, languages);
 }
 
+/** A country on the map: its people and its centre, in map units. */
+export interface PlacedCountry extends PopulatedCountry {
+  c: readonly number[];
+}
+
+/**
+ * How far guests travel, in map units (Equal Earth, 1000 wide — about 35 km
+ * each in Europe): a country this far from the restaurant (some 1,600 km)
+ * counts about a third as much as one next door, and one twice as far
+ * hardly at all. Tuned so Germany is offered Italian, French and Czech
+ * rather than the Arabic of North Africa's far larger populations.
+ */
+const NEARBY = 45;
+
+/** A language worth adding for a restaurant outside Poland. */
+export interface NearbyLanguage {
+  code: string;
+  /** New readers it brings, nearer countries counting more. */
+  weighted: number;
+  /** The nearby countries where it adds the most readers, best first. */
+  readIn: string[];
+}
+
+/**
+ * The languages that would bring a restaurant in `home` the most new
+ * readers, counting countries less the further they are — guests mostly
+ * come from nearby. For Poland the panel has a hand-made list instead;
+ * this is how every other country gets recommendations without invented
+ * reasons. A home not on the map counts every country alike.
+ */
+export function nearbyLanguages(
+  countries: readonly PlacedCountry[],
+  home: string,
+  languages: readonly string[],
+  candidates: readonly string[],
+  limit = 6,
+): NearbyLanguage[] {
+  const centre = countries.find((country) => country.key === home)?.c;
+  const weighted = countries.map((country) => {
+    const distance = centre
+      ? Math.hypot(country.c[0] - centre[0], country.c[1] - centre[1])
+      : 0;
+    return { country, weight: Math.exp(-((distance / NEARBY) ** 2)) };
+  });
+  return candidates
+    .filter((code) => !languages.includes(code))
+    .map((code) => {
+      const gains = weighted
+        .map(({ country, weight }) => ({
+          key: country.key,
+          people:
+            country.pop *
+            weight *
+            (coverage(country.key, [...languages, code]) -
+              coverage(country.key, languages)),
+        }))
+        .filter((entry) => entry.people > 0);
+      return {
+        code,
+        weighted: gains.reduce((sum, entry) => sum + entry.people, 0),
+        readIn: gains
+          .sort((a, b) => b.people - a.people)
+          .slice(0, 3)
+          .map((entry) => entry.key),
+      };
+    })
+    .filter((entry) => entry.weighted >= 50_000)
+    .sort((a, b) => b.weighted - a.weighted)
+    .slice(0, limit);
+}
+
 /**
  * The language that would help a country most, among `candidates` not yet in
  * `languages` — what clicking the country on the map adds. Null when none of

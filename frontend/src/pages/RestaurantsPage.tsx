@@ -40,6 +40,7 @@ import { useSnackbar } from '../components/feedback/SnackbarProvider';
 import { getApiErrorMessage } from '../services/api';
 import { StatusChip } from '../components/restaurants/StatusChip';
 import { panelLanguageLabel } from '../components/restaurants/panelLanguageLabel';
+import { countryName } from '../constants/countries';
 import { ManualPaymentDialog } from '../components/restaurants/ManualPaymentDialog';
 import { AddRestaurantDialog } from '../components/restaurants/AddRestaurantDialog';
 import { EditRestaurantDialog } from '../components/restaurants/EditRestaurantDialog';
@@ -220,6 +221,28 @@ export function RestaurantsPage() {
             icon={<WorkspacePremiumRoundedIcon />}
             label={params.row.package?.name ?? '—'}
           />
+        ),
+      },
+      {
+        field: 'country',
+        headerName: 'Kraj',
+        width: 150,
+        sortable: false,
+        renderCell: (params: GridRenderCellParams<RestaurantListItem>) => (
+          <Tooltip
+            title={params.row.address ?? ''}
+            arrow
+            disableHoverListener={!params.row.address}
+          >
+            <Stack spacing={0.25} sx={{ py: 1, minWidth: 0 }}>
+              <Typography variant="body2" noWrap>
+                {countryName(params.row.country, 'pl')}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" noWrap>
+                menu {params.row.base_language.toUpperCase()} · {params.row.currency}
+              </Typography>
+            </Stack>
+          </Tooltip>
         ),
       },
       {

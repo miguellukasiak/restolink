@@ -19,53 +19,17 @@ export const TAG_OPTIONS = [
   'Nowość',
 ] as const;
 
-/** One-tap names offered when adding a category: the sections most menus have. */
-export const CATEGORY_SUGGESTIONS = [
-  'Przystawki',
-  'Zupy',
-  'Sałatki',
-  'Dania główne',
-  'Makarony',
-  'Pizza',
-  'Burgery',
-  'Desery',
-  'Napoje',
-  'Kawa i herbata',
-] as const;
-
-/** The skeleton an empty menu can be started from in one click. */
-export const STARTER_CATEGORIES = ['Przystawki', 'Dania główne', 'Desery', 'Napoje'] as const;
-
 /**
- * Starting points for a note between the menu's sections, in the menu's own
- * language like the category names above, each with the icon that suits it.
- * The owner edits the hours and amounts; the panel names each one through
- * `noteDialog.templates.<key>`.
+ * Starting points for a note between the menu's sections, each with the icon
+ * that suits it. Their text is in the menu's own language, from its starter
+ * texts (`notes.<key>`, constants/starterTexts.ts); the panel names each one
+ * through `noteDialog.templates.<key>`.
  */
 export const NOTE_TEMPLATES = [
-  {
-    key: 'lunch',
-    icon: 'clock',
-    body:
-      '# Menu obiadowe\n' +
-      'Od poniedziałku do piątku, **12:00–16:00**.\n' +
-      'Zestaw: zupa + danie dnia.',
-  },
-  {
-    key: 'allergies',
-    icon: 'allergy',
-    body: 'Masz alergię lub nietolerancję pokarmową? **Powiedz obsłudze** — chętnie doradzimy.',
-  },
-  {
-    key: 'waitingTime',
-    icon: 'fire',
-    body: 'Wszystkie dania przygotowujemy na bieżąco, dlatego czas oczekiwania może się wydłużyć.',
-  },
-  {
-    key: 'service',
-    icon: 'info',
-    body: 'Do rachunku dla grup od 8 osób doliczamy **10% serwisu**.',
-  },
+  { key: 'lunch', icon: 'clock' },
+  { key: 'allergies', icon: 'allergy' },
+  { key: 'waitingTime', icon: 'fire' },
+  { key: 'service', icon: 'info' },
 ] as const;
 
 export const NOTE_MAX_LENGTH = 1000;
@@ -116,15 +80,4 @@ export function getAllergenI18nKey(allergen: string): string | null {
  *  vocabulary — which callers show as stored rather than blank. */
 export function getTagI18nKey(tag: string): string | null {
   return lookupKey(TAG_I18N_KEYS, tag);
-}
-
-/** The currency's sign, as the menu's prices write it. */
-export const CURRENCY_SYMBOL = 'zł';
-
-/** Formats a price in PLN with Polish conventions (e.g. "24,90 zł"). */
-export function formatPln(value: number): string {
-  return new Intl.NumberFormat('pl-PL', {
-    style: 'currency',
-    currency: 'PLN',
-  }).format(value);
 }

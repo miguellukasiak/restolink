@@ -26,9 +26,10 @@ import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import SmartphoneRoundedIcon from '@mui/icons-material/SmartphoneRounded';
 import NotesRoundedIcon from '@mui/icons-material/NotesRounded';
 import type { MenuCategory, MenuItem, MenuNote, MenuNoteStyle } from '../../types';
-import { CATEGORY_SUGGESTIONS, STARTER_CATEGORIES } from '../../constants/menu';
+import { starterCategories } from '../../constants/starterTexts';
 import { useMenu } from '../../hooks/useMenu';
 import { usePublicMenu } from '../../hooks/usePublicMenu';
+import { useMenuStarterTexts } from '../../hooks/useStarterTexts';
 import { useSaveMenuItem } from '../../hooks/useSaveMenuItem';
 import { useReorderMenu } from '../../hooks/useReorderMenu';
 import { useAddCategory } from '../../hooks/useAddCategory';
@@ -176,6 +177,12 @@ export function MenuBuilderPage() {
   const dialogPhone = useFittedPhone({ reserveY: 200, reserveX: 72 });
   const menu = useMenu(restaurantId);
   const publicMenu = usePublicMenu(restaurantId);
+  // Category names and note templates in the menu's own language.
+  const starterTexts = useMenuStarterTexts(restaurantId);
+  const starterNames = useMemo(
+    () => (starterTexts ? starterCategories(starterTexts) : []),
+    [starterTexts],
+  );
   const saveMenuItem = useSaveMenuItem(restaurantId);
   const reorderMenu = useReorderMenu(restaurantId);
   const addCategory = useAddCategory(restaurantId);
@@ -453,7 +460,7 @@ export function MenuBuilderPage() {
     setStartingMenu(true);
     try {
       // One at a time, so they are created in the order they are listed.
-      for (const name of STARTER_CATEGORIES) {
+      for (const name of starterNames) {
         await addCategory.mutateAsync(name);
       }
       showSuccess(t('builder.started'));
@@ -632,8 +639,10 @@ export function MenuBuilderPage() {
     const taken = new Set(
       categories.map((category) => category.name.trim().toLowerCase()),
     );
-    return CATEGORY_SUGGESTIONS.filter((name) => !taken.has(name.toLowerCase()));
-  }, [categories]);
+    return (starterTexts?.categories ?? []).filter(
+      (name) => !taken.has(name.toLowerCase()),
+    );
+  }, [categories, starterTexts]);
 
   // Before the notes arrive the board waits too, so they do not pop in under
   // the owner's hand. Notes that fail to load (an API that predates them)
@@ -809,7 +818,8 @@ export function MenuBuilderPage() {
             <BoardSkeleton />
           ) : isEmpty ? (
             <MenuStarter
-              busy={startingMenu}
+              names={starterNames}
+              busy={startingMenu || starterNames.length === 0}
               onStart={() => void startMenu()}
               onCustom={() => setAddCategoryOpen(true)}
             />
@@ -948,6 +958,7 @@ export function MenuBuilderPage() {
         note={noteEditor.note}
         placement={noteEditor.placement}
         menuTheme={publicMenu.data?.restaurant.theme}
+        templates={starterTexts?.notes}
         saving={addNote.isPending || updateNote.isPending}
         onClose={() => setNoteEditor((previous) => ({ ...previous, open: false }))}
         onSave={saveNote}

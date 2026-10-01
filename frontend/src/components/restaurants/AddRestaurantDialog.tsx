@@ -24,6 +24,8 @@ import { useAddRestaurant } from '../../hooks/useAddRestaurant';
 import { useSnackbar } from '../feedback/SnackbarProvider';
 import { getApiErrorMessage } from '../../services/api';
 import { PanelLanguageField } from './PanelLanguageField';
+import { LocationFields } from './LocationFields';
+import { locationFor, type RestaurantLocation } from './location';
 
 const addRestaurantSchema = z.object({
   name: z.string().trim().min(2, 'Nazwa musi mieć co najmniej 2 znaki'),
@@ -31,6 +33,12 @@ const addRestaurantSchema = z.object({
   contact_phone: z.string().trim().min(9, 'Telefon musi mieć co najmniej 9 znaków'),
   package_id: z.string().min(1, 'Wybierz pakiet'),
   panel_language: z.string(),
+  location: z.object({
+    country: z.string().length(2),
+    address: z.string(),
+    currency: z.string().length(3),
+    base_language: z.string().min(2),
+  }),
 });
 
 type AddRestaurantFormValues = z.infer<typeof addRestaurantSchema>;
@@ -41,6 +49,7 @@ const EMPTY_FORM: AddRestaurantFormValues = {
   contact_phone: '',
   package_id: '',
   panel_language: '',
+  location: locationFor('PL'),
 };
 
 interface AddRestaurantDialogProps {
@@ -91,6 +100,10 @@ export function AddRestaurantDialog({
         contact_phone: values.contact_phone.trim(),
         package_id: values.package_id,
         panel_language: values.panel_language || null,
+        country: values.location.country,
+        address: values.location.address.trim() || null,
+        currency: values.location.currency,
+        base_language: values.location.base_language,
       },
       {
         onSuccess: (created) => {
@@ -113,7 +126,7 @@ export function AddRestaurantDialog({
     <Dialog
       open={open}
       onClose={isSubmitting ? undefined : onClose}
-      maxWidth="xs"
+      maxWidth="sm"
       fullWidth
       slotProps={{ paper: { component: 'form', onSubmit } }}
     >
@@ -220,6 +233,18 @@ export function AddRestaurantDialog({
                   </MenuItem>
                 ))}
               </TextField>
+            )}
+          />
+
+          <Controller
+            name="location"
+            control={control}
+            render={({ field }) => (
+              <LocationFields
+                value={field.value}
+                onChange={(next: RestaurantLocation) => field.onChange(next)}
+                disabled={isSubmitting}
+              />
             )}
           />
 

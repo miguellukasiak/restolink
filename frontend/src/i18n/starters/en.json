@@ -1,0 +1,31 @@
+{
+  "categories": [
+    "Starters",
+    "Soups",
+    "Salads",
+    "Main courses",
+    "Pasta",
+    "Pizza",
+    "Burgers",
+    "Desserts",
+    "Drinks",
+    "Coffee & tea"
+  ],
+  "notes": {
+    "lunch": "# Lunch menu\nMonday to Friday, **12:00–16:00**.\nSet menu: soup + dish of the day.",
+    "allergies": "Allergy or food intolerance? **Tell our staff** — we will gladly advise you.",
+    "waitingTime": "We cook every dish to order, so waiting times may be longer.",
+    "service": "A **10% service charge** is added to the bill for groups of 8 or more."
+  },
+  "qr": {
+    "cta": "Scan to see the menu",
+    "ctaShort": "Scan the menu",
+    "footer": "Open your phone camera and point it at the code",
+    "footerShort": "Open the camera, point at the code",
+    "steps": [
+      "Open the camera",
+      "Point at the code",
+      "Choose your dishes"
+    ]
+  }
+}

@@ -35,7 +35,9 @@ describe('the share table', () => {
 
   it('gives every catalogue language somewhere it is read', () => {
     for (const code of catalogue) {
-      expect(gain(countries, ['pl'], code), code).toBeGreaterThan(0);
+      // Measured from a Polish menu — or, for Polish itself, an English one.
+      const base = code === 'pl' ? 'en' : 'pl';
+      expect(gain(countries, [base], code), code).toBeGreaterThan(0);
     }
   });
 });

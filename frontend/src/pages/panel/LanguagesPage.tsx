@@ -21,9 +21,6 @@ import { useMenuLanguages, useSaveMenuLanguages } from '../../hooks/useMenuLangu
 import { getApiErrorMessage } from '../../services/api';
 import { radii } from '../../theme';
 
-/** Where a menu written in this language is: the pin on the map. */
-const HOME_COUNTRY: Record<string, string> = { pl: 'PL' };
-
 /** How long the translations glow after a language is added. */
 const SPOTLIGHT_MS = 2400;
 
@@ -70,8 +67,8 @@ function Section({
  *
  * It opens on the world: how many people can read this menu now, where they
  * are, and what one more language would change. Under it, the languages on
- * offer with how far each has got, the ones worth adding for a restaurant in
- * Poland, and the translations themselves.
+ * offer with how far each has got, the ones worth adding where the
+ * restaurant is, and the translations themselves.
  *
  * The screen is built to encourage the right languages rather than many:
  * every candidate shows how many *new* readers it brings (so English-reading
@@ -100,6 +97,7 @@ export default function LanguagesPage() {
 
   const offered = data.data?.languages ?? [];
   const base = data.data?.base_language ?? 'pl';
+  const country = data.data?.country ?? 'PL';
   const languages = [base, ...offered];
   const candidates = (data.data?.available ?? []).filter(
     (code) => !offered.includes(code),
@@ -220,7 +218,7 @@ export default function LanguagesPage() {
             languages={languages}
             candidates={candidates}
             externalPreview={preview}
-            home={HOME_COUNTRY[base] ?? 'PL'}
+            home={country}
             onAdd={add}
             onSelectLanguage={openEditor}
           />
@@ -251,6 +249,7 @@ export default function LanguagesPage() {
 
             <Section title={t('languages.add')} hint={t('languages.addHint')}>
               <AddLanguagePanel
+                country={country}
                 languages={languages}
                 phrasesTotal={phrasesTotal}
                 translated={translated}

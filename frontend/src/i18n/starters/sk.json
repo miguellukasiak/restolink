@@ -1,0 +1,31 @@
+{
+  "categories": [
+    "Predjedlá",
+    "Polievky",
+    "Šaláty",
+    "Hlavné jedlá",
+    "Cestoviny",
+    "Pizza",
+    "Burgery",
+    "Dezerty",
+    "Nápoje",
+    "Káva a čaj"
+  ],
+  "notes": {
+    "lunch": "# Obedové menu\nOd pondelka do piatku, **12:00–16:00**.\nMenu: polievka + jedlo dňa.",
+    "allergies": "Máte alergiu alebo potravinovú intoleranciu? **Povedzte obsluhe** — radi poradíme.",
+    "waitingTime": "Všetky jedlá pripravujeme čerstvo, preto sa čas čakania môže predĺžiť.",
+    "service": "K účtu skupín od 8 osôb pripočítavame **10 % za obsluhu**."
+  },
+  "qr": {
+    "cta": "Naskenujte a pozrite si menu",
+    "ctaShort": "Naskenujte menu",
+    "footer": "Otvorte fotoaparát v telefóne a namierte ho na kód",
+    "footerShort": "Otvorte fotoaparát, namierte na kód",
+    "steps": [
+      "Otvorte fotoaparát",
+      "Namierte na kód",
+      "Vyberte si jedlá"
+    ]
+  }
+}

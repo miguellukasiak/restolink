@@ -1,0 +1,31 @@
+{
+  "categories": [
+    "Forretter",
+    "Supper",
+    "Salater",
+    "Hovedretter",
+    "Pasta",
+    "Pizza",
+    "Burgere",
+    "Desserter",
+    "Drikke",
+    "Kaffe og te"
+  ],
+  "notes": {
+    "lunch": "# Lunsjmeny\nMandag til fredag, **12:00–16:00**.\nInkludert: suppe + dagens rett.",
+    "allergies": "Har du allergi eller matintoleranse? **Si fra til personalet** — vi hjelper deg gjerne.",
+    "waitingTime": "Vi lager alle retter når du bestiller, så ventetiden kan bli lengre.",
+    "service": "For selskaper på 8 personer eller flere legges det til **10 % serviceavgift**."
+  },
+  "qr": {
+    "cta": "Skann for å se menyen",
+    "ctaShort": "Skann menyen",
+    "footer": "Åpne mobilkameraet og pek det mot koden",
+    "footerShort": "Åpne kameraet, pek mot koden",
+    "steps": [
+      "Åpne kameraet",
+      "Pek mot koden",
+      "Velg retter"
+    ]
+  }
+}

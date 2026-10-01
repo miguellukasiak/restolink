@@ -137,7 +137,9 @@ def _checked_address(value: str | None) -> str | None:
         return None
     text = " ".join(value.split())
     if len(text) > MAX_ADDRESS_LENGTH:
-        raise ValueError(f"Adres jest za długi — najwyżej {MAX_ADDRESS_LENGTH} znaków.")
+        raise ValueError(
+            f"Adres jest za długi — najwyżej {MAX_ADDRESS_LENGTH} znaków."
+        )
     return text or None
 
 
@@ -148,9 +150,8 @@ def _checked_currency(value: str) -> str:
     return code
 
 
-#: What a menu can be written in: Polish, and every language it can be
-#: translated into.
-MENU_BASE_LANGUAGES: tuple[str, ...] = ("pl", *MENU_LANGUAGES)
+#: What a menu can be written in: any language it can be offered in.
+MENU_BASE_LANGUAGES: tuple[str, ...] = MENU_LANGUAGES
 
 
 def _checked_menu_language(value: str) -> str:

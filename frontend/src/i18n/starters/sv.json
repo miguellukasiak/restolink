@@ -1,0 +1,31 @@
+{
+  "categories": [
+    "Förrätter",
+    "Soppor",
+    "Sallader",
+    "Varmrätter",
+    "Pasta",
+    "Pizza",
+    "Hamburgare",
+    "Desserter",
+    "Drycker",
+    "Kaffe och te"
+  ],
+  "notes": {
+    "lunch": "# Lunchmeny\nMåndag till fredag, **12:00–16:00**.\nIngår: soppa + dagens rätt.",
+    "allergies": "Har du allergi eller matintolerans? **Säg till personalen** — vi hjälper gärna till.",
+    "waitingTime": "Vi lagar alla rätter när du beställer, så väntetiden kan bli längre.",
+    "service": "För sällskap på 8 personer eller fler tillkommer **10 % serviceavgift**."
+  },
+  "qr": {
+    "cta": "Skanna för att se menyn",
+    "ctaShort": "Skanna menyn",
+    "footer": "Öppna mobilens kamera och rikta den mot koden",
+    "footerShort": "Öppna kameran, rikta mot koden",
+    "steps": [
+      "Öppna kameran",
+      "Rikta mot koden",
+      "Välj rätter"
+    ]
+  }
+}

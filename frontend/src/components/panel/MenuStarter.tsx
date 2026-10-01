@@ -7,11 +7,12 @@ import Typography from '@mui/material/Typography';
 import { alpha } from '@mui/material/styles';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded';
-import { STARTER_CATEGORIES } from '../../constants/menu';
 import { radii } from '../../theme';
 import { usePanelT } from '../../i18n/panel';
 
 interface MenuStarterProps {
+  /** The four categories the one-click layout makes, in the menu's language. */
+  names: readonly string[];
   busy: boolean;
   onStart: () => void;
   onCustom: () => void;
@@ -23,10 +24,9 @@ interface MenuStarterProps {
  * rather than decide how a menu is organised.
  *
  * The names are menu content, not panel text: they are created in the menu's
- * own language (Polish, the base every translation starts from), whichever
- * language the panel is in.
+ * own language (its starter texts), whichever language the panel is in.
  */
-export function MenuStarter({ busy, onStart, onCustom }: MenuStarterProps) {
+export function MenuStarter({ names, busy, onStart, onCustom }: MenuStarterProps) {
   const { t } = usePanelT();
   return (
     <Paper
@@ -65,9 +65,9 @@ export function MenuStarter({ busy, onStart, onCustom }: MenuStarterProps) {
           <MenuBookRoundedIcon sx={{ fontSize: 44 }} />
         </Box>
         {[
-          { label: STARTER_CATEGORIES[0], left: 0, top: 0, rotate: -8 },
-          { label: STARTER_CATEGORIES[2], left: 128, top: 12, rotate: 7 },
-          { label: STARTER_CATEGORIES[3], left: 18, top: 78, rotate: 4 },
+          { label: names[0], left: 0, top: 0, rotate: -8 },
+          { label: names[2], left: 128, top: 12, rotate: 7 },
+          { label: names[3], left: 18, top: 78, rotate: 4 },
         ].map((tab) => (
           <Box
             key={tab.label}
@@ -127,7 +127,7 @@ export function MenuStarter({ busy, onStart, onCustom }: MenuStarterProps) {
         </Button>
       </Stack>
       <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 2 }}>
-        {STARTER_CATEGORIES.join(' · ')}
+        {names.join(' · ')}
       </Typography>
     </Paper>
   );

@@ -1,0 +1,31 @@
+{
+  "categories": [
+    "Vorspeisen",
+    "Suppen",
+    "Salate",
+    "Hauptgerichte",
+    "Pasta",
+    "Pizza",
+    "Burger",
+    "Desserts",
+    "Getränke",
+    "Kaffee & Tee"
+  ],
+  "notes": {
+    "lunch": "# Mittagsmenü\nMontag bis Freitag, **12:00–16:00**.\nMenü: Suppe + Tagesgericht.",
+    "allergies": "Allergie oder Unverträglichkeit? **Sprechen Sie unser Personal an** — wir beraten Sie gern.",
+    "waitingTime": "Wir bereiten alle Gerichte frisch zu, daher kann es zu längeren Wartezeiten kommen.",
+    "service": "Für Gruppen ab 8 Personen berechnen wir **10 % Servicegebühr**."
+  },
+  "qr": {
+    "cta": "Scannen und Menü ansehen",
+    "ctaShort": "Menü scannen",
+    "footer": "Öffnen Sie die Kamera und richten Sie sie auf den Code",
+    "footerShort": "Kamera öffnen, auf den Code richten",
+    "steps": [
+      "Kamera öffnen",
+      "Auf Code richten",
+      "Gerichte wählen"
+    ]
+  }
+}

@@ -230,7 +230,9 @@ COUNTRIES: dict[str, tuple[str, str]] = {
 }
 
 #: Every currency a menu can price in: the countries' own.
-CURRENCIES: tuple[str, ...] = tuple(sorted({currency for currency, _ in COUNTRIES.values()}))
+CURRENCIES: tuple[str, ...] = tuple(
+    sorted({currency for currency, _ in COUNTRIES.values()})
+)
 
 #: Where every restaurant from before the country was a choice is.
 DEFAULT_COUNTRY = "PL"

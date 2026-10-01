@@ -1,0 +1,31 @@
+{
+  "categories": [
+    "Predjela",
+    "Juhe",
+    "Salate",
+    "Glavna jela",
+    "Tjestenina",
+    "Pizza",
+    "Burgeri",
+    "Deserti",
+    "Pića",
+    "Kava i čaj"
+  ],
+  "notes": {
+    "lunch": "# Ručak\nOd ponedjeljka do petka, **12:00–16:00**.\nMeni: juha + jelo dana.",
+    "allergies": "Imate alergiju ili nepodnošljivost na hranu? **Recite osoblju** — rado ćemo vas savjetovati.",
+    "waitingTime": "Sva jela pripremamo po narudžbi, pa vrijeme čekanja može biti dulje.",
+    "service": "Za skupine od 8 ili više osoba računu dodajemo **10 % za uslugu**."
+  },
+  "qr": {
+    "cta": "Skenirajte i pogledajte jelovnik",
+    "ctaShort": "Skenirajte jelovnik",
+    "footer": "Otvorite kameru mobitela i usmjerite je prema kodu",
+    "footerShort": "Otvorite kameru, usmjerite prema kodu",
+    "steps": [
+      "Otvorite kameru",
+      "Usmjerite prema kodu",
+      "Odaberite jela"
+    ]
+  }
+}

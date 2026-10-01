@@ -1,0 +1,31 @@
+{
+  "categories": [
+    "Hidangan pembuka",
+    "Sup",
+    "Salad",
+    "Hidangan utama",
+    "Pasta",
+    "Pizza",
+    "Burger",
+    "Hidangan penutup",
+    "Minuman",
+    "Kopi dan teh"
+  ],
+  "notes": {
+    "lunch": "# Menu makan siang\nSenin sampai Jumat, **12:00–16:00**.\nPaket: sup + menu hari ini.",
+    "allergies": "Punya alergi atau intoleransi makanan? **Beri tahu staf kami** — kami siap membantu.",
+    "waitingTime": "Semua hidangan kami masak saat dipesan, jadi waktu tunggu bisa lebih lama.",
+    "service": "Untuk rombongan 8 orang atau lebih, tagihan dikenakan **biaya layanan 10%**."
+  },
+  "qr": {
+    "cta": "Pindai untuk melihat menu",
+    "ctaShort": "Pindai menu",
+    "footer": "Buka kamera ponsel dan arahkan ke kode",
+    "footerShort": "Buka kamera, arahkan ke kode",
+    "steps": [
+      "Buka kamera",
+      "Arahkan ke kode",
+      "Pilih hidangan"
+    ]
+  }
+}

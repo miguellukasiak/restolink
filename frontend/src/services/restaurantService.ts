@@ -48,6 +48,11 @@ export interface RestaurantUpdateRequest {
   contact_phone?: string;
   /** null takes the second panel language away. */
   panel_language?: string | null;
+  country?: string;
+  /** null or '' clears it. */
+  address?: string | null;
+  currency?: string;
+  base_language?: string;
 }
 
 /** An activation link, for an operator to pass on. */
