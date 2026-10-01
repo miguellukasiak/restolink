@@ -832,6 +832,14 @@ In the print document, style `body>svg`, never `svg` — the codes are nested
   lands on it — iOS ignores a scripted click on a hidden one — and the
   browser anchors its popup there. Used by Wygląd menu, the QR studio and
   the photo cropper's background; a new colour setting uses these too.
+- **A language's short label on screen goes through `languageTag`**
+  (`constants/menuLanguages.ts`), never `code.toUpperCase()`: people read two
+  capitals as a country, like an internet domain, and Ukrainian's ISO 639
+  `uk` passed for the United Kingdom. Where the two differ the label is the
+  domain (UA, CZ, DK, GR, EE, IL, IN, JP, KR, NO, SI, SE, VN, CN); English
+  and Arabic keep EN and AR. Display only — the ISO code is what is stored,
+  sent and set as `lang`. Used by the guest switcher, the panel's language
+  switch, "Języki" and the HQ table.
 - Route guards (`RequireAuth.tsx`) are a **convenience, not the boundary** —
   every protected endpoint is enforced server-side.
 - **A page that holds unsaved edits mounts `UnsavedChangesGuard`** (Wygląd

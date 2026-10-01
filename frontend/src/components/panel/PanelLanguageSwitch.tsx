@@ -10,6 +10,7 @@ import {
   type PanelLanguage,
 } from '../../i18n/panel';
 import { radii } from '../../theme';
+import { languageTag } from '../../constants/menuLanguages';
 
 /**
  * The panel's language switch: English and the one other language HQ gave
@@ -78,7 +79,7 @@ export function PanelLanguageSwitch({
             {panelLanguageLabel(code)}
           </Box>
           <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>
-            {code.toUpperCase()}
+            {languageTag(code)}
           </Box>
         </ToggleButton>
       ))}

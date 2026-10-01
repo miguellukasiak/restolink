@@ -9,7 +9,7 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
 import { alpha } from '@mui/material/styles';
 import PublicRoundedIcon from '@mui/icons-material/PublicRounded';
-import { getMenuLanguage } from '../../../constants/menuLanguages';
+import { getMenuLanguage, languageTag } from '../../../constants/menuLanguages';
 import { useLanguageName, usePanelT } from '../../../i18n/panel';
 import { radii } from '../../../theme';
 import worldMap from './worldCountries.json';
@@ -243,7 +243,7 @@ export function ReachHero({
                 <Chip
                   key={code}
                   size="small"
-                  label={meta?.endonym ?? code.toUpperCase()}
+                  label={meta?.endonym ?? languageTag(code)}
                   lang={code}
                   color={index === 0 ? 'default' : 'primary'}
                   variant={index === 0 ? 'outlined' : 'filled'}

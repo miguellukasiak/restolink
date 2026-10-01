@@ -5,6 +5,7 @@ import {
   MENU_LANGUAGES,
   getMenuLanguage,
   languageName,
+  languageTag,
 } from '../constants/menuLanguages';
 import en from './panel/en.json';
 import pl from './panel/pl.json';
@@ -60,7 +61,7 @@ export const PANEL_DEFAULT_LANGUAGE: PanelLanguage = 'en';
 export function panelLanguageLabel(code: string): string {
   if (code === 'en') return 'English';
   if (code === 'pl') return 'Polski';
-  return getMenuLanguage(code)?.endonym ?? code.toUpperCase();
+  return getMenuLanguage(code)?.endonym ?? languageTag(code);
 }
 
 const STORAGE_KEY = 'restolink.panel.lang';

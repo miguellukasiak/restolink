@@ -53,6 +53,7 @@ import {
   useSendActivationLink,
 } from '../hooks/useOnboarding';
 import type { RestaurantListItem } from '../types';
+import { languageTag } from '../constants/menuLanguages';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25];
 
@@ -222,7 +223,7 @@ export function RestaurantsPage() {
                 {countryName(params.row.country, 'pl')}
               </Typography>
               <Typography variant="caption" color="text.secondary" noWrap>
-                menu {params.row.base_language.toUpperCase()} · {params.row.currency}
+                menu {languageTag(params.row.base_language)} · {params.row.currency}
               </Typography>
             </Stack>
           </Tooltip>
@@ -245,7 +246,10 @@ export function RestaurantsPage() {
             <Chip
               size="small"
               variant="outlined"
-              label={['EN', params.row.panel_language?.toUpperCase()]
+              label={[
+                'EN',
+                params.row.panel_language && languageTag(params.row.panel_language),
+              ]
                 .filter(Boolean)
                 .join(' · ')}
             />

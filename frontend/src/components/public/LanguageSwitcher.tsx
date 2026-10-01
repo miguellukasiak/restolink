@@ -7,6 +7,7 @@ import ListItemText from '@mui/material/ListItemText';
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import LanguageRoundedIcon from '@mui/icons-material/LanguageRounded';
 import { LANGUAGE_LABELS } from '../../i18n';
+import { languageTag } from '../../constants/menuLanguages';
 
 interface LanguageSwitcherProps {
   /** What this restaurant offers: its own language first, then the owner's picks. */
@@ -58,7 +59,7 @@ export function LanguageSwitcher({ languages }: LanguageSwitcherProps) {
         size="small"
         sx={{ flexShrink: 0, fontWeight: 700, minWidth: 0, px: 1 }}
       >
-        {active?.toUpperCase()}
+        {active && languageTag(active)}
       </Button>
 
       <Menu
@@ -81,7 +82,7 @@ export function LanguageSwitcher({ languages }: LanguageSwitcherProps) {
             sx={{ gap: 1.5 }}
           >
             <ListItemText
-              primary={LANGUAGE_LABELS[code] ?? code.toUpperCase()}
+              primary={LANGUAGE_LABELS[code] ?? languageTag(code)}
               slotProps={{ primary: { sx: { fontWeight: code === active ? 700 : 500 } } }}
             />
             {code === active && (

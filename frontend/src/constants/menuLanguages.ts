@@ -139,6 +139,38 @@ export const MENU_LANGUAGES: readonly MenuLanguage[] = [
 
 const BY_CODE = new Map(MENU_LANGUAGES.map((language) => [language.code, language]));
 
+/**
+ * Where a language's two letters differ from its country's internet domain,
+ * the domain: people read two capitals as a country, so Ukrainian's ISO 639
+ * code "uk" passed for the United Kingdom. English and Arabic, at home in
+ * many countries, keep their own (and English is never "UK").
+ */
+const TAGS: Readonly<Record<string, string>> = {
+  cs: 'CZ',
+  da: 'DK',
+  el: 'GR',
+  et: 'EE',
+  he: 'IL',
+  hi: 'IN',
+  ja: 'JP',
+  ko: 'KR',
+  nb: 'NO',
+  sl: 'SI',
+  sv: 'SE',
+  uk: 'UA',
+  vi: 'VN',
+  zh: 'CN',
+};
+
+/**
+ * A language's short label on screen — a switch, a badge, a column: "UA" for
+ * Ukrainian, "CZ" for Czech, "DE" for German. Display only; the ISO 639
+ * code stays what is stored, sent and set as `lang`.
+ */
+export function languageTag(code: string): string {
+  return TAGS[code] ?? code.toUpperCase();
+}
+
 export function getMenuLanguage(code: string): MenuLanguage | undefined {
   return BY_CODE.get(code);
 }

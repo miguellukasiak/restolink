@@ -24,6 +24,7 @@ import {
 import { getApiErrorMessage } from '../../../services/api';
 import { useLanguageName, usePanelT } from '../../../i18n/panel';
 import { radii } from '../../../theme';
+import { languageTag } from '../../../constants/menuLanguages';
 
 const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 
@@ -64,7 +65,7 @@ export function TranslationEditor({
   const save = useSaveDictionary(restaurantId, language);
   const auto = useAutoTranslate(restaurantId, language);
 
-  const code = language.toUpperCase();
+  const code = languageTag(language);
 
   // Reset the working copy whenever the server hands us a new one — on load,
   // on a language switch, and after a save. Without this, edits made for German
@@ -270,7 +271,7 @@ export function TranslationEditor({
           }}
         >
           {[
-            t('editor.original', { code: base.toUpperCase() }),
+            t('editor.original', { code: languageTag(base) }),
             `${capitalize(languageName(language))} (${code})`,
           ].map((heading) => (
             <Box
