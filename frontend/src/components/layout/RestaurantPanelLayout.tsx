@@ -28,6 +28,7 @@ import { useSnackbar } from '../feedback/SnackbarProvider';
 import { resolveAccessState } from '../../constants/subscription';
 import { PanelLanguageSwitch } from '../panel/PanelLanguageSwitch';
 import { RestaurantIdentity } from './RestaurantIdentity';
+import { BottomNav } from './BottomNav';
 import {
   PANEL_DEFAULT_LANGUAGE,
   isPanelLanguage,
@@ -105,21 +106,38 @@ export function RestaurantPanelLayout() {
   // Everything else is an extra and sits below the divider.
   const navGroups = [
     [
-      { label: t('nav.builder'), to: `${base}/menu`, icon: <MenuBookRoundedIcon /> },
+      {
+        label: t('nav.builder'),
+        short: t('nav.bar.builder'),
+        to: `${base}/menu`,
+        icon: <MenuBookRoundedIcon />,
+      },
       {
         label: t('nav.appearance'),
+        short: t('nav.bar.appearance'),
         to: `${base}/settings`,
         icon: <PaletteRoundedIcon />,
       },
-      { label: t('nav.qr'), to: `${base}/qr`, icon: <QrCode2RoundedIcon /> },
+      {
+        label: t('nav.qr'),
+        short: t('nav.bar.qr'),
+        to: `${base}/qr`,
+        icon: <QrCode2RoundedIcon />,
+      },
     ],
     [
       {
         label: t('nav.languages'),
+        short: t('nav.bar.languages'),
         to: `${base}/dictionary`,
         icon: <TranslateRoundedIcon />,
       },
-      { label: t('nav.reviews'), to: `${base}/google`, icon: <StarRoundedIcon /> },
+      {
+        label: t('nav.reviews'),
+        short: t('nav.bar.reviews'),
+        to: `${base}/google`,
+        icon: <StarRoundedIcon />,
+      },
     ],
   ];
 
@@ -239,7 +257,12 @@ export function RestaurantPanelLayout() {
 
         <Box
           component="main"
-          sx={{ flexGrow: 1, minWidth: 0, px: { xs: 2, md: 4 }, pb: 6 }}
+          sx={{
+            flexGrow: 1,
+            minWidth: 0,
+            px: { xs: 2, md: 4 },
+            pb: 'calc(var(--bottom-nav, 0px) + 48px)',
+          }}
         >
           <Toolbar />
           {/* Above the subscription gate on purpose: an admin looking at a
@@ -264,6 +287,16 @@ export function RestaurantPanelLayout() {
             </>
           )}
         </Box>
+
+        <BottomNav
+          label={t('nav.ownerPanel')}
+          color="secondary"
+          items={navGroups.flat().map(({ short, to, icon }) => ({
+            label: short,
+            to,
+            icon,
+          }))}
+        />
       </Box>
     </PriceFormatProvider>
   );

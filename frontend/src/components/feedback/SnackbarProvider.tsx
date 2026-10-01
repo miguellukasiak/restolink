@@ -58,6 +58,14 @@ export function SnackbarProvider({ children }: { children: ReactNode }) {
         // footers — the dish editor's buttons included, in the one flow
         // ("Zapisz i dodaj kolejne") where the dialog stays open after it.
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        // MUI's own offsets, lifted over a panel's navigation bar on a phone
+        // (BottomNav); the variable is unset everywhere else.
+        sx={{
+          bottom: {
+            xs: 'calc(var(--bottom-nav, 0px) + 8px)',
+            sm: 'calc(var(--bottom-nav, 0px) + 24px)',
+          },
+        }}
       >
         <Alert
           onClose={handleClose}

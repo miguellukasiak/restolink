@@ -776,6 +776,14 @@ In the print document, style `body>svg`, never `svg` — the codes are nested
 - Owner nav order is the setup order: **Menu builder → Menu design → QR codes**
   (Kreator menu → Wygląd menu → Kody QR), then the extras (Languages, Google
   reviews) below a divider.
+- **Below `md` the side drawer gives way to a bottom navigation bar**
+  (`components/layout/BottomNav.tsx`, both the owner panel and HQ), with
+  short labels (`nav.bar.*`). Before it the drawer simply vanished on phones
+  and tablets, leaving an owner stuck in the builder. While the bar shows,
+  `--bottom-nav` on `:root` holds the height it covers (0 from `md` up, unset
+  outside the panels): anything pinned to the bottom of the screen — the
+  snackbar, Wygląd menu's save bar, a page's end — sits at
+  `calc(var(--bottom-nav, 0px) + …)`, or it ends up under the bar.
 - Route guards (`RequireAuth.tsx`) are a **convenience, not the boundary** —
   every protected endpoint is enforced server-side.
 - **A page that holds unsaved edits mounts `UnsavedChangesGuard`** (Wygląd

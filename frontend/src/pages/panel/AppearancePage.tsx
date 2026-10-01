@@ -895,8 +895,14 @@ export function AppearancePage() {
             </Stack>
           </Section>
 
-          {/* Sticky save bar */}
-          <Box sx={{ position: 'sticky', bottom: 16, zIndex: 2 }}>
+          {/* Sticky save bar, above the phone's navigation bar */}
+          <Box
+            sx={{
+              position: 'sticky',
+              bottom: 'calc(var(--bottom-nav, 0px) + 16px)',
+              zIndex: 2,
+            }}
+          >
             <Paper
               elevation={4}
               sx={{

@@ -14,6 +14,7 @@ import HistoryRoundedIcon from '@mui/icons-material/HistoryRounded';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { LogoutButton } from '../auth/LogoutButton';
 import { Wordmark } from '../brand/Wordmark';
+import { BottomNav } from './BottomNav';
 import { useAdminProfile } from '../../hooks/useAdminProfile';
 import { getAdminSession } from '../../services/authStorage';
 
@@ -22,11 +23,17 @@ const DRAWER_WIDTH = 264;
 const NAV_ITEMS = [
   {
     label: 'Restauratorzy',
+    short: 'Restauratorzy',
     to: '/admin/restaurants',
     icon: <StorefrontRoundedIcon />,
   },
-  { label: 'Zespół HQ', to: '/admin/team', icon: <GroupsRoundedIcon /> },
-  { label: 'Dziennik zdarzeń', to: '/admin/logs', icon: <HistoryRoundedIcon /> },
+  { label: 'Zespół HQ', short: 'Zespół', to: '/admin/team', icon: <GroupsRoundedIcon /> },
+  {
+    label: 'Dziennik zdarzeń',
+    short: 'Dziennik',
+    to: '/admin/logs',
+    icon: <HistoryRoundedIcon />,
+  },
 ];
 
 /** Application shell: translucent top bar + permanent navigation drawer. */
@@ -111,10 +118,23 @@ export function AdminLayout() {
         </List>
       </Drawer>
 
-      <Box component="main" sx={{ flexGrow: 1, minWidth: 0, px: { xs: 2, md: 4 }, pb: 6 }}>
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          minWidth: 0,
+          px: { xs: 2, md: 4 },
+          pb: 'calc(var(--bottom-nav, 0px) + 48px)',
+        }}
+      >
         <Toolbar />
         <Outlet />
       </Box>
+
+      <BottomNav
+        label="Nawigacja HQ"
+        items={NAV_ITEMS.map(({ short, to, icon }) => ({ label: short, to, icon }))}
+      />
     </Box>
   );
 }

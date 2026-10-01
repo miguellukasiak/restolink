@@ -32,7 +32,14 @@
     "languages": "Languages",
     "reviews": "Google reviews",
     "ownerPanel": "Owner panel",
-    "logout": "Sign out"
+    "logout": "Sign out",
+    "bar": {
+      "builder": "Builder",
+      "appearance": "Design",
+      "qr": "QR codes",
+      "languages": "Languages",
+      "reviews": "Reviews"
+    }
   },
   "billing": {
     "paid": "Payment received. We are activating your subscription.",

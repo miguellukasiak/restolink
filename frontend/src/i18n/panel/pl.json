@@ -32,7 +32,14 @@
     "languages": "Języki",
     "reviews": "Opinie Google",
     "ownerPanel": "Panel restauratora",
-    "logout": "Wyloguj"
+    "logout": "Wyloguj",
+    "bar": {
+      "builder": "Kreator",
+      "appearance": "Wygląd",
+      "qr": "Kody QR",
+      "languages": "Języki",
+      "reviews": "Opinie"
+    }
   },
   "billing": {
     "paid": "Płatność przyjęta. Aktywujemy subskrypcję.",
