@@ -21,15 +21,9 @@ import type { Mutation, QueryClient, QueryKey } from '@tanstack/react-query';
  */
 
 /** What an owner can change, as the queries that show it see it. */
-export type Resource = 'menu' | 'theme' | 'languages' | 'dictionary' | 'reviews';
+export type Resource = 'menu' | 'theme' | 'languages' | 'dictionary';
 
-const RESOURCES: readonly Resource[] = [
-  'menu',
-  'theme',
-  'languages',
-  'dictionary',
-  'reviews',
-];
+const RESOURCES: readonly Resource[] = ['menu', 'theme', 'languages', 'dictionary'];
 
 declare module '@tanstack/react-query' {
   interface Register {

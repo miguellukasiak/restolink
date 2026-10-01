@@ -107,43 +107,6 @@ ENGLISH: dict[str, str] = {
     "Nie udało się pobrać tłumaczeń. Spróbuj ponownie za chwilę.": (
         "Translations could not be fetched. Please try again in a moment."
     ),
-    # Google reviews
-    "To wygląda na adres z Google Maps, a nie na Place ID. Place ID to krótki "
-    "identyfikator (np. ChIJN1t_tDeuEmsRUsoyG83frY4) — znajdziesz go w "
-    "wyszukiwarce Place ID Finder.": (
-        "This looks like a Google Maps address, not a Place ID. A Place ID is a "
-        "short identifier (e.g. ChIJN1t_tDeuEmsRUsoyG83frY4) — find it with the "
-        "Place ID Finder."
-    ),
-    "Place ID nie zawiera spacji — sprawdź, czy nie zostało skopiowane coś więcej "
-    "niż sam identyfikator.": (
-        "A Place ID has no spaces — check that nothing but the identifier was copied."
-    ),
-    "Klucz API Google Maps nie został skonfigurowany na serwerze": (
-        "The Google Maps API key is not set up on the server"
-    ),
-    "Google nie rozpoznaje tego Place ID. Sprawdź identyfikator w wyszukiwarce "
-    "Place ID Finder i zapisz go ponownie.": (
-        "Google does not recognise this Place ID. Check it with the Place ID Finder "
-        "and save it again."
-    ),
-    "Google odrzuciło klucz API. Sprawdź konfigurację serwera (GOOGLE_MAPS_API_KEY "
-    "oraz włączone Places API (New)).": (
-        "Google rejected the API key. Check the server configuration "
-        "(GOOGLE_MAPS_API_KEY and that Places API (New) is enabled)."
-    ),
-    "Wyczerpano limit zapytań do Google Maps. Spróbuj ponownie później.": (
-        "The Google Maps request limit is used up. Please try again later."
-    ),
-    "Google Maps chwilowo nie odpowiada. Spróbuj ponownie za chwilę.": (
-        "Google Maps is not responding right now. Please try again in a moment."
-    ),
-    "Nie udało się połączyć z Google Maps. Spróbuj ponownie za chwilę.": (
-        "Could not connect to Google Maps. Please try again in a moment."
-    ),
-    "Google Maps zwróciło nieczytelną odpowiedź. Spróbuj ponownie za chwilę.": (
-        "Google Maps sent an unreadable answer. Please try again in a moment."
-    ),
     # HQ actions — the HQ panel asks for Polish, but a message is never left
     # untranslated on the chance that it does not.
     "Nie przekazano żadnych zmian.": "No changes were sent.",

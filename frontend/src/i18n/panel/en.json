@@ -30,15 +30,13 @@
     "appearance": "Menu design",
     "qr": "QR codes",
     "languages": "Languages",
-    "reviews": "Google reviews",
     "ownerPanel": "Owner panel",
     "logout": "Sign out",
     "bar": {
       "builder": "Builder",
       "appearance": "Design",
       "qr": "QR codes",
-      "languages": "Languages",
-      "reviews": "Reviews"
+      "languages": "Languages"
     },
     "toTranslate_one": "{{count}} translation to write",
     "toTranslate_other": "{{count}} translations to write"
@@ -820,31 +818,6 @@
     "phraseAria": "Translation of: {{phrase}}",
     "fallbackNote": "Guests see phrases without a translation in English, or in Polish if that is missing too.",
     "fallbackNoteBase": "Guests see phrases without a translation in English, or in {{base}} if that is missing too."
-  },
-  "google": {
-    "placeIdHelper": "The listing's identifier, not a URL from Google Maps.",
-    "connectTitle": "Connect your Google reviews",
-    "connectBody": "Enter your listing's Place ID and you will see its rating and the latest guest reviews here — without leaving the panel.",
-    "step1": "Open the Place ID Finder.",
-    "step2": "Type your restaurant's name and address.",
-    "step3": "Copy the identifier from the bubble above the pin.",
-    "connecting": "Connecting…",
-    "connect": "Connect listing",
-    "noComment": "A rating without a comment.",
-    "connected": "Google listing connected.",
-    "disconnected": "Google listing disconnected.",
-    "subtitle": "The rating and latest reviews from your Google Maps listing.",
-    "disconnect": "Disconnect listing",
-    "noRatings": "No ratings",
-    "noRatingsBody": "This listing has no ratings yet.",
-    "basedOn_one": "based on {{total}} rating",
-    "basedOn_other": "based on {{total}} ratings",
-    "listing": "Google listing",
-    "viewInMaps": "View in Google Maps",
-    "changePlaceId": "Change Place ID",
-    "latest": "Latest reviews",
-    "noText": "Google does not share any written reviews for this listing yet.",
-    "synced": "Synced: {{at}} · the data refreshes once a day"
   },
   "unsaved": {
     "title": "Leave without saving?",

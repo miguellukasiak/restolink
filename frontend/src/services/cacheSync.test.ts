@@ -60,7 +60,7 @@ describe('the cache dependency map', () => {
     await seed(queryClient, ['menu', 'categories', RID], ['menu']);
     await seed(queryClient, ['public-menu', RID, 'pl'], ['menu', 'theme']);
     await seed(queryClient, ['public-menu', RID, 'de'], ['menu', 'theme']);
-    await seed(queryClient, ['google-reviews', RID], ['reviews']);
+    await seed(queryClient, ['offered-languages', RID], ['languages']);
     await seed(queryClient, ['public-menu', OTHER, 'pl'], ['menu', 'theme']);
 
     await write(queryClient, writesTo(RID, ['menu']));
@@ -69,7 +69,7 @@ describe('the cache dependency map', () => {
     expect(invalidated(queryClient, ['public-menu', RID, 'pl'])).toBe(true);
     expect(invalidated(queryClient, ['public-menu', RID, 'de'])).toBe(true);
     // Not built from the menu; another restaurant's menu is not this one.
-    expect(invalidated(queryClient, ['google-reviews', RID])).toBe(false);
+    expect(invalidated(queryClient, ['offered-languages', RID])).toBe(false);
     expect(invalidated(queryClient, ['public-menu', OTHER, 'pl'])).toBe(false);
   });
 
@@ -109,7 +109,7 @@ describe('the cache dependency map', () => {
     const panelTab = client();
     cleanups.push(listenToOtherTabs(guestTab), listenToOtherTabs(panelTab));
     await seed(guestTab, ['public-menu', RID, 'de'], ['menu', 'theme']);
-    await seed(guestTab, ['google-reviews', RID], ['reviews']);
+    await seed(guestTab, ['offered-languages', RID], ['languages']);
 
     // Seeded in the panel tab and marked fresh there — the guest tab has no
     // such copy, so it refreshes regardless.
@@ -117,7 +117,7 @@ describe('the cache dependency map', () => {
     await settle();
 
     expect(invalidated(guestTab, ['public-menu', RID, 'de'])).toBe(true);
-    expect(invalidated(guestTab, ['google-reviews', RID])).toBe(false);
+    expect(invalidated(guestTab, ['offered-languages', RID])).toBe(false);
   });
 });
 

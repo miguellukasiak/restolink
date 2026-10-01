@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, type ReactElement } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Box from '@mui/material/Box';
@@ -16,7 +16,6 @@ import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded';
 import QrCode2RoundedIcon from '@mui/icons-material/QrCode2Rounded';
 import PaletteRoundedIcon from '@mui/icons-material/PaletteRounded';
 import TranslateRoundedIcon from '@mui/icons-material/TranslateRounded';
-import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import { NavLink, Outlet, useLocation, useParams } from 'react-router-dom';
 import { useRestaurantInfo } from '../../hooks/useRestaurantInfo';
 import { useMenuLanguages } from '../../hooks/useMenuLanguages';
@@ -47,6 +46,16 @@ import {
 } from '../panel/SubscriptionNotices';
 
 const DRAWER_WIDTH = 272;
+
+interface PanelNavItem {
+  label: string;
+  /** For the bottom bar on a phone. */
+  short: string;
+  to: string;
+  icon: ReactElement;
+  /** Work waiting in that section. */
+  badge?: number;
+}
 
 /**
  * Isolated shell for the restaurant owner ecosystem (`/panel/:restaurantId`).
@@ -114,7 +123,7 @@ export function RestaurantPanelLayout() {
   const base = `/panel/${restaurantId}`;
   // In the order an owner sets up: write the menu, dress it, print its codes.
   // Everything else is an extra and sits below the divider.
-  const navGroups = [
+  const navGroups: PanelNavItem[][] = [
     [
       {
         label: t('nav.builder'),
@@ -142,12 +151,6 @@ export function RestaurantPanelLayout() {
         to: `${base}/dictionary`,
         icon: <TranslateRoundedIcon />,
         badge: toTranslate,
-      },
-      {
-        label: t('nav.reviews'),
-        short: t('nav.bar.reviews'),
-        to: `${base}/google`,
-        icon: <StarRoundedIcon />,
       },
     ],
   ];

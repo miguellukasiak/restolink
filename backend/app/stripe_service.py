@@ -9,7 +9,7 @@ Configuration comes exclusively from the environment — never hardcode keys:
 
 Read lazily rather than at import, so a deployment that sets the variables
 after the process starts — and a test that sets them per case — behaves the
-same as one that had them all along. Mirrors `google_maps._google_key()`.
+same as one that had them all along.
 
 The Stripe SDK is synchronous. Network calls go through `run_in_threadpool`;
 signature verification is local HMAC work and stays on the event loop.

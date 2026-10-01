@@ -6,6 +6,7 @@ import {
   RouterProvider,
   createBrowserRouter,
   createRoutesFromElements,
+  useParams,
 } from 'react-router-dom';
 import { RequireAdminAuth, RequireRestaurantAuth } from './components/auth/RequireAuth';
 import { AdminLayout } from './components/layout/AdminLayout';
@@ -22,7 +23,6 @@ import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
 import { MenuBuilderPage } from './pages/panel/MenuBuilderPage';
 import { QrGeneratorPage } from './pages/panel/QrGeneratorPage';
 import { AppearancePage } from './pages/panel/AppearancePage';
-import { GoogleReviewsPage } from './pages/panel/GoogleReviewsPage';
 import { PublicMenuPage } from './pages/public/PublicMenuPage';
 import { ShortMenuLink } from './pages/public/ShortMenuLink';
 import { PageLoader } from './components/feedback/PageLoader';
@@ -31,6 +31,13 @@ import { PageLoader } from './components/feedback/PageLoader';
 const LanguagesPage = lazy(() => import('./pages/panel/LanguagesPage'));
 
 /** What every route renders inside. */
+/** An unknown panel page: the builder of the same restaurant. A relative
+ *  `to` would resolve against the unknown path itself and loop. */
+function ToBuilder() {
+  const { restaurantId = '' } = useParams<{ restaurantId: string }>();
+  return <Navigate to={`/panel/${restaurantId}/menu`} replace />;
+}
+
 function Root() {
   return (
     // The guest interface loads a language's strings the first time it is
@@ -87,8 +94,10 @@ const router = createBrowserRouter(
               </Suspense>
             }
           />
-          <Route path="google" element={<GoogleReviewsPage />} />
           <Route path="settings" element={<AppearancePage />} />
+          {/* A page that is gone (the old Google reviews tab, say) or a
+              mistyped one: the builder, not the sign-in screen. */}
+          <Route path="*" element={<ToBuilder />} />
         </Route>
       </Route>
 

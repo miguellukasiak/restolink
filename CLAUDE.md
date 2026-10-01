@@ -31,7 +31,7 @@ dev-server entry the Browser pane uses.
 
 **Backend** — Python 3.12 in production (`backend/Dockerfile`), FastAPI,
 SQLAlchemy 2.0 async with `asyncpg`, Pydantic v2. Postgres is hosted on **Neon**.
-`passlib[bcrypt]` + `pyjwt` for auth, `httpx` for outbound calls, `stripe`,
+`passlib[bcrypt]` + `pyjwt` for auth, `stripe`,
 `resend`, `deepl`, `cloudinary`.
 
 **Frontend** — React 19 + TypeScript (strict) + Vite 8, **MUI v9** (Material
@@ -83,7 +83,7 @@ baseline revision against a production database whose schema it never authored.
 | `003_add_password_changed_at.sql` | `restaurant.password_changed_at`                    | required |
 | `004_add_translation_cache.sql`   | obsolete table from a retired MT worker             | dead |
 | `005_owner_translation_dictionary.sql` | `restaurant.base_language` + `translation_dictionary` | **column required** |
-| `006_add_google_reviews.sql`      | `restaurant.google_place_id` + `google_review_cache` | **column required** |
+| `006_add_google_reviews.sql`      | `restaurant.google_place_id` + `google_review_cache` (feature removed; see 018) | **column required** |
 | `007_admin_users_rbac.sql`        | `admin_user`                                        | optional (table only) |
 | `008_audit_log.sql`               | `audit_log`                                         | optional (table only) |
 | `009_stripe_billing.sql`          | `restaurant.stripe_customer_id` + unique index on `payment_history.external_transaction_id` | **required** |
@@ -95,13 +95,14 @@ baseline revision against a production database whose schema it never authored.
 | `015_add_panel_locales.sql`       | `panel_locale` (DeepL-made panel languages)         | optional (table only) |
 | `016_add_restaurant_location.sql` | `restaurant.country`, `address`, `currency` (existing rows get `PL`, `PLN`) | **required** |
 | `017_single_plan.sql`             | data only: every restaurant on the one plan, demo tiers retired | optional |
+| `018_drop_google_reviews.sql`     | drops `google_review_cache` and `restaurant.google_place_id` | optional, **only after** the deploy without Google is live |
 
 ### 2.2 Configuration comes only from the environment
 
 Never hardcode a key, secret, URL or price id. Services read `os.getenv`
 **lazily inside a function**, not at import time, so a late-configured
 deployment and a test behave alike (`stripe_service._env`,
-`google_maps._google_key`). A missing key produces a clean HTTP error naming the
+`deepl_client.deepl_key`). A missing key produces a clean HTTP error naming the
 variable — never a silent fallback, and never a hardcoded default for anything
 that grants access.
 
@@ -142,8 +143,7 @@ restaurant ─┬─ menu_category ── menu_item
             ├─ menu_note               (text between the categories)
             ├─ payment_history
             ├─ password_reset          (activation + reset grants)
-            ├─ translation_dictionary
-            └─ google_review_cache
+            └─ translation_dictionary
 admin_user                            (HQ staff — NOT restaurants)
 audit_log                             (append-only, no FKs)
 ```
@@ -592,13 +592,11 @@ still needs translating — from the map or the list — scrolls to its
 translations and rings them for a moment; a snackbar alone made a new
 language look finished while guests still read Polish.
 
-**Google reviews.** `GET /api/v1/panel/{id}/google-reviews`, backed by a
-24-hour `google_review_cache`. Uses **Places API (New)**
-(`places.googleapis.com/v1`) with the key in `X-Goog-Api-Key` and a
-`X-Goog-FieldMask` header — the legacy endpoint is a separate Google Cloud
-product and answers `REQUEST_DENIED` if only the new one is enabled. The cache
-row stores the `place_id` it describes, so correcting a mistyped id does not keep
-serving another restaurant's reviews.
+**No Google Maps.** The owner panel once had a "Opinie Google" tab (Places
+API reviews, a Place ID per restaurant, a daily cache). It was removed with
+everything behind it — page, routes, `GOOGLE_MAPS_API_KEY`, the landing
+page's "Google Maps and reviews" point (now "Mnóstwo szablonów, pełna
+kontrola"). Migration 018 drops its table and column once the deploy is live.
 
 **Allergens and tags on the public menu.** Stored as plain strings. The
 **built-in** ones (`ALLERGEN_OPTIONS`, `TAG_OPTIONS`, mirrored by
@@ -655,7 +653,7 @@ the form unless set by hand. Country and currency names come from
 - **"Języki"** pins the map and recommends by country (above); its wording
   names the menu's language instead of saying Polish.
 - **DeepL drafts** read any base language DeepL knows as a source, else
-  auto-detect; **Google reviews** are fetched in the menu's language.
+  auto-detect.
 
 **Notes between the sections ("Tekst w menu").** Lunch hours, what a set
 menu consists of, a word about allergies — text a guest should read that is
@@ -822,8 +820,8 @@ In the print document, style `body>svg`, never `svg` — the codes are nested
   `font_family` for it, and its query reads `theme`, so a new look shows at
   once.
 - Owner nav order is the setup order: **Menu builder → Menu design → QR codes**
-  (Kreator menu → Wygląd menu → Kody QR), then the extras (Languages, Google
-  reviews) below a divider.
+  (Kreator menu → Wygląd menu → Kody QR), then the extra (Languages) below a
+  divider.
 - **Below `md` the side drawer gives way to a bottom navigation bar**
   (`components/layout/BottomNav.tsx`, both the owner panel and HQ), with
   short labels (`nav.bar.*`). Before it the drawer simply vanished on phones
@@ -882,7 +880,7 @@ In the print document, style `body>svg`, never `svg` — the codes are nested
 /                       → /login
 /login  /forgot-password  /reset-password  /activate  /hq-access
 /admin/{restaurants,team,logs}          (RequireAdminAuth)
-/panel/:restaurantId/{menu,qr,dictionary,google,settings}   (RequireRestaurantAuth)
+/panel/:restaurantId/{menu,qr,dictionary,settings}   (RequireRestaurantAuth)
 /menu/:restaurantId     public, themed, no account
 /m/:code                short link printed in QR codes → /menu/:restaurantId
 ```
@@ -980,7 +978,6 @@ Each of these cost real debugging time in this repo. They are not hypothetical.
 | `CORS_ALLOWED_ORIGINS` | extra CORS origins, comma-separated — the landing page's domain(s) | only the built-in list; the contact form fails in the browser |
 | `STRIPE_API_KEY`, `STRIPE_PRICE_ID` | checkout | 503 from the checkout endpoint |
 | `STRIPE_WEBHOOK_SECRET` | webhook | **500, refuses to act** — never skips verification |
-| `GOOGLE_MAPS_API_KEY` | reviews | 503 naming the variable |
 | `DEEPL_API_KEY` | dictionary drafts; making a new owner-panel language | 500 naming the variable; manual entry still works. HQ's panel translation fails with that message (the restaurant is still saved, its panel and emails English) |
 | `VITE_API_URL` | frontend build | defaults to `http://localhost:8000` |
 | `VITE_API_URL` | landing-page build | **build fails** — a form posting to localhost would lose every lead. Set it in the `restolink-landing` Vercel project (Production and Preview) to `https://restolink.onrender.com` — there is no `restolink-backend.onrender.com`, and Render's 404 for an unknown host carries no CORS headers, so a wrong URL surfaces in the browser as a CORS error. `landing-page/.env.example` |
@@ -1059,7 +1056,8 @@ Deployment prerequisites, carried across several sessions:
 - [ ] **Rotate the Cloudinary API secret** — it was pasted into a chat long ago
       and has never been rotated.
 - [ ] Register the Stripe webhook endpoint and set its three variables.
-- [ ] Restrict `GOOGLE_MAPS_API_KEY` to **Places API (New)** in Google Cloud.
+- [ ] **Google Maps is gone:** remove `GOOGLE_MAPS_API_KEY` from Render, and
+      once the deploy without it is live, optionally run migration `018`.
 - [ ] **Contact form:** `CONTACT_INBOX_EMAIL` on Render, and
       `CORS_ALLOWED_ORIGINS` including `https://restolink-landing.vercel.app`
       (plus a custom domain — **both** `www.` and apex — once there is one).

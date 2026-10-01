@@ -23,7 +23,6 @@ from .routers import (
     billing,
     contact,
     dictionary,
-    google_maps,
     languages,
     panel,
     panel_locales,
@@ -124,7 +123,6 @@ app.include_router(admin.router)
 app.include_router(panel.router)
 app.include_router(dictionary.router)
 app.include_router(languages.router)
-app.include_router(google_maps.router)
 app.include_router(billing.router)
 # Unauthenticated by necessity: Stripe holds no token of ours, so the
 # signature check on the raw body is the whole of its security.

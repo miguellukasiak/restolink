@@ -10,3 +10,6 @@ pytest>=8.0
 pytest-asyncio>=0.24
 # The suite runs against SQLite so it needs no container and no credentials.
 aiosqlite>=0.20
+# The tests drive the real ASGI app through httpx's client. The app itself no
+# longer calls out with it (it did for the retired Google reviews tab).
+httpx>=0.27

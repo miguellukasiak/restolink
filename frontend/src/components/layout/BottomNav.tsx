@@ -81,8 +81,8 @@ export function BottomNav({
             height: BAR_HEIGHT,
             bgcolor: 'transparent',
             '& .MuiBottomNavigationAction-root': {
-              // Five sections share a 360px phone; MUI's 80px minimum
-              // would push the last one off the screen.
+              // Up to five sections share a 360px phone; MUI's 80px
+              // minimum would push the last one off the screen.
               minWidth: 0,
               px: 0.25,
               gap: 0.5,
