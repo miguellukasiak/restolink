@@ -953,8 +953,9 @@ Deployment prerequisites, carried across several sessions:
       Applied to production (confirmed by the owner, 2026-09-29).
 - [x] **Migration `014`** (`menu_note.style`) — required column.
       Applied to production (confirmed by the owner, 2026-09-30).
-- [ ] **Migration `016`** (`restaurant.country`, `address`, `currency`) —
-      required columns. Apply before the deploy that ships it.
+- [x] **Migration `016`** (`restaurant.country`, `address`, `currency`) —
+      required columns. Applied to production (confirmed by the owner,
+      2026-10-01).
 - [ ] `007`, `008`, `013` and `015` are table-only and optional (`create_all`
       covers them).
 - [ ] **DeepL quota is shared by every restaurant.** Drafting a whole menu into
