@@ -663,8 +663,10 @@
       "icon": "Sztućce",
       "upload": "Obraz",
       "none": "Bez",
-      "addLogo": "Dodaj logo w zakładce „Wygląd menu”",
-      "logoFailed": "Nie udało się wczytać logo — wgraj plik"
+      "logoFailed": "Nie udało się wczytać logo — wgraj plik",
+      "addLogoTile": "Dodaj logo",
+      "logoNote": "Nie masz jeszcze logo. Dodane tutaj pojawi się też w nagłówku menu.",
+      "logoSaved": "Logo zapisane — jest w kodzie i w nagłówku menu."
     },
     "subtitle": "Wybierz projekt w kolorach swojej restauracji, zobacz go na stoliku i wydrukuj. Każdy kod sprawdzamy, zanim trafi do druku.",
     "formatTabs": "Na czym wydrukujesz kod",

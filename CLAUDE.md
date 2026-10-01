@@ -739,7 +739,15 @@ in that language, English or both — labelled by the languages' own names (a
 bounded by `TEXT_LIMITS` and fitted by width, a name always on one line. The
 design, texts included, is remembered per restaurant in the browser
 (`restolink.qr-design.<id>`); an older one without the newer texts gets the
-menu language's set.
+menu language's set. The code's centre is the logo, the cutlery, an image
+or nothing. An uploaded image (scaled to 512px) is remembered beside the
+design (`restolink.qr-image.<id>`) — once only in memory, a reload kept
+"Obraz" selected over a code drawing the cutlery — and a design whose image
+is gone selects what the code shows. The "Obraz" tile shows the image,
+picks it, and once picked opens the chooser to change it; without an image
+it is picked only when a file comes back. Without a logo, the logo tile is
+"Dodaj logo": it saves the restaurant's logo (the theme, as "Wygląd menu"
+does) and says it will show in the menu's header too.
 
 Each template has print sizes:
 

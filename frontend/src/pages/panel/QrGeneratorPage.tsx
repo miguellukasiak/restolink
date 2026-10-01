@@ -35,11 +35,14 @@ import RestaurantMenuRoundedIcon from '@mui/icons-material/RestaurantMenuRounded
 import UploadRoundedIcon from '@mui/icons-material/UploadRounded';
 import BlockRoundedIcon from '@mui/icons-material/BlockRounded';
 import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded';
+import AddPhotoAlternateRoundedIcon from '@mui/icons-material/AddPhotoAlternateRounded';
 import TuneRoundedIcon from '@mui/icons-material/TuneRounded';
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import { usePublicMenu } from '../../hooks/usePublicMenu';
+import { useUpdateTheme } from '../../hooks/useUpdateTheme';
 import { useSnackbar } from '../../components/feedback/SnackbarProvider';
+import { getApiErrorMessage } from '../../services/api';
 import { getFontPairing } from '../../constants/menuStyle';
 import { radii } from '../../theme';
 import { qrMenuPayload, shortMenuUrl } from '../../utils/menuLink';
@@ -223,6 +226,32 @@ function saveDesign(restaurantId: string, design: QrDesign) {
   }
 }
 
+/**
+ * The image uploaded for the code's centre, remembered beside the design.
+ * It used to live only in the page's memory, so a reload kept "Image"
+ * selected while the code fell back to the cutlery. Scaled to 512px by
+ * `readImage`, it fits browser storage; when it does not, it is simply not
+ * remembered and the design falls back to what the code can show.
+ */
+const imageKey = (restaurantId: string) => `restolink.qr-image.${restaurantId}`;
+
+function loadImage(restaurantId: string): string | null {
+  try {
+    const value = localStorage.getItem(imageKey(restaurantId));
+    return value?.startsWith('data:image/') ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveImage(restaurantId: string, dataUri: string) {
+  try {
+    localStorage.setItem(imageKey(restaurantId), dataUri);
+  } catch {
+    // Too big or storage blocked: it lasts until the page is closed.
+  }
+}
+
 /** An uploaded image, scaled down so it does not bloat every export. */
 function readImage(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -318,7 +347,10 @@ export function QrGeneratorPage() {
   });
 
   const [design, setDesign] = useState<QrDesign | null>(null);
-  const [upload, setUpload] = useState<string | null>(null);
+  const [upload, setUpload] = useState<string | null>(() => loadImage(restaurantId));
+  // A logo added here is the restaurant's logo, as in "Wygląd menu".
+  const updateTheme = useUpdateTheme(restaurantId);
+  const logoInputRef = useRef<HTMLInputElement>(null);
   const [tuneOpen, setTuneOpen] = useState(false);
   const [busy, setBusy] = useState<'print' | 'png' | 'svg' | null>(null);
 
@@ -336,12 +368,14 @@ export function QrGeneratorPage() {
 
   useEffect(() => {
     if (brand && textSets && !design) {
-      setDesign(
-        loadDesign(restaurantId, textSets[0]) ??
-          defaultDesign(brand.primary, Boolean(logoUrl), textSets[0]),
-      );
+      const saved = loadDesign(restaurantId, textSets[0]);
+      // An image that was not remembered: select what the code will show.
+      if (saved && saved.center === 'upload' && !upload) {
+        saved.center = logoUrl ? 'logo' : 'icon';
+      }
+      setDesign(saved ?? defaultDesign(brand.primary, Boolean(logoUrl), textSets[0]));
     }
-  }, [brand, design, logoUrl, restaurantId, textSets]);
+  }, [brand, design, logoUrl, restaurantId, textSets, upload]);
 
   useEffect(() => {
     if (design) saveDesign(restaurantId, design);
@@ -543,6 +577,45 @@ export function QrGeneratorPage() {
     }
   };
 
+  /**
+   * A centre tile. "Image" with an image of its own picks it, and once
+   * picked, opens the file chooser to change it; without one it opens the
+   * chooser and is picked only when a file comes back, so cancelling cannot
+   * leave "Image" selected over a code drawing the cutlery. "Logo" without a
+   * logo adds one.
+   */
+  const chooseCenter = (value: CenterChoice) => {
+    if (!design) return;
+    if (value === 'upload') {
+      if (upload && design.center !== 'upload') update({ center: 'upload' });
+      else uploadRef.current?.click();
+      return;
+    }
+    if (value === 'logo' && !logoUrl) {
+      logoInputRef.current?.click();
+      return;
+    }
+    update({ center: value });
+  };
+
+  /** Saves the file as the restaurant's logo, as "Wygląd menu" does. */
+  const addLogo = (file: File) => {
+    const reader = new FileReader();
+    reader.onerror = () => showError(t('qr.errors.image'));
+    reader.onload = () =>
+      updateTheme.mutate(
+        { logo_url: String(reader.result) },
+        {
+          onSuccess: () => {
+            update({ center: 'logo' });
+            showSuccess(t('qr.center.logoSaved'));
+          },
+          onError: (error) => showError(getApiErrorMessage(error)),
+        },
+      );
+    reader.readAsDataURL(file);
+  };
+
   const centerOptions: {
     value: CenterChoice;
     label: string;
@@ -552,26 +625,41 @@ export function QrGeneratorPage() {
   }[] = [
     {
       value: 'logo',
-      label: t('qr.center.logo'),
-      icon: logo.data ? (
+      // No logo yet: the tile adds one rather than standing greyed out with
+      // the way to it hidden in a tooltip.
+      label: logoUrl ? t('qr.center.logo') : t('qr.center.addLogoTile'),
+      icon: updateTheme.isPending ? (
+        <CircularProgress size={20} />
+      ) : logo.data ? (
         <Box
           component="img"
           src={logo.data}
           alt=""
           sx={{ width: 26, height: 26, objectFit: 'contain' }}
         />
-      ) : (
+      ) : logoUrl ? (
         <StorefrontRoundedIcon />
+      ) : (
+        <AddPhotoAlternateRoundedIcon />
       ),
-      disabled: !logoUrl || logo.isError,
-      hint: !logoUrl
-        ? t('qr.center.addLogo')
-        : logo.isError
-          ? t('qr.center.logoFailed')
-          : undefined,
+      disabled: (Boolean(logoUrl) && logo.isError) || updateTheme.isPending,
+      hint: logoUrl && logo.isError ? t('qr.center.logoFailed') : undefined,
     },
     { value: 'icon', label: t('qr.center.icon'), icon: <RestaurantMenuRoundedIcon /> },
-    { value: 'upload', label: t('qr.center.upload'), icon: <UploadRoundedIcon /> },
+    {
+      value: 'upload',
+      label: t('qr.center.upload'),
+      icon: upload ? (
+        <Box
+          component="img"
+          src={upload}
+          alt=""
+          sx={{ width: 26, height: 26, objectFit: 'contain', borderRadius: '4px' }}
+        />
+      ) : (
+        <UploadRoundedIcon />
+      ),
+    },
     { value: 'none', label: t('qr.center.none'), icon: <BlockRoundedIcon /> },
   ];
 
@@ -933,11 +1021,7 @@ export function QrGeneratorPage() {
                       label={option.label}
                       selected={design.center === option.value}
                       disabled={option.disabled}
-                      onClick={() => {
-                        update({ center: option.value });
-                        if (option.value === 'upload' && !upload)
-                          uploadRef.current?.click();
-                      }}
+                      onClick={() => chooseCenter(option.value)}
                     >
                       {option.icon}
                     </OptionTile>
@@ -963,11 +1047,33 @@ export function QrGeneratorPage() {
                   readImage(file)
                     .then((dataUri) => {
                       setUpload(dataUri);
+                      saveImage(restaurantId, dataUri);
                       update({ center: 'upload' });
                     })
                     .catch(() => showError(t('qr.errors.image')));
                 }}
               />
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/png,image/jpeg"
+                hidden
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  event.target.value = '';
+                  if (file) addLogo(file);
+                }}
+              />
+              {!logoUrl && (
+                <Typography
+                  variant="caption"
+                  color="textSecondary"
+                  component="p"
+                  sx={{ mt: 1 }}
+                >
+                  {t('qr.center.logoNote')}
+                </Typography>
+              )}
               {design.center === 'upload' && upload && (
                 <Button
                   size="small"

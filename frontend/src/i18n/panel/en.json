@@ -641,8 +641,10 @@
       "icon": "Cutlery",
       "upload": "Image",
       "none": "None",
-      "addLogo": "Add a logo on the “Menu design” tab",
-      "logoFailed": "The logo could not be loaded — upload a file"
+      "logoFailed": "The logo could not be loaded — upload a file",
+      "addLogoTile": "Add logo",
+      "logoNote": "No logo yet. A logo added here also shows in your menu's header.",
+      "logoSaved": "Logo saved — it is in the code and in your menu's header."
     },
     "subtitle": "Pick a design in your restaurant's colours, see it on the table and print it. We check every code before it goes to print.",
     "formatTabs": "What you will print the code on",
