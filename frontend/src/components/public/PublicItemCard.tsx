@@ -80,6 +80,11 @@ function PublicItemCardComponent({ item, onOpen }: PublicItemCardProps) {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'stretch',
+          // Photo at the top whatever the text below it. A card is as tall as
+          // the tallest in its row, and ButtonBase centres its content by
+          // default, so a dish without a description sat lower than its
+          // neighbour and the photos of a row stopped lining up.
+          justifyContent: 'flex-start',
           overflow: 'hidden',
           '&.Mui-disabled': { opacity: 1 },
           // MUI's default rectangular focus wash competes with the image
