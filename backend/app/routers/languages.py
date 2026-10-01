@@ -43,6 +43,7 @@ async def _describe(db: AsyncSession, restaurant: Restaurant) -> MenuLanguagesRe
     shown = [code for code in MENU_LANGUAGES if code in offered or counts.get(code)]
     return MenuLanguagesResponse(
         base_language=restaurant.base_language,
+        country=restaurant.country,
         languages=offered,
         available=[code for code in MENU_LANGUAGES if code != restaurant.base_language],
         phrases_total=len(phrases),

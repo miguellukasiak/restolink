@@ -69,6 +69,10 @@ ENGLISH: dict[str, str] = {
         "The panel is not translated into this language yet."
     ),
     "Tekst jest pusty.": "The text is empty.",
+    # Where a restaurant is
+    "Nieznany kraj.": "Unknown country.",
+    "Nieobsługiwana waluta.": "Unsupported currency.",
+    "Nieobsługiwany język menu.": "Unsupported menu language.",
     # Payments
     "Płatności nie są jeszcze skonfigurowane na serwerze.": (
         "Payments are not set up on the server yet."
@@ -193,6 +197,10 @@ _PATTERNS: list[tuple[re.Pattern[str], str]] = [
     (
         re.compile(r"^Tekst jest za długi — najwyżej (\d+) znaków\.$"),
         "The text is too long — at most {0} characters.",
+    ),
+    (
+        re.compile(r"^Adres jest za długi — najwyżej (\d+) znaków\.$"),
+        "The address is too long — at most {0} characters.",
     ),
 ]
 

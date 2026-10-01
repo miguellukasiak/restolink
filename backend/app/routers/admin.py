@@ -188,6 +188,10 @@ async def create_restaurant(
         contact_phone=payload.contact_phone,
         package_id=payload.package_id,
         panel_language=payload.panel_language,
+        country=payload.country,
+        address=payload.address,
+        currency=payload.currency,
+        base_language=payload.base_language,
         status=RestaurantStatus.PENDING,
         subscription_valid_until=datetime.now(timezone.utc) + timedelta(days=14),
     )
@@ -518,9 +522,11 @@ async def update_restaurant(
         raise HTTPException(status_code=404, detail="Nie znaleziono restauracji.")
 
     fields = payload.model_dump(exclude_unset=True, exclude_none=True)
-    # A null second language is a change (English only), not an omission.
-    if "panel_language" in payload.model_fields_set:
-        fields["panel_language"] = payload.panel_language
+    # A null second language is a change (English only), not an omission;
+    # likewise a null or empty address clears it.
+    for nullable in ("panel_language", "address"):
+        if nullable in payload.model_fields_set:
+            fields[nullable] = getattr(payload, nullable)
     if not fields:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

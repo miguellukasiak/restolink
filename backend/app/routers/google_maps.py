@@ -415,7 +415,13 @@ def _classify_http_error(response: httpx.Response) -> _UpstreamError:
     )
 
 
-async def _fetch_place_details(place_id: str, api_key: str) -> dict:
+#: Where Google names a language differently from the catalogue.
+_GOOGLE_LANGUAGE = {"nb": "no"}
+
+
+async def _fetch_place_details(
+    place_id: str, api_key: str, language: str = "pl"
+) -> dict:
     """One Place Details (New) call. Raises `_UpstreamError` on any failure.
 
     The key and the field mask travel as headers, which the new API requires —
@@ -435,7 +441,9 @@ async def _fetch_place_details(place_id: str, api_key: str) -> dict:
     try:
         async with httpx.AsyncClient(timeout=_HTTP_TIMEOUT) as client:
             response = await client.get(
-                url, params={"languageCode": "pl"}, headers=headers
+                url,
+                params={"languageCode": _GOOGLE_LANGUAGE.get(language, language)},
+                headers=headers,
             )
     except httpx.HTTPError as exc:
         # Never log `headers` — they carry the API key.
@@ -469,9 +477,10 @@ async def _refresh(
     restaurant_id: uuid.UUID,
     place_id: str,
     entry: GoogleReviewCache | None,
+    language: str = "pl",
 ) -> GoogleReviewsResponse:
     """Pull fresh data from Google and store it as the new snapshot."""
-    result = await _fetch_place_details(place_id, _google_key())
+    result = await _fetch_place_details(place_id, _google_key(), language)
 
     reviews = _normalise_reviews(result.get("reviews"))
 
@@ -534,7 +543,9 @@ async def _read_or_refresh(
         return _cached_response(entry)
 
     try:
-        return await _refresh(db, restaurant.id, place_id, entry)
+        return await _refresh(
+            db, restaurant.id, place_id, entry, restaurant.base_language
+        )
     except _UpstreamError as exc:
         # Any failure of the Google call falls back to whatever snapshot this
         # restaurant has, however old, rather than answering with an error: a

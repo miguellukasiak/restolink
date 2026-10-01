@@ -113,6 +113,20 @@ class Restaurant(TimestampSoftDeleteMixin, Base):
         DateTime(timezone=True), nullable=True
     )
 
+    #: Where the restaurant is (ISO 3166-1 alpha-2, countries.py): where the
+    #: "Języki" map pins it and which languages it recommends. Set by HQ; every
+    #: restaurant from before it was a choice is in Poland.
+    country: Mapped[str] = mapped_column(
+        String(2), default="PL", server_default="PL", nullable=False
+    )
+    #: The street and town, as HQ typed it. For people to read; nothing
+    #: parses it.
+    address: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    #: What the menu's prices are in (ISO 4217). Starts as the country's own.
+    currency: Mapped[str] = mapped_column(
+        String(3), default="PLN", server_default="PLN", nullable=False
+    )
+
     #: The language the menu is written in. Everything the owner types — dish
     #: names, descriptions, category names — is assumed to be in this language,
     #: and `TranslationDictionary` holds its renderings in the others. Asking

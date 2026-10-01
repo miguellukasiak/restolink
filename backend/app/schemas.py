@@ -23,6 +23,15 @@ from pydantic import (
 )
 
 from .cloudinary_service import with_delivery_transformation
+from .countries import (
+    COUNTRIES,
+    CURRENCIES,
+    DEFAULT_COUNTRY,
+    MAX_ADDRESS_LENGTH,
+    default_currency,
+    default_menu_language,
+)
+from .menu_languages import MENU_LANGUAGES
 from .panel_language import DEFAULT_PANEL_LANGUAGE, PANEL_LANGUAGES
 from .menu_labels import (
     BUILT_IN_ALLERGENS,
@@ -74,11 +83,81 @@ class RestaurantCreate(BaseModel):
     package_id: uuid.UUID
     #: The panel's second language beside English, or None for English only.
     panel_language: str | None = None
+    #: Where it is. The currency and the menu's language follow from it
+    #: unless given.
+    country: str = DEFAULT_COUNTRY
+    address: str | None = None
+    currency: str | None = None
+    base_language: str | None = None
 
     @field_validator("panel_language")
     @classmethod
     def _panel_language(cls, value: str | None) -> str | None:
         return _checked_panel_language(value)
+
+    @field_validator("country")
+    @classmethod
+    def _country(cls, value: str) -> str:
+        return _checked_country(value)
+
+    @field_validator("address")
+    @classmethod
+    def _address(cls, value: str | None) -> str | None:
+        return _checked_address(value)
+
+    @field_validator("currency")
+    @classmethod
+    def _currency(cls, value: str | None) -> str | None:
+        return None if value is None else _checked_currency(value)
+
+    @field_validator("base_language")
+    @classmethod
+    def _base_language(cls, value: str | None) -> str | None:
+        return None if value is None else _checked_menu_language(value)
+
+    @model_validator(mode="after")
+    def _country_defaults(self) -> "RestaurantCreate":
+        if self.currency is None:
+            self.currency = default_currency(self.country)
+        if self.base_language is None:
+            self.base_language = default_menu_language(self.country)
+        return self
+
+
+def _checked_country(value: str) -> str:
+    code = value.strip().upper()
+    if code not in COUNTRIES:
+        raise ValueError("Nieznany kraj.")
+    return code
+
+
+def _checked_address(value: str | None) -> str | None:
+    """Tidied, or None when there is nothing in it."""
+    if value is None:
+        return None
+    text = " ".join(value.split())
+    if len(text) > MAX_ADDRESS_LENGTH:
+        raise ValueError(f"Adres jest za długi — najwyżej {MAX_ADDRESS_LENGTH} znaków.")
+    return text or None
+
+
+def _checked_currency(value: str) -> str:
+    code = value.strip().upper()
+    if code not in CURRENCIES:
+        raise ValueError("Nieobsługiwana waluta.")
+    return code
+
+
+#: What a menu can be written in: Polish, and every language it can be
+#: translated into.
+MENU_BASE_LANGUAGES: tuple[str, ...] = ("pl", *MENU_LANGUAGES)
+
+
+def _checked_menu_language(value: str) -> str:
+    code = value.strip().lower()
+    if code not in MENU_BASE_LANGUAGES:
+        raise ValueError("Nieobsługiwany język menu.")
+    return code
 
 
 def _checked_panel_language(value: str | None) -> str | None:
@@ -104,6 +183,10 @@ class RestaurantListItem(BaseModel):
     status: RestaurantStatus
     subscription_valid_until: datetime | None
     panel_language: str | None = None
+    country: str = DEFAULT_COUNTRY
+    address: str | None = None
+    currency: str = "PLN"
+    base_language: str = "pl"
     package: PackageResponse
 
 
@@ -162,6 +245,11 @@ class RestaurantPanelInfo(BaseModel):
     logo_url: HostedImageUrl = None
     primary_color: str | None = None
     font_family: str | None = None
+    #: Where it is and what its menu is in: prices, the map's pin, and the
+    #: language starting texts are offered in.
+    country: str = DEFAULT_COUNTRY
+    currency: str = "PLN"
+    base_language: str = "pl"
 
 
 class RestaurantThemeUpdate(BaseModel):
@@ -388,6 +476,10 @@ class PublicRestaurant(BaseModel):
     #: The languages the guest can switch to: the menu's own first, then the
     #: ones the owner offers, in their order.
     languages: list[str] = Field(default_factory=list)
+    #: What the prices are in (ISO 4217), and where the restaurant is — the
+    #: prices are written the way that country writes them.
+    currency: str = "PLN"
+    country: str = DEFAULT_COUNTRY
 
 
 class TranslationStatus(BaseModel):
@@ -469,6 +561,8 @@ class MenuLanguagesResponse(BaseModel):
     """What the "Języki" screen needs in one request."""
 
     base_language: str
+    #: Where the restaurant is: the map's pin and the recommendations.
+    country: str = DEFAULT_COUNTRY
     #: Offered to guests besides the base language, in the owner's order.
     languages: list[str]
     #: The whole catalogue the owner can pick from.
@@ -726,11 +820,36 @@ class RestaurantUpdate(BaseModel):
     #: Unlike the fields above, an explicit null here means something: take
     #: the second language away, leaving English only.
     panel_language: str | None = None
+    country: str | None = None
+    #: An explicit null or empty text clears it.
+    address: str | None = None
+    currency: str | None = None
+    base_language: str | None = None
 
     @field_validator("panel_language")
     @classmethod
     def _panel_language(cls, value: str | None) -> str | None:
         return _checked_panel_language(value)
+
+    @field_validator("country")
+    @classmethod
+    def _country(cls, value: str | None) -> str | None:
+        return None if value is None else _checked_country(value)
+
+    @field_validator("address")
+    @classmethod
+    def _address(cls, value: str | None) -> str | None:
+        return _checked_address(value)
+
+    @field_validator("currency")
+    @classmethod
+    def _currency(cls, value: str | None) -> str | None:
+        return None if value is None else _checked_currency(value)
+
+    @field_validator("base_language")
+    @classmethod
+    def _base_language(cls, value: str | None) -> str | None:
+        return None if value is None else _checked_menu_language(value)
 
 
 class ActivationLinkResponse(BaseModel):

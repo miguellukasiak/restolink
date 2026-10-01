@@ -54,10 +54,19 @@ router = APIRouter(
 _DEEPL_VARIANTS = DEEPL_VARIANTS
 _DEEPL_TARGET = DEEPL_TARGET
 
-#: Source codes have no regional variants, so this is just an uppercase pass —
-#: guarded against a `base_language` DeepL does not know, where passing nothing
-#: and letting it auto-detect is better than erroring.
-_DEEPL_SOURCE = {"pl": "PL", "en": "EN", "de": "DE", "fr": "FR", "es": "ES"}
+#: The languages DeepL reads, by their source codes — which have no regional
+#: variants ("EN", not "EN-GB"). A menu may be written in any catalogue
+#: language; for one DeepL does not read as a source, passing nothing and
+#: letting it auto-detect is better than erroring.
+_DEEPL_SOURCES = frozenset(
+    "AR BG CS DA DE EL EN ES ET FI FR HE HU ID IT JA KO LT LV NB NL PL PT RO RU "
+    "SK SL SV TH TR UK VI ZH".split()
+)
+_DEEPL_SOURCE = {
+    code: code.upper()
+    for code in ("pl", *DICTIONARY_LANGUAGES)
+    if code.upper() in _DEEPL_SOURCES
+}
 
 
 def _require_language(raw: str) -> str:

@@ -91,6 +91,8 @@ async def get_public_menu(
                 restaurant.base_language,
                 *offered_languages(restaurant.menu_languages, restaurant.base_language),
             ],
+            currency=restaurant.currency,
+            country=restaurant.country,
         ),
         categories=[MenuCategoryResponse.model_validate(c) for c in categories],
         notes=[MenuNoteResponse.model_validate(note) for note in notes],
