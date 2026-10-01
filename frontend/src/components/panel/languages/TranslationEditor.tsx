@@ -35,6 +35,8 @@ interface TranslationEditorProps {
   language: string;
   /** Tells the page whether leaving this language would lose edits. */
   onDirtyChange?: (dirty: boolean) => void;
+  /** Open on the untranslated phrases alone — sent here to fill gaps. */
+  startOnlyMissing?: boolean;
 }
 
 /**
@@ -49,12 +51,13 @@ export function TranslationEditor({
   restaurantId,
   language,
   onDirtyChange,
+  startOnlyMissing = false,
 }: TranslationEditorProps) {
   const { t } = usePanelT();
   const languageName = useLanguageName();
   const { showSuccess, showError } = useSnackbar();
   const [drafts, setDrafts] = useState<Record<string, string>>({});
-  const [onlyMissing, setOnlyMissing] = useState(false);
+  const [onlyMissing, setOnlyMissing] = useState(startOnlyMissing);
 
   const dictionary = useDictionary(restaurantId, language);
   const base = dictionary.data?.base_language ?? 'pl';

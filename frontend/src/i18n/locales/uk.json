@@ -52,5 +52,6 @@
   "skipAllergyFilter": "Ні, показати меню",
   "clearFilters": "Очистити",
   "noDishesForAllergens": "Жодна страва не відповідає вашим фільтрам алергенів.",
-  "adjustFilters": "Змінити фільтри"
+  "adjustFilters": "Змінити фільтри",
+  "untranslatedNotice": "Частину меню ще не перекладено українською."
 }

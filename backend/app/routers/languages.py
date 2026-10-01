@@ -16,8 +16,13 @@ from ..database import get_db
 from ..dependencies import verify_restaurant_access
 from ..menu_languages import MENU_LANGUAGES, offered_languages
 from ..models import Restaurant
-from ..schemas import LanguageProgress, MenuLanguagesResponse, MenuLanguagesUpdate
-from ..translation_service import menu_phrases, translated_counts
+from ..schemas import (
+    LanguageProgress,
+    MenuLanguagesResponse,
+    MenuLanguagesUpdate,
+    UntranslatedPhrase,
+)
+from ..translation_service import menu_phrases, translated_phrases
 
 router = APIRouter(
     prefix="/api/v1/panel/{restaurant_id}/languages",
@@ -38,9 +43,15 @@ async def _load(db: AsyncSession, restaurant_id: uuid.UUID) -> Restaurant:
 async def _describe(db: AsyncSession, restaurant: Restaurant) -> MenuLanguagesResponse:
     offered = offered_languages(restaurant.menu_languages, restaurant.base_language)
     phrases = await menu_phrases(db, restaurant.id)
-    counts = await translated_counts(db, restaurant.id, phrases)
+    done = await translated_phrases(db, restaurant.id, phrases)
+    counts = {code: len(found) for code, found in done.items()}
 
     shown = [code for code in MENU_LANGUAGES if code in offered or counts.get(code)]
+    untranslated = [
+        UntranslatedPhrase(text=phrase, languages=missing)
+        for phrase in phrases
+        if (missing := [code for code in offered if phrase not in done.get(code, ())])
+    ]
     return MenuLanguagesResponse(
         base_language=restaurant.base_language,
         country=restaurant.country,
@@ -50,6 +61,7 @@ async def _describe(db: AsyncSession, restaurant: Restaurant) -> MenuLanguagesRe
         progress=[
             LanguageProgress(code=code, translated=counts.get(code, 0)) for code in shown
         ],
+        untranslated=untranslated,
     )
 
 

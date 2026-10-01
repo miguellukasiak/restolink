@@ -52,5 +52,6 @@
   "skipAllergyFilter": "לא, להציג את התפריט",
   "clearFilters": "ניקוי",
   "noDishesForAllergens": "אף מנה לא מתאימה למסנני האלרגנים שלך.",
-  "adjustFilters": "שינוי המסננים"
+  "adjustFilters": "שינוי המסננים",
+  "untranslatedNotice": "חלק מהתפריט עדיין לא תורגם לעברית."
 }

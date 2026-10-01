@@ -52,5 +52,6 @@
   "skipAllergyFilter": "Nē, rādīt ēdienkarti",
   "clearFilters": "Notīrīt",
   "noDishesForAllergens": "Neviens ēdiens neatbilst jūsu alergēnu filtriem.",
-  "adjustFilters": "Mainīt filtrus"
+  "adjustFilters": "Mainīt filtrus",
+  "untranslatedNotice": "Daļa ēdienkartes vēl nav iztulkota latviešu valodā."
 }

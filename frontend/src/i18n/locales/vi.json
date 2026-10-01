@@ -52,5 +52,6 @@
   "skipAllergyFilter": "Không, xem thực đơn",
   "clearFilters": "Xóa",
   "noDishesForAllergens": "Không có món nào phù hợp với bộ lọc dị ứng của bạn.",
-  "adjustFilters": "Điều chỉnh bộ lọc"
+  "adjustFilters": "Điều chỉnh bộ lọc",
+  "untranslatedNotice": "Một phần thực đơn chưa được dịch sang tiếng Việt."
 }

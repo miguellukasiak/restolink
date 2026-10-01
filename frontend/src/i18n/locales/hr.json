@@ -52,5 +52,6 @@
   "skipAllergyFilter": "Ne, prikaži jelovnik",
   "clearFilters": "Očisti",
   "noDishesForAllergens": "Nijedno jelo ne odgovara vašim filtrima alergena.",
-  "adjustFilters": "Prilagodi filtre"
+  "adjustFilters": "Prilagodi filtre",
+  "untranslatedNotice": "Dio jelovnika još nije preveden na hrvatski."
 }

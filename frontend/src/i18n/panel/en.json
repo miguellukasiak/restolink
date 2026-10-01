@@ -39,7 +39,9 @@
       "qr": "QR codes",
       "languages": "Languages",
       "reviews": "Reviews"
-    }
+    },
+    "toTranslate_one": "{{count}} translation to write",
+    "toTranslate_other": "{{count}} translations to write"
   },
   "billing": {
     "paid": "Payment received. We are activating your subscription.",
@@ -344,7 +346,8 @@
     "missingHint": "Still missing: {{list}}. Dishes with a photo and a description tempt guests the most.",
     "noPhoto": "No photo · {{count}}",
     "noDescription": "No description · {{count}}",
-    "unavailable": "Unavailable · {{count}}"
+    "unavailable": "Unavailable · {{count}}",
+    "untranslated": "Not translated · {{count}}"
   },
   "starter": {
     "title": "Let's start with categories",
@@ -854,5 +857,15 @@
     "stay": "Stay",
     "leave": "Leave without saving",
     "saveAndContinue": "Save and continue"
+  },
+  "dishTranslate": {
+    "title": "Translate it for your guests",
+    "intro": "Your menu is also offered in: {{languages}}. Until these texts are translated, guests reading those languages see them in English or in the original. DeepL has drafted them — check them and save.",
+    "drafting": "DeepL is drafting the translations…",
+    "draftFailed": "DeepL could not draft them, so write them yourself or come back to them in Languages.",
+    "fieldAria": "{{phrase}} in {{language}}",
+    "later": "Later",
+    "save": "Save translations",
+    "saved": "Translations saved — guests already see them."
   }
 }

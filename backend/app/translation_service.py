@@ -147,10 +147,10 @@ def dish_texts(item) -> list[str]:
     ]
 
 
-async def translated_counts(
+async def translated_phrases(
     db: AsyncSession, restaurant_id: uuid.UUID, phrases: list[str]
-) -> dict[str, int]:
-    """How many of `phrases` each language has a translation for.
+) -> dict[str, set[str]]:
+    """Which of `phrases` each language has a translation for.
 
     One query for every language at once. Rows for phrases no longer on the
     menu are ignored, so a renamed dish does not count as translated.
@@ -163,11 +163,11 @@ async def translated_counts(
             TranslationDictionary.translated_text,
         ).where(TranslationDictionary.restaurant_id == restaurant_id)
     )
-    counts: dict[str, int] = {}
+    done: dict[str, set[str]] = {}
     for language, original, translated in rows.all():
         if original in wanted and translated and translated.strip():
-            counts[language] = counts.get(language, 0) + 1
-    return counts
+            done.setdefault(language, set()).add(original)
+    return done
 
 
 async def load_dictionary(

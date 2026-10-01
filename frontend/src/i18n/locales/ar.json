@@ -52,5 +52,6 @@
   "skipAllergyFilter": "لا، اعرض القائمة",
   "clearFilters": "مسح",
   "noDishesForAllergens": "لا يوجد طبق يطابق فلاتر الحساسية لديك.",
-  "adjustFilters": "تعديل الفلاتر"
+  "adjustFilters": "تعديل الفلاتر",
+  "untranslatedNotice": "لم تتم ترجمة جزء من القائمة إلى العربية بعد."
 }

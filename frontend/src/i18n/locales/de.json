@@ -52,5 +52,6 @@
   "skipAllergyFilter": "Nein, Karte anzeigen",
   "clearFilters": "Zurücksetzen",
   "noDishesForAllergens": "Kein Gericht entspricht Ihren Allergenfiltern.",
-  "adjustFilters": "Filter anpassen"
+  "adjustFilters": "Filter anpassen",
+  "untranslatedNotice": "Teile der Karte sind noch nicht ins Deutsche übersetzt."
 }

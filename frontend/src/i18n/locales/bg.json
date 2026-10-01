@@ -52,5 +52,6 @@
   "skipAllergyFilter": "Не, покажи менюто",
   "clearFilters": "Изчисти",
   "noDishesForAllergens": "Нито едно ястие не отговаря на вашите филтри за алергени.",
-  "adjustFilters": "Промени филтрите"
+  "adjustFilters": "Промени филтрите",
+  "untranslatedNotice": "Част от менюто все още не е преведена на български."
 }

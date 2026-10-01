@@ -52,5 +52,6 @@
   "skipAllergyFilter": "Nem, mutasd az étlapot",
   "clearFilters": "Törlés",
   "noDishesForAllergens": "Egyik étel sem felel meg az allergénszűrőinek.",
-  "adjustFilters": "Szűrők módosítása"
+  "adjustFilters": "Szűrők módosítása",
+  "untranslatedNotice": "Az étlap egy része még nincs lefordítva magyarra."
 }

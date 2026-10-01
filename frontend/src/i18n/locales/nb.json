@@ -52,5 +52,6 @@
   "skipAllergyFilter": "Nei, vis menyen",
   "clearFilters": "Tøm",
   "noDishesForAllergens": "Ingen retter passer til allergenfiltrene dine.",
-  "adjustFilters": "Juster filtre"
+  "adjustFilters": "Juster filtre",
+  "untranslatedNotice": "Deler av menyen er ennå ikke oversatt til norsk."
 }

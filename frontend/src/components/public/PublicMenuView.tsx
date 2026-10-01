@@ -50,6 +50,9 @@ interface PublicMenuViewProps {
   /** Shown where the dishes go when the menu has no categories yet — the
    *  panel's previews pass one; the guest page does not. */
   emptyState?: ReactNode;
+  /** A line above the first section — the guest page's word about missing
+   *  translations. */
+  notice?: ReactNode;
 }
 
 /**
@@ -68,6 +71,7 @@ export function PublicMenuView({
   languages = NO_LANGUAGES,
   onOpenAllergyFilter,
   emptyState,
+  notice,
 }: PublicMenuViewProps) {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -187,6 +191,8 @@ export function PublicMenuView({
         component="main"
         sx={{ maxWidth: 1200, mx: 'auto', px: 1.5, pb: 6, containerType: 'inline-size' }}
       >
+        {notice}
+
         {query.trim() && resultsCount === 0 && (
           <Stack
             spacing={1.5}

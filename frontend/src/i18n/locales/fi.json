@@ -52,5 +52,6 @@
   "skipAllergyFilter": "Ei, näytä ruokalista",
   "clearFilters": "Tyhjennä",
   "noDishesForAllergens": "Mikään ruoka ei vastaa allergeenisuodattimiasi.",
-  "adjustFilters": "Muokkaa suodattimia"
+  "adjustFilters": "Muokkaa suodattimia",
+  "untranslatedNotice": "Osaa ruokalistasta ei ole vielä käännetty suomeksi."
 }

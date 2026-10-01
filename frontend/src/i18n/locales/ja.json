@@ -52,5 +52,6 @@
   "skipAllergyFilter": "いいえ、メニューを見る",
   "clearFilters": "クリア",
   "noDishesForAllergens": "アレルゲンの条件に合う料理はありません。",
-  "adjustFilters": "条件を変更"
+  "adjustFilters": "条件を変更",
+  "untranslatedNotice": "メニューの一部はまだ日本語に翻訳されていません。"
 }

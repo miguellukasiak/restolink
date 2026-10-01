@@ -52,5 +52,6 @@
   "skipAllergyFilter": "No, mostra il menu",
   "clearFilters": "Azzera",
   "noDishesForAllergens": "Nessun piatto corrisponde ai tuoi filtri allergeni.",
-  "adjustFilters": "Modifica filtri"
+  "adjustFilters": "Modifica filtri",
+  "untranslatedNotice": "Parte del menu non è ancora tradotta in italiano."
 }

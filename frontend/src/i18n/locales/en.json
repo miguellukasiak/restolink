@@ -52,5 +52,6 @@
   "skipAllergyFilter": "No, show the menu",
   "clearFilters": "Clear",
   "noDishesForAllergens": "No dish matches your allergen filters.",
-  "adjustFilters": "Adjust filters"
+  "adjustFilters": "Adjust filters",
+  "untranslatedNotice": "Parts of this menu haven't been translated into English yet."
 }

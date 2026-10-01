@@ -52,5 +52,6 @@
   "skipAllergyFilter": "Tidak, tampilkan menu",
   "clearFilters": "Hapus",
   "noDishesForAllergens": "Tidak ada hidangan yang sesuai dengan filter alergen Anda.",
-  "adjustFilters": "Ubah filter"
+  "adjustFilters": "Ubah filter",
+  "untranslatedNotice": "Sebagian menu belum diterjemahkan ke bahasa Indonesia."
 }

@@ -52,5 +52,6 @@
   "skipAllergyFilter": "Ei, näita menüüd",
   "clearFilters": "Tühjenda",
   "noDishesForAllergens": "Ükski roog ei vasta teie allergeenifiltritele.",
-  "adjustFilters": "Muuda filtreid"
+  "adjustFilters": "Muuda filtreid",
+  "untranslatedNotice": "Osa menüüst pole veel eesti keelde tõlgitud."
 }

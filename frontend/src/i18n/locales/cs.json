@@ -52,5 +52,6 @@
   "skipAllergyFilter": "Ne, zobrazit menu",
   "clearFilters": "Vymazat",
   "noDishesForAllergens": "Žádné jídlo neodpovídá vašim filtrům alergenů.",
-  "adjustFilters": "Upravit filtry"
+  "adjustFilters": "Upravit filtry",
+  "untranslatedNotice": "Část menu zatím není přeložena do češtiny."
 }

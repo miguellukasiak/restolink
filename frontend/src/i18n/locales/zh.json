@@ -52,5 +52,6 @@
   "skipAllergyFilter": "不用，直接看菜单",
   "clearFilters": "清除",
   "noDishesForAllergens": "没有符合您过敏原筛选条件的菜品。",
-  "adjustFilters": "调整筛选条件"
+  "adjustFilters": "调整筛选条件",
+  "untranslatedNotice": "部分菜单内容尚未翻译成中文。"
 }

@@ -11,6 +11,7 @@ import Stack from '@mui/material/Stack';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
 import { alpha } from '@mui/material/styles';
+import { visuallyHidden } from '@mui/utils';
 import MenuBookRoundedIcon from '@mui/icons-material/MenuBookRounded';
 import QrCode2RoundedIcon from '@mui/icons-material/QrCode2Rounded';
 import PaletteRoundedIcon from '@mui/icons-material/PaletteRounded';
@@ -18,6 +19,9 @@ import TranslateRoundedIcon from '@mui/icons-material/TranslateRounded';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import { NavLink, Outlet, useLocation, useParams } from 'react-router-dom';
 import { useRestaurantInfo } from '../../hooks/useRestaurantInfo';
+import { useMenuLanguages } from '../../hooks/useMenuLanguages';
+import { missingTranslations } from '../../utils/translationGaps';
+import { radii } from '../../theme';
 import { PriceFormatProvider } from '../PriceFormatProvider';
 import { useCheckout, useCheckoutReturn } from '../../hooks/useSubscription';
 import { getApiErrorMessage } from '../../services/api';
@@ -53,6 +57,7 @@ export function RestaurantPanelLayout() {
   const { restaurantId = '' } = useParams<{ restaurantId: string }>();
   const location = useLocation();
   const restaurant = useRestaurantInfo(restaurantId);
+  const languages = useMenuLanguages(restaurantId);
   const { showInfo, showSuccess, showError } = useSnackbar();
   const checkout = useCheckout();
   const { t } = usePanelT();
@@ -101,6 +106,11 @@ export function RestaurantPanelLayout() {
     }
   };
 
+  // Translations guests are still waiting for, shown on "Languages" so a
+  // new dish's gap is seen from every page, not only from that one.
+  const toTranslate = missingTranslations(languages.data?.untranslated);
+  const toTranslateLabel = t('nav.toTranslate', { count: toTranslate });
+
   const base = `/panel/${restaurantId}`;
   // In the order an owner sets up: write the menu, dress it, print its codes.
   // Everything else is an extra and sits below the divider.
@@ -131,6 +141,7 @@ export function RestaurantPanelLayout() {
         short: t('nav.bar.languages'),
         to: `${base}/dictionary`,
         icon: <TranslateRoundedIcon />,
+        badge: toTranslate,
       },
       {
         label: t('nav.reviews'),
@@ -248,6 +259,31 @@ export function RestaurantPanelLayout() {
                       primary={item.label}
                       slotProps={{ primary: { sx: { fontWeight: 600 } } }}
                     />
+                    {item.badge ? (
+                      <>
+                        <Box
+                          component="span"
+                          aria-hidden
+                          sx={{
+                            minWidth: 22,
+                            height: 22,
+                            px: 0.75,
+                            borderRadius: radii.pill,
+                            bgcolor: 'error.main',
+                            color: 'error.contrastText',
+                            fontSize: 12,
+                            fontWeight: 700,
+                            display: 'grid',
+                            placeItems: 'center',
+                          }}
+                        >
+                          {item.badge > 99 ? '99+' : item.badge}
+                        </Box>
+                        <Box component="span" sx={visuallyHidden}>
+                          {toTranslateLabel}
+                        </Box>
+                      </>
+                    ) : null}
                   </ListItemButton>
                 );
               })}
@@ -291,10 +327,12 @@ export function RestaurantPanelLayout() {
         <BottomNav
           label={t('nav.ownerPanel')}
           color="secondary"
-          items={navGroups.flat().map(({ short, to, icon }) => ({
+          items={navGroups.flat().map(({ short, to, icon, badge }) => ({
             label: short,
             to,
             icon,
+            badge,
+            badgeLabel: badge ? toTranslateLabel : undefined,
           }))}
         />
       </Box>

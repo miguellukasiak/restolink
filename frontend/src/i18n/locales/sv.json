@@ -52,5 +52,6 @@
   "skipAllergyFilter": "Nej, visa menyn",
   "clearFilters": "Rensa",
   "noDishesForAllergens": "Ingen rätt matchar dina allergenfilter.",
-  "adjustFilters": "Justera filter"
+  "adjustFilters": "Justera filter",
+  "untranslatedNotice": "Delar av menyn är ännu inte översatta till svenska."
 }

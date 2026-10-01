@@ -52,5 +52,6 @@
   "skipAllergyFilter": "ไม่ แสดงเมนู",
   "clearFilters": "ล้าง",
   "noDishesForAllergens": "ไม่มีอาหารที่ตรงกับตัวกรองสารก่อภูมิแพ้ของคุณ",
-  "adjustFilters": "ปรับตัวกรอง"
+  "adjustFilters": "ปรับตัวกรอง",
+  "untranslatedNotice": "เมนูบางส่วนยังไม่ได้แปลเป็นภาษาไทย"
 }

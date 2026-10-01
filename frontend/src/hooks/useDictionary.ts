@@ -60,3 +60,50 @@ export function useAutoTranslate(restaurantId: string, targetLang: string) {
     mutationFn: (texts: string[]) => autoTranslate(restaurantId, targetLang, texts),
   });
 }
+
+/**
+ * DeepL's drafts for a few phrases in several languages at once — what a
+ * dish just saved needs. A query rather than a mutation, unlike the screen's
+ * button above, because it runs once as its dialog opens; it is never
+ * refetched (nothing it reads is declared) and is dropped as the dialog
+ * closes, so DeepL is asked once per opening. Phrases DeepL could not draft
+ * come back missing, for the owner to write.
+ */
+export function useTranslationDrafts(
+  restaurantId: string,
+  gaps: ReadonlyMap<string, string[]> | null,
+) {
+  const languages = gaps ? [...gaps] : [];
+  return useQuery({
+    queryKey: ['translation-drafts', restaurantId, languages] as const,
+    queryFn: async () => {
+      const answers = await Promise.all(
+        languages.map(([code, texts]) => autoTranslate(restaurantId, code, texts)),
+      );
+      return new Map(
+        answers.map((answer, index) => [
+          languages[index][0],
+          new Map(
+            answer.entries.map((entry) => [entry.original_text, entry.translated_text]),
+          ),
+        ]),
+      );
+    },
+    enabled: Boolean(restaurantId) && languages.length > 0,
+    staleTime: Infinity,
+    gcTime: 0,
+    retry: false,
+  });
+}
+
+/** Saves translations into several languages at once. */
+export function useSaveTranslations(restaurantId: string) {
+  return useMutation({
+    mutationFn: (byLanguage: [string, DictionaryEntry[]][]) =>
+      Promise.all(
+        byLanguage.map(([code, entries]) => saveDictionary(restaurantId, code, entries)),
+      ),
+    // The guest menu, "Languages" and the counts in the panel all read them.
+    meta: writesTo(restaurantId, ['dictionary']),
+  });
+}

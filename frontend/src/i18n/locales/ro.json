@@ -52,5 +52,6 @@
   "skipAllergyFilter": "Nu, arată meniul",
   "clearFilters": "Șterge",
   "noDishesForAllergens": "Niciun preparat nu corespunde filtrelor dvs. de alergeni.",
-  "adjustFilters": "Ajustează filtrele"
+  "adjustFilters": "Ajustează filtrele",
+  "untranslatedNotice": "O parte din meniu nu a fost încă tradusă în limba română."
 }

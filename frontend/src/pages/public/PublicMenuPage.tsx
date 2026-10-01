@@ -16,6 +16,7 @@ import { usePublicMenu } from '../../hooks/usePublicMenu';
 import { getApiErrorMessage } from '../../services/api';
 import { resolveAccessState } from '../../constants/subscription';
 import { PublicMenuView } from '../../components/public/PublicMenuView';
+import { UntranslatedNotice } from '../../components/public/UntranslatedNotice';
 import { CinematicLoader } from '../../components/public/CinematicLoader';
 import { REVEAL_FOCUS_PULL_MS, revealFocusPullSx } from '../../components/public/reveal';
 import { useAnimationWindow } from '../../hooks/useAnimationWindow';
@@ -285,6 +286,12 @@ export function PublicMenuPage() {
               canFilterAllergens={availableAllergens.length > 0}
               onOpenAllergyFilter={() => setGateOpen(true)}
               languages={languages}
+              notice={
+                <UntranslatedNotice
+                  restaurantId={restaurantId}
+                  translation={menu.data.translation}
+                />
+              }
             />
             <ItemDetailModal
               item={selectedItem}

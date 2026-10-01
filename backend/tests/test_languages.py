@@ -212,6 +212,77 @@ async def test_progress_counts_only_the_current_menu(restaurant):
     assert progress == {"en": 0, "de": 2, "zh": 1}
 
 
+@pytest.mark.asyncio
+async def test_untranslated_lists_what_each_offered_language_lacks(restaurant):
+    await add_menu(restaurant)
+    async with client() as http:
+        await put_languages(http, restaurant, ["de", "en"])
+        body = await get_languages(http, restaurant)
+
+    # In menu order, with the offered languages in the owner's order. Chinese
+    # is not offered, so its gaps are nobody's business.
+    assert body["untranslated"] == [
+        {"text": "Zupy", "languages": ["en"]},
+        {"text": "Żurek", "languages": ["en"]},
+        {"text": "Na zakwasie", "languages": ["de", "en"]},
+    ]
+
+
+@pytest.mark.asyncio
+async def test_a_fully_translated_menu_has_nothing_untranslated(restaurant):
+    await add_menu(restaurant)
+    async with client() as http:
+        await put_languages(http, restaurant, ["zh"])
+        assert (await get_languages(http, restaurant))["untranslated"][0] == {
+            "text": "Żurek",
+            "languages": ["zh"],
+        }
+        await http.put(
+            f"/api/v1/panel/{restaurant.id}/dictionary",
+            json={
+                "target_lang": "zh",
+                "entries": [
+                    {"original_text": "Żurek", "translated_text": "酸汤"},
+                    {"original_text": "Na zakwasie", "translated_text": "酸面种"},
+                ],
+            },
+            headers=owner_headers(restaurant.id),
+        )
+        assert (await get_languages(http, restaurant))["untranslated"] == []
+
+
+async def guest_translation(http: AsyncClient, restaurant, lang: str) -> dict:
+    response = await http.get(
+        f"/api/v1/public/restaurants/{restaurant.id}/menu", params={"lang": lang}
+    )
+    assert response.status_code == 200
+    return response.json()["translation"]
+
+
+@pytest.mark.asyncio
+async def test_the_guest_menu_counts_only_its_own_language_as_translated(restaurant):
+    await add_menu(restaurant)
+    async with AsyncSessionLocal() as db:
+        db.add(
+            TranslationDictionary(
+                restaurant_id=restaurant.id,
+                source_hash=source_hash("Na zakwasie"),
+                original_text="Na zakwasie",
+                target_lang="en",
+                translated_text="Sourdough-based",
+            )
+        )
+        await db.commit()
+    async with client() as http:
+        german = await guest_translation(http, restaurant, "de")
+
+    # English covered "Na zakwasie", so the guest reads all of it, but one
+    # phrase of three is not in German: the menu owes them a word about it.
+    assert german["phrases_total"] == 3
+    assert german["phrases_translated"] == 2
+    assert german["used_fallback"] is True
+
+
 # --------------------------------------------------------------------------- #
 # The catalogue agrees with everything that depends on it
 # --------------------------------------------------------------------------- #

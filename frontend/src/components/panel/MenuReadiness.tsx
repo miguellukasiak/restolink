@@ -8,6 +8,7 @@ import { alpha } from '@mui/material/styles';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import HideImageRoundedIcon from '@mui/icons-material/HideImageRounded';
 import NotesRoundedIcon from '@mui/icons-material/NotesRounded';
+import TranslateRoundedIcon from '@mui/icons-material/TranslateRounded';
 import VisibilityOffRoundedIcon from '@mui/icons-material/VisibilityOffRounded';
 import type { MenuCategory } from '../../types';
 import { radii } from '../../theme';
@@ -20,6 +21,10 @@ interface MenuReadinessProps {
   categories: MenuCategory[];
   filter: DishFilter;
   onFilterChange: (filter: DishFilter) => void;
+  /** Dishes some offered language still lacks; not scored, see below. */
+  untranslated?: number;
+  /** Where those are translated: the "Languages" page. */
+  onTranslate?: () => void;
 }
 
 /**
@@ -30,11 +35,15 @@ interface MenuReadinessProps {
  * have no photo" is one tap from being the list to work through. Allergens
  * are deliberately not scored: "no allergens" is a legitimate answer, and a
  * meter that nagged about it would push owners to tick boxes to make it stop.
+ * Missing translations are not scored either — they are not a gap in the
+ * menu itself — but they get a chip, which leads to where they are written.
  */
 export function MenuReadiness({
   categories,
   filter,
   onFilterChange,
+  untranslated = 0,
+  onTranslate,
 }: MenuReadinessProps) {
   const { t } = usePanelT();
   const dishes = categories.flatMap((category) => category.items);
@@ -143,6 +152,15 @@ export function MenuReadiness({
                 aria-pressed={filter === 'no-description'}
                 color={filter === 'no-description' ? 'primary' : 'default'}
                 variant={filter === 'no-description' ? 'filled' : 'outlined'}
+              />
+            )}
+            {untranslated > 0 && onTranslate && (
+              <Chip
+                icon={<TranslateRoundedIcon />}
+                label={t('readiness.untranslated', { count: untranslated })}
+                clickable
+                onClick={onTranslate}
+                variant="outlined"
               />
             )}
             {unavailable > 0 && (

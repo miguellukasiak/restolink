@@ -52,5 +52,6 @@
   "skipAllergyFilter": "Hayır, menüyü göster",
   "clearFilters": "Temizle",
   "noDishesForAllergens": "Alerjen filtrelerinize uyan yemek yok.",
-  "adjustFilters": "Filtreleri düzenle"
+  "adjustFilters": "Filtreleri düzenle",
+  "untranslatedNotice": "Menünün bir kısmı henüz Türkçeye çevrilmedi."
 }

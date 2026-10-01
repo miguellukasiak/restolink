@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   DragDropContext,
   Droppable,
@@ -56,6 +57,14 @@ import { MenuReadiness, type DishFilter } from '../../components/panel/MenuReadi
 import { MenuStarter } from '../../components/panel/MenuStarter';
 import { MenuNoteBlock } from '../../components/panel/MenuNoteBlock';
 import { MenuNoteDialog } from '../../components/panel/MenuNoteDialog';
+import { DishTranslationDialog } from '../../components/panel/DishTranslationDialog';
+import { menuLanguagesQueryKey, useMenuLanguages } from '../../hooks/useMenuLanguages';
+import { fetchMenuLanguages } from '../../services/languagesService';
+import {
+  gapsFor,
+  introducedTexts,
+  untranslatedDishes,
+} from '../../utils/translationGaps';
 import { menuSections, renumber } from '../../utils/menuLayout';
 import { usePanelT } from '../../i18n/panel';
 
@@ -194,6 +203,9 @@ export function MenuBuilderPage() {
   const updateNote = useUpdateMenuNote(restaurantId);
   const deleteNote = useDeleteMenuNote(restaurantId);
   const { showSuccess, showError } = useSnackbar();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const menuLanguages = useMenuLanguages(restaurantId);
 
   // The board's own copy, so a drag or a switch is on screen before the
   // server has answered.
@@ -211,6 +223,12 @@ export function MenuBuilderPage() {
   const [draggingCategory, setDraggingCategory] = useState(false);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
   const [startingMenu, setStartingMenu] = useState(false);
+  // Texts the open editor's saves brought onto the menu, and what of them
+  // offered languages lack — asked for once the editor closes.
+  const introduced = useRef<Set<string>>(new Set());
+  const [translationGaps, setTranslationGaps] = useState<Map<string, string[]> | null>(
+    null,
+  );
   const highlightTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const previewScrollRef = useRef<HTMLDivElement>(null);
   // The latest board, for callbacks that finish after a request: reading it
@@ -590,6 +608,32 @@ export function MenuBuilderPage() {
     setCategories((previous) => placeSaved(previous, saved));
     highlight(saved.id);
     showInPreview(saved.category_id);
+    for (const text of introducedTexts(saved, editor.item)) introduced.current.add(text);
+  };
+
+  /**
+   * Closes the dish editor and, when its saves brought texts some offered
+   * language lacks, offers to translate them there and then. Asked of the
+   * server afresh: the dishes were saved a moment ago. "Save and add next"
+   * asks once, for the whole batch, when the editor finally closes.
+   */
+  const closeEditor = () => {
+    setEditor((previous) => ({ ...previous, open: false }));
+    const texts = introduced.current;
+    introduced.current = new Set();
+    if (texts.size === 0) return;
+    queryClient
+      .fetchQuery({
+        queryKey: menuLanguagesQueryKey(restaurantId),
+        queryFn: () => fetchMenuLanguages(restaurantId),
+        staleTime: 0,
+      })
+      .then((data) => {
+        const gaps = gapsFor(texts, data.untranslated);
+        if (gaps.size > 0) setTranslationGaps(gaps);
+      })
+      // The count on "Languages" and the builder's chip still show the gap.
+      .catch(() => undefined);
   };
 
   const handleToggleCollapsed = useCallback((categoryId: string) => {
@@ -830,6 +874,13 @@ export function MenuBuilderPage() {
                   categories={categories}
                   filter={filter}
                   onFilterChange={setFilter}
+                  untranslated={untranslatedDishes(
+                    categories,
+                    menuLanguages.data?.untranslated,
+                  )}
+                  onTranslate={() =>
+                    navigate(`/panel/${restaurantId}/dictionary?translate=1`)
+                  }
                 />
               </Box>
 
@@ -933,9 +984,15 @@ export function MenuBuilderPage() {
         categoryId={editor.categoryId}
         item={editor.item}
         menuTheme={publicMenu.data?.restaurant.theme}
-        onClose={() => setEditor((previous) => ({ ...previous, open: false }))}
+        onClose={closeEditor}
         onSaved={handleSaved}
         onRequestDelete={handleRequestDeleteItem}
+      />
+
+      <DishTranslationDialog
+        restaurantId={restaurantId}
+        gaps={translationGaps}
+        onClose={() => setTranslationGaps(null)}
       />
 
       <AddCategoryDialog

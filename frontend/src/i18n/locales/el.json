@@ -52,5 +52,6 @@
   "skipAllergyFilter": "Όχι, δείξτε το μενού",
   "clearFilters": "Καθαρισμός",
   "noDishesForAllergens": "Κανένα πιάτο δεν ταιριάζει με τα φίλτρα αλλεργιογόνων σας.",
-  "adjustFilters": "Προσαρμογή φίλτρων"
+  "adjustFilters": "Προσαρμογή φίλτρων",
+  "untranslatedNotice": "Μέρος του μενού δεν έχει μεταφραστεί ακόμη στα ελληνικά."
 }

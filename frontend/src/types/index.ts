@@ -196,9 +196,10 @@ export interface PublicMenuResponse {
   notes?: MenuNote[];
   /**
    * Present only when the menu was requested in a language other than its own.
-   * Coverage can be partial: the owner writes these translations by hand, and
-   * `used_fallback` says whether English had to cover for phrases the requested
-   * language does not have yet.
+   * Coverage can be partial: the owner writes these translations by hand.
+   * `phrases_translated` counts the requested language alone — below
+   * `phrases_total`, the guest meets English (`used_fallback`) or the
+   * original, and `UntranslatedNotice` says so.
    */
   translation?: {
     language: string;

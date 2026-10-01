@@ -162,11 +162,12 @@ async def _localize(
         note.body = phrases.get(note.body, note.body)
 
     distinct = collect_sources(sources)
-    translated = sum(1 for phrase in distinct if phrase in phrases)
 
-    # Whether English had to cover for the requested language. Worked out from
-    # the primary dictionary alone, so it stays honest when the two overlap.
+    # Counted against the requested language alone: a phrase English covered
+    # is still one the guest cannot read in the language they picked, and the
+    # menu tells them when there are any.
     primary_only = await load_dictionary(db, restaurant.id, language)
+    translated = sum(1 for phrase in distinct if phrase in primary_only)
     used_fallback = any(
         phrase in phrases and phrase not in primary_only for phrase in distinct
     )

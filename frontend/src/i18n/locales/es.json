@@ -52,5 +52,6 @@
   "skipAllergyFilter": "No, mostrar la carta",
   "clearFilters": "Borrar",
   "noDishesForAllergens": "Ningún plato coincide con tus filtros de alérgenos.",
-  "adjustFilters": "Ajustar filtros"
+  "adjustFilters": "Ajustar filtros",
+  "untranslatedNotice": "Parte de la carta aún no está traducida al español."
 }

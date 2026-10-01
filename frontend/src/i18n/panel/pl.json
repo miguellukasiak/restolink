@@ -39,7 +39,11 @@
       "qr": "Kody QR",
       "languages": "Języki",
       "reviews": "Opinie"
-    }
+    },
+    "toTranslate_one": "{{count}} tłumaczenie do napisania",
+    "toTranslate_few": "{{count}} tłumaczenia do napisania",
+    "toTranslate_many": "{{count}} tłumaczeń do napisania",
+    "toTranslate_other": "{{count}} tłumaczenia do napisania"
   },
   "billing": {
     "paid": "Płatność przyjęta. Aktywujemy subskrypcję.",
@@ -356,7 +360,8 @@
     "missingHint": "Brakuje jeszcze {{list}}. Dania ze zdjęciem i opisem kuszą najbardziej.",
     "noPhoto": "Bez zdjęcia · {{count}}",
     "noDescription": "Bez opisu · {{count}}",
-    "unavailable": "Niedostępne · {{count}}"
+    "unavailable": "Niedostępne · {{count}}",
+    "untranslated": "Bez tłumaczenia · {{count}}"
   },
   "starter": {
     "title": "Zacznijmy od kategorii",
@@ -880,5 +885,15 @@
     "stay": "Zostań",
     "leave": "Wyjdź bez zapisywania",
     "saveAndContinue": "Zapisz i przejdź"
+  },
+  "dishTranslate": {
+    "title": "Przetłumacz dla gości",
+    "intro": "Menu jest dostępne także w językach: {{languages}}. Dopóki tych tekstów nie przetłumaczysz, goście czytający w tych językach zobaczą je po angielsku albo w oryginale. DeepL przygotował propozycje — sprawdź je i zapisz.",
+    "drafting": "DeepL przygotowuje propozycje…",
+    "draftFailed": "Nie udało się pobrać propozycji z DeepL — wpisz tłumaczenia ręcznie albo wróć do nich w „Językach”.",
+    "fieldAria": "{{phrase}} — {{language}}",
+    "later": "Później",
+    "save": "Zapisz tłumaczenia",
+    "saved": "Tłumaczenia zapisane — goście już je widzą."
   }
 }

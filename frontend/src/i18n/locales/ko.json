@@ -52,5 +52,6 @@
   "skipAllergyFilter": "아니요, 메뉴 보기",
   "clearFilters": "초기화",
   "noDishesForAllergens": "알레르기 필터에 맞는 요리가 없습니다.",
-  "adjustFilters": "필터 조정"
+  "adjustFilters": "필터 조정",
+  "untranslatedNotice": "메뉴의 일부가 아직 한국어로 번역되지 않았습니다."
 }

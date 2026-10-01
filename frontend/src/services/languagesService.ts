@@ -6,6 +6,12 @@ export interface LanguageProgress {
   translated: number;
 }
 
+export interface UntranslatedPhrase {
+  text: string;
+  /** Offered languages without a translation of it, in the owner's order. */
+  languages: string[];
+}
+
 export interface MenuLanguagesResponse {
   base_language: string;
   /** Where the restaurant is: the map's pin and the recommendations. */
@@ -18,6 +24,9 @@ export interface MenuLanguagesResponse {
   phrases_total: number;
   /** Offered languages, plus any other with work in it. */
   progress: LanguageProgress[];
+  /** Menu phrases some offered language still lacks, in menu order. Absent
+   *  from an API that predates it. */
+  untranslated?: UntranslatedPhrase[];
 }
 
 const base = (restaurantId: string) => `/api/v1/panel/${restaurantId}/languages`;

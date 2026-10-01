@@ -52,5 +52,6 @@
   "skipAllergyFilter": "Nee, toon het menu",
   "clearFilters": "Wissen",
   "noDishesForAllergens": "Geen enkel gerecht past bij uw allergenenfilters.",
-  "adjustFilters": "Filters aanpassen"
+  "adjustFilters": "Filters aanpassen",
+  "untranslatedNotice": "Een deel van het menu is nog niet in het Nederlands vertaald."
 }

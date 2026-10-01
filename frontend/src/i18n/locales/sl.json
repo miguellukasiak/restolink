@@ -52,5 +52,6 @@
   "skipAllergyFilter": "Ne, pokaži meni",
   "clearFilters": "Počisti",
   "noDishesForAllergens": "Nobena jed ne ustreza vašim filtrom alergenov.",
-  "adjustFilters": "Prilagodi filtre"
+  "adjustFilters": "Prilagodi filtre",
+  "untranslatedNotice": "Del menija še ni preveden v slovenščino."
 }

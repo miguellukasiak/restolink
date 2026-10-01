@@ -52,5 +52,6 @@
   "skipAllergyFilter": "नहीं, मेन्यू दिखाएँ",
   "clearFilters": "साफ़ करें",
   "noDishesForAllergens": "कोई भी व्यंजन आपके एलर्जेन फ़िल्टर से मेल नहीं खाता।",
-  "adjustFilters": "फ़िल्टर बदलें"
+  "adjustFilters": "फ़िल्टर बदलें",
+  "untranslatedNotice": "मेन्यू का कुछ हिस्सा अभी तक हिंदी में अनुवादित नहीं हुआ है।"
 }

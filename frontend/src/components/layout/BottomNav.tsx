@@ -1,4 +1,5 @@
 import type { ReactElement } from 'react';
+import Badge from '@mui/material/Badge';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import BottomNavigation from '@mui/material/BottomNavigation';
@@ -12,6 +13,10 @@ export interface NavDestination {
   label: string;
   to: string;
   icon: ReactElement;
+  /** A count on the icon — work waiting there. */
+  badge?: number;
+  /** What the count means, for screen readers. */
+  badgeLabel?: string;
 }
 
 /** The bar's own height; the phone's home-indicator area comes on top. */
@@ -115,7 +120,18 @@ export function BottomNav({
               key={item.to}
               value={item.to}
               label={item.label}
-              icon={<Box className="nav-indicator">{item.icon}</Box>}
+              icon={
+                <Box className="nav-indicator">
+                  <Badge badgeContent={item.badge} max={99} color="error">
+                    {item.icon}
+                  </Badge>
+                </Box>
+              }
+              aria-label={
+                item.badge && item.badgeLabel
+                  ? `${item.label}, ${item.badgeLabel}`
+                  : undefined
+              }
               component={NavLink}
               to={item.to}
             />

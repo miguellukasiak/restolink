@@ -52,5 +52,6 @@
   "skipAllergyFilter": "Ne, rodyti meniu",
   "clearFilters": "Išvalyti",
   "noDishesForAllergens": "Nė vienas patiekalas neatitinka jūsų alergenų filtrų.",
-  "adjustFilters": "Keisti filtrus"
+  "adjustFilters": "Keisti filtrus",
+  "untranslatedNotice": "Dalis meniu dar neišversta į lietuvių kalbą."
 }

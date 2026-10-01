@@ -52,5 +52,6 @@
   "skipAllergyFilter": "Nej, vis menuen",
   "clearFilters": "Ryd",
   "noDishesForAllergens": "Ingen retter passer til dine allergenfiltre.",
-  "adjustFilters": "Justér filtre"
+  "adjustFilters": "Justér filtre",
+  "untranslatedNotice": "Dele af menuen er endnu ikke oversat til dansk."
 }

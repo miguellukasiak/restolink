@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useEffectEvent, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
@@ -154,6 +154,28 @@ export default function LanguagesPage() {
   const needsTranslating = (code: string) =>
     phrasesTotal > 0 && translated(code) < phrasesTotal;
 
+  // Sent here from the builder's "Not translated" chip: open the first
+  // offered language with gaps on its untranslated phrases alone, and ring
+  // it, once the languages are known.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const sentToTranslate = searchParams.has('translate');
+  const [missingFirst, setMissingFirst] = useState(false);
+  const arriveToTranslate = useEffectEvent(() => {
+    setMissingFirst(true);
+    setSearchParams(
+      (params) => {
+        params.delete('translate');
+        return params;
+      },
+      { replace: true },
+    );
+    const code = offered.find(needsTranslating);
+    if (code) showTranslations(code);
+  });
+  useEffect(() => {
+    if (sentToTranslate && data.data) arriveToTranslate();
+  }, [sentToTranslate, data.data]);
+
   const commit = (next: string[], message: string) => {
     save.mutate(next, {
       onSuccess: () => showSuccess(message),
@@ -286,10 +308,11 @@ export default function LanguagesPage() {
                     })}
                   </Stack>
                   <TranslationEditor
-                    key={current}
+                    key={missingFirst ? `${current}:missing` : current}
                     restaurantId={restaurantId}
                     language={current}
                     onDirtyChange={setEditorDirty}
+                    startOnlyMissing={missingFirst}
                   />
                 </Stack>
               ) : (

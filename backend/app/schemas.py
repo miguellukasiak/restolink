@@ -488,7 +488,8 @@ class TranslationStatus(BaseModel):
 
     Translations come from the owner's dictionary, so coverage can be partial:
     `phrases_translated` out of `phrases_total` says how much of the menu the
-    guest is reading in their own language rather than in a fallback.
+    guest is reading in their own language rather than in a fallback. Fewer
+    means part of it is in English or the original, and the menu says so.
     """
 
     #: The language requested, and the one the page should be labelled with.
@@ -558,6 +559,12 @@ class LanguageProgress(BaseModel):
     translated: int
 
 
+class UntranslatedPhrase(BaseModel):
+    text: str
+    #: Offered languages without a translation of `text`, in the owner's order.
+    languages: list[str]
+
+
 class MenuLanguagesResponse(BaseModel):
     """What the "Języki" screen needs in one request."""
 
@@ -574,6 +581,10 @@ class MenuLanguagesResponse(BaseModel):
     #: offered language; a removed language keeps its translations, and the
     #: screen shows that it would come back ready.
     progress: list[LanguageProgress]
+    #: Every menu phrase some offered language still lacks, in menu order,
+    #: with those languages: what a guest reads in English or in the original.
+    #: The builder marks dishes by it, and asks for a new dish's translations.
+    untranslated: list[UntranslatedPhrase] = Field(default_factory=list)
 
 
 class MenuLanguagesUpdate(BaseModel):

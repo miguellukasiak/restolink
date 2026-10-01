@@ -432,6 +432,29 @@ wrong ("Smażony ser" came back as *boiled* cheese). Owners now maintain
 reviews and saves. Fallback chain per phrase: requested language → English →
 original.
 
+A gap is never silent, on either side:
+
+- **The guest** reading a language with gaps gets one quiet, closable line
+  above the first section (`UntranslatedNotice`, `untranslatedNotice` in
+  every guest locale, naming its own language; closed per language for the
+  visit). It shows when the public payload's `translation.phrases_translated`
+  — counted against the **requested language alone**, English cover not
+  included — is below `phrases_total`. Neutral wording on purpose: a gap is
+  not necessarily a new dish.
+- **The owner** sees it from every page: `GET …/languages` lists
+  `untranslated` (each phrase some offered language lacks, with those
+  languages), which drives the count on "Języki" in the drawer and the
+  bottom bar (`missingTranslations`) and the builder's "Bez tłumaczenia · N"
+  chip (dishes, `untranslatedDishes`; it opens "Języki" on the first
+  language with gaps, untranslated phrases only — `?translate=1`). Missing
+  translations do not lower the readiness score.
+- **Right after a save**, the builder asks: texts a save brought onto the
+  menu (`introducedTexts` — all of a new dish, only what changed of an
+  edited one, so a new price asks nothing) that an offered language lacks
+  open `DishTranslationDialog` when the editor closes — once for a "save and
+  add next" batch — with DeepL drafts (`useTranslationDrafts`) to check and
+  save, or "Później". `utils/translationGaps.ts` mirrors `dish_texts()`.
+
 **Owner panel language.** Every owner panel is **English**. HQ may give a
 restaurant one more language (`restaurant.panel_language`, set in the HQ
 create/edit forms, "Dodatkowy język panelu" — a searchable list of every
