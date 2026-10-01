@@ -945,6 +945,13 @@ Each of these cost real debugging time in this repo. They are not hypothetical.
     strip's `scrollIntoView` dragged the whole Appearance page down to the
     preview, and each category the spy then passed dragged it further.
     `CategoryPills` now sets its own `scrollLeft`. Scroll the container you mean.
+17. **MUI v9 `Typography` ignores `color="text.secondary"`.** Its `color` prop
+    takes `textSecondary` / `textPrimary` / `textDisabled` (or a palette
+    name); the dotted path was a system prop, removed after v6, and is now
+    dropped without a warning — the text renders in `text.primary`. Found
+    when the builder's preview hint came out black; the codebase still has
+    many `color="text.secondary"` on `Typography`, all rendering as primary.
+    Use `color="textSecondary"` or `sx={{ color: 'text.secondary' }}`.
 
 ---
 

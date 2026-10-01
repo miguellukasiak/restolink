@@ -4,11 +4,10 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { ThemeProvider, alpha } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
-import TouchAppRoundedIcon from '@mui/icons-material/TouchAppRounded';
 import type { MenuCategory, MenuNote, PublicMenuResponse } from '../../types';
 import { createRestaurantTheme } from '../public/RestaurantThemeProvider';
 import { PublicMenuView } from '../public/PublicMenuView';
@@ -17,7 +16,6 @@ import { PhoneFrame } from './PhoneFrame';
 import { EmptyMenuPreview } from './EmptyMenuPreview';
 import { GuestPreviewLanguage } from './GuestPreviewLanguage';
 import { usePanelT } from '../../i18n/panel';
-import { radii } from '../../theme';
 
 interface LiveMenuPreviewProps {
   restaurantId: string;
@@ -78,28 +76,38 @@ export function LiveMenuPreview({
     <Stack spacing={1.5} sx={{ alignItems: 'center' }}>
       <Stack
         direction="row"
-        sx={{ width: '100%', alignItems: 'center', justifyContent: 'space-between' }}
+        sx={{ width: '100%', alignItems: 'flex-start', justifyContent: 'space-between' }}
       >
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flex: 1 }}>
-          <Box
-            aria-hidden
-            sx={{
-              width: 8,
-              height: 8,
-              borderRadius: '50%',
-              bgcolor: 'primary.main',
-              // The first frame is the plain dot, so a paused animation (a
-              // hidden tab) still shows it — see CLAUDE.md, trap 7.
-              '@keyframes live-pulse': {
-                from: { boxShadow: '0 0 0 0 rgba(15, 130, 86, 0.45)' },
-                to: { boxShadow: '0 0 0 8px rgba(15, 130, 86, 0)' },
-              },
-              animation: 'live-pulse 1.6s ease-out infinite',
-              '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
-            }}
-          />
-          <Typography variant="subtitle2">{t('preview.live')}</Typography>
-        </Stack>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center', minHeight: 30 }}>
+            <Box
+              aria-hidden
+              sx={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                bgcolor: 'primary.main',
+                // The first frame is the plain dot, so a paused animation (a
+                // hidden tab) still shows it — see CLAUDE.md, trap 7.
+                '@keyframes live-pulse': {
+                  from: { boxShadow: '0 0 0 0 rgba(15, 130, 86, 0.45)' },
+                  to: { boxShadow: '0 0 0 8px rgba(15, 130, 86, 0)' },
+                },
+                animation: 'live-pulse 1.6s ease-out infinite',
+                '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+              }}
+            />
+            <Typography variant="subtitle2">{t('preview.live')}</Typography>
+          </Stack>
+          {/* What the phone is for, said where the heading says what it is:
+            plain supporting text under it, clear of the phone's shadow, and
+            only once there is a dish to click. */}
+          {hasDishes && (
+            <Typography variant="body2" color="textSecondary" sx={{ pl: 2 }}>
+              {t('preview.clickToEdit')}
+            </Typography>
+          )}
+        </Box>
         <Button
           size="small"
           href={`/menu/${restaurantId}`}
@@ -154,33 +162,6 @@ export function LiveMenuPreview({
           <MenuSkeleton />
         )}
       </PhoneFrame>
-
-      {/* A hint, not a footnote: it says what the phone can do, so it reads
-          like the header above rather than small print in the phone's
-          shadow — and only once there is a dish to click. */}
-      {hasDishes && (
-        <Stack
-          direction="row"
-          spacing={1}
-          sx={{
-            mt: 1,
-            px: 1.75,
-            py: 0.75,
-            maxWidth: phone.width,
-            alignItems: 'center',
-            borderRadius: radii.pill,
-            bgcolor: (t) => alpha(t.palette.primary.main, 0.07),
-            color: 'text.secondary',
-          }}
-        >
-          <TouchAppRoundedIcon
-            sx={{ fontSize: 18, color: 'primary.main', flexShrink: 0 }}
-          />
-          <Typography variant="body2" sx={{ fontWeight: 500, lineHeight: 1.35 }}>
-            {t('preview.clickToEdit')}
-          </Typography>
-        </Stack>
-      )}
     </Stack>
   );
 }
