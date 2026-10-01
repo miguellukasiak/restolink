@@ -35,6 +35,13 @@ interface PhoneFrameProps {
   scrollRef?: Ref<HTMLDivElement>;
   /** Changes whenever the content may have been swapped without resizing. */
   measureKey?: string | number | boolean;
+  /**
+   * What the dynamic island says when it opens, like a phone's live
+   * notification. Without it the island is the plain black notch.
+   */
+  island?: ReactNode;
+  /** Opens the island over the top of the screen, showing `island`. */
+  islandOpen?: boolean;
 }
 
 /**
@@ -50,7 +57,10 @@ export function PhoneFrame({
   screenHeight = Math.round(width * PHONE_ASPECT) - BEZEL * 2,
   scrollRef,
   measureKey,
+  island,
+  islandOpen = false,
 }: PhoneFrameProps) {
+  const open = Boolean(island) && islandOpen;
   const scale = (width - BEZEL * 2) / PHONE_VIEWPORT_WIDTH;
 
   const content = useMeasuredHeight(measureKey);
@@ -113,21 +123,49 @@ export function PhoneFrame({
           flexDirection: 'column',
         }}
       >
-        {/* Dynamic-island notch */}
+        {/* Dynamic island. Grows into a notification the way a real one
+            does (wider, taller, rounder at the ends), and shrinks back to
+            the notch. Size changes are transitions, so a hidden tab, which
+            runs none, still lands on the right state (CLAUDE.md, trap 8). */}
         <Box
-          aria-hidden
+          aria-hidden={island ? undefined : true}
           sx={{
             position: 'absolute',
             top: 8,
             left: '50%',
             transform: 'translateX(-50%)',
-            width: 90,
-            height: 24,
+            width: open ? 'calc(100% - 24px)' : 90,
+            height: open ? 44 : 24,
             bgcolor: '#000',
-            borderRadius: '999px',
+            borderRadius: open ? '22px' : '12px',
             zIndex: 3,
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: open ? '0 6px 18px rgba(0, 0, 0, 0.28)' : 'none',
+            transition:
+              'width 0.5s cubic-bezier(0.2, 0.9, 0.25, 1.15), height 0.5s cubic-bezier(0.2, 0.9, 0.25, 1.15), border-radius 0.5s ease, box-shadow 0.5s ease',
+            '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
           }}
-        />
+        >
+          {island && (
+            <Box
+              sx={{
+                px: 1.75,
+                minWidth: 0,
+                color: '#FFFFFF',
+                opacity: open ? 1 : 0,
+                // The words come in once the island has grown, and leave
+                // before it shrinks.
+                transition: open ? 'opacity 0.25s ease 0.25s' : 'opacity 0.12s ease',
+                '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
+              }}
+            >
+              {island}
+            </Box>
+          )}
+        </Box>
 
         {/* Faux mobile browser chrome. Deliberately neutral: it is the phone's
             UI, not the restaurant's, so it stays the same over a dark menu. */}

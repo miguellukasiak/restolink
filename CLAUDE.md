@@ -697,7 +697,11 @@ the guest menu on a phone beside it (`LiveMenuPreview`, `lg` and up; a
 "Podgląd" dialog below that). The phone renders the real `PublicMenuView`
 under the restaurant's theme but is fed the **board's local state**, so a drag
 or a switch shows on it before the server answers; clicking a dish in it opens
-the editor. Dishes are edited in a centred two-pane dialog
+the editor. The phone says so itself: its dynamic island opens into a
+notification ("Kliknij danie, aby je edytować", `PhoneFrame`'s `island`)
+for a few seconds once there is a dish, and briefly again whenever the
+pointer comes onto the phone — a caption under the phone was lost in its
+shadow, and a pill there read as a button. Dishes are edited in a centred two-pane dialog
 (`MenuItemEditorDialog`) whose right pane is the dish as guests will see it.
 Order is saved by `PUT /api/v1/restaurants/{id}/menu/order`, which takes the
 **whole board** (not one move) so a late or repeated request still lands on the
