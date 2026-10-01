@@ -1,7 +1,7 @@
 """Idempotent demo seeding so the frontend has data on a fresh database.
 
-Runs only when the packages table is empty. Creates three packages, a handful
-of restaurants across all statuses, and one fully-populated demo menu.
+Runs only when the packages table is empty. Creates the one plan, a handful
+of restaurants across all statuses on it, and one fully-populated demo menu.
 """
 
 from datetime import datetime, timedelta, timezone
@@ -16,6 +16,7 @@ from .models import (
     RestaurantStatus,
     SubscriptionPackage,
 )
+from .plans import DEFAULT_PACKAGE_NAME
 
 _RESTAURANT_NAMES = [
     "Sushi Master",
@@ -41,12 +42,8 @@ async def seed_if_empty(db: AsyncSession) -> None:
 
     now = datetime.now(timezone.utc)
 
-    packages = [
-        SubscriptionPackage(name="Podstawowy"),
-        SubscriptionPackage(name="Wyższy"),
-        SubscriptionPackage(name="Premium"),
-    ]
-    db.add_all(packages)
+    package = SubscriptionPackage(name=DEFAULT_PACKAGE_NAME)
+    db.add(package)
     await db.flush()
 
     restaurants: list[Restaurant] = []
@@ -57,7 +54,7 @@ async def seed_if_empty(db: AsyncSession) -> None:
                 name=name,
                 contact_email=f"kontakt@{slug}.pl",
                 contact_phone=f"+48 {500 + index} {100 + index} {200 + index}",
-                package_id=packages[index % len(packages)].id,
+                package_id=package.id,
                 status=_STATUSES[index % len(_STATUSES)],
                 subscription_valid_until=now + timedelta(days=(index - 2) * 20),
                 # Pleasant defaults on the demo (first) restaurant.

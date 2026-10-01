@@ -31,7 +31,6 @@ import RequestQuoteRoundedIcon from '@mui/icons-material/RequestQuoteRounded';
 import MailOutlineRoundedIcon from '@mui/icons-material/MailOutlineRounded';
 import PhoneRoundedIcon from '@mui/icons-material/PhoneRounded';
 import StorefrontRoundedIcon from '@mui/icons-material/StorefrontRounded';
-import WorkspacePremiumRoundedIcon from '@mui/icons-material/WorkspacePremiumRounded';
 import { format, isPast } from 'date-fns';
 import { pl } from 'date-fns/locale';
 import { useRestaurants } from '../hooks/useRestaurants';
@@ -208,22 +207,6 @@ export function RestaurantsPage() {
         ),
       },
       {
-        field: 'package',
-        headerName: 'Pakiet',
-        width: 150,
-        sortable: false,
-        valueGetter: (_value, row) => row.package?.name ?? '—',
-        renderCell: (params: GridRenderCellParams<RestaurantListItem>) => (
-          <Chip
-            size="small"
-            variant="outlined"
-            color="secondary"
-            icon={<WorkspacePremiumRoundedIcon />}
-            label={params.row.package?.name ?? '—'}
-          />
-        ),
-      },
-      {
         field: 'country',
         headerName: 'Kraj',
         width: 150,
@@ -391,7 +374,7 @@ export function RestaurantsPage() {
         <Stack spacing={0.5}>
           <Typography variant="h4">Zarządzanie restauratorami</Typography>
           <Typography variant="body1" color="text.secondary">
-            Przeglądaj konta restauracji, ich pakiety i statusy subskrypcji.
+            Przeglądaj konta restauracji i statusy ich subskrypcji.
           </Typography>
         </Stack>
         <Button

@@ -7,10 +7,8 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import TextField from '@mui/material/TextField';
-import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
-import InputAdornment from '@mui/material/InputAdornment';
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -18,8 +16,6 @@ import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import AddBusinessRoundedIcon from '@mui/icons-material/AddBusinessRounded';
-import WorkspacePremiumRoundedIcon from '@mui/icons-material/WorkspacePremiumRounded';
-import { usePackages } from '../../hooks/usePackages';
 import { useAddRestaurant } from '../../hooks/useAddRestaurant';
 import { useSnackbar } from '../feedback/SnackbarProvider';
 import { getApiErrorMessage } from '../../services/api';
@@ -31,7 +27,6 @@ const addRestaurantSchema = z.object({
   name: z.string().trim().min(2, 'Nazwa musi mieć co najmniej 2 znaki'),
   contact_email: z.email('Podaj poprawny adres e-mail'),
   contact_phone: z.string().trim().min(9, 'Telefon musi mieć co najmniej 9 znaków'),
-  package_id: z.string().min(1, 'Wybierz pakiet'),
   panel_language: z.string(),
   location: z.object({
     country: z.string().length(2),
@@ -47,7 +42,6 @@ const EMPTY_FORM: AddRestaurantFormValues = {
   name: '',
   contact_email: '',
   contact_phone: '',
-  package_id: '',
   panel_language: '',
   location: locationFor('PL'),
 };
@@ -60,9 +54,10 @@ interface AddRestaurantDialogProps {
 }
 
 /**
- * Modal for creating a new restaurant account. Packages for the select are
- * fetched lazily (only while the dialog is open); submission follows the same
- * spinner + snackbar + cache-invalidation pattern as the payment dialog.
+ * Modal for creating a new restaurant account. There is no plan to pick:
+ * RestoLink sells one, and the server puts every new restaurant on it
+ * (backend/app/plans.py). Submission follows the same spinner + snackbar +
+ * cache-invalidation pattern as the payment dialog.
  */
 export function AddRestaurantDialog({
   open,
@@ -71,7 +66,6 @@ export function AddRestaurantDialog({
 }: AddRestaurantDialogProps) {
   const { showSuccess, showError } = useSnackbar();
   const addRestaurant = useAddRestaurant();
-  const packages = usePackages(open);
 
   const {
     register,
@@ -98,7 +92,6 @@ export function AddRestaurantDialog({
         name: values.name.trim(),
         contact_email: values.contact_email.trim(),
         contact_phone: values.contact_phone.trim(),
-        package_id: values.package_id,
         panel_language: values.panel_language || null,
         country: values.location.country,
         address: values.location.address.trim() || null,
@@ -119,8 +112,6 @@ export function AddRestaurantDialog({
   });
 
   const isSubmitting = addRestaurant.isPending;
-  const packagesLoading = packages.isLoading;
-  const packagesError = packages.isError;
 
   return (
     <Dialog
@@ -187,53 +178,6 @@ export function AddRestaurantDialog({
             helperText={errors.contact_phone?.message ?? ' '}
             disabled={isSubmitting}
             {...register('contact_phone')}
-          />
-
-          <Controller
-            name="package_id"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                select
-                label="Pakiet subskrypcyjny"
-                fullWidth
-                error={Boolean(errors.package_id) || packagesError}
-                helperText={
-                  packagesError
-                    ? getApiErrorMessage(packages.error)
-                    : (errors.package_id?.message ?? ' ')
-                }
-                disabled={isSubmitting || packagesLoading}
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        {packagesLoading ? (
-                          <CircularProgress size={18} />
-                        ) : (
-                          <WorkspacePremiumRoundedIcon
-                            fontSize="small"
-                            color="secondary"
-                          />
-                        )}
-                      </InputAdornment>
-                    ),
-                  },
-                }}
-              >
-                {packagesLoading && (
-                  <MenuItem value="" disabled>
-                    Ładowanie pakietów…
-                  </MenuItem>
-                )}
-                {(packages.data ?? []).map((pkg) => (
-                  <MenuItem key={pkg.id} value={pkg.id}>
-                    {pkg.name}
-                  </MenuItem>
-                ))}
-              </TextField>
-            )}
           />
 
           <Controller

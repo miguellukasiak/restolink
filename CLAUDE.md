@@ -94,6 +94,7 @@ baseline revision against a production database whose schema it never authored.
 | `014_add_menu_note_style.sql`     | `menu_note.style` (JSONB, existing rows get `{}`)   | **required** |
 | `015_add_panel_locales.sql`       | `panel_locale` (DeepL-made panel languages)         | optional (table only) |
 | `016_add_restaurant_location.sql` | `restaurant.country`, `address`, `currency` (existing rows get `PL`, `PLN`) | **required** |
+| `017_single_plan.sql`             | data only: every restaurant on the one plan, demo tiers retired | optional |
 
 ### 2.2 Configuration comes only from the environment
 
@@ -150,6 +151,18 @@ audit_log                             (append-only, no FKs)
 `Restaurant` is both the tenant and the owner's identity. Note the deliberate
 split between **`contact_email`** (public-facing contact data) and **`email`**
 (the login identity). `email` is `NULL` until the owner activates.
+
+**One plan.** RestoLink sells a single plan (the landing page's one price),
+so HQ picks none: `POST /admin/restaurants` puts every new restaurant on the
+`subscription_package` named "Standard" (`app/plans.py`, made on first use),
+and neither panel shows a plan. The door for tiers is left open on purpose —
+the table, the NOT NULL `restaurant.package_id`, an optional `package_id` on
+create (still checked), `GET /admin/packages` and `package` in the admin
+list all stay. Nothing reads the plan today; bringing tiers back means their
+rows, a picker in the HQ create/edit forms, and deciding what each unlocks.
+Migration 017 moved the restaurants the old picker had spread over the demo
+seed's "Podstawowy / Wyższy / Premium" onto the one plan, so no restaurant
+holds a tier it never bought.
 
 `admin_user` is a separate table on purpose. `Restaurant` requires a name, a
 phone and a `package_id` FK, so making an HQ employee one would mean inventing a
@@ -1001,6 +1014,9 @@ Deployment prerequisites, carried across several sessions:
       2026-10-01).
 - [ ] `007`, `008`, `013` and `015` are table-only and optional (`create_all`
       covers them).
+- [ ] **Migration `017`** (optional, data only) — puts every restaurant on the
+      one plan and retires the demo tiers. The app works without it; run it
+      before tiers ever mean something.
 - [ ] **DeepL quota is shared by every restaurant.** Drafting a whole menu into
       one language costs its character count; with 34 languages on offer, a
       free-tier key (500k characters/month) can run dry. Watch usage; the

@@ -80,7 +80,9 @@ class RestaurantCreate(BaseModel):
     name: str = Field(min_length=1)
     contact_email: str
     contact_phone: str
-    package_id: uuid.UUID
+    #: The plan; omitted, the one plan RestoLink sells (`plans.py`). HQ no
+    #: longer sends it; kept for when there are tiers to choose from.
+    package_id: uuid.UUID | None = None
     #: The panel's second language beside English, or None for English only.
     panel_language: str | None = None
     #: Where it is. The currency and the menu's language follow from it

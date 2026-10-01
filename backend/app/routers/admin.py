@@ -26,6 +26,7 @@ from ..models import (
     RestaurantStatus,
     SubscriptionPackage,
 )
+from ..plans import default_package
 from ..schemas import (
     ActivationLinkResponse,
     AdminCreateRequest,
@@ -177,16 +178,22 @@ async def create_restaurant(
     db: AsyncSession = Depends(get_db),
     admin: AdminUser = Depends(get_current_superadmin),
 ) -> Restaurant:
-    """Create a PENDING restaurant with a 14-day trial window."""
-    package = await db.get(SubscriptionPackage, payload.package_id)
-    if package is None or package.deleted_at is not None:
-        raise HTTPException(status_code=400, detail="Nie znaleziono pakietu.")
+    """Create a PENDING restaurant with a 14-day trial window.
+
+    On the one plan unless a `package_id` is given (see `plans.py`).
+    """
+    if payload.package_id is None:
+        package = await default_package(db)
+    else:
+        package = await db.get(SubscriptionPackage, payload.package_id)
+        if package is None or package.deleted_at is not None:
+            raise HTTPException(status_code=400, detail="Nie znaleziono pakietu.")
 
     restaurant = Restaurant(
         name=payload.name,
         contact_email=payload.contact_email,
         contact_phone=payload.contact_phone,
-        package_id=payload.package_id,
+        package_id=package.id,
         panel_language=payload.panel_language,
         country=payload.country,
         address=payload.address,
@@ -288,7 +295,7 @@ async def manual_payment(
 
 @router.get("/packages", response_model=list[PackageResponse])
 async def list_packages(db: AsyncSession = Depends(get_db)) -> list[SubscriptionPackage]:
-    """All active subscription packages."""
+    """All active subscription packages — today the one plan (`plans.py`)."""
     result = await db.scalars(
         select(SubscriptionPackage)
         .where(SubscriptionPackage.deleted_at.is_(None))

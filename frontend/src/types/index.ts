@@ -5,11 +5,6 @@
 
 export type RestaurantStatus = 'ACTIVE' | 'BLOCKED' | 'PENDING';
 
-export interface PackageSummary {
-  id: string;
-  name: string;
-}
-
 /** Schema: RestaurantListItem */
 export interface RestaurantListItem {
   id: string;
@@ -27,7 +22,8 @@ export interface RestaurantListItem {
   currency: string;
   /** The language the menu is written in. */
   base_language: string;
-  package: PackageSummary;
+  // The API also sends the restaurant's plan (`package`). There is one plan,
+  // so the panel does not show it (backend/app/plans.py).
 }
 
 /** Schema: PaginationMeta */
@@ -49,18 +45,11 @@ export interface RestaurantListParams {
   limit: number;
 }
 
-/** Schema: PackageItem */
-export interface PackageItem {
-  id: string;
-  name: string;
-}
-
 /** Schema: CreateRestaurantRequest */
 export interface CreateRestaurantRequest {
   name: string;
   contact_email: string;
   contact_phone: string;
-  package_id: string;
   /** The owner panel's second language; null for English only. */
   panel_language?: string | null;
   country: string;
